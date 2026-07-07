@@ -1,0 +1,905 @@
+.env.example
+  s_d867799404043c::t_ff7451d4889924 1-52
+.gitignore
+  s_d867799404043c::t_df5a95172efed2 1-70
+AGENTS.md
+  s_d867799404043c::t_9661d0ef73c7c5 1-97
+CHANGELOG.md
+  s_d867799404043c::t_69a2bd7beb24bd 1-15
+CONTRIBUTING.md
+  s_d867799404043c::t_2c16865194da18 1-31
+LICENSE
+  s_d867799404043c::t_9e7ab2f85b3f84 1-21
+README.md
+  s_d867799404043c::t_8910b9e1946b33 1-112
+README_schedule.md
+  s_d867799404043c::t_97881f92316568 1-227
+SECURITY.md
+  s_d867799404043c::t_a6a61e93145f45 1-23
+apps/android/app/build.gradle
+  s_d867799404043c::t_3d4cc1f1455c44 1-91
+apps/android/app/src/main/AndroidManifest.xml
+  s_d867799404043c::t_53ca8a6af28c61 1-27
+apps/android/app/src/main/assets/react/assets/index-C6NUBYE3.css
+  s_d867799404043c::t_372240734200ac 1
+apps/android/app/src/main/assets/react/assets/index-C8tTHyXm.js
+  s_d867799404043c::t_1d428c5177aadb 1-473
+apps/android/app/src/main/assets/react/index.html
+  s_d867799404043c::t_f5fde6524ab735 1-14
+apps/android/app/src/main/assets/web/assets/auth.js
+  s_d867799404043c::t_1bf7bf12e44d20 1-77
+apps/android/app/src/main/assets/web/assets/embedded-data.js
+  s_d867799404043c::t_8110f97103435c 1
+apps/android/app/src/main/assets/web/assets/icon.svg
+  s_d867799404043c::t_b0b863101adbad 1-5
+apps/android/app/src/main/assets/web/assets/manifest.webmanifest
+  s_d867799404043c::t_76322c40c4d319 1-18
+apps/android/app/src/main/assets/web/assets/schedule.css
+  s_d867799404043c::t_34226320a759ef 1-2220
+apps/android/app/src/main/assets/web/assets/schedule.js
+  s_d867799404043c::t_c89c4fc674dcf7 1-3599
+apps/android/app/src/main/assets/web/build-manifest.json
+  s_d867799404043c::t_266edb5fe6307d 1-19
+apps/android/app/src/main/assets/web/data/interview_context.json
+  s_d867799404043c::t_40142ecaf71da3 1-255
+apps/android/app/src/main/assets/web/data/interview_kb.json
+  s_d867799404043c::t_c380eafacf87ba 1-531
+apps/android/app/src/main/assets/web/data/schedule.json
+  s_d867799404043c::t_f5a691c8b90b57 1-12218
+apps/android/app/src/main/assets/web/login.html
+  s_d867799404043c::t_44744a6136a1e2 1-37
+apps/android/app/src/main/assets/web/schedule.html
+  s_d867799404043c::t_34f9b18ce327ca 1-612
+apps/android/app/src/main/assets/web/sw.js
+  s_d867799404043c::t_d80586a0d9c5fb 1-36
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidActivityLifecycleController.java
+  s_d867799404043c::t_b314d9902933b8 1-63
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidAppStartupController.java
+  s_d867799404043c::t_77f08f7fa9fa1c 1-51
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidAuthSettingsBridge.java
+  s_d867799404043c::t_d682521e16fb6a 1-28
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidBasicAuthController.java
+  s_d867799404043c::t_20b97ca7a6fae6 1-110
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidKeystoreStringCipher.java
+  s_d867799404043c::t_6bc68b4dc6bbcc 1-76
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidRecorderBridge.java
+  s_d867799404043c::t_bd2e053c97f9f5 1-225
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidRecorderUploader.java
+  s_d867799404043c::t_c68b359ad3e669 1-102
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidRemoteSettingsBridge.java
+  s_d867799404043c::t_bf2a635b855c4f 1-34
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidRemoteWebViewClient.java
+  s_d867799404043c::t_1633bfafced844 1-62
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidSessionCookieBridge.java
+  s_d867799404043c::t_6737849f517293 1-63
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidSpeechBridge.java
+  s_d867799404043c::t_6fda2aab7f1811 1-246
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidSpeechCallbackEmitter.java
+  s_d867799404043c::t_b79db2c0dca113 1-101
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidSpeechErrorCoordinator.java
+  s_d867799404043c::t_6cc5318aafbccf 1-60
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidSpeechErrorPolicy.java
+  s_d867799404043c::t_141fadc4338d43 1-107
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidSpeechRecognizerController.java
+  s_d867799404043c::t_f32e99e5ca0ccc 1-163
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidSpeechServiceResolver.java
+  s_d867799404043c::t_c836fe791c7829 1-82
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidSpeechSessionState.java
+  s_d867799404043c::t_756aa65543ef91 1-90
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidSpeechStartCoordinator.java
+  s_d867799404043c::t_f5a2ce6b54afc9 1-89
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidTranscribeEndpointResolver.java
+  s_d867799404043c::t_681fad65fd89e1 1-44
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidWebChromePermissionController.java
+  s_d867799404043c::t_184916ecd5966e 1-48
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidWebViewInitializer.java
+  s_d867799404043c::t_dc17cbe68e53ac 1-77
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidWindowLayoutController.java
+  s_d867799404043c::t_7fecc7d866f9fe 1-79
+apps/android/app/src/main/java/com/kai/jobsprint/AuthCredentialStore.java
+  s_d867799404043c::t_da275ec701b100 1-132
+apps/android/app/src/main/java/com/kai/jobsprint/MainActivity.java
+  s_d867799404043c::t_aafe2d03356651 1-56
+apps/android/app/src/main/java/com/kai/jobsprint/RemoteUrlPolicy.java
+  s_d867799404043c::t_234521a476ccd4 1-112
+apps/android/app/src/main/java/com/kai/jobsprint/RemoteWebViewController.java
+  s_d867799404043c::t_8e503a34ec2679 1-157
+apps/android/app/src/main/res/values/strings.xml
+  s_d867799404043c::t_c88ceeea1da084 1-4
+apps/android/app/src/main/res/values/styles.xml
+  s_d867799404043c::t_e294bd89091524 1-6
+apps/android/build.gradle
+  s_d867799404043c::t_b8b907a07f2349 1-3
+apps/android/settings.gradle
+  s_d867799404043c::t_a852d2bdbadb4c 1-18
+apps/react-web/.gitignore
+  s_d867799404043c::t_799bdc0cdee695 1-5
+apps/react-web/README.md
+  s_d867799404043c::t_4da79c5c24e430 1-57
+apps/react-web/index.html
+  s_d867799404043c::t_8efb1bcccd159f 1-13
+apps/react-web/package-lock.json
+  s_d867799404043c::t_8c99ca5b9d21f7 1-4418
+apps/react-web/package.json
+  s_d867799404043c::t_189f1829f88bdf 1-40
+apps/react-web/postcss.config.js
+  s_d867799404043c::t_dfe6c8deb53a1a 1-6
+apps/react-web/scripts/build-compact-schedule.mjs
+  s_d867799404043c::t_d6c3aa69493e92 1-49
+apps/react-web/scripts/build-interview-questions.mjs
+  s_d867799404043c::t_41f8fe3c212c68 1-64
+apps/react-web/scripts/build-learning-knowledge.mjs
+  s_d867799404043c::t_e64b8b96822fc5 1-104
+apps/react-web/src/App.tsx
+  s_d867799404043c::t_fbde690c9d2e93 1-10
+apps/react-web/src/api/authClient.ts
+  s_d867799404043c::t_19ccd7cdc4a968 1-131
+apps/react-web/src/api/boundaryFeedbackClient.ts
+  s_d867799404043c::t_7d1d0c7f7dca6d 1-47
+apps/react-web/src/api/coachInvitationClient.ts
+  s_d867799404043c::t_1b3836dcdae995 1-327
+apps/react-web/src/api/coachInvitationImportClient.ts
+  s_d867799404043c::t_4979e51c246792 1-153
+apps/react-web/src/api/coachOnboardingReportClient.ts
+  s_d867799404043c::t_e36ed8deca5000 1-47
+apps/react-web/src/api/coachOutcomesClient.ts
+  s_d867799404043c::t_e6336741bc1aac 1-71
+apps/react-web/src/api/runtimeClient.ts
+  s_d867799404043c::t_bb087edce9d9f2 1-336
+apps/react-web/src/app/AppShell.tsx
+  s_d867799404043c::t_f78538270c86bc 1-169
+apps/react-web/src/app/MobileBottomNav.tsx
+  s_d867799404043c::t_8949f2ce8d1e5b 1-32
+apps/react-web/src/app/authSessionContext.tsx
+  s_d867799404043c::t_48d34eb0cfebed 1-8
+apps/react-web/src/app/navigation.ts
+  s_d867799404043c::t_34954726936070 1-127
+apps/react-web/src/app/providers.tsx
+  s_d867799404043c::t_c623070d4004be 1-218
+apps/react-web/src/app/router.tsx
+  s_d867799404043c::t_e5f323853e3207 1-30
+apps/react-web/src/app/syncStatus.ts
+  s_d867799404043c::t_34d4075e4dc7b8 1-11
+apps/react-web/src/data/aiFeedbackAdapter.ts
+  s_d867799404043c::t_3526fbcaff5518 1-128
+apps/react-web/src/data/applicationsAdapter.ts
+  s_d867799404043c::t_f445f289f06aa7 1-320
+apps/react-web/src/data/boundarySuggestionAdapter.ts
+  s_d867799404043c::t_26edd877f8cdfd 1-102
+apps/react-web/src/data/boundarySuggestionFeedbackAdapter.ts
+  s_d867799404043c::t_adfcfdb288cfc3 1-88
+apps/react-web/src/data/coachAdapter.ts
+  s_d867799404043c::t_4ccb9be55415d4 1-450
+apps/react-web/src/data/coachConstantsAdapter.ts
+  s_d867799404043c::t_9f5720bfdd13c1 1-29
+apps/react-web/src/data/coachEntityAdapter.ts
+  s_d867799404043c::t_102ad28553a8e1 1-18
+apps/react-web/src/data/coachFirstLoginFlowAdapter.ts
+  s_d867799404043c::t_0a38728751a4fb 1-105
+apps/react-web/src/data/coachOnboardingMaterialAdapter.ts
+  s_d867799404043c::t_dcf44d3d0c3982 1-64
+apps/react-web/src/data/coachOnboardingTemplateAdapter.ts
+  s_d867799404043c::t_93665448a578a7 1-35
+apps/react-web/src/data/coachOutcomeMetricsAdapter.ts
+  s_d867799404043c::t_eb8d4365c20d62 1-69
+apps/react-web/src/data/coachScheduleTaskAdapter.ts
+  s_d867799404043c::t_4c8c1934a28546 1-66
+apps/react-web/src/data/coachSetupChecklistAdapter.ts
+  s_d867799404043c::t_5a258bd78ee78d 1-81
+apps/react-web/src/data/interviewAdapter.ts
+  s_d867799404043c::t_e1152336d6a83f 1-386
+apps/react-web/src/data/interviewQuestionsCompact.json
+  s_d867799404043c::t_2308f0295d9e79 1-190
+apps/react-web/src/data/learningAdapter.ts
+  s_d867799404043c::t_bdd85bd28a42f9 1-314
+apps/react-web/src/data/learningKnowledgeCompact.json
+  s_d867799404043c::t_95fbcbf3ca6f1a 1-161
+apps/react-web/src/data/legacyAdapters.ts
+  s_d867799404043c::t_88bbb3bfe8ade3 1-63
+apps/react-web/src/data/llmRunAdapter.ts
+  s_d867799404043c::t_82d5b12fd67c2c 1-50
+apps/react-web/src/data/moreAdapter.ts
+  s_d867799404043c::t_42d57fbeba7db5 1-262
+apps/react-web/src/data/moreImportAdapter.ts
+  s_d867799404043c::t_fc8c0ae5626be8 1-228
+apps/react-web/src/data/opportunitySignalsAdapter.ts
+  s_d867799404043c::t_54326517aa35f6 1-182
+apps/react-web/src/data/reviewAdapter.ts
+  s_d867799404043c::t_c41eade6e0b1d4 1-338
+apps/react-web/src/data/roleFamilyPlaybook.ts
+  s_d867799404043c::t_81d208a171d2d0 1-116
+apps/react-web/src/data/scheduleAdapter.ts
+  s_d867799404043c::t_4928247217ac47 1-436
+apps/react-web/src/data/scheduleCompact.json
+  s_d867799404043c::t_ad903e0a357844 1-2984
+apps/react-web/src/data/seedSprint.ts
+  s_d867799404043c::t_473ede9655cc53 1-62
+apps/react-web/src/data/weeklyReviewAdapter.ts
+  s_d867799404043c::t_c18d6b514688e0 1-197
+apps/react-web/src/features/applications/ApplicationsPage.tsx
+  s_d867799404043c::t_71eaafbe8be8fb 1-436
+apps/react-web/src/features/applications/components/ApplicationForm.tsx
+  s_d867799404043c::t_7f3f99d6826422 1-145
+apps/react-web/src/features/coach/CoachPage.tsx
+  s_d867799404043c::t_bb01852e07a704 1-522
+apps/react-web/src/features/coach/components/AiFeedbackPanel.tsx
+  s_d867799404043c::t_6c5bff4f14b903 1-59
+apps/react-web/src/features/coach/components/ArtifactPanel.tsx
+  s_d867799404043c::t_680cec233141d1 1-122
+apps/react-web/src/features/coach/components/BoundaryPanel.tsx
+  s_d867799404043c::t_4431ecf4a2192a 1-88
+apps/react-web/src/features/coach/components/BoundarySuggestionPanel.tsx
+  s_d867799404043c::t_6f7f56eca4cbba 1-107
+apps/react-web/src/features/coach/components/CoachPrimitives.tsx
+  s_d867799404043c::t_330a9607769581 1-59
+apps/react-web/src/features/coach/components/FirstLoginFlowPanel.tsx
+  s_d867799404043c::t_57c623335b91a4 1-94
+apps/react-web/src/features/coach/components/InitializationWizardPanel.tsx
+  s_d867799404043c::t_c5edeae67d7616 1-190
+apps/react-web/src/features/coach/components/InviteManagementPanel.tsx
+  s_d867799404043c::t_44e8daf20362e5 1-552
+apps/react-web/src/features/coach/components/InviteOnboardingReportPanel.tsx
+  s_d867799404043c::t_04e7fdac9d2419 1-82
+apps/react-web/src/features/coach/components/LlmRunPanel.tsx
+  s_d867799404043c::t_0795c1a9b9de37 1-31
+apps/react-web/src/features/coach/components/OnboardingChecklistPanel.tsx
+  s_d867799404043c::t_f490fbef594b4d 1-83
+apps/react-web/src/features/coach/components/ProfilePanel.tsx
+  s_d867799404043c::t_0e0a84e7cd651a 1-77
+apps/react-web/src/features/coach/components/SchedulePanel.tsx
+  s_d867799404043c::t_a9b3dbf51cdc4e 1-86
+apps/react-web/src/features/coach/components/inviteManagementConfig.ts
+  s_d867799404043c::t_cedab62e87b66c 1-35
+apps/react-web/src/features/interview/InterviewPage.tsx
+  s_d867799404043c::t_bfe5f1c7d2a57c 1-539
+apps/react-web/src/features/interview/components/RecentRecords.tsx
+  s_d867799404043c::t_fa083d01118541 1-31
+apps/react-web/src/features/interview/components/ScoreAnalysisPanel.tsx
+  s_d867799404043c::t_8f2e8e2aa688d9 1-46
+apps/react-web/src/features/learning/LearningPage.tsx
+  s_d867799404043c::t_a4c8b3fb04c31c 1-481
+apps/react-web/src/features/learning/components/LearningSidePanels.tsx
+  s_d867799404043c::t_28f1637bb58e14 1-102
+apps/react-web/src/features/learning/components/LearningTaskCard.tsx
+  s_d867799404043c::t_f8cb5eef6b41b1 1-120
+apps/react-web/src/features/modules/ModulePlaceholderPage.tsx
+  s_d867799404043c::t_e799ea6cc0cbb1 1-124
+apps/react-web/src/features/more/MorePage.tsx
+  s_d867799404043c::t_54c0c14623cb4e 1-350
+apps/react-web/src/features/review/ReviewPage.tsx
+  s_d867799404043c::t_20df3a72100ba0 1-537
+apps/react-web/src/features/review/components/WeeklyReviewPanel.tsx
+  s_d867799404043c::t_65cedcf52e9380 1-112
+apps/react-web/src/features/review/useServerOutcome.ts
+  s_d867799404043c::t_720479f0752935 1-55
+apps/react-web/src/features/today/TodayPage.tsx
+  s_d867799404043c::t_98be5a70c08fbc 1-358
+apps/react-web/src/features/today/components/CurrentTaskCard.tsx
+  s_d867799404043c::t_7ffda1fb99b353 1-103
+apps/react-web/src/features/today/components/EvidenceGate.tsx
+  s_d867799404043c::t_e83205903d512e 1-312
+apps/react-web/src/features/today/components/ProgressDashboard.tsx
+  s_d867799404043c::t_d1cbbfc9ec98b7 1-140
+apps/react-web/src/features/today/components/RiskAndOralPanels.tsx
+  s_d867799404043c::t_e1a9bc22a6b763 1-127
+apps/react-web/src/main.tsx
+  s_d867799404043c::t_2b65229264a0da 1-10
+apps/react-web/src/stores/sprintCoachActions.ts
+  s_d867799404043c::t_98be1e8295b398 1-193
+apps/react-web/src/stores/sprintStateFactory.ts
+  s_d867799404043c::t_f40dd1b6a53a6e 1-29
+apps/react-web/src/stores/sprintStore.ts
+  s_d867799404043c::t_458cb4d836d254 1-388
+apps/react-web/src/stores/sprintStoreParsers.ts
+  s_d867799404043c::t_9eba853c8154fe 1-133
+apps/react-web/src/stores/sprintStoreStorage.ts
+  s_d867799404043c::t_55577d07a5aaf3 1-20
+apps/react-web/src/styles/index.css
+  s_d867799404043c::t_0ae53be73dfa8c 1-69
+apps/react-web/src/test/ApplicationsPage.test.tsx
+  s_d867799404043c::t_85a007df8ac780 1-123
+apps/react-web/src/test/CoachBoundarySuggestionFeedbackPage.test.tsx
+  s_d867799404043c::t_5202368a9bbf36 1-67
+apps/react-web/src/test/CoachPage.test.tsx
+  s_d867799404043c::t_a2d8995927c979 1-252
+apps/react-web/src/test/InterviewPage.test.tsx
+  s_d867799404043c::t_2f33581a20fc16 1-90
+apps/react-web/src/test/LearningPage.test.tsx
+  s_d867799404043c::t_0ad17d52b9195f 1-102
+apps/react-web/src/test/MorePage.test.tsx
+  s_d867799404043c::t_4915661f8fdf72 1-152
+apps/react-web/src/test/ReviewPage.test.tsx
+  s_d867799404043c::t_e811bbd7e5e650 1-129
+apps/react-web/src/test/TodayPage.test.tsx
+  s_d867799404043c::t_1069a1a440cfd4 1-104
+apps/react-web/src/test/applicationsAdapter.test.ts
+  s_d867799404043c::t_ea74b7a7091003 1-132
+apps/react-web/src/test/authClient.test.ts
+  s_d867799404043c::t_064a88b8a1d799 1-42
+apps/react-web/src/test/boundarySuggestionAdapter.test.ts
+  s_d867799404043c::t_40892dc404967c 1-42
+apps/react-web/src/test/boundarySuggestionFeedbackAdapter.test.ts
+  s_d867799404043c::t_b80452211f21e6 1-49
+apps/react-web/src/test/coachAdapter.test.ts
+  s_d867799404043c::t_b1ca179f82777f 1-340
+apps/react-web/src/test/coachBoundaryProvenance.test.ts
+  s_d867799404043c::t_e4b8392c551918 1-41
+apps/react-web/src/test/coachFirstLoginFlowAdapter.test.ts
+  s_d867799404043c::t_20479fd7753fb4 1-83
+apps/react-web/src/test/coachInvitationClient.test.ts
+  s_d867799404043c::t_15532eadb05e1d 1-131
+apps/react-web/src/test/coachOnboardingMaterialAdapter.test.ts
+  s_d867799404043c::t_a3f312ac54d94b 1-23
+apps/react-web/src/test/coachOutcomeMetricsAdapter.test.ts
+  s_d867799404043c::t_19c4bd9ff9f6d9 1-40
+apps/react-web/src/test/interviewAdapter.test.ts
+  s_d867799404043c::t_a702f331558b6f 1-103
+apps/react-web/src/test/learningAdapter.test.ts
+  s_d867799404043c::t_0c704253f1f531 1-81
+apps/react-web/src/test/moreAdapter.test.ts
+  s_d867799404043c::t_5b86084ae67bbc 1-207
+apps/react-web/src/test/navigationRoutes.test.tsx
+  s_d867799404043c::t_49d797552e4591 1-68
+apps/react-web/src/test/reviewAdapter.test.ts
+  s_d867799404043c::t_5d6dd1bf96a740 1-233
+apps/react-web/src/test/runtimeClient.test.ts
+  s_d867799404043c::t_b1f922cd299958 1-19
+apps/react-web/src/test/runtimeSyncBridge.test.ts
+  s_d867799404043c::t_ca8c8b297f8c27 1-42
+apps/react-web/src/test/scheduleAdapter.test.ts
+  s_d867799404043c::t_e2a7dee0f8e5a3 1-108
+apps/react-web/src/test/sprintStoreCoachIsolation.test.ts
+  s_d867799404043c::t_390d8973611c71 1-78
+apps/react-web/src/types/sprint.ts
+  s_d867799404043c::t_4ef39a07bc2034 1-252
+apps/react-web/tailwind.config.ts
+  s_d867799404043c::t_07481635a9d81d 1-57
+apps/react-web/tsconfig.app.json
+  s_d867799404043c::t_a91e318c4af77b 1-22
+apps/react-web/tsconfig.json
+  s_d867799404043c::t_dd50f9aaaf1ebe 1-7
+apps/react-web/tsconfig.node.json
+  s_d867799404043c::t_f4d7193efff207 1-15
+apps/react-web/vite.config.ts
+  s_d867799404043c::t_98b75370ac8606 1-12
+apps/react-web/vitest.setup.ts
+  s_d867799404043c::t_096e195d7a05eb 1-7
+apps/rust-api/Cargo.lock
+  s_d867799404043c::t_4c4300417c849c 1-2707
+apps/rust-api/Cargo.toml
+  s_d867799404043c::t_23b67ce2de102f 1-33
+apps/rust-api/README.md
+  s_d867799404043c::t_872fb0d9cb00bf 1-68
+apps/rust-api/migrations/001_init.sql
+  s_d867799404043c::t_7dbb6690768121 1-16
+apps/rust-api/src/ai_routes.rs
+  s_d867799404043c::t_1cece98dfba59c 1-206
+apps/rust-api/src/ai_tools.rs
+  s_d867799404043c::t_f1669ba1ce46fa 1-104
+apps/rust-api/src/ai_transcribe.rs
+  s_d867799404043c::t_9e46a9244655f5 1-101
+apps/rust-api/src/app_bootstrap.rs
+  s_d867799404043c::t_78b30278d06286 1-137
+apps/rust-api/src/app_schema.rs
+  s_d867799404043c::t_1fda8ee2f36148 1-215
+apps/rust-api/src/app_schema_boundary_feedback.rs
+  s_d867799404043c::t_d5604e58098426 1-34
+apps/rust-api/src/application_routes.rs
+  s_d867799404043c::t_f375e52a1fd3df 1-177
+apps/rust-api/src/auth_account_actions.rs
+  s_d867799404043c::t_cd7ae6113bc95c 1-153
+apps/rust-api/src/auth_account_batch_actions.rs
+  s_d867799404043c::t_a3024f2a604611 1-174
+apps/rust-api/src/auth_account_store.rs
+  s_d867799404043c::t_0f646af22dee12 1-172
+apps/rust-api/src/auth_account_users_file.rs
+  s_d867799404043c::t_95c1058eb18288 1-57
+apps/rust-api/src/auth_bearer.rs
+  s_d867799404043c::t_e676baea43e85a 1-49
+apps/rust-api/src/auth_config.rs
+  s_d867799404043c::t_044985fc16adfa 1-118
+apps/rust-api/src/auth_hash.rs
+  s_d867799404043c::t_5f6cc124cedc70 1-44
+apps/rust-api/src/auth_http.rs
+  s_d867799404043c::t_c0310a28657e99 1-80
+apps/rust-api/src/auth_permissions.rs
+  s_d867799404043c::t_77c328d6b3b61f 1-96
+apps/rust-api/src/auth_routes.rs
+  s_d867799404043c::t_455ed4ae7feb29 1-145
+apps/rust-api/src/auth_state.rs
+  s_d867799404043c::t_9fbd028a057585 1-171
+apps/rust-api/src/auth_tokens.rs
+  s_d867799404043c::t_bcaa8d167e2d68 1-127
+apps/rust-api/src/auth_users.rs
+  s_d867799404043c::t_8b5f8fc235ce33 1-183
+apps/rust-api/src/auth_values.rs
+  s_d867799404043c::t_124a7ec96e2b52 1-23
+apps/rust-api/src/coach_ai_metadata.rs
+  s_d867799404043c::t_547385d930a6cd 1-38
+apps/rust-api/src/coach_ai_provider.rs
+  s_d867799404043c::t_4cb71421d7eed3 1-114
+apps/rust-api/src/coach_ai_provider_format.rs
+  s_d867799404043c::t_f673bcc0add8c2 1-220
+apps/rust-api/src/coach_ai_tools.rs
+  s_d867799404043c::t_226b282bab5d25 1-208
+apps/rust-api/src/coach_ai_tools_tests.rs
+  s_d867799404043c::t_1717f51066dca7 1-187
+apps/rust-api/src/coach_boundary_feedback.rs
+  s_d867799404043c::t_a071a182f7ef1b 1-165
+apps/rust-api/src/coach_boundary_feedback_summary.rs
+  s_d867799404043c::t_b1a5fac9ac9346 1-124
+apps/rust-api/src/coach_boundary_provider.rs
+  s_d867799404043c::t_2e42372d725611 1-218
+apps/rust-api/src/coach_boundary_routes.rs
+  s_d867799404043c::t_3bd08947689e2c 1-106
+apps/rust-api/src/coach_boundary_suggestions.rs
+  s_d867799404043c::t_26ececf2f2687e 1-185
+apps/rust-api/src/coach_invitation_action_routes.rs
+  s_d867799404043c::t_475eb17b277c94 1-212
+apps/rust-api/src/coach_invitation_import_routes.rs
+  s_d867799404043c::t_ed3ecffeac72da 1-100
+apps/rust-api/src/coach_invitation_notifications.rs
+  s_d867799404043c::t_1a503407621bd0 1-176
+apps/rust-api/src/coach_invitation_routes.rs
+  s_d867799404043c::t_07c9c9d4aa145b 1-182
+apps/rust-api/src/coach_invitations.rs
+  s_d867799404043c::t_3487823cc1746b 1-204
+apps/rust-api/src/coach_jd_insights.rs
+  s_d867799404043c::t_4ad3f6d1468b1c 1-197
+apps/rust-api/src/coach_onboarding_event_summary.rs
+  s_d867799404043c::t_278d68c81978f3 1-51
+apps/rust-api/src/coach_onboarding_events.rs
+  s_d867799404043c::t_a66a99c015d124 1-190
+apps/rust-api/src/coach_onboarding_report.rs
+  s_d867799404043c::t_dae19e69de35dc 1-145
+apps/rust-api/src/coach_onboarding_routes.rs
+  s_d867799404043c::t_629beca85f5932 1-128
+apps/rust-api/src/coach_opportunity_signal_parse.rs
+  s_d867799404043c::t_3e350fa8fa8644 1-181
+apps/rust-api/src/coach_opportunity_signals.rs
+  s_d867799404043c::t_17456a133399e6 1-140
+apps/rust-api/src/coach_outcomes.rs
+  s_d867799404043c::t_7e2852e31cae74 1-135
+apps/rust-api/src/coach_outcomes/metrics.rs
+  s_d867799404043c::t_4be779ee7487be 1-193
+apps/rust-api/src/coach_outcomes/narrative.rs
+  s_d867799404043c::t_39174a6ffd8898 1-122
+apps/rust-api/src/coach_outcomes/report.rs
+  s_d867799404043c::t_ef14988ab4f360 1-118
+apps/rust-api/src/coach_outcomes/window.rs
+  s_d867799404043c::t_78536a454d6211 1-42
+apps/rust-api/src/coach_role_playbook.rs
+  s_d867799404043c::t_ce5b973e1c1e24 1-200
+apps/rust-api/src/data_routes.rs
+  s_d867799404043c::t_1152a192368a92 1-6
+apps/rust-api/src/health_routes.rs
+  s_d867799404043c::t_eab8aeacccb08e 1-23
+apps/rust-api/src/http_responses.rs
+  s_d867799404043c::t_ffd3fd8a080ca0 1-92
+apps/rust-api/src/interview_mistake_routes.rs
+  s_d867799404043c::t_2dbb09f8bf01b7 1-147
+apps/rust-api/src/json_body.rs
+  s_d867799404043c::t_c5b4a8250fdb2e 1-9
+apps/rust-api/src/lib.rs
+  s_d867799404043c::t_91a08f30964944 1-146
+apps/rust-api/src/llm_feedback.rs
+  s_d867799404043c::t_6b6de01152fc6c 1-142
+apps/rust-api/src/llm_feedback_summary.rs
+  s_d867799404043c::t_126f56e7c05c0c 1-144
+apps/rust-api/src/llm_runs.rs
+  s_d867799404043c::t_f326b9b249180b 1-165
+apps/rust-api/src/login_rate.rs
+  s_d867799404043c::t_b3cac60d73db5f 1-152
+apps/rust-api/src/main.rs
+  s_d867799404043c::t_ab5119097c356e 1-4
+apps/rust-api/src/runtime_records.rs
+  s_d867799404043c::t_8047232991ceb7 1-75
+apps/rust-api/src/runtime_routes.rs
+  s_d867799404043c::t_41a6398cdf7722 1-155
+apps/rust-api/src/runtime_store.rs
+  s_d867799404043c::t_3d02a3ef334a83 1-192
+apps/rust-api/src/session_token.rs
+  s_d867799404043c::t_5195aaedcff86a 1-138
+apps/rust-api/src/static_files.rs
+  s_d867799404043c::t_d3a60655fa92a8 1-129
+apps/rust-api/src/static_routes.rs
+  s_d867799404043c::t_949e5dd29e91c4 1-67
+apps/rust-api/tests/boundary_provider_contract.rs
+  s_d867799404043c::t_fff3cecb73f2d8 1-175
+apps/rust-api/tests/runtime_contract.rs
+  s_d867799404043c::t_161df7a560fe3d 1-769
+apps/rust-api/tests/runtime_contract/boundary_feedback.rs
+  s_d867799404043c::t_2cc77d9aa1c3a4 1-80
+apps/rust-api/tests/runtime_contract/coach_onboarding.rs
+  s_d867799404043c::t_9e46e0fd904745 1-105
+apps/rust-api/tests/runtime_contract/invitation_account.rs
+  s_d867799404043c::t_c8c831a67db801 1-397
+apps/rust-api/tests/runtime_contract/mock_provider.rs
+  s_d867799404043c::t_40ef7b0c2328a4 1-45
+apps/rust-api/tests/runtime_contract/multi_user.rs
+  s_d867799404043c::t_195e8c38bca7ca 1-612
+apps/rust-api/tests/runtime_contract/outcomes.rs
+  s_d867799404043c::t_dc1aab972ba220 1-124
+apps/server/ai_routes.js
+  s_d867799404043c::t_eb2ac0edb5ecfd 1-217
+apps/server/ai_tools.js
+  s_d867799404043c::t_a07a95f0611e77 1-302
+apps/server/app.js
+  s_d867799404043c::t_13bb7e11f6fdcc 1-205
+apps/server/auth.js
+  s_d867799404043c::t_57625c7400f11d 1-371
+apps/server/auth_account_batch_store.js
+  s_d867799404043c::t_c8acf445b6f467 1-115
+apps/server/auth_account_store.js
+  s_d867799404043c::t_c89b5d0d3d7092 1-300
+apps/server/auth_routes.js
+  s_d867799404043c::t_6a4c6f69e712b5 1-165
+apps/server/coach_ai_tools.js
+  s_d867799404043c::t_6632b010c5b43d 1-240
+apps/server/coach_boundary_feedback_routes.js
+  s_d867799404043c::t_5a291165deb7d5 1-189
+apps/server/coach_boundary_suggestions.js
+  s_d867799404043c::t_b23ef95c4840f1 1-186
+apps/server/coach_feedback_routes.js
+  s_d867799404043c::t_2b6f71d169f949 1-132
+apps/server/coach_feedback_summary.js
+  s_d867799404043c::t_032def57c6a371 1-82
+apps/server/coach_invitation_import_routes.js
+  s_d867799404043c::t_be6c87f53dfcc1 1-71
+apps/server/coach_invitation_notifications.js
+  s_d867799404043c::t_b1af038e3505ca 1-100
+apps/server/coach_invitations_routes.js
+  s_d867799404043c::t_90cb2ae4794eb9 1-382
+apps/server/coach_onboarding_events_routes.js
+  s_d867799404043c::t_22ce09164dd608 1-304
+apps/server/coach_opportunity_signals.js
+  s_d867799404043c::t_c650d995580155 1-136
+apps/server/coach_outcomes_routes.js
+  s_d867799404043c::t_8eb15e13387a85 1-300
+apps/server/coach_role_playbook.js
+  s_d867799404043c::t_2c97deaf4d23ce 1-53
+apps/server/http_utils.js
+  s_d867799404043c::t_f10d6143414fbd 1-137
+apps/server/runtime_routes.js
+  s_d867799404043c::t_0c3eb2f41bd5e0 1-232
+apps/server/runtime_store.js
+  s_d867799404043c::t_457ba4afed5173 1-118
+apps/server/static_files.js
+  s_d867799404043c::t_b5d88c460d9774 1-189
+assets/auth.js
+  s_d867799404043c::t_cfe381f70ed7d1 1-77
+assets/embedded-data.js
+  s_d867799404043c::t_46e87b619837aa 1
+assets/icon.svg
+  s_d867799404043c::t_359b9a81df5b24 1-5
+assets/manifest.webmanifest
+  s_d867799404043c::t_6e68dfcef88d13 1-18
+assets/schedule.css
+  s_d867799404043c::t_d1f469adfe8989 1-2220
+assets/schedule.js
+  s_d867799404043c::t_17735e0cea7511 1-3599
+data/interview_context.json
+  s_d867799404043c::t_bd8e4263a3086f 1-144
+data/interview_kb.json
+  s_d867799404043c::t_13a0f171e6e118 1-555
+data/schedule.json
+  s_d867799404043c::t_c0b064d652dc2c 1-12738
+docs/README.md
+  s_d867799404043c::t_65150901a7236f 1-41
+docs/archive/deletion-disposition.md
+  s_d867799404043c::t_c98310beaa02c8 1-21
+docs/archive/index.md
+  s_d867799404043c::t_894185c1b474ab 1-50
+docs/archive/workspace-boundary-inventory.md
+  s_d867799404043c::t_0dc0cfdc78c3e4 1-30
+docs/core/01-project-background.md
+  s_d867799404043c::t_c8ea11a9734f03 1-47
+docs/core/02-project-plan.md
+  s_d867799404043c::t_2b117407b3f834 1-49
+docs/core/03-technical-architecture.md
+  s_d867799404043c::t_6ca87f4d24c85f 1-107
+docs/core/04-acceptance-and-risk.md
+  s_d867799404043c::t_32461229790c45 1-116
+docs/core/05-interview-knowledge-base.md
+  s_d867799404043c::t_842806cc1c73f8 1-269
+docs/core/06-goal-acceptance-audit.md
+  s_d867799404043c::t_acf80b12c0e245 1-112
+docs/plans/2026-07-03-001-refactor-workspace-boundaries-plan.md
+  s_d867799404043c::t_21289fa9aa17a5 1-572
+docs/product/README.md
+  s_d867799404043c::t_fadd0e748e7ffa 1-24
+docs/product/it-job-coach-v1/README.md
+  s_d867799404043c::t_aac71a0f108c7b 1-63
+docs/product/it-job-coach-v1/completion-audit.md
+  s_d867799404043c::t_b620f5c0d26ef8 1-76
+docs/product/it-job-coach-v1/development-workflow.md
+  s_d867799404043c::t_798763c17647b1 1-283
+docs/product/it-job-coach-v1/prd-options.md
+  s_d867799404043c::t_616978a277bdde 1-125
+docs/product/it-job-coach-v1/prd-recommended.md
+  s_d867799404043c::t_d4478bc7c563e1 1-271
+docs/product/it-job-coach-v1/product-completeness-and-ai-expansion-2026-07-07.md
+  s_d867799404043c::t_dbaafe2756ae77 1-125
+docs/product/it-job-coach-v1/review-and-adjudication.md
+  s_d867799404043c::t_06e0af5445fe6d 1-165
+docs/product/product-ops/doc-rules.md
+  s_d867799404043c::t_6162032864ed88 1-54
+docs/product/product-ops/iteration-workflow.md
+  s_d867799404043c::t_57465217757f93 1-45
+docs/product/product-ops/known-issues.md
+  s_d867799404043c::t_245a4f339777a8 1-31
+docs/product/product-ops/product-ledger.md
+  s_d867799404043c::t_50955b68f6bda2 1-50
+docs/solutions/logic-errors/jvm-xmind-custom-subtrees-duplicate-key-overwrite-2026-06-28.md
+  s_d867799404043c::t_db6b2802bca338 1-225
+docs/solutions/logic-errors/xmind-knowledge-notes-semantic-duplication-qa-2026-07-01.md
+  s_d867799404043c::t_fd19c49586bf48 1-166
+login.html
+  s_d867799404043c::t_7973cb49b2ad2a 1-37
+package.json
+  s_d867799404043c::t_f8d8018b685f5c 1-59
+schedule.html
+  s_d867799404043c::t_38b44af6f75db5 1-612
+sw.js
+  s_d867799404043c::t_062f2ffc96bd98 1-36
+tests/android_activity_lifecycle_controller_test.js
+  s_d867799404043c::t_7b463b9e8cba48 1-70
+tests/android_app_startup_controller_test.js
+  s_d867799404043c::t_ec69bc753e54ab 1-51
+tests/android_auth_credential_store_test.js
+  s_d867799404043c::t_2e4af35a9a14dd 1-93
+tests/android_basic_auth_controller_test.js
+  s_d867799404043c::t_28d694d38db592 1-62
+tests/android_recorder_bridge_test.js
+  s_d867799404043c::t_85e58e84c0d180 1-59
+tests/android_recorder_uploader_test.js
+  s_d867799404043c::t_b6619e700d0106 1-33
+tests/android_release_signing_init_test.js
+  s_d867799404043c::t_e4791e4c67f7e1 1-113
+tests/android_remote_functional_entrypoint_test.js
+  s_d867799404043c::t_bd141d370ead2f 1-51
+tests/android_remote_url_policy_test.js
+  s_d867799404043c::t_683fbf80e16530 1-60
+tests/android_remote_webview_client_test.js
+  s_d867799404043c::t_6d410043a20c22 1-45
+tests/android_remote_webview_controller_test.js
+  s_d867799404043c::t_edf51839fe8ad2 1-47
+tests/android_settings_bridge_test.js
+  s_d867799404043c::t_cbd44cb5a92e69 1-101
+tests/android_speech_bridge_test.js
+  s_d867799404043c::t_32c40a70f8391b 1-177
+tests/android_speech_callback_emitter_test.js
+  s_d867799404043c::t_b160a7da2c17de 1-43
+tests/android_speech_error_coordinator_test.js
+  s_d867799404043c::t_17365aa6671d27 1-52
+tests/android_speech_error_policy_test.js
+  s_d867799404043c::t_f5e8da0ffd84a7 1-47
+tests/android_speech_recognizer_controller_test.js
+  s_d867799404043c::t_f355f393c684e7 1-51
+tests/android_speech_service_resolver_test.js
+  s_d867799404043c::t_24ccfd24f3c16a 1-50
+tests/android_speech_session_state_test.js
+  s_d867799404043c::t_d11f60dff7401d 1-69
+tests/android_speech_start_coordinator_test.js
+  s_d867799404043c::t_05ad0b3487a3fe 1-56
+tests/android_transcribe_endpoint_resolver_test.js
+  s_d867799404043c::t_ca7346ed56f52f 1-34
+tests/android_web_chrome_permission_controller_test.js
+  s_d867799404043c::t_07c7abffa3b0b7 1-40
+tests/android_webview_ai_artifact_flow.js
+  s_d867799404043c::t_225e6479ab8f67 1-65
+tests/android_webview_functional_persistence_test.js
+  s_d867799404043c::t_8e92ba240a2252 1-822
+tests/android_webview_initializer_test.js
+  s_d867799404043c::t_b8130ee56b4d34 1-65
+tests/android_window_layout_controller_test.js
+  s_d867799404043c::t_caf6a7b0f285f1 1-62
+tests/api_runtime_test.js
+  s_d867799404043c::t_820092da4b7369 1-570
+tests/api_transcribe_test.js
+  s_d867799404043c::t_e8d6121f196e51 1-137
+tests/architecture_quality_test.js
+  s_d867799404043c::t_4eaf03db03696f 1-177
+tests/auth_permissions_test.js
+  s_d867799404043c::t_673e76078dcebb 1-404
+tests/delivery_action_commands_test.js
+  s_d867799404043c::t_dc6e10277b5490 1-25
+tests/delivery_env_file_entrypoints_test.js
+  s_d867799404043c::t_39d2e7ad3a7504 1-77
+tests/delivery_env_template_test.js
+  s_d867799404043c::t_63b230015be04a 1-134
+tests/delivery_external_inputs_test.js
+  s_d867799404043c::t_1c7a27e6775327 1-155
+tests/feature_parity_test.js
+  s_d867799404043c::t_e2c36be24ad464 1-173
+tests/final_delivery_readiness_android_remote_test.js
+  s_d867799404043c::t_46e88695ce5744 1-210
+tests/final_delivery_readiness_test.js
+  s_d867799404043c::t_5f9f837ee099b1 1-800
+tests/final_delivery_runner_test.js
+  s_d867799404043c::t_db4b967121cbd4 1-239
+tests/fixtures/react_import_restore_payload.js
+  s_d867799404043c::t_128ec0d0447b36 1-99
+tests/functional_coverage_test.js
+  s_d867799404043c::t_013d41cbd11b39 1-186
+tests/goal_acceptance_test.js
+  s_d867799404043c::t_05a17c16451240 1-261
+tests/invitation_account_provisioning_test.js
+  s_d867799404043c::t_c1108315bf7a23 1-316
+tests/kb_mobile_list_test.js
+  s_d867799404043c::t_af4a718cce90c0 1-36
+tests/mobile_schedule_detail_test.js
+  s_d867799404043c::t_48b23070c27197 1-29
+tests/node_ai_routes_boundary_test.js
+  s_d867799404043c::t_763830c02055e5 1-670
+tests/node_ai_tools_boundary_test.js
+  s_d867799404043c::t_2ca6ab1e22df87 1-164
+tests/node_auth_boundary_test.js
+  s_d867799404043c::t_5171b2c2a4e9ea 1-64
+tests/node_auth_routes_boundary_test.js
+  s_d867799404043c::t_2758076971082d 1-98
+tests/node_http_utils_boundary_test.js
+  s_d867799404043c::t_68e6ed654688a2 1-114
+tests/node_runtime_routes_boundary_test.js
+  s_d867799404043c::t_84c110b2e1f3d6 1-162
+tests/node_runtime_store_boundary_test.js
+  s_d867799404043c::t_59f7cc691e961b 1-60
+tests/node_static_files_boundary_test.js
+  s_d867799404043c::t_577778760ab056 1-57
+tests/page_smoke_test.js
+  s_d867799404043c::t_890de0d243c983 1-240
+tests/product_iteration_workflow_test.js
+  s_d867799404043c::t_6ae0619089b22e 1-171
+tests/react_functional_persistence_test.js
+  s_d867799404043c::t_47fe15b42849b8 1-713
+tests/remote_login_switch_evidence_test.js
+  s_d867799404043c::t_f5a70abc5d7239 1-20
+tests/rust_ai_routes_boundary_test.js
+  s_d867799404043c::t_61ecf85ae273e7 1-253
+tests/rust_ai_tools_boundary_test.js
+  s_d867799404043c::t_0f5ff970d3e1ab 1-109
+tests/rust_app_bootstrap_boundary_test.js
+  s_d867799404043c::t_6da4635850d10b 1-73
+tests/rust_auth_config_boundary_test.js
+  s_d867799404043c::t_654496dfb2cd2c 1-84
+tests/rust_auth_routes_boundary_test.js
+  s_d867799404043c::t_967d67cec93690 1-36
+tests/rust_auth_state_boundary_test.js
+  s_d867799404043c::t_bd74f1c69558b3 1-99
+tests/rust_data_routes_boundary_test.js
+  s_d867799404043c::t_08f0436a7b1494 1-117
+tests/rust_http_responses_boundary_test.js
+  s_d867799404043c::t_b22f610db22b0e 1-40
+tests/rust_login_rate_boundary_test.js
+  s_d867799404043c::t_fad6623b931531 1-38
+tests/rust_runtime_routes_boundary_test.js
+  s_d867799404043c::t_2d74053e4ce9f4 1-50
+tests/rust_runtime_store_boundary_test.js
+  s_d867799404043c::t_54d3bfe0aeffd5 1-48
+tests/rust_session_token_boundary_test.js
+  s_d867799404043c::t_7ee24d4da45e36 1-35
+tests/rust_sqlite_ui_persistence_test.js
+  s_d867799404043c::t_5b742bcb3933b6 1-452
+tests/rust_static_files_boundary_test.js
+  s_d867799404043c::t_7c4ab326412cf6 1-38
+tests/rust_static_routes_boundary_test.js
+  s_d867799404043c::t_f2fa37dfe4ab1a 1-40
+tests/scan_sensitive_content_test.js
+  s_d867799404043c::t_b76bbc3544f2d6 1-39
+tests/schedule_logic_test.js
+  s_d867799404043c::t_0e52cf6faa010e 1-143
+tests/speech_provider_test.js
+  s_d867799404043c::t_136bd392dd0a15 1-96
+tests/ui_category_test.js
+  s_d867799404043c::t_9d506f21fbe530 1-55
+tests/workspace_boundaries_test.js
+  s_d867799404043c::t_de2def619b7ef7 1-91
+tools/build_android_release_apk.js
+  s_d867799404043c::t_908bd8ec5c4da7 1-316
+tools/build_linux_rust_binary.js
+  s_d867799404043c::t_21dd08a3049db2 1-258
+tools/build_public_safe_bundle.js
+  s_d867799404043c::t_1ef47baf16d53f 1-218
+tools/build_schedule_and_kb.js
+  s_d867799404043c::t_ee07ca248ce67e 1-633
+tools/build_server_delivery_package.js
+  s_d867799404043c::t_852841e293710e 1-172
+tools/check_android_voice_setup.sh
+  s_d867799404043c::t_22ba9ee7716080 1-71
+tools/configure_remote_provider_env.js
+  s_d867799404043c::t_8db4342a36afe3 1-173
+tools/delivery_action_commands.js
+  s_d867799404043c::t_2fac16913fd06e 1-22
+tools/delivery_env_file.js
+  s_d867799404043c::t_1b40e839fa9fff 1-152
+tools/delivery_readiness_architecture.js
+  s_d867799404043c::t_c71aea186eddf3 1-42
+tools/delivery_readiness_env.js
+  s_d867799404043c::t_60e497b9608117 1-64
+tools/delivery_readiness_feature_parity.js
+  s_d867799404043c::t_6a30f2dcb4568d 1-39
+tools/delivery_readiness_functional.js
+  s_d867799404043c::t_d2bc179a049361 1-39
+tools/delivery_readiness_goal.js
+  s_d867799404043c::t_34ae1d2e87e07f 1-61
+tools/delivery_readiness_server_package.js
+  s_d867799404043c::t_bdc03cec60aeda 1-193
+tools/health_check.sh
+  s_d867799404043c::t_02a5ae1eb16f7c 1-62
+tools/init_android_release_signing.js
+  s_d867799404043c::t_07fde4e3bbfc5f 1-287
+tools/job_sprint_public_tunnel.sh
+  s_d867799404043c::t_d0cddd90dee56e 1-22
+tools/job_sprint_public_tunnel_tmux.sh
+  s_d867799404043c::t_c01de129efc9dc 1-87
+tools/job_sprint_ssh_tunnel.sh
+  s_d867799404043c::t_fc959fcf5933d6 1-130
+tools/remote_https_job_sprint_check.sh
+  s_d867799404043c::t_68afe185444f87 1-158
+tools/remote_job_sprint_check.sh
+  s_d867799404043c::t_4ebb19e3161728 1-102
+tools/remote_sub2api_basepath_check.sh
+  s_d867799404043c::t_d2c05541b48ce9 1-147
+tools/restart_remote_service.js
+  s_d867799404043c::t_65197370c96d57 1-173
+tools/run_command_retry.js
+  s_d867799404043c::t_eb3a68f0ecbaf0 1-11
+tools/run_final_delivery.js
+  s_d867799404043c::t_c2aaf657de82f1 1-450
+tools/scan_public_bundle.js
+  s_d867799404043c::t_2a80bae4bbb942 1-73
+tools/scan_sensitive_content.js
+  s_d867799404043c::t_7f98c4844f31a7 1-148
+tools/sync_react_android_assets.js
+  s_d867799404043c::t_f4fb9143a793d8 1-55
+tools/validate_ai_team_protocol.js
+  s_d867799404043c::t_a93fc0604617b5 1-98
+tools/validate_architecture_quality.js
+  s_d867799404043c::t_e2ce97eedc0d63 1-529
+tools/validate_delivery_external_inputs.js
+  s_d867799404043c::t_7efbea2b9dca40 1-342
+tools/validate_feature_parity.js
+  s_d867799404043c::t_7ddb11a8d3e529 1-278
+tools/validate_final_delivery_readiness.js
+  s_d867799404043c::t_f7b1be7762ae4d 1-1284
+tools/validate_functional_coverage.js
+  s_d867799404043c::t_cd6d590bea1bec 1-348
+tools/validate_goal_acceptance.js
+  s_d867799404043c::t_87da690d5e819d 1-518
+tools/validate_product_iteration_workflow.js
+  s_d867799404043c::t_58848a5d9639e2 1-257
+tools/validate_schedule_paths.js
+  s_d867799404043c::t_741ebd70ca749c 1-147
+tools/validate_workspace_boundaries.js
+  s_d867799404043c::t_74e265047cc64b 1-191
+tools/write_delivery_env_template.js
+  s_d867799404043c::t_94f931d6291861 1-280
+tools/write_remote_acceptance_evidence.js
+  s_d867799404043c::t_cb566f4f2e5f4f 1-108
+tools/write_remote_coach_evidence.js
+  s_d867799404043c::t_b0add88872cbb1 1-338
+tools/write_remote_invitation_account_evidence.js
+  s_d867799404043c::t_35c4a69d4f57cc 1-527
+tools/write_remote_invitation_evidence.js
+  s_d867799404043c::t_976cecc0470031 1-346
+tools/write_remote_login_switch_evidence.js
+  s_d867799404043c::t_53a282489d8552 1-373
+tools/write_server_sync_evidence.js
+  s_d867799404043c::t_96c470b6c464e8 1-293
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "6076f382c4b2251308ce335d00bf73983e5b4b61",
+  "prompts": {},
+  "sessions": {
+    "s_d867799404043c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3560-c35c-76d1-8393-ed9ba5903e6d",
+        "model": "gpt-5.5"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
