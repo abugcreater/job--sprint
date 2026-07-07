@@ -1,0 +1,555 @@
+{
+  "version": "interview-kb-local-redacted-v1",
+  "updatedAt": "2026-07-03T12:09:43.663Z",
+  "scope": "本地使用的脱敏面试知识库；不上传公司原始材料，不包含密钥、客户数据或内部接口原文。",
+  "categories": [
+    "个人背景",
+    "同程旅行经历抽象总结",
+    "高级 Java 后端能力",
+    "订单/交易/支付/搜索/供应商运营相关经验",
+    "稳定性治理经验",
+    "复杂业务链路经验",
+    "供小慧 Agent",
+    "RAG",
+    "JVM 排查经验",
+    "Spring / MySQL / Redis / MQ 经验",
+    "AI 工程化项目",
+    "Tool / Skill / Function Calling",
+    "API 服务化",
+    "鉴权",
+    "观测",
+    "异步任务",
+    "项目证据表",
+    "简历 bullet"
+  ],
+  "entries": [
+    {
+      "id": "kb-profile-001",
+      "category": "个人背景",
+      "title": "高级 Java 后端主身份",
+      "sourceType": "resume",
+      "sourceRefs": [
+        {
+          "label": "杭州主投简历",
+          "path": "/path/to/resume-materials/主投简历/候选人-杭州主投版简历-高级Java后端-项目指标增强版.md",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "9 年 Java 后端经验，主线是复杂业务链路、高并发 I/O、缓存/MQ、异步执行和稳定性治理。AI 只是应用工程化增强方向。",
+      "interviewQuestion": "请做一个 60 秒自我介绍。",
+      "answer60s": "我有 9 年 Java 后端经验，主线是复杂业务链路、高并发 I/O、缓存/MQ、异步执行和线上稳定性治理。近阶段聚焦搜索交易链路治理和两个边界清晰的 0 到 1 服务交付。现在求职主身份仍是高级 Java 后端，AI/RAG/Agent 作为企业应用工程化增强，不包装成算法岗。",
+      "answer3min": "可以按早期政务/物联网/教育业务系统、中期云课堂微服务和近期搜索交易链路三段讲。重点落到复杂链路、外部依赖、缓存、MQ、异步、Trace、指标和线上排查，而不是泛泛说会很多技术。",
+      "javaMapping": "复杂业务后端、搜索/交易链路、稳定性治理",
+      "projectEvidence": "简历材料、面试话术包、项目证据表",
+      "risk": "把 AI 放在开场会削弱 Java 主线。",
+      "doNotSay": [
+        "我是 AI Agent 专家",
+        "我训练过大模型"
+      ],
+      "safeWording": [
+        "AI 是长期增强方向，短期主身份是高级 Java 后端"
+      ]
+    },
+    {
+      "id": "kb-company-summary-001",
+      "category": "同程旅行经历抽象总结",
+      "title": "同程旅行搜索交易链路抽象讲法",
+      "sourceType": "derived",
+      "sourceRefs": [
+        {
+          "label": "搜索接口数据流脱敏材料",
+          "path": "/path/to/company-evidence/search_interface_data_flow.md",
+          "safeToShow": false
+        },
+        {
+          "label": "searchblackhole 技术指标脱敏锚点",
+          "path": "/path/to/company-evidence/搜索指标/searchblackhole技术指标.md",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "可公开讲成：围绕国际机票搜索、报价、缓存、异步消费和链路稳定性做后端治理，重点是复杂业务链路、外部依赖、缓存/MQ、指标和排查。",
+      "interviewQuestion": "你在同程最能体现高级 Java 后端能力的项目是什么？",
+      "answer60s": "我会选搜索/报价链路相关治理来讲，因为它覆盖入口参数、下游供应商或服务依赖、缓存、MQ 异步、Redis 查询、指标监控和故障排查。我的表达重点不是公司内部系统名，而是复杂链路里如何保证可观测、可降级和可复盘。",
+      "answer3min": "按搜索入口、业务编排、缓存构建、消息消费、异常兜底、指标监控和复盘治理展开。能讲清自己负责的边界、参与协作的部分、以及不能公开的内部细节。",
+      "javaMapping": "复杂搜索链路、MQ/Redis、稳定性治理、故障排查",
+      "projectEvidence": "只保留脱敏材料路径锚点，不公开内部接口、客户数据或监控截图。",
+      "risk": "把团队整体能力写成个人独立完成。",
+      "doNotSay": [
+        "内部接口名",
+        "客户数据",
+        "线上完整指标截图"
+      ],
+      "safeWording": [
+        "围绕搜索交易链路参与治理并负责边界清晰模块"
+      ]
+    },
+    {
+      "id": "kb-java-map-001",
+      "category": "高级 Java 后端能力",
+      "title": "高级 Java 后端能力地图",
+      "sourceType": "derived",
+      "sourceRefs": [
+        {
+          "label": "高级 Java 深挖题库",
+          "path": "/path/to/resume-materials/面试训练/候选人-高级Java深挖题库与备选面试准备清单.md",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "高级 Java 后端不只是 CRUD，要能讲复杂业务建模、并发异步、事务一致性、缓存/MQ、JVM 排查、稳定性和工程治理。",
+      "interviewQuestion": "你和普通 Java CRUD 开发最大的区别是什么？",
+      "answer60s": "普通 CRUD 更偏接口和表操作，我的优势在复杂链路：能把业务状态、异步消息、缓存一致性、外部依赖、监控指标和故障排查放在一起设计。遇到问题不是只看代码，而是从入口、链路、数据、消息、缓存、JVM 和下游依赖建立证据链。",
+      "answer3min": "用一个搜索/缓存/MQ 类项目讲职责边界，再补 JVM、Spring 事务、Redis、MQ 和可观测的具体追问准备。",
+      "javaMapping": "复杂业务后端、架构治理、线上稳定性",
+      "projectEvidence": "简历项目、题库、同程脱敏材料、AI 工程化项目证据表。",
+      "risk": "只说技术栈不说复杂度。",
+      "doNotSay": [
+        "我什么都懂",
+        "我是全链路架构负责人"
+      ],
+      "safeWording": [
+        "我更适合复杂业务后端和稳定性治理方向"
+      ]
+    },
+    {
+      "id": "kb-order-search-001",
+      "category": "订单/交易/支付/搜索/供应商运营相关经验",
+      "title": "搜索/交易/供应商运营的统一讲法",
+      "sourceType": "derived",
+      "sourceRefs": [
+        {
+          "label": "AI 工程化项目 README",
+          "path": "/path/to/sample-ai-project/README.md",
+          "safeToShow": true
+        }
+      ],
+      "publicSummary": "把搜索交易链路经验和供应商运营 AI 项目统一成：复杂规则、外部依赖、状态、证据、审计和稳定性。",
+      "interviewQuestion": "为什么供应商运营 AI 项目和交易/搜索后端有关？",
+      "answer60s": "它们的共同点不是模型，而是复杂规则和链路治理。搜索/交易链路要处理参数、规则、外部依赖、缓存和异常；供应商运营 AI 项目也要把知识、工具、权限、审计和失败兜底放进受控后端链路里。",
+      "answer3min": "用 Java 后端语言讲：Controller 接入、Auth 鉴权、Service 编排、Tool Client 调用、任务状态、MQ 异步、DB 审计、Metrics 观测和降级。",
+      "javaMapping": "交易链路设计、供应商规则、外部依赖治理",
+      "projectEvidence": "AI 项目本地代码 + 同程脱敏项目经验。",
+      "risk": "把 AI 项目讲得脱离岗位主线。",
+      "doNotSay": [
+        "这是算法平台"
+      ],
+      "safeWording": [
+        "这是复杂业务后端能力的 AI 应用增强案例"
+      ]
+    },
+    {
+      "id": "kb-stability-001",
+      "category": "稳定性治理经验",
+      "title": "稳定性治理面试口径",
+      "sourceType": "derived",
+      "sourceRefs": [
+        {
+          "label": "稳定性治理 XMind",
+          "path": "/path/to/learning-materials/12_稳定性治理与可观测性压测.xmind",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "稳定性治理要按超时、重试、限流、熔断、降级、隔离、灰度、回滚、指标、告警和复盘来讲。",
+      "interviewQuestion": "线上接口 P99 突然升高，你怎么排？",
+      "answer60s": "先确认是单接口、单机房、单机器还是全局；再看请求量、错误率、P99、下游耗时、线程池、GC、数据库和缓存指标。定位后先做止血，比如限流、降级、扩容或切流，再补根因复盘和监控告警。",
+      "answer3min": "按发现、定位、止血、修复、复盘五步讲，并给出命令或指标：日志 traceId、APM、GC log、jcmd、慢 SQL、Redis latency、MQ lag。",
+      "javaMapping": "限流熔断、隔离、观测、故障演练",
+      "projectEvidence": "可映射搜索链路治理和 AI 服务化健康检查。",
+      "risk": "只讲理论组件，不讲排查顺序。",
+      "doNotSay": [
+        "我保证系统不出故障"
+      ],
+      "safeWording": [
+        "通过观测、降级和复盘降低故障影响"
+      ]
+    },
+    {
+      "id": "kb-project-searchblackhole-001",
+      "category": "复杂业务链路经验",
+      "title": "搜索黑洞缓存服务抽象讲法",
+      "sourceType": "derived",
+      "sourceRefs": [
+        {
+          "label": "简历风险点",
+          "path": "/path/to/resume-materials/面试训练/简历风险点与追问防线.md",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "可公开讲成：消费上游搜索结果消息，构建航线维度缓存，并对外提供查询接口。重点是 MQ 消费、解析、Key 设计、TTL、Redis 查询和未命中排查。",
+      "interviewQuestion": "缓存查不到时你怎么排查？",
+      "answer60s": "我会从写链路和读链路两边查。写链路先看 MQ 是否消费、消息解析是否成功、航线映射是否正确、Redis Key 和 TTL 是否写入；读链路再用同样入参复核 Key 构建、渠道配置、Redis 查询和兜底策略。最后结合日志、指标和 Trace 判断是没写入、Key 不一致、过期还是渠道配置问题。",
+      "answer3min": "先说明服务边界，再按 MQ -> 解析 -> 转换 -> Redis 写入 -> 查询接口 -> 响应语义展开。异常分支包括消息重复、乱序、解析失败、Redis 异常、TTL 过期、渠道兜底配置缺失。不能只说 Redis get/set，要说排查顺序和证据。",
+      "javaMapping": "MQ 消费、Redis 缓存、幂等、可观测、故障排查",
+      "projectEvidence": "本地只保留脱敏路径锚点，不公开内部源码。",
+      "risk": "把 Redis 覆盖写成完全幂等会被追问乱序覆盖。",
+      "doNotSay": [
+        "完整反爬体系",
+        "全链路架构由我设计"
+      ],
+      "safeWording": [
+        "我独立负责边界清晰的缓存服务，团队既有大链路我参与治理"
+      ]
+    },
+    {
+      "id": "kb-agent-001",
+      "category": "供小慧 Agent",
+      "title": "供小慧 Agent 当前实现与边界",
+      "sourceType": "project",
+      "sourceRefs": [
+        {
+          "label": "xiaohui_agent.py",
+          "path": "/path/to/sample-ai-project/src/replay/xiaohui_agent.py",
+          "safeToShow": true
+        }
+      ],
+      "publicSummary": "当前可讲成受控工具/知识库编排样例：根据输入选择服务分工具或知识库回答，输出有边界。它不是完整生产级自主 Agent。",
+      "interviewQuestion": "你这个 Agent 是不是只是 if/else？",
+      "answer60s": "当前实现我不会夸大，它更像一个最小 Agent 工程化样例：把业务意图、工具调用、知识库回答和输出边界收敛到后端服务里。价值不是算法，而是展示后端如何管理工具边界、权限、日志、失败兜底和生产化升级路径。",
+      "answer3min": "先承认当前是最小闭环，再讲生产化会升级为 Skill 配置、Tool Schema、参数校验、权限审计、异步执行、Trace、降级和 eval。这样回答能防止被认为在吹完整 Agent 平台。",
+      "javaMapping": "策略模式、工具执行器、参数校验、审计日志、异常兜底",
+      "projectEvidence": "src/replay/xiaohui_agent.py、data/knowledge/供应商规则.md、outputs/xiaohui_session.jsonl",
+      "risk": "过度包装为自主规划 Agent。",
+      "doNotSay": [
+        "生产级 Agent 平台",
+        "模型自主完成复杂规划"
+      ],
+      "safeWording": [
+        "最小 Agent 工程化样例，生产化可升级"
+      ]
+    },
+    {
+      "id": "kb-rag-001",
+      "category": "RAG",
+      "title": "RAG 防幻觉与 no-answer",
+      "sourceType": "project",
+      "sourceRefs": [
+        {
+          "label": "供应商规则知识库",
+          "path": "/path/to/sample-ai-project/data/knowledge/供应商规则.md",
+          "safeToShow": true
+        }
+      ],
+      "publicSummary": "RAG 是把回答绑定到检索证据，但不能完全消灭幻觉；需要 citation、权限过滤、no-answer 和评测。",
+      "interviewQuestion": "RAG 为什么不能完全消灭幻觉？",
+      "answer60s": "RAG 的价值是让模型回答前先拿到外部知识证据，并把答案和来源绑定起来，所以能降低凭空编造。但检索可能漏召回、召回内容可能过期或不相关，模型仍可能误用证据。因此生产系统要有 citation、score threshold、no-answer、权限过滤和评测。",
+      "answer3min": "可以从检索、重排、证据拼接、生成、引用、拒答和评测七步讲。当前项目是最小演示，生产化升级会补 embedding/vector store、hybrid search、rerank、ACL filter、eval 和审计。",
+      "javaMapping": "检索服务、ACL filter、ES/BM25/向量检索、结果可信度",
+      "projectEvidence": "data/knowledge/供应商规则.md 与供小慧 Agent 知识回答链路",
+      "risk": "把关键词检索说成完整向量 RAG。",
+      "doNotSay": [
+        "已上线大规模向量库",
+        "RAG 完全解决幻觉"
+      ],
+      "safeWording": [
+        "当前是最小检索增强样例，生产化可升级为混合检索和评测体系"
+      ]
+    },
+    {
+      "id": "kb-java-jvm-001",
+      "category": "JVM 排查经验",
+      "title": "G1/ZGC 与线上 P99 抖动排查",
+      "sourceType": "derived",
+      "sourceRefs": [
+        {
+          "label": "JVM XMind",
+          "path": "/path/to/learning-materials/03_JVM体系与线上排查.xmind",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "高级 Java 面试需要能从 GC 目标、实现机制、日志/JFR/jcmd 排查顺序讲 P99 抖动。",
+      "interviewQuestion": "G1 和 ZGC 区别？P99 抖动怎么排查？",
+      "answer60s": "G1 目标是可预测停顿，通过 Region、并发标记和混合回收控制停顿；ZGC 更强调低停顿，通过着色指针、读屏障和并发搬迁降低 STW。线上 P99 抖动我会先看时间段、接口和机器，再抓 GC log、JFR、jcmd、线程和内存，区分 GC、锁、线程池、慢下游还是数据库问题。",
+      "answer3min": "按现象定位、指标关联、JVM 证据、线程证据、外部依赖证据、复盘治理展开。不要只背收集器名词。",
+      "javaMapping": "JVM、GC、JFR、jcmd、线上稳定性",
+      "projectEvidence": "可结合搜索链路慢 I/O 和 JVM/APM 指标排查口径，但不公开内部监控截图。",
+      "risk": "只讲 GC 名词不讲排查命令。",
+      "doNotSay": [
+        "我完整负责 JVM 平台治理"
+      ],
+      "safeWording": [
+        "参与线上问题排查，能按证据链定位 JVM/线程/外部依赖问题"
+      ]
+    },
+    {
+      "id": "kb-java-mq-001",
+      "category": "Spring / MySQL / Redis / MQ 经验",
+      "title": "MQ 不丢不重与幂等消费",
+      "sourceType": "derived",
+      "sourceRefs": [
+        {
+          "label": "MQ XMind",
+          "path": "/path/to/learning-materials/18_MQ三件套原理对比.xmind",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "可靠消息要分生产、Broker、消费、重试、DLQ、幂等和观测，不承诺绝对不重。",
+      "interviewQuestion": "如何保证 MQ 消息不丢不重？",
+      "answer60s": "工程上通常不能承诺绝对不重，所以核心是至少一次投递 + 消费幂等。生产端要确认发送结果，Broker 要持久化，消费端要手动 ACK、失败重试和 DLQ。业务侧用唯一键、版本号、状态机或幂等表防重复影响，最后用消费延迟、失败率和积压指标监控。",
+      "answer3min": "结合缓存构建类场景讲：消息解析、业务 key、版本号防乱序、分布式锁或 CAS 防并发写、重试和死信处理、指标告警。",
+      "javaMapping": "RabbitMQ/RocketMQ/Kafka、ACK、重试、DLQ、幂等",
+      "projectEvidence": "可映射 searchblackhole/searchpackage 的 MQ 消费和缓存构建口径。",
+      "risk": "说 exactly-once 而无法解释业务幂等。",
+      "doNotSay": [
+        "MQ 天然不重复",
+        "只靠 Redis 覆盖就是完整幂等"
+      ],
+      "safeWording": [
+        "至少一次 + 业务幂等 + 监控补偿"
+      ]
+    },
+    {
+      "id": "kb-spring-db-cache-001",
+      "category": "Spring / MySQL / Redis / MQ 经验",
+      "title": "Spring 事务、MySQL、Redis 高频追问",
+      "sourceType": "derived",
+      "sourceRefs": [
+        {
+          "label": "SpringBoot 工程入口 XMind",
+          "path": "/path/to/learning-materials/04_SpringBoot工程入口与运行链路.xmind",
+          "safeToShow": false
+        },
+        {
+          "label": "MySQL XMind",
+          "path": "/path/to/learning-materials/05_MySQL索引事务与高可用.xmind",
+          "safeToShow": false
+        },
+        {
+          "label": "Redis XMind",
+          "path": "/path/to/learning-materials/06_Redis缓存与分布式锁治理.xmind",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "必须能讲事务传播、自调用失效、MVCC、索引、锁、缓存一致性、热点 key、分布式锁。",
+      "interviewQuestion": "Spring 事务为什么会失效？缓存和数据库怎么保证一致？",
+      "answer60s": "事务失效常见原因是自调用绕过代理、方法非 public、异常被吞、传播行为选错、异步线程脱离事务上下文。缓存一致性通常不追求强一致，而是更新 DB 后删除缓存，配合重试、延迟双删或消息补偿，并通过 TTL 和监控兜底。",
+      "answer3min": "补充 REQUIRED/REQUIRES_NEW/NESTED 的边界、连接池风险、MVCC 快照读/当前读、Redis 分布式锁过期和续期风险。",
+      "javaMapping": "Spring AOP、事务传播、MySQL MVCC、Redis 缓存治理",
+      "projectEvidence": "可绑定搜索缓存服务、AI 服务化鉴权和任务状态。",
+      "risk": "只背传播级别，不会讲失效场景。",
+      "doNotSay": [
+        "Redis 锁绝对可靠"
+      ],
+      "safeWording": [
+        "通过事务边界、幂等和补偿降低不一致影响"
+      ]
+    },
+    {
+      "id": "kb-ai-project-001",
+      "category": "AI 工程化项目",
+      "title": "AI 工程化项目总口径",
+      "sourceType": "project",
+      "sourceRefs": [
+        {
+          "label": "api.py",
+          "path": "/path/to/sample-ai-project/src/replay/api.py",
+          "safeToShow": true
+        },
+        {
+          "label": "准生产路线图",
+          "path": "/path/to/sample-ai-project/docs/quasi-production-roadmap.md",
+          "safeToShow": true
+        }
+      ],
+      "publicSummary": "项目定位是准生产演示级 AI 应用后端骨架，重点是服务化、鉴权、观测、RAG/Agent 边界和生产化升级设计。",
+      "interviewQuestion": "这个项目工程难点在哪里？",
+      "answer60s": "难点不是调模型 API，而是把不确定的模型能力放进可验证的后端链路里：入口鉴权、参数校验、工具权限、知识证据、会话记录、metrics、失败兜底和测试。当前我会明确说是准生产演示级，生产化还要补 DB、MQ、权限隔离、审计和评测。",
+      "answer3min": "按 API 服务化、供小慧 Agent、RAG、往返解析、Observability、Docker/CI、生产化差距展开。",
+      "javaMapping": "Spring Boot 服务化、外部依赖治理、可观测、异步任务",
+      "projectEvidence": "src/replay/api.py、auth.py、observability.py、xiaohui_agent.py、roundtrip_langchain.py。",
+      "risk": "把 demo 说成生产平台。",
+      "doNotSay": [
+        "完整生产级 SaaS",
+        "大规模 AI 平台"
+      ],
+      "safeWording": [
+        "准生产演示级服务骨架，具备生产化升级方案"
+      ]
+    },
+    {
+      "id": "kb-tool-skill-001",
+      "category": "Tool / Skill / Function Calling",
+      "title": "Tool、Skill、Function Calling、Agent 区分",
+      "sourceType": "project",
+      "sourceRefs": [
+        {
+          "label": "AI Agent 工程化 XMind",
+          "path": "/path/to/learning-materials/13_AIAgent工程化后端设计.xmind",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "Tool 是可执行能力，Function Calling 是模型选函数和填参数的协议，Skill 是意图/工具/边界配置，Agent 是受控编排。",
+      "interviewQuestion": "Function Calling 等于 Agent 吗？",
+      "answer60s": "不等于。Function Calling 更像模型和函数之间的调用协议；Tool 是真正执行的后端能力；Skill 是把意图、槽位、允许工具和边界配置起来；Agent 才是围绕目标做上下文、检索、工具调用、结果校验和会话记录的编排。",
+      "answer3min": "再落到供小慧：当前是关键词路由 + Tool/知识库 + 输出边界，不是完整自主规划 Agent。",
+      "javaMapping": "策略模式、命令模式、参数校验、权限和审计",
+      "projectEvidence": "xiaohui_agent.py 的路由、工具、知识库和 session 记录。",
+      "risk": "概念混用会被追问击穿。",
+      "doNotSay": [
+        "有函数调用就是 Agent"
+      ],
+      "safeWording": [
+        "当前实现是受控 Agent 工程化最小闭环"
+      ]
+    },
+    {
+      "id": "kb-ai-service-001",
+      "category": "API 服务化",
+      "title": "AI 能力为什么要后端服务化",
+      "sourceType": "project",
+      "sourceRefs": [
+        {
+          "label": "api.py",
+          "path": "/path/to/sample-ai-project/src/replay/api.py",
+          "safeToShow": true
+        },
+        {
+          "label": "auth.py",
+          "path": "/path/to/sample-ai-project/src/replay/auth.py",
+          "safeToShow": true
+        }
+      ],
+      "publicSummary": "AI 能力不能直接暴露给前端，需要后端代理处理鉴权、参数校验、超时、日志、审计、成本和降级。",
+      "interviewQuestion": "为什么不直接让前端调大模型 API？",
+      "answer60s": "因为 token、权限、成本和业务边界都不能放在前端。后端服务化后，可以统一做 API Key/JWT、用户上下文、参数校验、超时重试、工具权限、日志审计、metrics 和降级兜底。这样 AI 只是后端链路里的一个外部能力，而不是裸露的第三方调用。",
+      "answer3min": "可以按入口、鉴权、业务编排、模型/工具调用、可观测、异常兜底、成本控制讲，并映射到 Spring Boot Controller、Service、Client、Filter、Actuator、Micrometer。",
+      "javaMapping": "Spring Boot 服务化、鉴权、观测、外部依赖治理",
+      "projectEvidence": "src/replay/api.py、auth.py、observability.py",
+      "risk": "只讲 prompt，不讲服务治理。",
+      "doNotSay": [
+        "前端直接接模型就行"
+      ],
+      "safeWording": [
+        "模型调用必须被后端工程能力包住"
+      ]
+    },
+    {
+      "id": "kb-auth-001",
+      "category": "鉴权",
+      "title": "AI 服务鉴权与权限边界",
+      "sourceType": "project",
+      "sourceRefs": [
+        {
+          "label": "auth.py",
+          "path": "/path/to/sample-ai-project/src/replay/auth.py",
+          "safeToShow": true
+        }
+      ],
+      "publicSummary": "AI 服务要把 API Key/JWT、用户上下文、工具权限、审计和成本控制放到后端。",
+      "interviewQuestion": "为什么 AI Tool 调用需要权限控制？",
+      "answer60s": "因为 Tool 往往连接真实业务数据或动作，不能让模型或前端随意调用。后端要校验用户身份、租户、角色、参数范围和工具白名单，同时记录审计日志，失败时降级而不是越权兜底。",
+      "answer3min": "映射到 Java：Filter/Spring Security 建立 UserContext，Service 层校验 tool 权限，MDC 写 traceId，审计表记录 toolName、参数摘要、结果状态。",
+      "javaMapping": "Spring Security、RBAC、审计日志、MDC",
+      "projectEvidence": "src/replay/auth.py 与 API 依赖注入。",
+      "risk": "把 API Key 放前端或日志。",
+      "doNotSay": [
+        "前端可直接带模型 token"
+      ],
+      "safeWording": [
+        "token 和工具权限必须在后端托管"
+      ]
+    },
+    {
+      "id": "kb-observability-001",
+      "category": "观测",
+      "title": "Logging / Metrics / Tracing",
+      "sourceType": "project",
+      "sourceRefs": [
+        {
+          "label": "observability.py",
+          "path": "/path/to/sample-ai-project/src/replay/observability.py",
+          "safeToShow": true
+        }
+      ],
+      "publicSummary": "AI 后端要观测请求、模型调用、工具失败率、检索命中、延迟、错误率和成本。",
+      "interviewQuestion": "AI 服务上线后你会监控哪些指标？",
+      "answer60s": "基础指标是 QPS、延迟、错误率、超时率；AI 特有指标包括模型调用耗时、token 成本、Tool 失败率、RAG 命中率、no-answer 比例、评分失败率。日志要带 requestId/sessionId，方便串起入口、检索、工具和回答。",
+      "answer3min": "Java 映射到 Actuator、Micrometer、Prometheus、Grafana、OpenTelemetry 和结构化日志。",
+      "javaMapping": "Micrometer、Actuator、OpenTelemetry、结构化日志",
+      "projectEvidence": "src/replay/observability.py、/api/health、/metrics 设计。",
+      "risk": "只说打印日志。",
+      "doNotSay": [
+        "有日志就可观测"
+      ],
+      "safeWording": [
+        "用指标、日志和 trace 三件套定位问题"
+      ]
+    },
+    {
+      "id": "kb-async-001",
+      "category": "异步任务",
+      "title": "AI 长任务异步化与 MQ 设计",
+      "sourceType": "derived",
+      "sourceRefs": [
+        {
+          "label": "异步任务 XMind",
+          "path": "/path/to/learning-materials/11_异步任务与外部依赖治理.xmind",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "长文档解析、批量问答和外部 Tool 调用适合异步任务：任务表 + MQ + worker + 状态查询 + 幂等补偿。",
+      "interviewQuestion": "如果往返政策解析耗时很长，你怎么改造成生产服务？",
+      "answer60s": "我会把同步接口改成提交任务：POST 返回 taskId，任务表记录状态，MQ 派发 worker 执行，结果落库，前端轮询或回调查询。失败按错误类型重试，超过阈值进入 DLQ 或人工处理，消费端用 taskId/业务 key 做幂等。",
+      "answer3min": "补充状态机：PENDING/RUNNING/SUCCEEDED/FAILED/RETRYING/CANCELED；监控 queue lag、失败率、平均耗时、超时数。",
+      "javaMapping": "MQ、任务表、状态机、幂等、补偿、DLQ",
+      "projectEvidence": "roundtrip_langchain.py 当前是同步 workflow，生产化可升级。",
+      "risk": "把同步 demo 当成生产长任务。",
+      "doNotSay": [
+        "当前已经有完整 MQ worker"
+      ],
+      "safeWording": [
+        "当前是同步演示，生产化方案是任务化和 MQ 化"
+      ]
+    },
+    {
+      "id": "kb-evidence-001",
+      "category": "项目证据表",
+      "title": "项目证据表怎么组织",
+      "sourceType": "process",
+      "sourceRefs": [
+        {
+          "label": "学习与面试作战手册",
+          "path": "/path/to/sample-ai-project/学习与面试作战手册.md",
+          "safeToShow": true
+        }
+      ],
+      "publicSummary": "每条简历亮点必须绑定文件、命令、输出、边界和面试回答，不能只有一句包装。",
+      "interviewQuestion": "你简历这条 AI 工程化亮点有什么证据？",
+      "answer60s": "我会拿证据表回答：对应文件是 api.py/auth.py/observability.py/xiaohui_agent.py；能跑的命令是 pytest、uvicorn 和供小慧 CLI；输出证据是 session jsonl 和 run summary；边界是当前未接生产 DB/MQ 和完整向量检索。",
+      "answer3min": "按证据类型逐项展开，并说明哪些是已实现、哪些是生产化升级设想。",
+      "javaMapping": "证据驱动简历、边界管理、面试防追问",
+      "projectEvidence": "data/schedule.json artifacts、data/interview_kb.json。",
+      "risk": "没有证据的亮点会被认为包装过度。",
+      "doNotSay": [
+        "因为我看过代码所以就是我做过生产"
+      ],
+      "safeWording": [
+        "我用本地项目证明工程理解，用真实 Java 项目证明生产经验"
+      ]
+    },
+    {
+      "id": "kb-resume-bullet-001",
+      "category": "简历 bullet",
+      "title": "AI 增强项目简历 bullet",
+      "sourceType": "resume",
+      "sourceRefs": [
+        {
+          "label": "AI 应用工程化增强版简历",
+          "path": "/path/to/resume-materials/长期AI增强/候选人-AI应用工程化增强版简历.md",
+          "safeToShow": false
+        }
+      ],
+      "publicSummary": "AI bullet 要克制：强调服务化、鉴权、观测、RAG/Agent 工程边界和 Java 生产化设计。",
+      "interviewQuestion": "这条简历 bullet 怎么写才不夸大？",
+      "answer60s": "可以写：搭建准生产演示级 AI 应用后端骨架，完成 API 服务化、API Key 鉴权、请求日志/metrics、RAG/Agent 最小闭环和往返政策解析 workflow，并沉淀 Java 后端生产化升级方案。不要写训练模型、生产级平台或大规模向量集群。",
+      "answer3min": "分普通 Java 版和 AI 增强版：普通 Java 版只把 AI 项目放补充；AI 增强版用于 JD 明确需要企业知识库/RAG/Agent 工程化的岗位。",
+      "javaMapping": "简历定位、JD 匹配、边界表达",
+      "projectEvidence": "简历文件、项目代码、测试和部署文档。",
+      "risk": "AI 项目放太重影响高级 Java 主线。",
+      "doNotSay": [
+        "AI Agent 平台负责人"
+      ],
+      "safeWording": [
+        "高级 Java 后端 + AI 应用工程化增强"
+      ]
+    }
+  ]
+}

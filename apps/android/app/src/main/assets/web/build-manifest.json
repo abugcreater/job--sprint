@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "generatedBy": "tools/build_public_safe_bundle.js",
+  "sourceHashes": {
+    "assets/auth.js": "79de865a5122211aa951b79efa22fb478a1020653ef24cd19bc41de040ffe352",
+    "assets/embedded-data.js": "e07308798d8b515cd279bcd72591d722263534575e55fa2f7a42e54be8f19617",
+    "assets/icon.svg": "5a55c4892f25c6d375d0b05a212dd41dd22c977895ae233b312946cd578ab457",
+    "assets/manifest.webmanifest": "59cfc76c9833822a273a771d89fa1b49c8a84e4cf739db5fa9824d2b0057145f",
+    "assets/schedule.css": "3ad82564108b578919a751e9f36326f81fbf3eabb1a7492a09d4bf45aff03414",
+    "assets/schedule.js": "7b7a8a419d708d21c4dbd25e230ba3a8172a11e867896dac2d77980969625ea3",
+    "data/interview_context.json": "3b37694f640b64ec5e88f94dd11c95cb9de691dd27e0fc60360954d2a4692817",
+    "data/interview_kb.json": "eac067e535d099eaac9e8db3ede68ca2b28c354b008ed9c8af9d4716b8ae0335",
+    "data/schedule.json": "60e5c8302f2f438ea95469054a54c3732160be0ae47c9bdd2a548ed8582d3ef2",
+    "login.html": "b347ac8dd3e36958b744fd66e1fe1915678d47a3ed7c71b15eff871e5d084eeb",
+    "schedule.html": "3b6f439eb386a570f0c43c1f5ad01d83d8c070be84dc0b2bf6a448c607c41a3f",
+    "sw.js": "0d28b9bbe3f25354a43acc8768ab7f92de2f87f94c109ee2cf4d59fe6409fa7c",
+    "tools/build_public_safe_bundle.js": "a9581142fec0d9ce5497f4099daf49ea85406dde1fcadddd3a7bb1e8f8498c90"
+  }
+}

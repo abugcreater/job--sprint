@@ -1,0 +1,70 @@
+# Environment and local secrets
+.env
+.env.*
+!.env.example
+config.local.*
+secrets.*
+credentials.*
+service-account.json
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.crt
+*.csr
+
+# Dependencies and package manager caches
+node_modules/
+apps/react-web/node_modules/
+.npm/
+.pnpm-store/
+.yarn/
+
+# Build outputs and generated bundles
+dist/
+build/
+coverage/
+apps/react-web/dist/
+apps/android/.gradle/
+apps/android/build/
+apps/android/app/build/
+apps/android/.signing/
+apps/rust-api/target/
+
+# Runtime data, local databases, uploads, and evidence
+server/data/
+apps/server/data/
+apps/rust-api/data/
+data/local/
+data/private/
+runtime-data/
+uploads/
+tmp/
+temp/
+docs/evidence/
+*.sqlite
+*.sqlite3
+*.db
+*.db-shm
+*.db-wal
+
+# Logs, reports, and OS/editor noise
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Local Android configuration
+android/local.properties
+android/.gradle/
+android/build/
+android/app/build/
+apps/android/local.properties

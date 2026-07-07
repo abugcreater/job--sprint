@@ -1,0 +1,190 @@
+{
+  "version": "interview-questions-compact-v1",
+  "sourceVersion": "candidate-interview-context-v1",
+  "sourceUpdatedAt": "2026-06-30",
+  "privacy": "Only questionBank and safe rubric dimensions are bundled for the React app. Local paths, profile refs and JD source paths are excluded.",
+  "questionBank": [
+    {
+      "id": "llm-basic-001",
+      "mode": "llm-basics",
+      "source": "LLM 初学",
+      "question": "你现在用自己的话说一下：LLM、RAG、Agent 分别是什么？不要背定义，先讲业务系统里它们各自解决什么问题。",
+      "hint": "先说模型回答、检索证据、工具编排三件事，再承认当前还在学习。",
+      "expectedKeywords": [
+        "模型回答",
+        "检索",
+        "证据",
+        "工具",
+        "编排",
+        "边界"
+      ]
+    },
+    {
+      "id": "llm-basic-002",
+      "mode": "llm-basics",
+      "source": "RAG 入门",
+      "question": "RAG 为什么能减少幻觉，但不能保证完全不幻觉？如果检索不到证据，系统应该怎么答？",
+      "hint": "必须说到 citation、no-answer、权限过滤和评测。",
+      "expectedKeywords": [
+        "citation",
+        "证据",
+        "no-answer",
+        "权限",
+        "评测",
+        "拒答"
+      ]
+    },
+    {
+      "id": "llm-basic-003",
+      "mode": "llm-basics",
+      "source": "Agent 入门",
+      "question": "Tool、Skill、Function Calling、Agent 怎么区分？你这个项目目前做到哪一层？",
+      "hint": "先讲当前实现，再讲生产化升级，不要夸成完整 Agent 平台。",
+      "expectedKeywords": [
+        "Tool",
+        "Skill",
+        "Function Calling",
+        "Agent",
+        "当前实现",
+        "生产化"
+      ]
+    },
+    {
+      "id": "resume-java-001",
+      "mode": "resume-java",
+      "source": "searchblackhole",
+      "question": "你独立负责 searchblackhole，缓存查不到时你怎么排查？从 MQ 到 Redis 到查询接口按顺序讲。",
+      "hint": "按 MQ 消费、消息解析、航线映射、Key、Redis、TTL、渠道兜底讲。",
+      "expectedKeywords": [
+        "MQ",
+        "消息解析",
+        "Key",
+        "Redis",
+        "TTL",
+        "渠道",
+        "兜底"
+      ]
+    },
+    {
+      "id": "resume-java-002",
+      "mode": "resume-java",
+      "source": "searchpackage",
+      "question": "searchpackage 的政策缓存为什么要版本号、分布式锁和双重检查？分别解决什么问题？",
+      "hint": "必须说乱序、重复消费、并发写入、索引一致性。",
+      "expectedKeywords": [
+        "版本号",
+        "乱序",
+        "分布式锁",
+        "双重检查",
+        "重复消费",
+        "一致性"
+      ]
+    },
+    {
+      "id": "resume-java-003",
+      "mode": "resume-java",
+      "source": "SearchFrontAPI",
+      "question": "你参与 JDK 21 异步改造，虚拟线程、平台线程池、串行兜底三种模式为什么要同时保留？",
+      "hint": "强调灰度、风险控制、慢 I/O、限流背压、Trace 传播。",
+      "expectedKeywords": [
+        "虚拟线程",
+        "平台线程",
+        "串行",
+        "灰度",
+        "Semaphore",
+        "CallerRuns",
+        "Trace"
+      ]
+    },
+    {
+      "id": "jd-match-001",
+      "mode": "jd-match",
+      "source": "高级 Java JD",
+      "question": "如果 JD 写了高并发、稳定性、MQ、Redis、交易链路，你会用简历里哪两个项目去匹配？为什么？",
+      "hint": "首选 searchblackhole/searchpackage，再补 SearchFrontAPI/SearchCore 参与治理。",
+      "expectedKeywords": [
+        "searchblackhole",
+        "searchpackage",
+        "MQ",
+        "Redis",
+        "稳定性",
+        "复杂链路"
+      ]
+    },
+    {
+      "id": "jd-match-002",
+      "mode": "jd-match",
+      "source": "Java + AI 应用工程化 JD",
+      "question": "如果岗位写 Java 后端 + RAG/Agent 应用工程化，你怎么介绍 AI 项目，才不会被认为是裸转 AI？",
+      "hint": "主身份先放 Java，AI 项目只说服务化、鉴权、观测、工具边界和生产升级。",
+      "expectedKeywords": [
+        "Java 主线",
+        "AI 增强",
+        "服务化",
+        "鉴权",
+        "观测",
+        "边界",
+        "不训练模型"
+      ]
+    },
+    {
+      "id": "java-core-001",
+      "mode": "java-core",
+      "source": "JVM 高频",
+      "question": "G1 和 ZGC 的核心区别是什么？如果线上出现 P99 抖动，你会怎么用 JFR、jcmd、GC log 排查？",
+      "hint": "先讲目标和实现差异，再讲排查顺序，不要只背名词。",
+      "expectedKeywords": [
+        "G1",
+        "ZGC",
+        "停顿",
+        "JFR",
+        "jcmd",
+        "GC log",
+        "P99"
+      ]
+    },
+    {
+      "id": "java-core-002",
+      "mode": "java-core",
+      "source": "Spring 事务",
+      "question": "Spring 事务传播级别里 REQUIRED、REQUIRES_NEW、NESTED 的差异是什么？自调用为什么会失效？",
+      "hint": "必须讲代理、连接、回滚边界和连接池风险。",
+      "expectedKeywords": [
+        "REQUIRED",
+        "REQUIRES_NEW",
+        "NESTED",
+        "代理",
+        "自调用",
+        "回滚",
+        "连接池"
+      ]
+    },
+    {
+      "id": "java-core-003",
+      "mode": "java-core",
+      "source": "MQ 高频",
+      "question": "RabbitMQ、RocketMQ、Kafka 在可靠消息、顺序、事务、吞吐和消费模型上怎么取舍？结合你的项目怎么讲？",
+      "hint": "不要泛泛比较，要落到 searchblackhole 的 MQ 消费和幂等缓存构建。",
+      "expectedKeywords": [
+        "RabbitMQ",
+        "RocketMQ",
+        "Kafka",
+        "ACK",
+        "重试",
+        "DLQ",
+        "幂等",
+        "顺序"
+      ]
+    }
+  ],
+  "scoringRubric": {
+    "dimensions": [
+      "是否先守住 Java 后端主身份",
+      "是否讲清真实项目边界",
+      "是否有具体文件/链路/指标/排查顺序",
+      "是否覆盖异常分支和生产化风险",
+      "是否避免夸大 AI 能力"
+    ],
+    "scale": "0-100"
+  }
+}

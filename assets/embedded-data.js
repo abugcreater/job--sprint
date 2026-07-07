@@ -1,0 +1,1 @@
+window.__JOB_SPRINT_EMBEDDED_DATA__ = window.__JOB_SPRINT_EMBEDDED_DATA__ || {};

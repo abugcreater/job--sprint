@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">求职冲刺工作台</string>
+    <string name="remote_schedule_url">https://job-sprint.example.com/job-sprint/react/index.html#/today</string>
+</resources>

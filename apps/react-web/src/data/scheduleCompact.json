@@ -1,0 +1,2984 @@
+{
+  "timezone": "Asia/Singapore",
+  "startDate": "2026-07-01",
+  "endDate": "2026-07-14",
+  "version": "optimized-fulltime-with-path-audit-v1+react-compact",
+  "totalDays": 14,
+  "days": [
+    {
+      "date": "2026-07-01",
+      "weekday": "周三",
+      "dayIndex": 1,
+      "theme": "真实项目技术栈、SOF/Dubbo 搜索链路与学习优先级",
+      "goal": "先按最新知识图谱确认主线：真实 Java 项目和搜索链路优先，AI/RAG 作为后续增强",
+      "risk": "一开始就讲 LLM/Agent 会被追问击穿，必须先把自己的 Java 项目链路讲稳",
+      "javaFocus": "SOF/Dubbo、Spring MVC、网关入口、搜索链路边界",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "你真实项目的主链路是什么？",
+        "为什么第一阶段不先讲 AI Agent？",
+        "你是不是要裸转 AI？"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-01-0930-project",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "project",
+          "title": "真实项目知识图谱总览",
+          "description": "先读优先级导航和 SOF/Dubbo 项目技术栈，确认两周学习顺序和真实项目边界。",
+          "deliverables": [
+            "写出 P0/P1/P2 学习顺序",
+            "列出 searchfrontapi/visearch/SOF/Dubbo 边界",
+            "标记 5 个不确定点"
+          ],
+          "interviewQuestions": [
+            "你真实项目的主链路是什么？",
+            "为什么第一阶段不先讲 AI Agent？"
+          ],
+          "javaMapping": "真实项目优先、SOF/Dubbo、搜索链路边界",
+          "acceptance": "能说清先学真实项目，再用 AI 项目增强，而不是裸转 AI",
+          "risk": "把 AI 学习排到第一天会导致主线失焦",
+          "sourceFiles": [
+            {
+              "label": "面试学习优先级导航"
+            },
+            {
+              "label": "SOF/Dubbo 项目学习面试文档"
+            },
+            {
+              "label": "SOF/Dubbo 补充报告"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-01-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "低压口述：主线定位",
+          "description": "用 60 秒说清主身份是高级 Java 后端，核心证据来自真实搜索链路，AI 只是增强。",
+          "deliverables": [
+            "60 秒主线定位文字稿"
+          ],
+          "interviewQuestions": [
+            "你是不是要裸转 AI？",
+            "你最强的 Java 项目证据是什么？"
+          ],
+          "javaMapping": "Java 主线 + AI 工程化增强",
+          "acceptance": "不说训练模型，不把 demo 说成生产平台",
+          "risk": "主线定位含糊会影响简历投递",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            },
+            {
+              "label": "面试学习优先级导航"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-01-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "搜索服务入口与 SOF/Dubbo 映射",
+          "description": "把真实项目链路拆成入口、网关、业务编排、Dubbo/DSF 调用、下游依赖和返回。",
+          "deliverables": [
+            "HTTP/SOF Gateway -> Controller -> Pipeline/Pipe -> DSF/Dubbo -> Response 链路图"
+          ],
+          "interviewQuestions": [
+            "SOF/Dubbo 在你项目里解决什么问题？",
+            "Spring MVC 和 SOF 网关边界怎么讲？"
+          ],
+          "javaMapping": "Spring MVC、SOF Gateway、Dubbo/DSF、Pipeline/Pipe",
+          "acceptance": "能把真实项目入口链路用 Java 后端语言讲清",
+          "risk": "只讲框架名不讲链路会显得空泛",
+          "sourceFiles": [
+            {
+              "label": "SOF/Dubbo 项目学习面试文档"
+            },
+            {
+              "label": "SOF/Dubbo 补充报告"
+            },
+            {
+              "label": "搜索接口数据流脱敏材料"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-01-1600-java",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "java",
+          "title": "搜索链路证据与边界",
+          "description": "整理可公开讲的搜索链路证据，区分个人负责、团队协作和不能公开的内部细节。",
+          "deliverables": [
+            "搜索链路证据表 v0",
+            "不能夸大的边界清单"
+          ],
+          "interviewQuestions": [
+            "哪些是你独立负责？",
+            "哪些只能脱敏抽象讲？"
+          ],
+          "javaMapping": "复杂业务链路、缓存/MQ、稳定性治理、边界表达",
+          "acceptance": "每个亮点都有路径或脱敏证据锚点",
+          "risk": "把团队整体成果写成个人独立完成",
+          "sourceFiles": [
+            {
+              "label": "搜索接口数据流脱敏材料"
+            },
+            {
+              "label": "searchblackhole 技术指标脱敏锚点"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-01-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "低压问答：真实项目 3 问",
+          "description": "第一天只练真实项目低压问答，不进入 LLM/Agent 高压追问。",
+          "deliverables": [
+            "真实项目 3 问回答 v0",
+            "追问卡点清单"
+          ],
+          "interviewQuestions": [
+            "项目入口链路怎么走？",
+            "缓存查不到怎么排查？",
+            "你如何证明稳定性治理能力？"
+          ],
+          "javaMapping": "搜索链路、Redis/MQ、排查证据",
+          "acceptance": "能回答 3 个问题且承认边界",
+          "risk": "一开始背 AI 概念会掩盖真实优势",
+          "sourceFiles": [
+            {
+              "label": "SOF/Dubbo 项目学习面试文档"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-01-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "项目证据表 v0",
+          "description": "建立证据维度：文件、链路、命令、指标、边界、面试话术。",
+          "deliverables": [
+            "真实项目证据表 v0"
+          ],
+          "interviewQuestions": [
+            "简历 bullet 背后有什么证据？"
+          ],
+          "javaMapping": "简历表达必须有代码/文档/脱敏材料证据",
+          "acceptance": "每条亮点至少绑定一个路径、材料或可复述链路",
+          "risk": "没有证据的亮点不能进简历",
+          "sourceFiles": [
+            {
+              "label": "SOF/Dubbo 项目学习面试文档"
+            },
+            {
+              "label": "搜索接口数据流脱敏材料"
+            },
+            {
+              "label": "searchblackhole 技术指标脱敏锚点"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-01-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "记录真实项目链路、路径问题、Java 映射和明日补救项。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "完成页面复盘 6 问",
+          "risk": "复盘只写感受不写产出",
+          "sourceFiles": [
+            {
+              "label": "面试学习优先级导航"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-02",
+      "weekday": "周四",
+      "dayIndex": 2,
+      "theme": "真实项目硬点：Spring/JVM/MQ/Redis 与搜索链路排查",
+      "goal": "把面试高频硬点落到真实项目，不只背八股",
+      "risk": "只背技术点不绑定真实链路，面试官会认为项目深度不足",
+      "javaFocus": "Spring 事务、JVM、MQ、Redis、缓存一致性与故障排查",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "Spring 事务传播级别有哪些？",
+        "为什么搜索链路不能用大事务包住所有调用？",
+        "@Transactional 为什么会失效？"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-02-0930-java",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "java",
+          "title": "Spring 事务与搜索链路边界",
+          "description": "复习事务传播、自调用失效、异常回滚，再映射到搜索链路中哪些场景不能滥用事务。",
+          "deliverables": [
+            "Spring 事务传播回答卡",
+            "真实链路中事务边界说明"
+          ],
+          "interviewQuestions": [
+            "Spring 事务传播级别有哪些？",
+            "为什么搜索链路不能用大事务包住所有调用？"
+          ],
+          "javaMapping": "Spring AOP、事务传播、外部依赖边界",
+          "acceptance": "能说 REQUIRED/REQUIRES_NEW/NESTED 和失效场景",
+          "risk": "只背传播级别不讲链路边界",
+          "sourceFiles": [
+            {
+              "label": "SpringBoot 工程入口 XMind"
+            },
+            {
+              "label": "SOF/Dubbo 项目学习面试文档"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-02-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "口述：事务失效",
+          "description": "用 60 秒讲事务失效和搜索链路里的事务边界。",
+          "deliverables": [
+            "事务失效 60 秒回答"
+          ],
+          "interviewQuestions": [
+            "@Transactional 为什么会失效？"
+          ],
+          "javaMapping": "代理、自调用、异常、异步线程",
+          "acceptance": "不卡住并能补一个真实场景",
+          "risk": "只说注解名",
+          "sourceFiles": [
+            {
+              "label": "SpringBoot 工程入口 XMind"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-02-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "JVM G1/ZGC 与线上抖动排查",
+          "description": "补齐 G1/ZGC、JFR、jcmd、GC log，并和 P99 抖动排查绑定。",
+          "deliverables": [
+            "G1/ZGC 对比卡",
+            "P99 抖动排查步骤"
+          ],
+          "interviewQuestions": [
+            "G1 和 ZGC 的底层差异是什么？",
+            "接口 P99 抖动你怎么排？"
+          ],
+          "javaMapping": "JVM、GC、JFR、jcmd、线程池、外部依赖",
+          "acceptance": "能从证据链而不是名词回答 JVM 问题",
+          "risk": "JVM 只讲线上治理不讲基础会被问穿",
+          "sourceFiles": [
+            {
+              "label": "JVM 体系与线上排查 XMind"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "稳定性治理 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-02-1600-java",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "java",
+          "title": "MQ/Redis 缓存查不到排查",
+          "description": "按 MQ 消费、消息解析、航线映射、Key、Redis、TTL、查询接口顺序讲。",
+          "deliverables": [
+            "缓存查不到排查链路图"
+          ],
+          "interviewQuestions": [
+            "缓存查不到怎么排查？",
+            "如何处理 MQ 重复和乱序？"
+          ],
+          "javaMapping": "MQ 消费、Redis Key、TTL、幂等、观测",
+          "acceptance": "能按写链路和读链路两边排查",
+          "risk": "只说 Redis get/set",
+          "sourceFiles": [
+            {
+              "label": "MQ 三件套 XMind"
+            },
+            {
+              "label": "Redis XMind"
+            },
+            {
+              "label": "searchblackhole 技术指标脱敏锚点"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-02-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "压力小面：Spring/JVM/MQ 三连",
+          "description": "围绕真实项目做 3 个硬点追问，记录错题和修正答案。",
+          "deliverables": [
+            "Spring/JVM/MQ 错题清单"
+          ],
+          "interviewQuestions": [
+            "事务为什么失效？",
+            "G1/ZGC 怎么选？",
+            "MQ 如何保证不丢不重？"
+          ],
+          "javaMapping": "Java 硬点 + 真实项目证据",
+          "acceptance": "每题都有机制、场景、边界",
+          "risk": "只背八股不落项目",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "SOF/Dubbo 项目学习面试文档"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-02-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "简历项目证据补强",
+          "description": "把真实项目硬点转成简历可写 bullet 和证据表。",
+          "deliverables": [
+            "简历项目 bullet v0",
+            "硬点证据表"
+          ],
+          "interviewQuestions": [
+            "这条 bullet 的证据是什么？"
+          ],
+          "javaMapping": "真实项目证据驱动简历",
+          "acceptance": "每条 bullet 不夸大且可追问",
+          "risk": "简历写过度会被追问击穿",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "SOF/Dubbo 项目学习面试文档"
+            },
+            {
+              "label": "搜索接口数据流脱敏材料"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-02-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "复盘 Spring/JVM/MQ 卡点和明日 AI 项目衔接。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天如何把 AI 项目接到 Java 主线？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "完成页面复盘 6 问",
+          "risk": "错题不沉淀",
+          "sourceFiles": [
+            {
+              "label": "面试学习优先级导航"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-03",
+      "weekday": "周五",
+      "dayIndex": 3,
+      "theme": "AI 工程化项目接入：服务化、鉴权、RAG/Agent 边界",
+      "goal": "在真实 Java 主线已建立后，再学习 AI/RAG/Agent 的后端工程化表达",
+      "risk": "AI 项目不能讲成算法岗，也不能把 Python demo 夸成生产平台",
+      "javaFocus": "Spring Boot 服务化、鉴权、观测、RAG/Agent 边界",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个项目解决什么业务问题？",
+        "为什么它不是简单套 API？",
+        "为什么 AI 工程化项目能服务高级 Java 后端求职？"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-03-0930-project",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "project",
+          "title": "AI 工程化项目总览与边界",
+          "description": "阅读 AI 工程化项目 README、作战手册和路线图，只确认服务化、鉴权、观测和生产化边界，不做算法岗包装。",
+          "deliverables": [
+            "写出 3 分钟 AI 增强项目介绍 v0",
+            "列出不能夸大的边界",
+            "列出可映射到 Java 后端的 3 个工程点"
+          ],
+          "interviewQuestions": [
+            "这个项目解决什么业务问题？",
+            "为什么它不是简单套 API？"
+          ],
+          "javaMapping": "服务化入口、业务链路拆解、工程边界表达",
+          "acceptance": "能不看稿讲清项目背景、核心链路、AI 工程化边界",
+          "risk": "容易把项目讲成 AI 玩具",
+          "sourceFiles": [
+            {
+              "label": "AI 工程化项目 README"
+            },
+            {
+              "label": "学习与面试作战手册"
+            },
+            {
+              "label": "准生产路线图"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-03-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "口述：AI 只是增强",
+          "description": "用 60 秒说清 Java 主线和 AI 工程化增强之间的关系。",
+          "deliverables": [
+            "AI 增强 60 秒回答"
+          ],
+          "interviewQuestions": [
+            "为什么 AI 工程化项目能服务高级 Java 后端求职？"
+          ],
+          "javaMapping": "Java 主线 + AI 工程化增强",
+          "acceptance": "先讲服务化、鉴权、观测，再讲 RAG/Agent",
+          "risk": "一上来讲模型会偏岗",
+          "sourceFiles": [
+            {
+              "label": "简历风险点与追问防线"
+            },
+            {
+              "label": "AI 应用工程化知识补充路线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-03-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Spring Boot 服务化与鉴权映射",
+          "description": "按 Java 后端视角设计 AI 能力接入层：Controller、Filter、安全上下文、全局异常、Actuator、Micrometer 和 MDC。",
+          "deliverables": [
+            "HTTP -> Auth -> Biz -> Metrics -> Response 的 Spring Boot 设计图"
+          ],
+          "interviewQuestions": [
+            "AI 能力为什么要后端服务化？",
+            "API Key 为什么不能放前端？"
+          ],
+          "javaMapping": "Spring MVC、Filter、Controller、全局异常、Actuator、MDC",
+          "acceptance": "能把 AI 能力接入讲成 Java/Spring 后端设计",
+          "risk": "只讲模型接口会偏离高级 Java 岗",
+          "sourceFiles": [
+            {
+              "label": "SpringBoot 工程入口 XMind"
+            },
+            {
+              "label": "SOF/Dubbo 项目学习面试文档"
+            },
+            {
+              "label": "稳定性治理 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-03-1600-agent",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "agent",
+          "title": "供小慧 Agent/RAG 入门",
+          "description": "先看供小慧 Agent 和供应商规则的工程边界，不要求吃透所有 Agent 概念。",
+          "deliverables": [
+            "供小慧 Agent 三句话说明",
+            "RAG 当前实现 vs 生产升级对照表"
+          ],
+          "interviewQuestions": [
+            "供小慧 Agent 当前到底做了什么？",
+            "RAG 为什么不能完全消灭幻觉？"
+          ],
+          "javaMapping": "策略路由、工具边界、知识库检索、后端编排",
+          "acceptance": "能说清它是受控工具编排，不是万能 Agent",
+          "risk": "把规则路由吹成完整 Agent 平台",
+          "sourceFiles": [
+            {
+              "label": "供应商规则知识库"
+            },
+            {
+              "label": "AI Agent 工程化 XMind"
+            },
+            {
+              "label": "RAG 工程化 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-03-2030-resume",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "resume",
+          "title": "可投简历 v0 + JD 采样",
+          "description": "写可投简历 v0，把真实项目放主段，AI 增强项目作为工程化补充。",
+          "deliverables": [
+            "可投简历 v0 项目段落",
+            "3 条 JD 关键词记录",
+            "评分记录"
+          ],
+          "interviewQuestions": [
+            "这个 AI 工程化项目怎么证明 Java 后端能力？",
+            "哪些不能写？"
+          ],
+          "javaMapping": "复杂业务 workflow、服务化、鉴权、观测、AI 增强",
+          "acceptance": "bullet 克制、可证明、不夸大，且绑定 JD 关键词",
+          "risk": "把生产化设想写成已实现",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            },
+            {
+              "label": "目标 JD 矩阵"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-03-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "补项目证据：真实项目 + AI 增强",
+          "description": "把真实搜索链路、AI 服务化、供小慧/RAG 证据绑定路径和命令。",
+          "deliverables": [
+            "项目证据表 v1"
+          ],
+          "interviewQuestions": [
+            "简历里的 AI 增强证据是什么？"
+          ],
+          "javaMapping": "证据链",
+          "acceptance": "证据表路径完整，主次清楚",
+          "risk": "路径不清导致复习低效",
+          "sourceFiles": [
+            {
+              "label": "SOF/Dubbo 项目学习面试文档"
+            },
+            {
+              "label": "搜索接口数据流脱敏材料"
+            },
+            {
+              "label": "AI 工程化项目 README"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-03-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "复盘 Java 主线与 AI 增强的边界。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天第一次项目模拟要补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "完成页面复盘 6 问",
+          "risk": "概念混淆",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-04",
+      "weekday": "周六",
+      "dayIndex": 4,
+      "theme": "供小慧 Agent 第一轮项目模拟",
+      "goal": "把供小慧 Agent、RAG、往返解析合成 3 分钟项目故事",
+      "risk": "Agent 与 RAG 讲散，无法回到 Java 后端",
+      "javaFocus": "策略模式、工具执行器、接口编排",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-04-0930-agent",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "agent",
+          "title": "供小慧 Agent 第一轮项目模拟：主线深挖",
+          "description": "围绕 供小慧 Agent 第一轮项目模拟 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "供小慧 Agent 第一轮项目模拟 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "策略模式、工具执行器、接口编排",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "Agent 与 RAG 讲散，无法回到 Java 后端",
+          "sourceFiles": [
+            {
+              "label": "供应商规则知识库"
+            },
+            {
+              "label": "AI Agent 工程化 XMind"
+            },
+            {
+              "label": "RAG 工程化 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-04-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "策略模式、工具执行器、接口编排",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "供应商规则知识库"
+            },
+            {
+              "label": "AI Agent 工程化 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-04-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 策略模式、工具执行器、接口编排，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "策略模式、工具执行器、接口编排",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "供应商规则知识库"
+            },
+            {
+              "label": "AI Agent 工程化 XMind"
+            },
+            {
+              "label": "RAG 工程化 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-04-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-04-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "互动评分训练",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-04-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "证据/简历/投递闭环",
+          "description": "更新证据表、简历 bullet 或低风险投递记录。",
+          "deliverables": [
+            "证据表更新",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-04-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-05",
+      "weekday": "周日",
+      "dayIndex": 5,
+      "theme": "API 服务化、Observability、项目讲稿 v0",
+      "goal": "把服务化、鉴权、metrics、logging 和项目讲稿打通",
+      "risk": "讲得像 demo，没有服务治理",
+      "javaFocus": "Actuator、Micrometer、TraceId、结构化日志",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-05-0930-project",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "project",
+          "title": "API 服务化、Observability、项目讲稿 v0：主线深挖",
+          "description": "围绕 API 服务化、Observability、项目讲稿 v0 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "API 服务化、Observability、项目讲稿 v0 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "Actuator、Micrometer、TraceId、结构化日志",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "讲得像 demo，没有服务治理",
+          "sourceFiles": [
+            {
+              "label": "云服务架构说明"
+            },
+            {
+              "label": "准生产路线图"
+            },
+            {
+              "label": "SpringBoot 工程入口 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-05-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "Actuator、Micrometer、TraceId、结构化日志",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "云服务架构说明"
+            },
+            {
+              "label": "准生产路线图"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-05-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 Actuator、Micrometer、TraceId、结构化日志，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "Actuator、Micrometer、TraceId、结构化日志",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "云服务架构说明"
+            },
+            {
+              "label": "准生产路线图"
+            },
+            {
+              "label": "SpringBoot 工程入口 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-05-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-05-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "互动评分训练",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-05-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "证据/简历/投递闭环",
+          "description": "更新证据表、简历 bullet 或低风险投递记录。",
+          "deliverables": [
+            "证据表更新",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-05-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-06",
+      "weekday": "周一",
+      "dayIndex": 6,
+      "theme": "异步任务、MQ、幂等补偿、低风险投递",
+      "goal": "建立异步任务生产化方案并启动低风险投递",
+      "risk": "只画 MQ 架构，不讲幂等和失败恢复",
+      "javaFocus": "MQ 可靠消息、幂等消费、补偿重试",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-06-0930-java",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "java",
+          "title": "异步任务、MQ、幂等补偿、低风险投递：主线深挖",
+          "description": "围绕 异步任务、MQ、幂等补偿、低风险投递 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "异步任务、MQ、幂等补偿、低风险投递 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "MQ 可靠消息、幂等消费、补偿重试",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "只画 MQ 架构，不讲幂等和失败恢复",
+          "sourceFiles": [
+            {
+              "label": "异步任务 XMind"
+            },
+            {
+              "label": "MQ 三件套 XMind"
+            },
+            {
+              "label": "杭州主投简历"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-06-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "MQ 可靠消息、幂等消费、补偿重试",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "异步任务 XMind"
+            },
+            {
+              "label": "MQ 三件套 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-06-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 MQ 可靠消息、幂等消费、补偿重试，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "MQ 可靠消息、幂等消费、补偿重试",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "异步任务 XMind"
+            },
+            {
+              "label": "MQ 三件套 XMind"
+            },
+            {
+              "label": "杭州主投简历"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-06-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-06-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "互动评分训练",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-06-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "证据/简历/投递闭环",
+          "description": "更新证据表、简历 bullet 或低风险投递记录。",
+          "deliverables": [
+            "证据表更新",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-06-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-07",
+      "weekday": "周二",
+      "dayIndex": 7,
+      "theme": "JVM/JDK17/21、线上问题治理",
+      "goal": "补齐 JVM 面试硬点，映射到线上稳定性",
+      "risk": "AI 项目能讲但 JVM 被问穿",
+      "javaFocus": "G1/ZGC/JFR/jcmd/GC log/虚拟线程",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-07-0930-java",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "java",
+          "title": "JVM/JDK17/21、线上问题治理：主线深挖",
+          "description": "围绕 JVM/JDK17/21、线上问题治理 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "JVM/JDK17/21、线上问题治理 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "G1/ZGC/JFR/jcmd/GC log/虚拟线程",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "AI 项目能讲但 JVM 被问穿",
+          "sourceFiles": [
+            {
+              "label": "JVM 体系与线上排查 XMind"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-07-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "G1/ZGC/JFR/jcmd/GC log/虚拟线程",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "JVM 体系与线上排查 XMind"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-07-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 G1/ZGC/JFR/jcmd/GC log/虚拟线程，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "G1/ZGC/JFR/jcmd/GC log/虚拟线程",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "JVM 体系与线上排查 XMind"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-07-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-07-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "互动评分训练",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-07-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "证据/简历/投递闭环",
+          "description": "更新证据表、简历 bullet 或低风险投递记录。",
+          "deliverables": [
+            "证据表更新",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-07-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-08",
+      "weekday": "周三",
+      "dayIndex": 8,
+      "theme": "Spring 事务、MySQL、Redis",
+      "goal": "补齐 Spring 事务传播和数据库缓存高频追问",
+      "risk": "事务/MVCC/Redis 一问就散",
+      "javaFocus": "Spring 事务、MVCC、索引、缓存一致性",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-08-0930-java",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "java",
+          "title": "Spring 事务、MySQL、Redis：主线深挖",
+          "description": "围绕 Spring 事务、MySQL、Redis 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "Spring 事务、MySQL、Redis 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "Spring 事务、MVCC、索引、缓存一致性",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "事务/MVCC/Redis 一问就散",
+          "sourceFiles": [
+            {
+              "label": "SpringBoot 工程入口 XMind"
+            },
+            {
+              "label": "MySQL XMind"
+            },
+            {
+              "label": "Redis XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-08-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "Spring 事务、MVCC、索引、缓存一致性",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "SpringBoot 工程入口 XMind"
+            },
+            {
+              "label": "MySQL XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-08-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 Spring 事务、MVCC、索引、缓存一致性，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "Spring 事务、MVCC、索引、缓存一致性",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "SpringBoot 工程入口 XMind"
+            },
+            {
+              "label": "MySQL XMind"
+            },
+            {
+              "label": "Redis XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-08-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-08-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "互动评分训练",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-08-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "证据/简历/投递闭环",
+          "description": "更新证据表、简历 bullet 或低风险投递记录。",
+          "deliverables": [
+            "证据表更新",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-08-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-09",
+      "weekday": "周四",
+      "dayIndex": 9,
+      "theme": "MQ 三件套、稳定性治理、简历 v1",
+      "goal": "把 RabbitMQ/RocketMQ/Kafka 和稳定性治理落到项目回答",
+      "risk": "只背 MQ 对比，不会结合项目",
+      "javaFocus": "ACK、重试、DLQ、顺序、事务、限流熔断",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-09-0930-java",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "java",
+          "title": "MQ 三件套、稳定性治理、简历 v1：主线深挖",
+          "description": "围绕 MQ 三件套、稳定性治理、简历 v1 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "MQ 三件套、稳定性治理、简历 v1 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "ACK、重试、DLQ、顺序、事务、限流熔断",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "只背 MQ 对比，不会结合项目",
+          "sourceFiles": [
+            {
+              "label": "MQ 三件套 XMind"
+            },
+            {
+              "label": "稳定性治理 XMind"
+            },
+            {
+              "label": "杭州主投简历"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-09-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "ACK、重试、DLQ、顺序、事务、限流熔断",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "MQ 三件套 XMind"
+            },
+            {
+              "label": "稳定性治理 XMind"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-09-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 ACK、重试、DLQ、顺序、事务、限流熔断，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "ACK、重试、DLQ、顺序、事务、限流熔断",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "MQ 三件套 XMind"
+            },
+            {
+              "label": "稳定性治理 XMind"
+            },
+            {
+              "label": "杭州主投简历"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-09-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-09-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "互动评分训练",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-09-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "证据/简历/投递闭环",
+          "description": "更新证据表、简历 bullet 或低风险投递记录。",
+          "deliverables": [
+            "证据表更新",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-09-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-10",
+      "weekday": "周五",
+      "dayIndex": 10,
+      "theme": "部署与可演示、Docker/CI、压力面试",
+      "goal": "补云端部署、Docker/CI 和可演示证据",
+      "risk": "部署说不清，server-ready 和 production 混说",
+      "javaFocus": "Docker、CI、Nginx、health check、日志",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-10-0930-deployment",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "deployment",
+          "title": "部署与可演示、Docker/CI、压力面试：主线深挖",
+          "description": "围绕 部署与可演示、Docker/CI、压力面试 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "部署与可演示、Docker/CI、压力面试 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "Docker、CI、Nginx、health check、日志",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "部署说不清，server-ready 和 production 混说",
+          "sourceFiles": [
+            {
+              "label": "Dockerfile"
+            },
+            {
+              "label": "docker-compose.yml"
+            },
+            {
+              "label": "GitHub Actions CI"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-10-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "Docker、CI、Nginx、health check、日志",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "Dockerfile"
+            },
+            {
+              "label": "docker-compose.yml"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-10-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 Docker、CI、Nginx、health check、日志，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "Docker、CI、Nginx、health check、日志",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "Dockerfile"
+            },
+            {
+              "label": "docker-compose.yml"
+            },
+            {
+              "label": "GitHub Actions CI"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-10-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-10-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "压力模拟面试",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-10-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "证据/简历/投递闭环",
+          "description": "更新证据表、简历 bullet 或低风险投递记录。",
+          "deliverables": [
+            "证据表更新",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-10-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-11",
+      "weekday": "周六",
+      "dayIndex": 11,
+      "theme": "Android APK、移动端语音、PWA",
+      "goal": "尝试 APK/WebView，确认安卓端口述训练路径",
+      "risk": "APK 做不成却假装成功",
+      "javaFocus": "WebView、HTTPS、PWA、网络错误兜底",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-11-0930-android",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "android",
+          "title": "Android APK、移动端语音、PWA：主线深挖",
+          "description": "围绕 Android APK、移动端语音、PWA 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "Android APK、移动端语音、PWA 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "WebView、HTTPS、PWA、网络错误兜底",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "APK 做不成却假装成功",
+          "sourceFiles": [
+            {
+              "label": "技术架构与 Android 边界"
+            },
+            {
+              "label": "验收与风险"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-11-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "WebView、HTTPS、PWA、网络错误兜底",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "技术架构与 Android 边界"
+            },
+            {
+              "label": "验收与风险"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-11-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 WebView、HTTPS、PWA、网络错误兜底，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "WebView、HTTPS、PWA、网络错误兜底",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "技术架构与 Android 边界"
+            },
+            {
+              "label": "验收与风险"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-11-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-11-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "压力模拟面试",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-11-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "证据/简历/投递闭环",
+          "description": "更新证据表、简历 bullet 或低风险投递记录。",
+          "deliverables": [
+            "证据表更新",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-11-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-12",
+      "weekday": "周日",
+      "dayIndex": 12,
+      "theme": "综合项目演示、30 个追问",
+      "goal": "把项目、Java、AI 工程化合成一轮完整面试",
+      "risk": "追问清单没有证据支撑",
+      "javaFocus": "项目证据、错题、JD 对齐",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-12-0930-interview",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "interview",
+          "title": "综合项目演示、30 个追问：主线深挖",
+          "description": "围绕 综合项目演示、30 个追问 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "综合项目演示、30 个追问 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "项目证据、错题、JD 对齐",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "追问清单没有证据支撑",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-12-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "项目证据、错题、JD 对齐",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-12-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 项目证据、错题、JD 对齐，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "项目证据、错题、JD 对齐",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-12-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-12-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "压力模拟面试",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-12-2130-delivery",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "delivery",
+          "title": "证据/简历/投递闭环",
+          "description": "更新证据表、简历 bullet 或低风险投递记录。",
+          "deliverables": [
+            "证据表更新",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-12-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-13",
+      "weekday": "周一",
+      "dayIndex": 13,
+      "theme": "正式投递前压力模拟、JD 对齐",
+      "goal": "按 JD 做正式投递相关压力复盘和简历微调",
+      "risk": "投递前仍不知道 JD 命中点",
+      "javaFocus": "JD 关键词 -> 简历版本 -> 项目证据",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-13-0930-resume",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "resume",
+          "title": "正式投递前压力模拟、JD 对齐：主线深挖",
+          "description": "围绕 正式投递前压力模拟、JD 对齐 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "正式投递前压力模拟、JD 对齐 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 简历版本 -> 项目证据",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "投递前仍不知道 JD 命中点",
+          "sourceFiles": [
+            {
+              "label": "JD 面经对齐护栏"
+            },
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "快速再就业面试话术包"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-13-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "JD 关键词 -> 简历版本 -> 项目证据",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "JD 面经对齐护栏"
+            },
+            {
+              "label": "杭州主投简历"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-13-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 JD 关键词 -> 简历版本 -> 项目证据，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "JD 关键词 -> 简历版本 -> 项目证据",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "JD 面经对齐护栏"
+            },
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "快速再就业面试话术包"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-13-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-13-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "正式投递前压力复盘",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-13-2130-resume",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "resume",
+          "title": "正式投递相关动作",
+          "description": "正式投递、记录 JD 关键词和反馈状态。",
+          "deliverables": [
+            "正式投递记录",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-13-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "date": "2026-07-14",
+      "weekday": "周二",
+      "dayIndex": 14,
+      "theme": "正式密集投递、反馈闭环、下一周计划",
+      "goal": "启动正式密集投递并建立反馈闭环",
+      "risk": "投递后没有记录和复盘",
+      "javaFocus": "投递反馈驱动复习",
+      "dailyDeliverables": [
+        "一个可讲项目点",
+        "两个面试题回答",
+        "一个 Java 后端知识点",
+        "当天路径问题记录",
+        "一条证据/简历/投递更新"
+      ],
+      "mustAnswer": [
+        "这个任务和高级 Java 后端有什么关系？",
+        "当前实现和生产化升级差距是什么？",
+        "请用 60 秒讲清上午主题。"
+      ],
+      "blocks": [
+        {
+          "id": "2026-07-14-0930-resume",
+          "start": "09:30",
+          "end": "11:30",
+          "category": "resume",
+          "title": "正式密集投递、反馈闭环、下一周计划：主线深挖",
+          "description": "围绕 正式密集投递、反馈闭环、下一周计划 做代码/文档/命令级复现，产出可面试证据。",
+          "deliverables": [
+            "正式密集投递、反馈闭环、下一周计划 证据条目",
+            "一张链路图或对照表"
+          ],
+          "interviewQuestions": [
+            "这个任务和高级 Java 后端有什么关系？",
+            "当前实现和生产化升级差距是什么？"
+          ],
+          "javaMapping": "投递反馈驱动复习",
+          "acceptance": "有路径、有产出、有 60 秒回答",
+          "risk": "投递后没有记录和复盘",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-14-1130-interview",
+          "start": "11:30",
+          "end": "12:00",
+          "category": "interview",
+          "title": "上午口述总结",
+          "description": "把上午内容压缩成 60 秒回答。",
+          "deliverables": [
+            "60 秒回答"
+          ],
+          "interviewQuestions": [
+            "请用 60 秒讲清上午主题。"
+          ],
+          "javaMapping": "投递反馈驱动复习",
+          "acceptance": "不卡住，能讲边界",
+          "risk": "口述不练就无法面试输出",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "快速再就业面试话术包"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-14-1400-java",
+          "start": "14:00",
+          "end": "16:00",
+          "category": "java",
+          "title": "Java 后端专题映射",
+          "description": "复习 投递反馈驱动复习，并映射到真实项目和 AI 工程化项目。",
+          "deliverables": [
+            "Java 专题回答卡",
+            "项目映射表"
+          ],
+          "interviewQuestions": [
+            "面试官追问底层机制怎么答？",
+            "线上故障怎么排查？"
+          ],
+          "javaMapping": "投递反馈驱动复习",
+          "acceptance": "至少完成 2 个机制 + 1 个故障场景",
+          "risk": "只背八股不讲场景",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-14-1600-interview",
+          "start": "16:00",
+          "end": "17:00",
+          "category": "interview",
+          "title": "错题补强",
+          "description": "整理当天最容易被追问穿的问题。",
+          "deliverables": [
+            "错题清单"
+          ],
+          "interviewQuestions": [
+            "今天最薄弱的问题是什么？"
+          ],
+          "javaMapping": "错题闭环",
+          "acceptance": "形成修正动作",
+          "risk": "错题不复盘",
+          "sourceFiles": [
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-14-2030-interview",
+          "start": "20:30",
+          "end": "21:30",
+          "category": "interview",
+          "title": "正式投递前压力复盘",
+          "description": "项目 + Java + 工程化混合追问，记录评分和下一追问。",
+          "deliverables": [
+            "面试评分记录",
+            "下一追问"
+          ],
+          "interviewQuestions": [
+            "如果明天约面，最可能先问什么？",
+            "你的项目证据是什么？"
+          ],
+          "javaMapping": "项目主线 + Java 硬点 + JD 命中",
+          "acceptance": "完成一次评分并修正回答",
+          "risk": "不做压力训练",
+          "sourceFiles": [
+            {
+              "label": "快速再就业面试话术包"
+            },
+            {
+              "label": "高级 Java 深挖题库"
+            },
+            {
+              "label": "JD 面经对齐护栏"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-14-2130-resume",
+          "start": "21:30",
+          "end": "22:30",
+          "category": "resume",
+          "title": "正式投递相关动作",
+          "description": "正式投递、记录 JD 关键词和反馈状态。",
+          "deliverables": [
+            "正式投递记录",
+            "简历/投递记录更新"
+          ],
+          "interviewQuestions": [
+            "这条简历表达的证据是什么？"
+          ],
+          "javaMapping": "JD 关键词 -> 项目证据 -> 简历版本",
+          "acceptance": "记录完整，不投不匹配岗位",
+          "risk": "投递无反馈闭环",
+          "sourceFiles": [
+            {
+              "label": "杭州主投简历"
+            },
+            {
+              "label": "简历风险点与追问防线"
+            }
+          ]
+        },
+        {
+          "id": "2026-07-14-2230-review",
+          "start": "22:30",
+          "end": "23:00",
+          "category": "review",
+          "title": "当日复盘",
+          "description": "完成复盘 6 问，标记路径问题和明日优先级。",
+          "deliverables": [
+            "当日复盘"
+          ],
+          "interviewQuestions": [
+            "明天最优先补什么？"
+          ],
+          "javaMapping": "复盘闭环",
+          "acceptance": "页面复盘已保存",
+          "risk": "复盘流于形式",
+          "sourceFiles": [
+            {
+              "label": "学习与面试作战手册"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

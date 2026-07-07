@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>登录 job-sprint</title>
+    <meta name="theme-color" content="#172026">
+    <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="assets/schedule.css">
+  </head>
+  <body class="login-page">
+    <main class="login-shell">
+      <section class="login-panel" aria-labelledby="loginTitle">
+        <p class="eyebrow">Protected Workspace</p>
+        <h1 id="loginTitle">登录 AI 求职教练</h1>
+        <p class="login-intro">这是邀请制泛 IT 求职教练系统。登录后可查看完整日程、复盘、机会记录和面试训练数据。</p>
+        <form id="loginForm" class="login-form">
+          <label>
+            <span>用户名</span>
+            <input id="loginUser" name="username" type="text" autocomplete="username" required>
+          </label>
+          <label>
+            <span>密码</span>
+            <input id="loginPassword" name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <button id="loginButton" class="primary-btn" type="submit">进入工作台</button>
+        </form>
+        <p id="loginMessage" class="login-message" aria-live="polite">请使用本机或服务器环境中配置的账号登录。</p>
+        <div class="login-safety">
+          <strong>安全边界</strong>
+          <span>凭据只应配置在服务器环境变量中，不写入前端、APK、文档或日志。</span>
+        </div>
+      </section>
+    </main>
+    <script src="assets/auth.js"></script>
+  </body>
+</html>

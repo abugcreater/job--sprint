@@ -1,0 +1,33 @@
+[package]
+name = "job-sprint-api"
+version = "0.1.0"
+edition = "2024"
+
+[lib]
+name = "job_sprint_rust_api"
+path = "src/lib.rs"
+
+[dependencies]
+axum = "0.8"
+base64 = "0.22"
+chrono = { version = "0.4", default-features = false, features = ["clock", "serde"] }
+hex = "0.4"
+hmac = "0.12"
+mime_guess = "2.0"
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+sqlx = { version = "0.8", features = ["runtime-tokio-rustls", "sqlite", "json"] }
+subtle = "2.6"
+time = { version = "0.3", features = ["formatting"] }
+tokio = { version = "1.48", features = ["fs", "macros", "net", "rt-multi-thread", "signal"] }
+tower-http = { version = "0.6", features = ["cors", "trace"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+urlencoding = "2.1"
+uuid = { version = "1.19", features = ["v4"] }
+
+[dev-dependencies]
+tempfile = "3.23"
+tower = { version = "0.5", features = ["util"] }

@@ -1,0 +1,73 @@
+const assert = require("assert");
+const fs = require("fs");
+
+const lib = fs.readFileSync("apps/rust-api/src/lib.rs", "utf8");
+const bootstrap = fs.readFileSync("apps/rust-api/src/app_bootstrap.rs", "utf8");
+const appSchema = fs.readFileSync("apps/rust-api/src/app_schema.rs", "utf8");
+const boundaryFeedbackSchema = fs.readFileSync("apps/rust-api/src/app_schema_boundary_feedback.rs", "utf8");
+
+assert.match(lib, /mod app_bootstrap;/);
+assert.match(lib, /mod app_schema;/);
+assert.match(lib, /mod app_schema_boundary_feedback;/);
+assert.match(lib, /pub\(crate\) use app_bootstrap::AppState;/);
+assert.match(lib, /pub use app_bootstrap::\{build_app_from_env, serve_from_env\};/);
+assert.match(lib, /pub\(crate\) fn api_routes\(\) -> Router<AppState>/);
+
+assert.match(bootstrap, /pub\(crate\) struct AppState/);
+assert.match(bootstrap, /pub\(crate\) db: SqlitePool/);
+assert.match(bootstrap, /pub\(crate\) root: Arc<PathBuf>/);
+assert.match(bootstrap, /pub\(crate\) login_failures: LoginFailureStore/);
+assert.match(bootstrap, /pub async fn build_app_from_env/);
+assert.match(bootstrap, /pub async fn serve_from_env/);
+assert.match(bootstrap, /fn find_project_root/);
+assert.match(bootstrap, /use crate::app_schema::init_db;/);
+assert.match(appSchema, /pub\(crate\) async fn init_db/);
+assert.match(bootstrap, /async fn sync_configured_users/);
+assert.match(bootstrap, /fn max_body_bytes/);
+assert.match(bootstrap, /fn sqlite_connect_options_from_env/);
+assert.match(bootstrap, /SqlitePoolOptions::new\(\)/);
+assert.match(bootstrap, /DefaultBodyLimit::max\(max_body_bytes\(\)\)/);
+assert.match(bootstrap, /TraceLayer::new_for_http\(\)/);
+assert.match(bootstrap, /TcpListener::bind/);
+assert.match(bootstrap, /migrate_legacy_runtime_json/);
+assert.match(bootstrap, /new_login_failure_store/);
+assert.match(appSchema, /CREATE TABLE IF NOT EXISTS users/);
+assert.match(appSchema, /CREATE TABLE IF NOT EXISTS runtime_items/);
+assert.match(appSchema, /CREATE TABLE IF NOT EXISTS llm_runs/);
+assert.match(appSchema, /idx_llm_runs_scope_created_at/);
+assert.match(appSchema, /CREATE TABLE IF NOT EXISTS llm_feedback/);
+assert.match(appSchema, /idx_llm_feedback_scope_created_at/);
+assert.match(appSchema, /create_coach_boundary_feedback\(db\)\.await\?/);
+assert.match(boundaryFeedbackSchema, /CREATE TABLE IF NOT EXISTS coach_boundary_feedback/);
+assert.match(boundaryFeedbackSchema, /idx_coach_boundary_feedback_scope_created_at/);
+assert.match(appSchema, /CREATE TABLE IF NOT EXISTS coach_onboarding_events/);
+assert.match(appSchema, /idx_coach_onboarding_events_scope_created_at/);
+assert.match(appSchema, /input_tokens INTEGER/);
+assert.match(appSchema, /estimated_cost_usd REAL/);
+assert.match(bootstrap, /JOB_SPRINT_MAX_BODY_BYTES/);
+assert.match(bootstrap, /ASR_MAX_AUDIO_BYTES/);
+assert.match(bootstrap, /DATABASE_URL/);
+assert.match(bootstrap, /JOB_SPRINT_RUNTIME_DB_PATH/);
+assert.match(bootstrap, /JOB_SPRINT_DB_PATH/);
+assert.match(bootstrap, /RUNTIME_DB_PATH/);
+
+assert.doesNotMatch(lib, /struct AppState/);
+assert.doesNotMatch(lib, /fn find_project_root/);
+assert.doesNotMatch(lib, /async fn init_db/);
+assert.doesNotMatch(lib, /async fn sync_configured_users/);
+assert.doesNotMatch(lib, /fn max_body_bytes/);
+assert.doesNotMatch(lib, /fn sqlite_connect_options_from_env/);
+assert.doesNotMatch(lib, /SqlitePoolOptions/);
+assert.doesNotMatch(lib, /TcpListener/);
+assert.doesNotMatch(lib, /TraceLayer/);
+assert.doesNotMatch(lib, /DefaultBodyLimit/);
+assert.doesNotMatch(lib, /CREATE TABLE/);
+assert.doesNotMatch(bootstrap, /CREATE TABLE/);
+
+assert.doesNotMatch(bootstrap, /\.route\("\/api\/health"/);
+assert.doesNotMatch(bootstrap, /auth_routes::/);
+assert.doesNotMatch(bootstrap, /runtime_routes::/);
+assert.doesNotMatch(bootstrap, /data_routes::/);
+assert.doesNotMatch(bootstrap, /ai_routes::/);
+
+console.log("rust app bootstrap boundary tests passed");

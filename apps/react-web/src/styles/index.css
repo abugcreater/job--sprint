@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  font-family: Inter, Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: #f8fafc;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button,
+a,
+input,
+textarea,
+select {
+  touch-action: manipulation;
+}
+
+@layer components {
+  .app-main {
+    @apply min-h-dvh overflow-x-hidden bg-surface-0 pb-[calc(92px+env(safe-area-inset-bottom))] text-ink-900 md:pb-0 md:pl-[248px];
+  }
+
+  .app-page {
+    @apply mx-auto flex min-h-dvh w-full max-w-shell min-w-0 flex-col gap-4 px-4 py-4 md:px-8 md:py-6;
+  }
+
+  .command-card {
+    @apply rounded-card border border-line bg-white shadow-soft;
+  }
+
+  .command-panel {
+    @apply rounded-card border border-line bg-white p-5 shadow-soft;
+  }
+
+  .touch-button {
+    @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-control px-4 text-sm font-black transition duration-200 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .primary-button {
+    @apply touch-button bg-brand-700 text-white shadow-soft hover:bg-brand-600;
+  }
+
+  .secondary-button {
+    @apply touch-button border border-line bg-white text-ink-700 hover:bg-surface-0;
+  }
+
+  .field-control {
+    @apply min-h-11 w-full rounded-control border border-line bg-surface-0 px-3 text-base font-semibold text-ink-900 outline-none transition placeholder:text-ink-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100;
+  }
+
+  .status-chip {
+    @apply inline-flex min-h-8 items-center gap-1.5 rounded-control px-2.5 py-1 text-xs font-black;
+  }
+}
