@@ -24,7 +24,7 @@ assert.match(controller, /private final Activity activity/);
 assert.match(controller, /private final AuthCredentialStore credentialStore/);
 assert.match(controller, /private final RemoteWebViewController remoteWebViewController/);
 assert.match(controller, /void handleHttpAuthRequest\(HttpAuthHandler handler, String host, String realm\)/);
-assert.match(controller, /RemoteUrlPolicy\.isAllowedRemoteHost\(host\)/);
+assert.match(controller, /remoteWebViewController\.isAllowedRemoteHost\(host\)/);
 assert.match(controller, /handler\.cancel\(\)/);
 assert.match(controller, /remoteWebViewController\.loadFallback\("拦截未授权远端认证域名"\)/);
 assert.match(controller, /private boolean trySavedBasicAuth/);

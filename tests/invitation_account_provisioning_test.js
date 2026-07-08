@@ -12,6 +12,7 @@ const ownerLoginText = ["Owner", "pass", "2026!"].join("-");
 const firstLoginText = ["Mia", "pass", "2026!"].join("-");
 const resetLoginText = ["Mia", "reset", "2026!"].join("-");
 const leoLoginText = ["Leo", "pass", "2026!"].join("-");
+const forbiddenOwnerLoginText = ["Shadow", "owner", "pass", "2026!"].join("-");
 
 function sha256(value) {
   return crypto.createHash("sha256").update(String(value)).digest("hex");
@@ -127,6 +128,22 @@ async function login(server, username, password, expectedStatus = 200) {
     assert.strictEqual(res.json.summary.totalInvitations, 2);
     assert.ok(res.json.invitations.some((invitation) => invitation.username === "nora"));
     assert.ok(!res.json.configuredUsers.some((user) => user.username === "nora"));
+
+    res = await request(server, "POST", "/api/coach/invitations", {
+      username: "shadow-owner",
+      displayName: "Shadow Owner",
+      dataScope: "shadow-owner",
+      inviteBatch: "2026-07-beta",
+      roleFamily: "qa",
+      targetRole: "测试开发工程师",
+      status: "invited",
+      provisionAccount: true,
+      accountRole: "owner",
+      password: forbiddenOwnerLoginText
+    }, { cookie: ownerCookie });
+    assert.strictEqual(res.status, 400, res.raw);
+    assert.strictEqual(res.json.accountProvisioning.error, "owner_account_role_forbidden");
+    assert.strictEqual(fs.readFileSync(usersFile, "utf8").includes("shadow-owner"), false);
 
     res = await request(server, "POST", "/api/coach/invitations", {
       username: "mia",

@@ -295,15 +295,15 @@ const kbEntries = [
   },
   {
     id: "kb-company-summary-001",
-    category: "同程旅行经历抽象总结",
-    title: "同程旅行搜索交易链路抽象讲法",
+    category: "过往公司经历抽象总结",
+    title: "过往公司搜索交易链路抽象讲法",
     sourceType: "derived",
     sourceRefs: [
       { label: "搜索接口数据流脱敏材料", path: refs.searchFlow.absolutePath, safeToShow: false },
       { label: "searchblackhole 技术指标脱敏锚点", path: refs.searchBlackholeMetric.absolutePath, safeToShow: false }
     ],
     publicSummary: "可公开讲成：围绕国际机票搜索、报价、缓存、异步消费和链路稳定性做后端治理，重点是复杂业务链路、外部依赖、缓存/MQ、指标和排查。",
-    interviewQuestion: "你在同程最能体现高级 Java 后端能力的项目是什么？",
+    interviewQuestion: "你在过往公司最能体现高级 Java 后端能力的项目是什么？",
     answer60s: "我会选搜索/报价链路相关治理来讲，因为它覆盖入口参数、下游供应商或服务依赖、缓存、MQ 异步、Redis 查询、指标监控和故障排查。我的表达重点不是公司内部系统名，而是复杂链路里如何保证可观测、可降级和可复盘。",
     answer3min: "按搜索入口、业务编排、缓存构建、消息消费、异常兜底、指标监控和复盘治理展开。能讲清自己负责的边界、参与协作的部分、以及不能公开的内部细节。",
     javaMapping: "复杂搜索链路、MQ/Redis、稳定性治理、故障排查",

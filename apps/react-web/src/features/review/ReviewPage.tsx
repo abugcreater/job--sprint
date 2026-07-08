@@ -1,7 +1,6 @@
-import { ArrowRight, CheckCircle2, ClipboardCheck, Download, FileText, ListChecks, NotebookPen, Pencil, ShieldAlert, SlidersHorizontal, Sparkles, Trash2, WifiOff, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardCheck, Download, FileText, ListChecks, NotebookPen, Pencil, ShieldAlert, SlidersHorizontal, Sparkles, Trash2, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
-import { syncStateLabel } from "../../app/syncStatus";
 import { getLegacySnapshot } from "../../data/legacyAdapters";
 import { buildCoachDashboard } from "../../data/coachAdapter";
 import { buildWeeklyReviewAnalysis } from "../../data/weeklyReviewAdapter";
@@ -21,6 +20,7 @@ import {
   type ReviewTaskSummary
 } from "../../data/reviewAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
+import { ReviewEmptyProfile } from "./components/ReviewEmptyProfile";
 import { WeeklyReviewPanel } from "./components/WeeklyReviewPanel";
 import { useServerOutcome } from "./useServerOutcome";
 import type { RiskItem } from "../../types/sprint";
@@ -30,7 +30,6 @@ export function ReviewPage() {
   const completed = useSprintStore((state) => state.completed);
   const evidenceByTaskId = useSprintStore((state) => state.evidenceByTaskId);
   const delayRecords = useSprintStore((state) => state.delayRecords);
-  const syncState = useSprintStore((state) => state.syncState);
   const userProfiles = useSprintStore((state) => state.userProfiles);
   const knowledgeBoundaries = useSprintStore((state) => state.knowledgeBoundaries);
   const coachScheduleEvents = useSprintStore((state) => state.coachScheduleEvents);
@@ -43,6 +42,7 @@ export function ReviewPage() {
   const [recordFilter, setRecordFilter] = useState<ReviewRecordFilter>("all");
   const [editingRecord, setEditingRecord] = useState<{ taskId: string; evidenceId: string } | null>(null);
   const [exportPreview, setExportPreview] = useState("");
+  const [formFeedback, setFormFeedback] = useState("");
   const { saveServerOutcome, serverOutcome, serverOutcomeStatus } = useServerOutcome(sprint.date);
   const legacySnapshot = getLegacySnapshot();
   const dashboard = useMemo(() => buildReviewDashboard(sprint, evidenceByTaskId, legacySnapshot), [sprint, evidenceByTaskId, legacySnapshot]);
@@ -56,20 +56,26 @@ export function ReviewPage() {
     [coachDashboard.feedbackSummary, completed, delayRecords, evidenceByTaskId, sprint]
   );
   const filteredReviewRecords = useMemo(() => filterReviewRecords(dashboard.reviewRecords, recordFilter), [dashboard.reviewRecords, recordFilter]);
+  const hasProfile = userProfiles.length > 0;
 
   const updateDraft = useCallback((patch: Partial<ReviewFormDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
   }, []);
 
   const handleSaveReview = useCallback(() => {
-    if (!dashboard.targetTask || !isReviewDraftReady(draft)) return;
+    if (!dashboard.targetTask || !isReviewDraftReady(draft)) {
+      setFormFeedback("请至少填写一项复盘内容后再保存。");
+      return;
+    }
     const targetTask = editingRecord ? sprint.tasks.find((task) => task.id === editingRecord.taskId) ?? dashboard.targetTask : dashboard.targetTask;
     const content = buildReviewEvidenceContent(sprint, targetTask, draft);
     if (editingRecord) {
       updateEvidence(editingRecord.taskId, editingRecord.evidenceId, { title: "复盘证据", content, verified: true });
       setEditingRecord(null);
+      setFormFeedback("复盘记录已更新。");
     } else {
       addEvidence(targetTask.id, "review", "复盘证据", content);
+      setFormFeedback("复盘记录已保存，并写入 Evidence Gate。");
     }
     setDraft(createReviewDraft());
   }, [addEvidence, dashboard.targetTask, draft, editingRecord, sprint, updateEvidence]);
@@ -78,6 +84,7 @@ export function ReviewPage() {
     if (record.source !== "local") return;
     setDraft(reviewRecordToDraft(record));
     setEditingRecord({ taskId: record.taskId, evidenceId: record.id });
+    setFormFeedback(`正在编辑「${record.title}」。`);
   }, []);
 
   const handleDeleteReview = useCallback(
@@ -88,6 +95,7 @@ export function ReviewPage() {
         setEditingRecord(null);
         setDraft(createReviewDraft());
       }
+      setFormFeedback("复盘记录已删除。");
     },
     [deleteEvidence, editingRecord]
   );
@@ -95,6 +103,7 @@ export function ReviewPage() {
   const handleCancelEdit = useCallback(() => {
     setEditingRecord(null);
     setDraft(createReviewDraft());
+    setFormFeedback("已取消编辑。");
   }, []);
 
   const handleExportReviews = useCallback(() => {
@@ -102,29 +111,29 @@ export function ReviewPage() {
     setExportPreview(JSON.stringify(payload, null, 2));
   }, [filteredReviewRecords, sprint.date]);
 
+  if (!hasProfile) return <ReviewEmptyProfile />;
+
   return (
     <main className="app-main">
       <section className="app-page">
         <header className="command-card p-4 md:p-5">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">复盘归因 · 本地 AI 分析</p>
+              <p className="text-sm font-black text-brand-700">今日复盘 · 明日行动</p>
               <div className="mt-2 flex items-center gap-3">
                 <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
                   <ClipboardCheck size={22} aria-hidden="true" />
                 </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">复盘归因</h1>
+                <h1 className="text-3xl font-black leading-tight md:text-4xl">今日复盘</h1>
               </div>
               <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                收束完成情况、缺失证据、原因归因和明日恢复动作；复盘不是总结气氛，而是给下一轮执行和 AI 分析降阻。
+                用一条记录收束今天的事实、卡点和明天第一步。先写清楚，再看分析。
               </p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[520px]">
-              <MetricTile label="完成进度" value={`${dashboard.completion.done}/${dashboard.completion.total}`} />
-              <MetricTile label="证据记录" value={`${dashboard.evidenceRecords.length} 条`} />
-              <MetricTile label="复盘记录" value={`${dashboard.reviewRecords.length} 条`} />
-              <MetricTile label="同步状态" value={syncStateLabel(syncState)} icon={<WifiOff size={15} aria-hidden="true" />} />
-            </div>
+            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
+              <span className="text-xs font-black text-ink-500">集中统计</span>
+              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看完成、证据、复盘和风险统计</span>
+            </Link>
           </div>
         </header>
 
@@ -137,6 +146,15 @@ export function ReviewPage() {
           </aside>
 
           <section className="space-y-4">
+            <ReviewForm
+              draft={draft}
+              disabled={!dashboard.targetTask}
+              isEditing={Boolean(editingRecord)}
+              feedback={formFeedback}
+              onCancelEdit={handleCancelEdit}
+              onChange={updateDraft}
+              onSave={handleSaveReview}
+            />
             <EvidenceList records={dashboard.evidenceRecords} />
             <AiAnalysisPanel analysis={aiAnalysis} />
             <WeeklyReviewPanel
@@ -144,14 +162,6 @@ export function ReviewPage() {
               serverOutcome={serverOutcome}
               serverStatus={serverOutcomeStatus}
               onSaveServerSnapshot={saveServerOutcome}
-            />
-            <ReviewForm
-              draft={draft}
-              disabled={!dashboard.targetTask || !isReviewDraftReady(draft)}
-              isEditing={Boolean(editingRecord)}
-              onCancelEdit={handleCancelEdit}
-              onChange={updateDraft}
-              onSave={handleSaveReview}
             />
             <LocalReviewRecords
               records={filteredReviewRecords}
@@ -167,18 +177,6 @@ export function ReviewPage() {
         </section>
       </section>
     </main>
-  );
-}
-
-function MetricTile({ label, value, icon }: { label: string; value: string; icon?: ReactNode }) {
-  return (
-    <div className="rounded-card border border-line bg-surface-0 p-3">
-      <p className="text-[11px] font-black text-ink-500">{label}</p>
-      <p className="mt-1 flex items-center gap-1.5 text-sm font-extrabold leading-5 text-ink-900">
-        {icon}
-        <span>{value}</span>
-      </p>
-    </div>
   );
 }
 
@@ -304,7 +302,7 @@ function EvidenceList({ records }: { records: ReviewEvidenceRecord[] }) {
           ))}
         </div>
       ) : (
-        <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">今日还没有证据，先写一条本地复盘。</p>
+        <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">今日还没有证据，先写一条复盘。</p>
       )}
     </article>
   );
@@ -316,7 +314,7 @@ function AiAnalysisPanel({ analysis }: { analysis: ReturnType<typeof buildReview
       <div className="flex items-center gap-2 text-brand-700">
         <Sparkles size={18} aria-hidden="true" />
         <h2 id="ai-analysis-input-title" className="text-base font-black text-ink-900">
-          本地规则版 AI 分析
+          复盘建议
         </h2>
       </div>
       <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">
@@ -352,6 +350,7 @@ function ReviewForm({
   draft,
   disabled,
   isEditing,
+  feedback,
   onCancelEdit,
   onChange,
   onSave
@@ -359,6 +358,7 @@ function ReviewForm({
   draft: ReviewFormDraft;
   disabled: boolean;
   isEditing: boolean;
+  feedback: string;
   onCancelEdit: () => void;
   onChange: (patch: Partial<ReviewFormDraft>) => void;
   onSave: () => void;
@@ -368,17 +368,28 @@ function ReviewForm({
       <div className="flex items-center gap-2 text-brand-700">
         <ClipboardCheck size={18} aria-hidden="true" />
         <h2 id="review-form-title" className="text-base font-black text-ink-900">
-          {isEditing ? "编辑本地复盘记录" : "本地复盘记录"}
+          {isEditing ? "编辑今日复盘" : "写一条今日复盘"}
         </h2>
       </div>
       <div className="mt-5 grid gap-4">
-        <ReviewField label="今天能讲的一个项目点是什么？" value={draft.projectPoint} onChange={(value) => onChange({ projectPoint: value })} />
-        <ReviewField label="今天能回答的两个面试题是什么？" value={draft.interviewQuestions} onChange={(value) => onChange({ interviewQuestions: value })} />
-        <ReviewField label="今天补强的一个知识或技能边界是什么？" value={draft.javaPoint} onChange={(value) => onChange({ javaPoint: value })} />
-        <ReviewField label="今天发现了哪些路径问题？" value={draft.pathIssues} onChange={(value) => onChange({ pathIssues: value })} />
-        <ReviewField label="今天哪些回答还容易被面试官追问穿？" value={draft.fragileAnswers} onChange={(value) => onChange({ fragileAnswers: value })} />
-        <ReviewField label="明天最优先补什么？" value={draft.tomorrowPriority} onChange={(value) => onChange({ tomorrowPriority: value })} />
+        <ReviewGroup title="事实">
+          <ReviewField label="今天完成了什么可证明的结果？" value={draft.projectPoint} onChange={(value) => onChange({ projectPoint: value })} />
+          <ReviewField label="哪些面试题或表达已经能回答？" value={draft.interviewQuestions} onChange={(value) => onChange({ interviewQuestions: value })} />
+          <ReviewField label="今天补强了哪个知识边界？" value={draft.javaPoint} onChange={(value) => onChange({ javaPoint: value })} />
+        </ReviewGroup>
+        <ReviewGroup title="卡点">
+          <ReviewField label="今天卡在哪里？" value={draft.pathIssues} onChange={(value) => onChange({ pathIssues: value })} />
+          <ReviewField label="哪个回答还容易被追问？" value={draft.fragileAnswers} onChange={(value) => onChange({ fragileAnswers: value })} />
+        </ReviewGroup>
+        <ReviewGroup title="下一步">
+          <ReviewField label="明天第一件事是什么？" value={draft.tomorrowPriority} onChange={(value) => onChange({ tomorrowPriority: value })} />
+        </ReviewGroup>
       </div>
+      {feedback ? (
+        <p className="mt-4 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" role="status" aria-live="polite">
+          {feedback}
+        </p>
+      ) : null}
       <div className="mt-4 flex flex-wrap gap-2">
         <button
           type="button"
@@ -387,7 +398,7 @@ function ReviewForm({
           onClick={onSave}
         >
           <CheckCircle2 size={16} aria-hidden="true" />
-          {isEditing ? "更新本地复盘" : "保存本地复盘"}
+          {isEditing ? "更新复盘" : "保存复盘"}
         </button>
         {isEditing ? (
           <button
@@ -417,6 +428,15 @@ function ReviewField({ label, value, onChange }: { label: string; value: string;
   );
 }
 
+function ReviewGroup({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <fieldset className="rounded-card border border-line bg-surface-0 p-4">
+      <legend className="px-1 text-sm font-black text-ink-900">{title}</legend>
+      <div className="mt-1 grid gap-3">{children}</div>
+    </fieldset>
+  );
+}
+
 function LocalReviewRecords({
   records,
   totalCount,
@@ -442,7 +462,7 @@ function LocalReviewRecords({
         <div className="flex items-center gap-2 text-brand-700">
           <NotebookPen size={18} aria-hidden="true" />
           <div>
-            <h2 className="text-base font-black text-ink-900">本地复盘证据</h2>
+            <h2 className="text-base font-black text-ink-900">复盘历史</h2>
             <p className="mt-1 text-xs font-bold text-ink-500">当前显示 {records.length}/{totalCount} 条</p>
           </div>
         </div>
@@ -469,7 +489,7 @@ function LocalReviewRecords({
             onClick={onExport}
           >
             <Download size={16} aria-hidden="true" />
-            导出当前筛选复盘 JSON
+            导出当前筛选
           </button>
         </div>
       </div>
@@ -481,7 +501,7 @@ function LocalReviewRecords({
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="text-sm font-extrabold text-ink-900">{record.title}</p>
-                    <span className="rounded-control bg-white px-2 py-1 text-xs font-bold text-ink-500">{record.source === "local" ? "React 本地" : "旧版只读"}</span>
+                    <span className="rounded-control bg-white px-2 py-1 text-xs font-bold text-ink-500">{record.source === "local" ? "本机记录" : "历史记录"}</span>
                   </div>
                   {record.projectPoint ? <p className="mt-2 text-xs font-black text-brand-700">项目点：{record.projectPoint}</p> : null}
                   {record.tomorrowPriority ? <p className="mt-1 text-xs font-black text-success-600">明日优先：{record.tomorrowPriority}</p> : null}
@@ -512,11 +532,11 @@ function LocalReviewRecords({
           ))}
         </div>
       ) : (
-        <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">暂无符合筛选条件的本地复盘证据。写一条复盘后，今日 Evidence Gate 会立即更新。</p>
+        <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">暂无符合筛选条件的复盘记录。写一条复盘后，今日 Evidence Gate 会立即更新。</p>
       )}
       {exportPreview ? (
         <div className="mt-4 rounded-card border border-line bg-ink-900 p-4 text-white">
-          <p className="text-xs font-black uppercase text-brand-100">Local export preview</p>
+          <p className="text-xs font-black uppercase text-brand-100">导出预览</p>
           <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-words text-xs font-semibold leading-5">{exportPreview}</pre>
         </div>
       ) : null}

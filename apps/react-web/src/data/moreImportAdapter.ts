@@ -35,12 +35,16 @@ export type ReactStateImportResult =
 const reactStorageKey = "jobSprint.react.v1";
 const evidenceTypes: EvidenceType[] = ["review", "oral_score", "interview_answer", "delivery_record", "learning_note"];
 
-export function parseReactStateImportPayload(payload: unknown): ReactStateImportResult {
+export function parseReactStateImportPayload(payload: unknown, options: { currentDataScope?: string } = {}): ReactStateImportResult {
   if (!isRecord(payload)) {
     return { ok: false, error: "JSON 顶层必须是对象" };
   }
   if (payload.source !== reactStorageKey) {
     return { ok: false, error: "只支持 jobSprint.react.v1 导出文件" };
+  }
+  const payloadDataScope = readPayloadDataScope(payload.storageOwner);
+  if (options.currentDataScope && payloadDataScope && options.currentDataScope !== payloadDataScope) {
+    return { ok: false, error: `导入文件属于 ${payloadDataScope} 数据域，不能恢复到当前 ${options.currentDataScope} 数据域` };
   }
 
   const completed = parseCompleted(payload.completed);
@@ -225,4 +229,11 @@ function isDelayRecord(value: unknown): value is DelayRecord {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function readPayloadDataScope(value: unknown): string {
+  if (!isRecord(value)) return "";
+  const dataScope = typeof value.dataScope === "string" ? value.dataScope.trim() : "";
+  const username = typeof value.username === "string" ? value.username.trim() : "";
+  return dataScope || username;
 }

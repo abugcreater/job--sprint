@@ -37,6 +37,10 @@ final class RemoteUrlPolicy {
         return ALLOWED_REMOTE_HOSTS.contains(host);
     }
 
+    static boolean isAllowedRemoteHost(String host, String configuredRemoteUrl) {
+        return isAllowedRemoteHost(host) || hostMatchesConfiguredUrl(host, configuredRemoteUrl);
+    }
+
     static boolean isUsableHttpsUrl(String url) {
         return isUsableRemoteUrl(url) && "https".equalsIgnoreCase(Uri.parse(url).getScheme());
     }
@@ -47,7 +51,7 @@ final class RemoteUrlPolicy {
         }
         Uri parsed = Uri.parse(url);
         String path = parsed.getPath();
-        return isAllowedRemoteSchemeAndHost(parsed) && isConfiguredRemoteAppPath(path);
+        return isUsableRemoteSchemeAndHost(parsed) && isConfiguredRemoteAppPath(path);
     }
 
     static String loginUrlFor(String url) {
@@ -70,7 +74,7 @@ final class RemoteUrlPolicy {
             .toString();
     }
 
-    static boolean isAllowedWebViewUrl(String url) {
+    static boolean isAllowedWebViewUrl(String url, String configuredRemoteUrl) {
         if (url == null || url.isEmpty()) {
             return false;
         }
@@ -78,11 +82,19 @@ final class RemoteUrlPolicy {
             return true;
         }
         Uri parsed = Uri.parse(url);
-        return isAllowedRemoteSchemeAndHost(parsed)
+        return isAllowedConfiguredRemoteSchemeAndHost(parsed, configuredRemoteUrl)
             && isAllowedRemoteNavigationPath(parsed.getPath());
     }
 
-    private static boolean isAllowedRemoteSchemeAndHost(Uri parsed) {
+    private static boolean isUsableRemoteSchemeAndHost(Uri parsed) {
+        if (parsed == null || parsed.getHost() == null || parsed.getHost().trim().isEmpty()) {
+            return false;
+        }
+        String scheme = parsed.getScheme();
+        return "https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme);
+    }
+
+    private static boolean isAllowedConfiguredRemoteSchemeAndHost(Uri parsed, String configuredRemoteUrl) {
         if (parsed == null) {
             return false;
         }
@@ -90,7 +102,17 @@ final class RemoteUrlPolicy {
         String host = parsed.getHost();
         boolean allowedScheme = "https".equalsIgnoreCase(scheme)
             || ("http".equalsIgnoreCase(scheme) && ALLOWED_HTTP_REMOTE_HOSTS.contains(host));
-        return allowedScheme && isAllowedRemoteHost(host);
+        return (allowedScheme && isAllowedRemoteHost(host))
+            || (isUsableRemoteSchemeAndHost(parsed) && hostMatchesConfiguredUrl(host, configuredRemoteUrl));
+    }
+
+    private static boolean hostMatchesConfiguredUrl(String host, String configuredRemoteUrl) {
+        if (host == null || configuredRemoteUrl == null || configuredRemoteUrl.trim().isEmpty()) {
+            return false;
+        }
+        Uri configured = Uri.parse(normalizeRemoteUrl(configuredRemoteUrl));
+        String configuredHost = configured.getHost();
+        return configuredHost != null && configuredHost.equalsIgnoreCase(host);
     }
 
     private static boolean isConfiguredRemoteAppPath(String path) {

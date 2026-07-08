@@ -156,6 +156,15 @@ function testRemoteCoachEvidenceMustIncludeRoleQuestionBank() {
   assert(report.findings.some((item) => item.issues && item.issues.includes("role_question_bank_not_proven")));
 }
 
+function testMissingRemoteCoachEvidenceWarnsOnly() {
+  const root = makeFixture();
+  fs.rmSync(path.join(root, "docs/evidence"), { recursive: true, force: true });
+  const report = validateProductIterationWorkflow(root);
+  assert.strictEqual(report.ok, true, JSON.stringify(report, null, 2));
+  assert.strictEqual(report.status, "PASS_WITH_LIMITS");
+  assert(report.warnings.some((item) => item.id === "remote_coach_artifacts" && item.code === "evidence_missing"));
+}
+
 function testCurrentRepoPassesProductIterationGate() {
   const report = validateProductIterationWorkflow(repoRoot);
   assert.strictEqual(report.ok, true, JSON.stringify(report, null, 2));
@@ -166,6 +175,7 @@ testFixtureWarnsWhenProviderIsFallbackOnly();
 testMissingPrdVersionFails();
 testMissingReactGateInNpmTestFails();
 testRemoteCoachEvidenceMustIncludeRoleQuestionBank();
+testMissingRemoteCoachEvidenceWarnsOnly();
 testCurrentRepoPassesProductIterationGate();
 
-console.log("产品迭代工作流门禁测试：6 项通过。");
+console.log("产品迭代工作流门禁测试：7 项通过。");

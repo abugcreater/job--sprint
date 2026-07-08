@@ -1,12 +1,11 @@
-import interviewQuestionsJson from "./interviewQuestionsCompact.json";
-import type { DailySprint, ReviewEvidence, Task, TaskType } from "../types/sprint";
+import type { DailySprint, ReviewEvidence, Task } from "../types/sprint";
 
 export type InterviewMode = "auto" | "java-core" | "resume-java" | "jd-match" | "llm-basics";
 
 export const interviewModes: Array<{ id: InterviewMode; label: string }> = [
   { id: "auto", label: "自动" },
-  { id: "java-core", label: "Java" },
-  { id: "resume-java", label: "项目" },
+  { id: "java-core", label: "技术核心" },
+  { id: "resume-java", label: "项目经历" },
   { id: "jd-match", label: "JD" },
   { id: "llm-basics", label: "AI" }
 ];
@@ -73,29 +72,13 @@ export interface InterviewDashboard {
 
 export const INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY = "jobSprint.react.interviewWeakQuestions.v1";
 
-interface CompactQuestion {
-  id: string;
-  mode: InterviewMode;
-  source: string;
-  question: string;
-  hint: string;
-  expectedKeywords: string[];
-}
-
-interface CompactInterviewFile {
-  questionBank: CompactQuestion[];
-  scoringRubric?: {
-    dimensions?: string[];
-  };
-}
-
 interface StorageLike {
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => void;
 }
 
-const interviewQuestionData = interviewQuestionsJson as CompactInterviewFile;
 const oralEvidenceTypes = new Set(["oral_score", "interview_answer"]);
+const rubricDimensions = ["结论先行", "真实项目证据", "边界与风险", "可验证指标", "下一步复盘"];
 
 export function buildInterviewDashboard(
   sprint: DailySprint,
@@ -116,7 +99,7 @@ export function buildInterviewDashboard(
     candidateQuestions,
     recentRecords,
     recordCount: recentRecords.length,
-    rubricDimensions: interviewQuestionData.scoringRubric?.dimensions ?? []
+    rubricDimensions
   };
 }
 
@@ -124,7 +107,7 @@ export function buildOralEvidenceContent(task: Task, question: InterviewQuestion
   const normalizedAnswer = answer.trim().replace(/\s+/g, " ");
   const clippedAnswer = normalizedAnswer.length > 220 ? `${normalizedAnswer.slice(0, 220)}...` : normalizedAnswer;
   const keywords = question.expectedKeywords.length ? `；关键词：${question.expectedKeywords.slice(0, 5).join("、")}` : "";
-  const score = analysis ? `；AI评分：${analysis.score}分（${analysis.level}，本地规则版）；薄弱点：${analysis.gaps.join("、") || "暂无明显缺口"}；建议追问：${analysis.nextQuestions.join("、")}` : "";
+  const score = analysis ? `；AI评分：${analysis.score}分（${analysis.level}，自检评分）；薄弱点：${analysis.gaps.join("、") || "暂无明显缺口"}；建议追问：${analysis.nextQuestions.join("、")}` : "";
   return `React 面试页本地记录：围绕「${task.title}」完成一轮口述。题目：${question.question}；回答摘要：${clippedAnswer}${keywords}${score}`;
 }
 
@@ -252,11 +235,11 @@ function buildOralTasks(
 }
 
 function buildCandidateQuestions(targetTask: Task | undefined, mode: InterviewMode): InterviewQuestionOption[] {
-  const fromTask = taskQuestions(targetTask);
-  const fromBank = filterQuestionBank(targetTask, mode).map(toQuestionOption);
+  if (!targetTask) return [];
+  const fromTask = taskQuestions(targetTask, mode);
 
   const seen = new Set<string>();
-  return [...fromTask, ...fromBank].filter((question) => {
+  return fromTask.filter((question) => {
     const key = question.question.trim();
     if (!key || seen.has(key)) return false;
     seen.add(key);
@@ -264,51 +247,27 @@ function buildCandidateQuestions(targetTask: Task | undefined, mode: InterviewMo
   }).slice(0, 8);
 }
 
-function taskQuestions(task: Task | undefined): InterviewQuestionOption[] {
+function taskQuestions(task: Task | undefined, mode: InterviewMode): InterviewQuestionOption[] {
   if (!task) return [];
+  const questions = task.interviewQuestions.length
+    ? task.interviewQuestions
+    : [
+        `请用 60 秒说明「${task.title}」的真实背景、动作和结果。`,
+        `「${task.title}」最容易被追问的边界是什么？`,
+        `完成「${task.title}」后，你能拿出什么证据证明它不是空计划？`
+      ];
 
-  return task.interviewQuestions.map((question, index) => ({
+  return questions.map((question, index) => ({
     id: `${task.id}-question-${index + 1}`,
     mode: "current-task",
-    modeLabel: "当前任务",
+    modeLabel: mode === "auto" ? "当前任务" : "当前任务",
     source: task.title,
     question,
-    hint: task.javaMapping ?? task.acceptanceCriteria ?? "先讲机制，再讲真实项目边界和证据。",
+    hint: task.acceptanceCriteria || "先给结论，再讲真实经历、边界、证据和下一步。",
     expectedKeywords: [...task.tags, ...task.deliverables].slice(0, 8),
     taskId: task.id,
     isCurrentTask: true
   }));
-}
-
-function filterQuestionBank(targetTask: Task | undefined, mode: InterviewMode): CompactQuestion[] {
-  const questions = interviewQuestionData.questionBank ?? [];
-  if (mode !== "auto") {
-    return questions.filter((question) => question.mode === mode);
-  }
-
-  const taskText = targetTask ? [targetTask.title, targetTask.description, targetTask.javaMapping, targetTask.tags.join(" ")].join(" ") : "";
-  if (/LLM|RAG|Agent|AI|模型|检索|初学/.test(taskText)) {
-    return questions.filter((question) => question.mode === "llm-basics" || question.mode === "jd-match");
-  }
-  if (targetTask?.type === "java" || /Spring|JVM|MQ|Redis|事务|缓存|P99/.test(taskText)) {
-    return questions.filter((question) => question.mode === "java-core" || question.mode === "resume-java");
-  }
-  if (targetTask && isDeliveryLike(targetTask.type)) {
-    return questions.filter((question) => question.mode === "jd-match" || question.mode === "resume-java");
-  }
-  return questions.filter((question) => question.mode === "resume-java" || question.mode === "llm-basics");
-}
-
-function toQuestionOption(question: CompactQuestion): InterviewQuestionOption {
-  return {
-    ...question,
-    modeLabel: interviewModeLabel(question.mode),
-    isCurrentTask: false
-  };
-}
-
-function isDeliveryLike(type: TaskType): boolean {
-  return type === "resume" || type === "delivery";
 }
 
 function buildRecentRecords(tasks: Task[], evidenceByTaskId: Record<string, ReviewEvidence[]>): OralEvidenceRecord[] {

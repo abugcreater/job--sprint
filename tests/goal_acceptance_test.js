@@ -4,6 +4,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { goalAcceptanceCheck } = require("../tools/delivery_readiness_goal");
+const { deliveryCommands } = require("../tools/delivery_action_commands");
 const { summarizeStatus, validateGoalAcceptance } = require("../tools/validate_goal_acceptance");
 
 const repoRoot = path.resolve(__dirname, "..");
@@ -216,10 +217,10 @@ function testCurrentRepoReportsExternalDeliveryState() {
   const deliveryGoal = report.goals.find((goal) => goal.id === "server_sync_and_formal_apk");
   assert(["PASS_WITH_LIMITS", "USER_ACTION_REQUIRED", "FAIL"].includes(deliveryGoal.status), `unexpected delivery goal status ${deliveryGoal.status}`);
   const deliveryInputs = deliveryGoal.requiredInputs.join("\n");
-  assert(deliveryInputs.includes("final:delivery -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env"), "delivery goal should mention final delivery when the final report is missing or stale");
+  assert(deliveryInputs.includes(deliveryCommands.finalDelivery), "delivery goal should mention final delivery when the final report is missing or stale");
   if (deliveryGoal.missing.some((item) => item.includes("android_remote"))) {
     assert(
-      deliveryInputs.includes("test:android:remote:functional -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env"),
+      deliveryInputs.includes(deliveryCommands.androidRemote),
       "delivery goal should mention Android remote only when Android remote evidence is invalid or missing"
     );
   }
@@ -229,13 +230,17 @@ function testCurrentRepoReportsExternalDeliveryState() {
       "failed delivery goal should expose the invalid external evidence"
     );
   } else {
-    assert(
-      !deliveryInputs.includes("write:server-sync-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env"),
-      "delivery goal should not require server sync after default server sync evidence is present"
+    const missingServerSync = deliveryGoal.missing.some((item) => item.includes("server_sync") || item === "evidence_missing");
+    const missingServerRemote = deliveryGoal.missing.some((item) => item.includes("server_remote") || item === "evidence_missing");
+    assert.strictEqual(
+      deliveryInputs.includes(deliveryCommands.serverSync),
+      missingServerSync,
+      "delivery goal should require server sync exactly when default server sync evidence is missing or invalid"
     );
-    assert(
-      !deliveryInputs.includes("write:remote-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env"),
-      "delivery goal should not require server remote evidence after default server remote evidence is present"
+    assert.strictEqual(
+      deliveryInputs.includes(deliveryCommands.serverRemote),
+      missingServerRemote,
+      "delivery goal should require server remote evidence exactly when default server remote evidence is missing or invalid"
     );
   }
 }

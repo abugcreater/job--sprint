@@ -5,25 +5,19 @@ const html = fs.readFileSync("schedule.html", "utf8");
 const js = fs.readFileSync("assets/schedule.js", "utf8");
 const css = fs.readFileSync("assets/schedule.css", "utf8");
 
-assert.match(html, /id="taskDetailSheet"/);
-assert.match(html, /id="taskDetailSheetBody"/);
-assert.match(html, /id="sheetBackdrop"/);
-assert.match(js, /function openTaskDetail\(app, els, blockId, state, now\)/);
-assert.match(js, /function renderTaskDetailSheet\(app, els, block\)/);
-assert.match(js, /openSheet\(app, els, "taskDetail"\)/);
-assert.ok(!/detailButton\.addEventListener\("click",[\s\S]{0,160}renderAll\(app, els\)/.test(js));
-assert.match(css, /\.bottom-sheet/);
-assert.match(css, /\.sheet-backdrop/);
-assert.match(css, /\.right-column\s*\{\s*display:\s*none;/);
-assert.match(css, /overflow-x:\s*hidden/);
-assert.match(css, /overscroll-behavior:\s*contain/);
+assert.match(html, /正在进入 Job Sprint/);
+assert.match(html, /React 今日页/);
+assert.match(html, /\.\/react\/index\.html#\/today/);
+assert.doesNotMatch(html, /id="taskDetailSheet"/);
+assert.doesNotMatch(html, /id="taskDetailSheetBody"/);
+assert.doesNotMatch(html, /id="sheetBackdrop"/);
 
-[
-  "描述",
-  "必须产出",
-  "必须会答",
-  "Java 映射",
-  "验收标准"
-].forEach((label) => assert.ok(js.includes(label), `missing detail field: ${label}`));
+assert.match(js, /reactTodayPath/);
+assert.match(js, /window\.location\.replace/);
+assert.doesNotMatch(js, /function openTaskDetail/);
+assert.doesNotMatch(js, /function renderTaskDetailSheet/);
+assert.doesNotMatch(js, /openSheet\(app, els, "taskDetail"\)/);
+
+assert.ok(css.length > 0);
 
 console.log("mobile schedule detail tests passed");

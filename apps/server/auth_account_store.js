@@ -3,7 +3,7 @@ const path = require("path");
 const { sha256 } = require("./auth");
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{2,64}$/;
-const ROLE_ALLOWLIST = new Set(["owner", "coach", "viewer"]);
+const ROLE_ALLOWLIST = new Set(["coach", "viewer"]);
 
 function accountProvisioningCapability(env = process.env) {
   if (String(env.JOB_SPRINT_USERS_JSON || "").trim()) {
@@ -43,7 +43,7 @@ function provisionUserAccountFromInvitation(payload, env = process.env) {
 
   const username = text(payload, "username");
   const password = text(payload, "password");
-  const validationError = validateProvisioningPayload(username, password);
+  const validationError = validateProvisioningPayload(username, password, text(payload, "accountRole"));
   if (validationError) {
     return {
       ok: false,
@@ -198,7 +198,7 @@ function userAccountsForManagement(env = process.env) {
     }));
 }
 
-function validateProvisioningPayload(username, password) {
+function validateProvisioningPayload(username, password, accountRole = "") {
   if (!USERNAME_PATTERN.test(username)) {
     return {
       status: "FAIL",
@@ -211,6 +211,20 @@ function validateProvisioningPayload(username, password) {
       status: "FAIL",
       error: "password_too_short",
       message: "登录密码至少 8 位。"
+    };
+  }
+  if (accountRole === "owner") {
+    return {
+      status: "FAIL",
+      error: "owner_account_role_forbidden",
+      message: "邀请账号不能开通 owner 权限；owner 账号只能通过服务端配置。"
+    };
+  }
+  if (accountRole && !ROLE_ALLOWLIST.has(accountRole)) {
+    return {
+      status: "FAIL",
+      error: "invalid_account_role",
+      message: "邀请账号角色只能是 coach 或 viewer。"
     };
   }
   return null;

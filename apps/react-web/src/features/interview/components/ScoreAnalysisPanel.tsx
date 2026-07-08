@@ -7,7 +7,7 @@ export function ScoreAnalysisPanel({ analysis }: { analysis: OralScoreAnalysis }
       <div className="flex flex-wrap items-center gap-2">
         <span className="rounded-control bg-brand-700 px-3 py-1 text-sm font-black text-white">{analysis.score} 分</span>
         <span className="rounded-control bg-white px-3 py-1 text-sm font-black text-brand-700">{analysis.level}</span>
-        <span className="rounded-control bg-white px-3 py-1 text-xs font-bold text-ink-500">本地规则版</span>
+        <span className="rounded-control bg-white px-3 py-1 text-xs font-bold text-ink-500">自检评分</span>
       </div>
       <p className="mt-3 text-sm font-bold leading-6 text-ink-800">{analysis.summary}</p>
       <div className="mt-4 grid gap-3 md:grid-cols-2">

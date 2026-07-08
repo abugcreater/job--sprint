@@ -19,22 +19,22 @@ function makeFixture() {
     scripts: {
       "test:functional": "node tests/react_functional_persistence_test.js",
       "test:android:functional": "node tests/android_webview_functional_persistence_test.js",
-      "test:android:remote:functional": "node tests/android_webview_functional_persistence_test.js --remote"
+      "test:android:remote:functional": "node tools/run_android_remote_functional_evidence.js --remote"
     }
   }, null, 2));
   writeFile(root, "tests/react_functional_persistence_test.js", [
     "用户名 密码 进入工作台 今日 AI 教练 delivery_record learning_note",
     "延期原因 delayRecords 知识边界 learningKnowledgeMarks 面试训练 interviewWeakQuestions",
-    "AI 教练设置 生成 AI 草稿 userProfiles knowledgeBoundaries coachScheduleEvents aiArtifacts",
-    "机会验证 applications 复盘归因 review 更多入口 导出 JSON 导入 React 状态 JSON",
+    "AI 求职教练 生成 AI 建议 userProfiles knowledgeBoundaries coachScheduleEvents aiArtifacts",
+    "机会验证 applications 今日复盘 review 我的数据 导出 JSON 导入个人数据备份",
     "browser restart should preserve expected localStorage bytes and hashes"
   ].join("\n"));
   writeFile(root, "tests/android_webview_functional_persistence_test.js", [
     "AUTH_EVIDENCE loginPageSeen loginAttempted sessionStates readSessionState",
     "assertExpectedStorage Android 延期原因 delayRecords",
-    "AI 教练设置 生成 AI 草稿 profileCount aiArtifactCount",
-    "知识边界 learningMarkedCount 面试训练 interviewWeakCount 机会验证 applications 复盘归因 review",
-    "更多入口 导入 React 状态 JSON android-webview-functional-persistence-report.json",
+    "AI 求职教练 生成 AI 建议 profileCount aiArtifactCount",
+    "知识边界 learningMarkedCount 面试训练 interviewWeakCount 机会验证 applications 今日复盘 review",
+    "我的数据 导入个人数据备份 android-webview-functional-persistence-report.json",
     "am\", \"force-stop\" Android app restart should preserve expected localStorage bytes and hashes"
   ].join("\n"));
   writeFile(root, "docs/evidence/android-functional/android-webview-functional-persistence-report.json", JSON.stringify({
@@ -156,6 +156,17 @@ function testMissingLoginSessionEvidenceFails() {
   )));
 }
 
+function testMissingOptionalAndroidEvidenceWarnsOnly() {
+  const root = makeFixture();
+  fs.rmSync(path.join(root, "docs/evidence"), { recursive: true, force: true });
+  const report = validateFeatureParity(root);
+  assert.strictEqual(report.ok, true, JSON.stringify(report, null, 2));
+  assert(report.findings.some((finding) => (
+    finding.code === "feature_parity_android_evidence_missing"
+    && finding.severity === "warning"
+  )));
+}
+
 function testCurrentRepoPasses() {
   const report = validateFeatureParity(repoRoot);
   assert.strictEqual(report.ok, true, JSON.stringify(report, null, 2));
@@ -168,6 +179,7 @@ testFixturePasses();
 testMissingAndroidDelayFails();
 testInvalidAndroidEvidenceFails();
 testMissingLoginSessionEvidenceFails();
+testMissingOptionalAndroidEvidenceWarnsOnly();
 testCurrentRepoPasses();
 
-console.log("功能对齐门禁测试：6 项通过。");
+console.log("功能对齐门禁测试：7 项通过。");

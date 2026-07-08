@@ -10,7 +10,7 @@ export interface CoachOnboardingTemplate {
 }
 
 export const coachOnboardingTemplates: CoachOnboardingTemplate[] = [
-  template("backend", "后端求职者", "Java 后端工程师", "MQ、Redis、Spring、JVM、事务、稳定性、高并发、缓存、分布式"),
+  template("backend", "后端求职者", "后端工程师", "接口设计、数据库、缓存、消息队列、稳定性、高并发、分布式"),
   template("frontend", "前端求职者", "前端工程师", "性能、组件、状态管理、工程化、首屏、发布、兼容性"),
   template("qa", "测试求职者", "测试开发工程师", "接口自动化、测试分层、质量指标、稳定性、缺陷归因、Mock"),
   template("ops", "运维求职者", "运维工程师", "监控、告警、发布、回滚、故障恢复、容量、变更"),
@@ -30,6 +30,6 @@ function template(roleFamily: ProfileRoleFamily, label: string, targetRole: stri
     roleFamily,
     targetRole,
     nonClaims: "不包装未实际主导的项目、指标、线上结果或不熟悉技术。",
-    sourceText: `首登模板关键词：${sourceText}。请结合真实 JD、简历或面试反馈替换和补充。`
+    sourceText: `建档模板关键词：${sourceText}。请结合真实 JD、简历或面试反馈替换和补充。`
   };
 }

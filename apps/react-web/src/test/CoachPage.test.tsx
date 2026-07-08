@@ -1,4 +1,5 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
+import { vi } from "vitest";
 import { App } from "../App";
 import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";
@@ -27,6 +28,12 @@ function resetSprint(hash = "#/coach") {
   });
 }
 
+function panelByHeading(name: string) {
+  const panel = screen.getByRole("heading", { name }).closest("article, section");
+  if (!panel) throw new Error(`Panel not found: ${name}`);
+  return within(panel as HTMLElement);
+}
+
 describe("React Job Sprint AI coach workspace", () => {
   beforeEach(() => {
     resetSprint();
@@ -35,41 +42,32 @@ describe("React Job Sprint AI coach workspace", () => {
   it("saves a profile, knowledge boundary, schedule event and AI artifact decisions", async () => {
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "AI 教练设置" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "邀请制首登编排" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "邀请批次首登看板" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "邀请账号管理" })).toBeInTheDocument();
-    expect(screen.getByText("本周有效推进")).toBeInTheDocument();
-    expect(screen.getByText("采纳后完成")).toBeInTheDocument();
-    expect(screen.getByText("面试复盘")).toBeInTheDocument();
-    expect(screen.getByLabelText("首登模板版本")).toHaveValue("role-family-v1");
-    expect(screen.getByLabelText("批次筛选")).toHaveValue("all");
-    expect(screen.getByRole("button", { name: "生成导出 JSON" })).toBeInTheDocument();
-    expect(screen.getByLabelText("批量账号动作")).toHaveValue("disable");
-    expect(screen.getByLabelText("邀请通知渠道")).toHaveValue("im");
-    expect(screen.getByRole("button", { name: "批量更新账号状态" })).toBeDisabled();
-    expect(screen.getByRole("button", { name: "生成邀请通知" })).toBeDisabled();
-    expect(await screen.findByText("服务端报表未连接；本地仍可继续完成首登编排。")).toBeInTheDocument();
-    expect(await screen.findByText("服务端邀请管理未连接；当前只能查看本地教练流程。")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "AI 求职教练" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "求职画像" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "邀请批次首登看板" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "邀请账号管理" })).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /查看画像、边界、AI 建议和本周推进/ })).toHaveAttribute("href", "#/stats");
     expect(screen.getByText("1/5")).toBeInTheDocument();
-    expect(screen.getByText("首登完成率 20%")).toBeInTheDocument();
-    expect(screen.getByText("当前放弃点 首登画像模板")).toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "记录首登观察" }));
-    expect(await screen.findByText("当前处于本地模式，首登观察未写入服务端。")).toBeInTheDocument();
+    expect(screen.getByText("建档完成度 20%")).toBeInTheDocument();
+    expect(screen.getByText("下一项 求职画像")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "记录建档进度" }));
+    expect(await screen.findByText("当前处于本地模式，建档进度未写入服务端。")).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("画像名称"), { target: { value: "测试开发画像" } });
-    fireEvent.change(screen.getByLabelText("角色族"), { target: { value: "implementation" } });
-    fireEvent.change(screen.getByLabelText("目标岗位"), { target: { value: "测试开发工程师" } });
-    fireEvent.change(screen.getByLabelText("目标等级"), { target: { value: "高级" } });
-    fireEvent.change(screen.getByLabelText("每日分钟"), { target: { value: "45" } });
-    fireEvent.change(screen.getByLabelText("经验摘要"), { target: { value: "5 年测试平台和自动化经验" } });
-    fireEvent.change(screen.getByLabelText("项目证据"), { target: { value: "接口自动化平台、稳定性报表" } });
-    fireEvent.change(screen.getByLabelText("不可夸大边界"), { target: { value: "不包装算法训练经验" } });
+    const profilePanel = panelByHeading("求职画像");
+    fireEvent.change(profilePanel.getByLabelText("画像名称"), { target: { value: "测试开发画像" } });
+    fireEvent.change(profilePanel.getByLabelText("角色族"), { target: { value: "implementation" } });
+    fireEvent.change(profilePanel.getByLabelText("目标岗位"), { target: { value: "测试开发工程师" } });
+    fireEvent.change(profilePanel.getByLabelText("目标等级"), { target: { value: "高级" } });
+    fireEvent.change(profilePanel.getByLabelText("每日分钟"), { target: { value: "45" } });
+    fireEvent.change(profilePanel.getByLabelText("经验摘要"), { target: { value: "5 年测试平台和自动化经验" } });
+    fireEvent.change(profilePanel.getByLabelText("项目证据"), { target: { value: "接口自动化平台、稳定性报表" } });
+    fireEvent.change(profilePanel.getByLabelText("不可夸大边界"), { target: { value: "不包装算法训练经验" } });
     fireEvent.click(screen.getByRole("button", { name: "保存画像" }));
 
-    expect(await screen.findByText("画像已保存，后续 AI 草稿会引用该画像。")).toBeInTheDocument();
+    expect(await screen.findByText("求职画像已保存，后续 AI 建议会引用这份画像。")).toBeInTheDocument();
     expect(useSprintStore.getState().userProfiles).toHaveLength(1);
     expect(useSprintStore.getState().userProfiles[0].roleFamily).toBe("implementation");
+    expect(screen.getByText("画像已保存。")).toBeInTheDocument();
     expect(screen.getByText("2/5")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("边界提取素材"), { target: { value: "JD 要求 MQ、Redis、稳定性，面试官反馈需要补齐故障恢复和线上补偿证据。" } });
@@ -111,9 +109,9 @@ describe("React Job Sprint AI coach workspace", () => {
     expect(useSprintStore.getState().sprint.tasks.some((task) => task.title === "补接口自动化证据")).toBe(true);
     expect(screen.getByText("3/5")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "生成 AI 草稿" }));
+    fireEvent.click(screen.getByRole("button", { name: "生成 AI 建议" }));
 
-    expect(await screen.findByText("服务端 AI 暂不可用，已使用本地规则生成草稿。")).toBeInTheDocument();
+    expect(await screen.findByText("服务端 AI 暂不可用，已使用本地规则生成 AI 建议。")).toBeInTheDocument();
     expect(useSprintStore.getState().aiArtifacts.length).toBeGreaterThanOrEqual(3);
     expect(useSprintStore.getState().llmRuns[0]).toMatchObject({
       provider: "local-fallback",
@@ -124,19 +122,19 @@ describe("React Job Sprint AI coach workspace", () => {
     expect(screen.getByRole("heading", { name: "AI 运行记录" })).toBeInTheDocument();
 
     const firstDraftTitle = useSprintStore.getState().aiArtifacts[0].title;
-    fireEvent.click(screen.getByRole("button", { name: `接受 AI 草稿：${firstDraftTitle}` }));
-    expect(await screen.findByText("已接受知识卡草稿，并写入知识边界。")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: `接受 AI 建议：${firstDraftTitle}` }));
+    expect(await screen.findByText("已接受知识卡建议，并写入知识边界。")).toBeInTheDocument();
     expect(useSprintStore.getState().aiArtifacts.some((artifact) => artifact.status === "accepted")).toBe(true);
     expect(screen.getByText("5/5")).toBeInTheDocument();
-    expect(screen.getAllByText("首登完成").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("首登完成率 100%")).toBeInTheDocument();
-    expect(screen.getByText("当前放弃点 无放弃点")).toBeInTheDocument();
+    expect(screen.getAllByText("建档完成").length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText("建档完成度 100%")).toBeInTheDocument();
+    expect(screen.getByText("下一项 无待办")).toBeInTheDocument();
 
     const draft = useSprintStore.getState().aiArtifacts.find((artifact) => artifact.status === "draft" || artifact.status === "edited");
     expect(draft).toBeDefined();
     if (!draft) return;
     fireEvent.change(screen.getByLabelText(`拒绝原因：${draft.title}`), { target: { value: "这条不贴合今天目标" } });
-    fireEvent.click(screen.getByRole("button", { name: `拒绝 AI 草稿：${draft.title}` }));
+    fireEvent.click(screen.getByRole("button", { name: `拒绝 AI 建议：${draft.title}` }));
 
     expect(useSprintStore.getState().aiArtifacts.some((artifact) => artifact.status === "rejected")).toBe(true);
     expect(await screen.findByRole("heading", { name: "AI 反馈复盘" })).toBeInTheDocument();
@@ -149,37 +147,63 @@ describe("React Job Sprint AI coach workspace", () => {
   it("runs the quick initialization flow from profile to boundaries and first schedule", async () => {
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "快速初始化" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "导入简历建档" })).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("首登模板"), { target: { value: "qa" } });
-    fireEvent.click(screen.getByRole("button", { name: "套用模板" }));
-    expect(await screen.findByText("已套用「测试求职者」首登模板。")).toBeInTheDocument();
-    expect(screen.getByLabelText("快速目标岗位")).toHaveValue("测试开发工程师");
-    expect((screen.getByLabelText("初始化素材") as HTMLTextAreaElement).value).toContain("接口自动化");
+    const wizardPanel = panelByHeading("导入简历建档");
+    fireEvent.change(wizardPanel.getByLabelText("建档模板"), { target: { value: "qa" } });
+    fireEvent.click(wizardPanel.getByRole("button", { name: "套用模板" }));
+    expect(await screen.findByText("已套用「测试求职者」建档模板。")).toBeInTheDocument();
+    expect(wizardPanel.getByLabelText("快速建档目标岗位")).toHaveValue("测试开发工程师");
+    expect((wizardPanel.getByLabelText("导入素材") as HTMLTextAreaElement).value).toContain("接口自动化");
     expect(screen.getByText("已识别 1 段素材：其它")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "追加面试反馈" }));
+    fireEvent.click(wizardPanel.getByRole("button", { name: "追加面试反馈" }));
     expect(await screen.findByText("已追加「面试反馈」素材段。")).toBeInTheDocument();
-    expect((screen.getByLabelText("初始化素材") as HTMLTextAreaElement).value).toContain("面试反馈");
+    expect((wizardPanel.getByLabelText("导入素材") as HTMLTextAreaElement).value).toContain("面试反馈");
     expect(screen.getByText("已识别 2 段素材：其它、面试反馈")).toBeInTheDocument();
 
-    fireEvent.change(screen.getByLabelText("快速每日分钟"), { target: { value: "60" } });
-    fireEvent.change(screen.getByLabelText("快速经验摘要"), { target: { value: "5 年测试开发，做过接口自动化平台和稳定性治理" } });
-    fireEvent.click(screen.getByRole("button", { name: "保存画像并生成边界" }));
+    fireEvent.change(wizardPanel.getByLabelText("快速建档每日分钟"), { target: { value: "60" } });
+    fireEvent.change(wizardPanel.getByLabelText("快速建档经验摘要"), { target: { value: "5 年测试开发，做过接口自动化平台和稳定性治理" } });
+    fireEvent.click(wizardPanel.getByRole("button", { name: "生成画像建议" }));
+    expect(await screen.findByText(/已生成画像建议/)).toBeInTheDocument();
+    fireEvent.click(wizardPanel.getByRole("button", { name: "确认写入画像" }));
 
-    expect(await screen.findByText("已生成初始化边界候选。")).toBeInTheDocument();
+    expect(await screen.findByText("求职画像已保存，已准备好可确认的知识边界。")).toBeInTheDocument();
     expect(useSprintStore.getState().userProfiles).toHaveLength(1);
     expect(useSprintStore.getState().knowledgeBoundaries).toHaveLength(0);
 
-    fireEvent.click(screen.getByRole("button", { name: "采纳初始化边界" }));
-    expect(await screen.findByText("已采纳 3 条初始化边界。")).toBeInTheDocument();
+    fireEvent.click(wizardPanel.getByRole("button", { name: "采纳建议边界" }));
+    expect(await screen.findByText("已采纳 3 条知识边界。")).toBeInTheDocument();
     expect(useSprintStore.getState().knowledgeBoundaries).toHaveLength(3);
 
-    fireEvent.click(screen.getByRole("button", { name: "生成首条日程" }));
-    expect(await screen.findByText("已生成首条个人日程。")).toBeInTheDocument();
+    fireEvent.click(wizardPanel.getByRole("button", { name: "生成今日行动" }));
+    expect(await screen.findByText("已生成今天的第一条行动。")).toBeInTheDocument();
     expect(useSprintStore.getState().coachScheduleEvents).toHaveLength(1);
     expect(useSprintStore.getState().coachScheduleEvents[0].title).toMatch(/^补 .+ 面试表达$/);
     expect(screen.getByText("4/5")).toBeInTheDocument();
+  });
+
+  it("deletes a profile from the redesigned profile panel and clears related data", async () => {
+    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
+    render(<App />);
+
+    const profilePanel = panelByHeading("求职画像");
+    fireEvent.change(await profilePanel.findByLabelText("画像名称"), { target: { value: "可删除画像" } });
+    fireEvent.change(profilePanel.getByLabelText("目标岗位"), { target: { value: "测试开发工程师" } });
+    fireEvent.change(profilePanel.getByLabelText("每日分钟"), { target: { value: "45" } });
+    fireEvent.change(profilePanel.getByLabelText("经验摘要"), { target: { value: "5 年测试平台经验" } });
+    fireEvent.click(screen.getByRole("button", { name: "保存画像" }));
+
+    expect(await screen.findByText("画像已保存。")).toBeInTheDocument();
+    expect(useSprintStore.getState().userProfiles).toHaveLength(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "删除此画像" }));
+
+    expect(confirmSpy).toHaveBeenCalled();
+    expect(await screen.findByText("已删除「可删除画像」，关联边界、日程和 AI 建议已同步清理。")).toBeInTheDocument();
+    expect(useSprintStore.getState().userProfiles).toHaveLength(0);
+    expect(screen.getByText("尚未创建画像")).toBeInTheDocument();
+    confirmSpy.mockRestore();
   });
 
   it("shows explicit expand controls when coach schedules and AI drafts exceed the compact list", async () => {
@@ -217,8 +241,8 @@ describe("React Job Sprint AI coach workspace", () => {
       id: `artifact-many-${index + 1}`,
       profileId: profile.id,
       type: index % 3 === 0 ? "knowledge_card" : index % 3 === 1 ? "schedule_suggestion" : "interview_question",
-      title: `候选 AI 草稿 ${index + 1}`,
-      body: "验证 AI 草稿长列表有明确展开入口",
+      title: `候选 AI 建议 ${index + 1}`,
+      body: "验证 AI 建议长列表有明确展开入口",
       reason: "来自画像和知识边界",
       sources: ["画像：前端工程师"],
       confidence: "medium",
@@ -243,10 +267,10 @@ describe("React Job Sprint AI coach workspace", () => {
     expect(await screen.findByText("第6条自定义日程")).toBeInTheDocument();
     expect(screen.getByText("已显示全部 6 条日程。")).toBeInTheDocument();
 
-    expect(screen.getByText("还有 1 条 AI 草稿未显示，先处理最靠前的建议。")).toBeInTheDocument();
-    expect(screen.queryByLabelText("AI 草稿标题：候选 AI 草稿 9")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "查看全部 AI 草稿" }));
-    expect(await screen.findByLabelText("AI 草稿标题：候选 AI 草稿 9")).toBeInTheDocument();
-    expect(screen.getByText("已显示全部 9 条 AI 草稿。")).toBeInTheDocument();
+    expect(screen.getByText("还有 1 条 AI 建议未显示，先处理最靠前的建议。")).toBeInTheDocument();
+    expect(screen.queryByLabelText("AI 建议标题：候选 AI 建议 9")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "查看全部 AI 建议" }));
+    expect(await screen.findByLabelText("AI 建议标题：候选 AI 建议 9")).toBeInTheDocument();
+    expect(screen.getByText("已显示全部 9 条 AI 建议。")).toBeInTheDocument();
   });
 });

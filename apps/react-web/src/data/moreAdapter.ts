@@ -50,6 +50,10 @@ export interface MoreEntryLink {
 export interface ReactStateExportPayload {
   exportedAt: string;
   source: "jobSprint.react.v1";
+  storageOwner?: {
+    username?: string;
+    dataScope?: string;
+  };
   syncState: SyncState;
   lastSavedAt?: string;
   sprint: {
@@ -140,35 +144,35 @@ export function buildMoreDashboard({
     },
     fallback: {
       reactEntry: "apps/react-web/dist -> apps/android/app/src/main/assets/react",
-      webFallbackEntry: "schedule.html + assets/schedule.css + assets/schedule.js",
-      androidFallbackEntry: "apps/android/app/src/main/assets/web/schedule.html",
-      rollbackNote: "React assets 缺失时 Android 会回退旧 web fallback；Web 侧可直接打开旧 schedule.html。"
+      webFallbackEntry: "React 入口（画像生成日历）",
+      androidFallbackEntry: "apps/android/app/src/main/assets/react/index.html",
+      rollbackNote: "旧静态日程不再作为用户入口；没有画像或今日日历时只展示建档引导。"
     },
     exportItems: [
       {
         id: "react-state",
-        title: "导出 React 本地状态",
+        title: "导出个人数据备份",
         status: "可导出",
-        description: "包含 React 完成状态、证据记录、延期、画像、知识边界、边界候选反馈、自定义日程、AI 草稿和 AI 运行记录。",
+        description: "包含完成状态、证据记录、延期、画像、知识边界、自定义日程和 AI 建议。",
         filename: "job-sprint-react-state.json"
       },
       {
         id: "legacy-completion",
-        title: "旧版完成状态 JSON",
-        status: "旧版保留",
-        description: "旧版入口仍提供完成状态、每日复盘、错题、路径审计、机会记录和延期 JSON。"
+        title: "旧版本地数据检测",
+        status: "只检测不合并",
+        description: "旧版完成状态、复盘、错题、机会记录只用于提示迁移风险，不会自动并入今日/知识/面试数据。"
       },
       {
         id: "public-safe",
-        title: "Android fallback 离线包",
-        status: "脚本保留",
-        description: "继续由根目录 public-safe 和 Android build 流程维护，不在本页直接生成。"
+        title: "Android React 资产",
+        status: "随构建同步",
+        description: "Android 本地入口使用 React build 资产，和 Web 共享画像生成日历逻辑。"
       }
     ],
     nextEntries: [
       { label: "回到今日", path: "/today", description: "回到当前任务和 Evidence Gate。" },
-      { label: "进入画像", path: "/coach", description: "维护目标画像、知识边界和 AI 草稿。" },
-      { label: "进入复盘", path: "/review", description: "查看今日证据、风险和本地复盘记录。" }
+      { label: "进入画像", path: "/coach", description: "维护求职画像、知识边界和 AI 建议。" },
+      { label: "进入复盘", path: "/review", description: "记录今日事实、卡点和明日行动。" }
     ]
   };
 }
@@ -185,7 +189,8 @@ export function buildReactStateExportPayload({
   aiArtifacts = [],
   llmRuns = [],
   syncState,
-  lastSavedAt
+  lastSavedAt,
+  storageOwner
 }: {
   sprint: DailySprint;
   completed: Record<string, boolean>;
@@ -199,10 +204,15 @@ export function buildReactStateExportPayload({
   llmRuns?: LlmRun[];
   syncState: SyncState;
   lastSavedAt?: string;
+  storageOwner?: {
+    username?: string;
+    dataScope?: string;
+  };
 }): ReactStateExportPayload {
   return {
     exportedAt: new Date().toISOString(),
     source: reactStorageKey,
+    storageOwner,
     syncState,
     lastSavedAt,
     sprint: {
@@ -244,7 +254,7 @@ function syncLabel(syncState: SyncState): string {
 
 function syncDetail(syncState: SyncState): string {
   if (syncState === "online") return "当前状态已接入同源 /api/runtime；远端可用时会自动同步到服务端数据库。";
-  if (syncState === "local_fallback") return "数据保存在当前浏览器或 Android WebView 的 localStorage。";
+  if (syncState === "local_fallback") return "数据保存在当前设备的本地空间，恢复服务端后可继续同步。";
   if (syncState === "syncing") return "正在与同源 /api/runtime 同步，完成后会回到在线或失败状态。";
   if (syncState === "conflict") return "冲突状态会先保留本地数据；导出 JSON 后再合并，避免覆盖已有证据。";
   return "远端同步失败时仍可继续本地记录；可先导出 JSON 备份，稍后回到今日页或刷新后重试同步。";

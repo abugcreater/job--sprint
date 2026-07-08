@@ -139,7 +139,7 @@ export function buildReviewDashboard(
 export function buildReviewEvidenceContent(sprint: DailySprint, task: Task, draft: ReviewFormDraft): string {
   const projectPoint = cleanLabeledValue(draft.projectPoint, "项目点");
   const interviewQuestions = cleanLabeledValue(draft.interviewQuestions, "面试题");
-  const javaPoint = cleanLabeledValue(draft.javaPoint, "Java 知识点");
+  const javaPoint = cleanLabeledValue(draft.javaPoint, "技术知识点");
   const pathIssues = cleanLabeledValue(draft.pathIssues, "路径问题");
   const fragileAnswers = cleanLabeledValue(draft.fragileAnswers, "易被追问");
   const tomorrowPriority = cleanLabeledValue(draft.tomorrowPriority, "明日优先");
@@ -148,13 +148,13 @@ export function buildReviewEvidenceContent(sprint: DailySprint, task: Task, draf
     `完成进度：${sprint.progress.done}/${sprint.progress.total}`,
     projectPoint ? `项目点：${projectPoint}` : "",
     interviewQuestions ? `面试题：${interviewQuestions}` : "",
-    javaPoint ? `Java 知识点：${javaPoint}` : "",
+    javaPoint ? `技术知识点：${javaPoint}` : "",
     pathIssues ? `路径问题：${pathIssues}` : "",
     fragileAnswers ? `易被追问：${fragileAnswers}` : "",
     tomorrowPriority ? `明日优先：${tomorrowPriority}` : ""
   ].filter(Boolean);
 
-  return `React 复盘页本地记录：${parts.join("；")}`;
+  return `复盘记录：${parts.join("；")}`;
 }
 
 export function isReviewDraftReady(draft: ReviewFormDraft): boolean {
@@ -217,7 +217,7 @@ export function buildReviewAiAnalysis(dashboard: ReviewDashboard, aiFeedback?: A
   ].filter(Boolean);
   const gaps = [
     !hasEvidence ? "缺少 Evidence Gate 证据，无法判断今天是否真实推进。" : "",
-    !hasReview ? "缺少本地复盘记录，AI 无法区分事实、推断和建议。" : "",
+    !hasReview ? "缺少今日复盘，系统无法区分事实、推断和建议。" : "",
     dashboard.completion.evidenceMissing > 0 ? `还有 ${dashboard.completion.evidenceMissing} 项完成记录缺证据。` : "",
     fragileAnswers[0] ? `面试回答仍可能被追问穿：${fragileAnswers[0]}` : "",
     pathIssues[0] ? `执行路径仍不稳：${pathIssues[0]}` : "",
@@ -234,7 +234,7 @@ export function buildReviewAiAnalysis(dashboard: ReviewDashboard, aiFeedback?: A
   const readiness: ReviewAiAnalysis["readiness"] = !hasEvidence ? "needs_evidence" : !hasReview ? "needs_review" : "ready";
   return {
     readiness,
-    summary: readiness === "ready" ? "本地规则版 AI 分析已生成，可用于明日计划和提示词校准。" : "复盘输入不足，先补证据和本地复盘。",
+    summary: readiness === "ready" ? "已生成复盘建议，可用于明日计划和提示词校准。" : "复盘输入不足，先补证据和今日复盘。",
     facts: facts.length ? facts.slice(0, 5) : ["暂无足够事实。"],
     gaps: gaps.length ? gaps.slice(0, 5) : ["暂未发现明显缺口，继续观察后续结果。"],
     recommendations: recommendations.length ? recommendations.slice(0, 5) : ["保持当前节奏，明日继续补一条可验证证据。"],
@@ -321,7 +321,7 @@ function parseReviewRecord(taskId: string, item: ReviewEvidence, source: ReviewE
     createdAt: item.createdAt,
     projectPoint: readContentField(item.content, "项目点"),
     interviewQuestions: readContentField(item.content, "面试题"),
-    javaPoint: readContentField(item.content, "Java 知识点"),
+    javaPoint: readContentField(item.content, "技术知识点") || readContentField(item.content, "Java 知识点"),
     pathIssues: readContentField(item.content, "路径问题"),
     fragileAnswers: readContentField(item.content, "易被追问"),
     tomorrowPriority: readContentField(item.content, "明日优先")

@@ -392,7 +392,7 @@ function run() {
     && envValue("JOB_SPRINT_AUTH_USER", env)
     && (envValue("JOB_SPRINT_AUTH_PASSWORD", env) || envValue("JOB_SPRINT_AUTH_PASS", env))
   ) {
-    steps.push(runCommandWithRetries(runCommand, "android_remote_acceptance", "npm", ["run", "test:android:remote:functional"], env, { maxAttempts: 2 }));
+    steps.push(runCommandWithRetries(runCommand, "android_remote_acceptance", "npm", ["run", "test:android:remote:functional", ...(argSet.has("--allow-create-account") ? ["--", "--allow-create-account"] : [])], env, { maxAttempts: 2 }));
   } else {
     steps.push(missingEnvStep("android_remote_acceptance", [
       "Set JOB_SPRINT_ANDROID_WEBVIEW_URL or a remote base URL.",

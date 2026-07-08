@@ -25,13 +25,16 @@ const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "job-sprint-sensitive-scan-
 try {
   const sshKeyName = ["id", "rsa"].join("_");
   fs.mkdirSync(path.join(tmpDir, "apps", "rust-api", "target", "debug"), { recursive: true });
+  fs.mkdirSync(path.join(tmpDir, "docs", "evidence"), { recursive: true });
   fs.mkdirSync(path.join(tmpDir, "src"), { recursive: true });
   fs.writeFileSync(path.join(tmpDir, "apps", "rust-api", "target", "debug", "job-sprint-api"), `embedded /tmp/${sshKeyName} from compiler output`);
+  fs.writeFileSync(path.join(tmpDir, "docs", "evidence", "remote.json"), `http://${["118", "25", "151", "251"].join(".")} ${["/Users", "kai"].join("/")}`);
   fs.writeFileSync(path.join(tmpDir, "src", "leak.txt"), `manual /tmp/${sshKeyName} source value`);
   const findings = scanRoot(tmpDir);
 
   assert.ok(findings.some((item) => item.file === path.join("src", "leak.txt") && item.rule === "ssh-private-path"));
   assert.ok(findings.every((item) => !item.file.includes(`${path.sep}target${path.sep}`)));
+  assert.ok(findings.every((item) => !item.file.startsWith(path.join("docs", "evidence"))));
 } finally {
   fs.rmSync(tmpDir, { recursive: true, force: true });
 }

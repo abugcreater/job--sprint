@@ -1,7 +1,7 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
 import { App } from "../App";
-import { getScheduleData, buildTodaySprint } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";
+import { buildQaSprint, qaProfile, qaScheduleEvents } from "./fixtures/coachFlow";
 
 const fixedNow = new Date("2026-07-02T10:00:00+08:00");
 
@@ -13,9 +13,16 @@ function resetSprint(hash = "#/today") {
   useSprintStore.setState({
     completed,
     evidenceByTaskId,
+    delayRecords: [],
+    userProfiles: [qaProfile],
+    knowledgeBoundaries: [],
+    boundarySuggestionFeedback: [],
+    coachScheduleEvents: qaScheduleEvents,
+    aiArtifacts: [],
+    llmRuns: [],
     syncState: "local_fallback",
     lastSavedAt: undefined,
-    sprint: buildTodaySprint(getScheduleData(), fixedNow, { completed, evidenceByTaskId, syncState: "local_fallback" })
+    sprint: buildQaSprint({ now: fixedNow, completed, evidenceByTaskId })
   });
 }
 
@@ -24,7 +31,7 @@ describe("React Job Sprint module routing", () => {
     resetSprint();
   });
 
-  it("navigates from the mobile bottom nav to the coach and learning workspaces", async () => {
+  it("navigates from the mobile bottom nav to coach, stats and more workspaces", async () => {
     render(<App />);
 
     const nav = screen.getByRole("navigation", { name: "移动端底部导航" });
@@ -32,25 +39,25 @@ describe("React Job Sprint module routing", () => {
 
     fireEvent.click(coachLink);
 
-    expect(await screen.findByRole("heading", { name: "AI 教练设置" })).toBeInTheDocument();
-    expect(screen.getByText(/草稿必须经你接受后才会写入日程或知识边界/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "AI 求职教练" })).toBeInTheDocument();
+    expect(screen.getByText(/建议必须经你接受后才会写入日程或知识边界/)).toBeInTheDocument();
     expect(coachLink).toHaveAttribute("aria-current", "page");
     expect(window.location.hash).toBe("#/coach");
 
-    const learnLink = within(nav).getByRole("link", { name: "知识" });
+    const statsLink = within(nav).getByRole("link", { name: "统计" });
 
-    fireEvent.click(learnLink);
+    fireEvent.click(statsLink);
 
-    expect(await screen.findByRole("heading", { name: "知识边界" })).toBeInTheDocument();
-    expect(screen.getByText(/学习笔记直接进入 Evidence Gate/)).toBeInTheDocument();
-    expect(learnLink).toHaveAttribute("aria-current", "page");
-    expect(window.location.hash).toBe("#/learn");
+    expect(await screen.findByRole("heading", { name: "进展统计" })).toBeInTheDocument();
+    expect(screen.getByText(/这里集中查看个人执行/)).toBeInTheDocument();
+    expect(statsLink).toHaveAttribute("aria-current", "page");
+    expect(window.location.hash).toBe("#/stats");
 
     const moreLink = within(nav).getByRole("link", { name: "更多" });
     fireEvent.click(moreLink);
 
-    expect(await screen.findByRole("heading", { name: "更多入口" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "进入复盘 查看今日证据、风险和本地复盘记录。" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "我的数据" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "进入复盘 记录今日事实、卡点和明日行动。" })).toBeInTheDocument();
     expect(moreLink).toHaveAttribute("aria-current", "page");
     expect(window.location.hash).toBe("#/more");
   });
@@ -60,9 +67,20 @@ describe("React Job Sprint module routing", () => {
 
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "复盘归因" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "本地复盘记录" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "今日复盘" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "复盘历史" })).toBeInTheDocument();
     const nav = screen.getByRole("navigation", { name: "移动端底部导航" });
     expect(within(nav).getByRole("link", { name: "更多" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("redirects non-owner direct admin access to the ordinary more workspace", async () => {
+    resetSprint("#/admin");
+
+    render(<App />);
+
+    expect(await screen.findByRole("heading", { name: "我的数据" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "管理员中心" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "我的账号" })).toBeInTheDocument();
+    expect(window.location.hash).toBe("#/more");
   });
 });

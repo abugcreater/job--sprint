@@ -1,4 +1,4 @@
-import { AlertTriangle, ArrowRight, CircleDot, Clock3, CloudOff, FileText, RefreshCw, Route, ShieldCheck, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowRight, CalendarPlus, CircleDot, Clock3, CloudOff, FileText, RefreshCw, Route, ShieldCheck, Sparkles, Upload, UserRound } from "lucide-react";
 import { useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { buildCoachDashboard } from "../../data/coachAdapter";
@@ -32,6 +32,8 @@ export function TodayPage() {
     () => buildCoachDashboard({ profiles: userProfiles, boundaries: knowledgeBoundaries, scheduleEvents: coachScheduleEvents, artifacts: aiArtifacts }),
     [aiArtifacts, coachScheduleEvents, knowledgeBoundaries, userProfiles]
   );
+  const hasActiveProfile = Boolean(coachDashboard.activeProfile);
+  const needsSetup = !hasActiveProfile || sprint.tasks.length === 0;
   const evidenceSummary = currentTask
     ? getEvidenceSummary(currentTask.id, sprint.date, evidenceByTaskId, legacySnapshot)
     : { evidence: [], hasEvidence: false, summary: "今日暂无任务，进入复盘即可。" };
@@ -61,6 +63,14 @@ export function TodayPage() {
           </div>
         </header>
 
+        {needsSetup ? (
+          <TodaySetupPanel
+            hasProfile={hasActiveProfile}
+            boundaryCount={coachDashboard.boundaries.length}
+            profileName={coachDashboard.activeProfile?.targetRole}
+          />
+        ) : (
+          <>
         <div className="order-2 md:order-none">
           <ProgressDashboard
             sprint={sprint}
@@ -140,19 +150,84 @@ export function TodayPage() {
             </ul>
           </InfoPanel>
         </section>
+          </>
+        )}
       </section>
     </main>
   );
 }
 
+function TodaySetupPanel({ hasProfile, boundaryCount, profileName }: { hasProfile: boolean; boundaryCount: number; profileName?: string }) {
+  const steps = [
+    {
+      icon: <Upload size={18} aria-hidden="true" />,
+      title: "导入简历或 JD",
+      detail: "粘贴简历、JD 或面试反馈，先生成画像建议。",
+      done: hasProfile
+    },
+    {
+      icon: <UserRound size={18} aria-hidden="true" />,
+      title: "确认求职画像",
+      detail: hasProfile ? `当前画像：${profileName ?? "已保存画像"}` : "确认目标岗位、城市、经验摘要和不可夸大边界。",
+      done: hasProfile
+    },
+    {
+      icon: <CalendarPlus size={18} aria-hidden="true" />,
+      title: "生成今日日历",
+      detail: boundaryCount ? "采纳知识边界后，生成今天的个人行动。" : "先采纳至少一条知识边界，再生成今日行动。",
+      done: false
+    }
+  ];
+
+  return (
+    <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <article className="command-card p-5 md:p-6">
+        <p className="text-sm font-black text-brand-700">{hasProfile ? "画像已就绪" : "还没有求职画像"}</p>
+        <h2 className="mt-2 text-2xl font-black leading-tight text-ink-900 md:text-3xl">
+          {hasProfile ? "先生成今天的个人日历" : "先导入简历建档，再开始今日任务"}
+        </h2>
+        <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-600">
+          今日页只展示你自己画像生成的行动。没有画像或没有今日日历时，系统不会加载任何示例任务、旧日程或历史数据。
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <Link to="/coach" className="primary-button">
+            <Upload size={17} aria-hidden="true" />
+            {hasProfile ? "生成今日日历" : "导入简历建档"}
+          </Link>
+          <Link to="/stats" className="secondary-button">
+            查看统计
+          </Link>
+        </div>
+      </article>
+
+      <aside className="command-panel">
+        <h2 className="text-lg font-black text-ink-900">开始顺序</h2>
+        <div className="mt-4 space-y-3">
+          {steps.map((step, index) => (
+            <div key={step.title} className="flex gap-3 rounded-card bg-surface-0 p-3">
+              <span className={`grid size-9 shrink-0 place-items-center rounded-control ${step.done ? "bg-success-100 text-success-600" : index === 0 || hasProfile ? "bg-brand-100 text-brand-700" : "bg-white text-ink-500"}`}>
+                {step.icon}
+              </span>
+              <div>
+                <p className="text-sm font-black text-ink-900">{step.title}</p>
+                <p className="mt-1 text-xs font-semibold leading-5 text-ink-500">{step.detail}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </aside>
+    </section>
+  );
+}
+
 function buildCoachAdvice(task: Task | undefined, hasEvidence: boolean, evidenceMissing: number, coachDashboard: ReturnType<typeof buildCoachDashboard>): string {
-  if (!coachDashboard.activeProfile) return "先保存目标画像，今日建议才能引用你的目标岗位、城市、时间投入和不可夸大边界。";
+  if (!coachDashboard.activeProfile) return "先保存求职画像，今日建议才能引用你的目标岗位、城市、时间投入和不可夸大边界。";
   if (!coachDashboard.boundaries.length) return `「${coachDashboard.activeProfile.targetRole}」画像已就绪，下一步先补一条知识边界。`;
-  if (coachDashboard.draftArtifacts.length) return `有 ${coachDashboard.draftArtifacts.length} 条 AI 草稿待确认，先接受、编辑或拒绝，再进入执行。`;
+  if (coachDashboard.draftArtifacts.length) return `有 ${coachDashboard.draftArtifacts.length} 条 AI 建议待确认，先接受、编辑或拒绝，再进入执行。`;
   if (!task) return "今日没有可执行任务，先进入复盘确认明日计划。";
   if (!hasEvidence) return `先为「${task.title}」补一条可读回证据，再标记完成。`;
   if (evidenceMissing > 0) return `「${task.title}」已有证据，继续补齐口述或复盘证据会让闭环更稳。`;
-  return `「${task.title}」证据已就绪，可以标记完成并进入复盘归因。`;
+  return `「${task.title}」证据已就绪，可以标记完成并进入复盘。`;
 }
 
 function SyncRecoveryPill({ syncState, lastSavedAt }: { syncState: string; lastSavedAt?: string }) {

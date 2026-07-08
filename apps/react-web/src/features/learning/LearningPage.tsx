@@ -1,6 +1,6 @@
-import { ArrowRight, BookOpen, Filter, Layers3, NotebookPen, RotateCcw, Search, Star, StarOff, WifiOff } from "lucide-react";
+import { ArrowRight, BookOpen, Filter, Layers3, NotebookPen, RotateCcw, Search, Star, StarOff } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
-import { syncStateLabel } from "../../app/syncStatus";
+import { Link } from "react-router-dom";
 import {
   buildLearningDashboard,
   buildLearningNoteContent,
@@ -20,7 +20,7 @@ import { LearningTaskCard } from "./components/LearningTaskCard";
 export function LearningPage() {
   const sprint = useSprintStore((state) => state.sprint);
   const evidenceByTaskId = useSprintStore((state) => state.evidenceByTaskId);
-  const syncState = useSprintStore((state) => state.syncState);
+  const userProfiles = useSprintStore((state) => state.userProfiles);
   const addEvidence = useSprintStore((state) => state.addEvidence);
   const dashboard = useMemo(() => buildLearningDashboard(sprint, evidenceByTaskId), [sprint, evidenceByTaskId]);
   const [knowledgeQuery, setKnowledgeQuery] = useState("");
@@ -34,6 +34,7 @@ export function LearningPage() {
   const [knowledgeFeedback, setKnowledgeFeedback] = useState("");
   const [selectedResourceId, setSelectedResourceId] = useState<string | undefined>();
   const [resourceFeedback, setResourceFeedback] = useState("");
+  const hasProfile = userProfiles.length > 0;
 
   const filteredKnowledgeCards = useMemo(
     () =>
@@ -115,6 +116,33 @@ export function LearningPage() {
     setResourceFeedback(resource.hasPath ? `已打开「${resource.label}」资料详情。` : `已打开「${resource.label}」资料摘要；当前缺少可打开路径。`);
   }, []);
 
+  if (!hasProfile) {
+    return (
+      <main className="app-main">
+        <section className="app-page">
+          <article className="command-card p-5">
+            <div className="flex items-center gap-3 text-brand-700">
+              <span className="grid size-12 place-items-center rounded-control bg-brand-100">
+                <BookOpen size={22} aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-sm font-black text-brand-700">知识边界</p>
+                <h1 className="text-3xl font-black text-ink-900">先建立你的求职画像</h1>
+              </div>
+            </div>
+            <p className="mt-4 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
+              保存目标岗位、经验摘要和项目证据后，知识任务会围绕你的求职方向生成。
+            </p>
+            <Link to="/coach" className="primary-button mt-5">
+              <ArrowRight size={16} aria-hidden="true" />
+              去创建画像
+            </Link>
+          </article>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="app-main">
       <section className="app-page">
@@ -132,12 +160,10 @@ export function LearningPage() {
                 今日知识任务、资料入口和知识卡只保留能转成岗位表达的内容；学习笔记直接进入 Evidence Gate。
               </p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[520px]">
-              <MetricTile label="今日知识任务" value={`${dashboard.learningTasks.length} 个`} />
-              <MetricTile label="资料入口" value={`${dashboard.resources.length} 个`} />
-              <MetricTile label="学习笔记" value={`${dashboard.noteCount} 条`} />
-              <MetricTile label="同步状态" value={syncStateLabel(syncState)} icon={<WifiOff size={15} aria-hidden="true" />} />
-            </div>
+            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
+              <span className="text-xs font-black text-ink-500">集中统计</span>
+              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看知识任务、学习笔记和资料入口</span>
+            </Link>
           </div>
         </header>
 
@@ -192,18 +218,6 @@ export function LearningPage() {
         </section>
       </section>
     </main>
-  );
-}
-
-function MetricTile({ label, value, icon }: { label: string; value: string; icon?: React.ReactNode }) {
-  return (
-    <div className="rounded-card border border-line bg-surface-0 p-3">
-      <p className="text-[11px] font-black text-ink-500">{label}</p>
-      <p className="mt-1 flex items-center gap-1.5 text-sm font-extrabold leading-5 text-ink-900">
-        {icon}
-        <span>{value}</span>
-      </p>
-    </div>
   );
 }
 
@@ -283,7 +297,7 @@ function KnowledgeBrowser({
             type="search"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="岗位 / Spring / MQ / JVM / 证据"
+            placeholder="岗位能力 / 项目 / 证据"
             className="min-h-11 w-full rounded-control border border-line bg-surface-0 px-3 text-sm font-bold text-ink-900 outline-none transition placeholder:text-ink-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
           />
         </label>

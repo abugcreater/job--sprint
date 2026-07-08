@@ -13,7 +13,7 @@ pub(crate) struct RuntimeState {
 
 pub(crate) async fn migrate_legacy_runtime_json(
     db: &SqlitePool,
-    default_scope: &str,
+    _default_scope: &str,
 ) -> sqlx::Result<()> {
     let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM runtime_items")
         .fetch_one(db)
@@ -38,17 +38,12 @@ pub(crate) async fn migrate_legacy_runtime_json(
         Err(_) => return Ok(()),
     };
 
-    let mut migrated_any = false;
     if parsed.get("schemaVersion").and_then(Value::as_i64) == Some(2)
         && let Some(users) = parsed.get("users").and_then(Value::as_object)
     {
         for (scope, state) in users {
             write_runtime_state(db, scope, &runtime_state_from_value(state.clone())).await?;
-            migrated_any = true;
         }
-    }
-    if !migrated_any {
-        write_runtime_state(db, default_scope, &runtime_state_from_value(parsed)).await?;
     }
     Ok(())
 }

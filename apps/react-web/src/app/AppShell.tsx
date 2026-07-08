@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { CloudOff, LogIn, LogOut, RefreshCw, ShieldCheck, UserRound } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
+import { AuthSessionContext } from "./authSessionContext";
 import { MobileBottomNav } from "./MobileBottomNav";
-import { desktopNavRouteIds, routeById } from "./navigation";
+import { desktopNavRouteIds, routeById, visibleRouteIds } from "./navigation";
 import { syncStateLabel } from "./syncStatus";
 import {
   authSessionMeta,
@@ -10,6 +11,7 @@ import {
   buildLoginHref,
   fetchAuthSession,
   initialAuthSession,
+  isOwnerSession,
   logoutAuthSession,
   type AuthSessionState
 } from "../api/authClient";
@@ -21,6 +23,7 @@ export function AppShell() {
   const [authSession, setAuthSession] = useState<AuthSessionState>(() => initialAuthSession());
   const syncLabel = syncStateLabel(syncState);
   const syncTone = syncState === "online" ? "bg-success-100 text-success-600" : syncState === "failed" ? "bg-risk-100 text-risk-600" : "bg-warn-100 text-warn-600";
+  const visibleDesktopRouteIds = visibleRouteIds(desktopNavRouteIds, { owner: isOwnerSession(authSession) });
   const refreshAuth = useCallback(() => {
     let active = true;
     fetchAuthSession().then((session) => {
@@ -38,18 +41,19 @@ export function AppShell() {
 
   const handleLogout = useCallback(async () => {
     setAuthSession({ status: "checking" });
+    useSprintStore.getState().resetRuntimeForOwner(undefined, "local_fallback");
     await logoutAuthSession();
     window.location.href = buildLoginHref();
   }, []);
 
   return (
-    <>
+    <AuthSessionContext.Provider value={authSession}>
       <ScrollToTop />
       <header className="sticky top-0 z-30 border-b border-line bg-white/95 px-4 py-3 shadow-soft backdrop-blur md:hidden">
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[11px] font-black uppercase text-brand-700">Job Sprint</p>
-            <p className="truncate text-lg font-black text-ink-900">泛 IT AI 求职教练</p>
+            <p className="truncate text-lg font-black text-ink-900">个人求职教练</p>
           </div>
           <NavLink to="/more" className={`status-chip shrink-0 ${syncTone}`} aria-label={`${syncLabel}，打开更多页处理同步`}>
             <CloudOff size={14} aria-hidden="true" />
@@ -80,7 +84,7 @@ export function AppShell() {
           <AuthStatusBar session={authSession} onLogout={handleLogout} />
         </div>
         <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="桌面模块导航">
-          {desktopNavRouteIds.map((id) => {
+          {visibleDesktopRouteIds.map((id) => {
             const item = routeById[id];
             const Icon = item.icon;
             return (
@@ -100,12 +104,12 @@ export function AppShell() {
           })}
         </nav>
         <div className="border-t border-line p-4 text-xs font-semibold leading-5 text-ink-500">
-          邀请制泛 IT 求职教练 · Evidence Gate 优先
+          个人求职教练 · Evidence Gate 优先
         </div>
       </aside>
       <Outlet />
       <MobileBottomNav />
-    </>
+    </AuthSessionContext.Provider>
   );
 }
 

@@ -68,6 +68,34 @@ pub(crate) async fn verify_invitation_account_provisioning() {
         Method::POST,
         "/api/coach/invitations",
         Some(json!({
+            "username": "shadow-owner",
+            "displayName": "Shadow Owner",
+            "dataScope": "shadow-owner",
+            "inviteBatch": "2026-07-beta",
+            "roleFamily": "qa",
+            "targetRole": "测试开发工程师",
+            "status": "invited",
+            "provisionAccount": true,
+            "accountRole": "owner",
+            "password": "Shadow-owner-2026!"
+        })),
+        &[("cookie", owner_cookie.as_str())],
+    )
+    .await;
+    assert_eq!(res.status, StatusCode::BAD_REQUEST);
+    assert_eq!(
+        res.json["accountProvisioning"]["error"],
+        "owner_account_role_forbidden"
+    );
+    assert!(!fs::read_to_string(&users_file)
+        .unwrap()
+        .contains("shadow-owner"));
+
+    res = request(
+        &app,
+        Method::POST,
+        "/api/coach/invitations",
+        Some(json!({
             "username": "mia",
             "displayName": "Mia",
             "dataScope": "mia",

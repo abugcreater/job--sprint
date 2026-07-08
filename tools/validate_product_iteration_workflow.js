@@ -151,11 +151,15 @@ function parseEvidence(root, file) {
 function validateCoachEvidence(root, findings, warnings) {
   const evidence = parseEvidence(root, "docs/evidence/server-remote/coach-artifacts.json");
   if (!evidence.ok) {
-    findings.push({
+    const target = evidence.reason === "evidence_missing" ? warnings : findings;
+    target.push({
       id: "remote_coach_artifacts",
       code: evidence.reason,
       evidence: evidence.evidence,
-      error: evidence.error
+      error: evidence.error,
+      reason: evidence.reason === "evidence_missing"
+        ? "远端 coach artifact evidence 不进入开源源码包；发布交付阶段需要重新生成。"
+        : undefined
     });
     return;
   }

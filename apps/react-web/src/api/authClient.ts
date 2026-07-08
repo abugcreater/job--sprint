@@ -104,10 +104,21 @@ export function authSessionMeta(session: AuthSessionState): string {
 }
 
 export function roleLabel(role?: string): string {
+  if (role === "owner") return "管理员";
+  if (role === "coach") return "求职者";
+  if (role === "viewer") return "只读用户";
   if (role === "admin") return "管理员";
   if (role === "member") return "成员";
   if (role === "guest") return "访客";
   return role || "用户";
+}
+
+export function isOwnerSession(session: AuthSessionState): boolean {
+  return session.status === "authenticated" && (session.user?.role === "owner" || Boolean(session.user?.permissions?.includes("*")));
+}
+
+export function isReadOnlySession(session: AuthSessionState): boolean {
+  return session.status === "authenticated" ? Boolean(session.user?.readOnly) : false;
 }
 
 export function dataScopeLabel(scope?: string): string {

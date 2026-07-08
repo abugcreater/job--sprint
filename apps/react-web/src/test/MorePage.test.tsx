@@ -1,8 +1,8 @@
 import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "../App";
-import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";
+import { buildQaSprint, qaProfile, qaScheduleEvents } from "./fixtures/coachFlow";
 
 const fixedNow = new Date("2026-07-02T14:05:00+08:00");
 
@@ -16,15 +16,15 @@ function resetSprint(hash = "#/more") {
     completed,
     evidenceByTaskId,
     delayRecords: [],
-    userProfiles: [],
+    userProfiles: [qaProfile],
     knowledgeBoundaries: [],
     boundarySuggestionFeedback: [],
-    coachScheduleEvents: [],
+    coachScheduleEvents: qaScheduleEvents,
     aiArtifacts: [],
     llmRuns: [],
     syncState: "local_fallback",
     lastSavedAt: undefined,
-    sprint: buildTodaySprint(getScheduleData(), fixedNow, { completed, evidenceByTaskId, syncState: "local_fallback" })
+    sprint: buildQaSprint({ now: fixedNow, completed, evidenceByTaskId })
   });
 }
 
@@ -37,16 +37,18 @@ describe("React Job Sprint more workspace", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders sync, storage, export and rollback panels", async () => {
+  it("renders ordinary-user sync, account and export panels without admin tools", async () => {
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "更多入口" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "我的数据" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "同步状态" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "localStorage 状态" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "导出与恢复" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "旧版回滚说明" })).toBeInTheDocument();
-    expect(screen.getByText("旧版每日复盘")).toBeInTheDocument();
-    expect(screen.getByText("apps/android/app/src/main/assets/web/schedule.html")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "我的账号" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "个人数据备份" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "localStorage 状态" })).not.toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "旧版回滚说明" })).not.toBeInTheDocument();
+    expect(screen.queryByText("旧版每日复盘")).not.toBeInTheDocument();
+    expect(screen.queryByText("apps/android/app/src/main/assets/web/schedule.html")).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "查看统计" })).toBeInTheDocument();
   });
 
   it("exports React local state and keeps navigation links working", async () => {
@@ -63,10 +65,10 @@ describe("React Job Sprint more workspace", () => {
     expect(createObjectURL).toHaveBeenCalledTimes(1);
     expect(anchorClick).toHaveBeenCalledTimes(1);
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:job-sprint");
-    expect(screen.getByRole("status")).toHaveTextContent("React 本地状态已导出");
+    expect(screen.getByRole("status")).toHaveTextContent("个人数据备份已导出");
 
-    fireEvent.click(screen.getByRole("link", { name: "进入复盘 查看今日证据、风险和本地复盘记录。" }));
-    expect(await screen.findByRole("heading", { name: "复盘归因" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("link", { name: "进入复盘 记录今日事实、卡点和明日行动。" }));
+    expect(await screen.findByRole("heading", { name: "今日复盘" })).toBeInTheDocument();
     expect(window.location.hash).toBe("#/review");
 
     firstRender.unmount();
@@ -136,10 +138,10 @@ describe("React Job Sprint more workspace", () => {
     };
     const file = new File([JSON.stringify(payload)], "job-sprint-react-state.json", { type: "application/json" });
 
-    fireEvent.change(await screen.findByLabelText("导入 React 状态 JSON"), { target: { files: [file] } });
+    fireEvent.change(await screen.findByLabelText("导入个人数据备份"), { target: { files: [file] } });
 
     await waitFor(() => {
-      expect(screen.getByRole("status")).toHaveTextContent("React 本地状态已导入：完成 1 项，证据 1 条，延期 1 条，画像 0 个，边界反馈 1 条，AI 草稿 0 条，AI 运行 1 条");
+      expect(screen.getByRole("status")).toHaveTextContent("个人数据备份已导入：完成 1 项，证据 1 条，延期 1 条，画像 0 个，知识边界 0 条，AI 建议 0 条");
     });
     const state = useSprintStore.getState();
     expect(state.completed["task-imported"]).toBe(true);

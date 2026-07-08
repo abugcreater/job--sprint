@@ -27,21 +27,22 @@ export function buildCoachScheduleTasks(events: CoachScheduleEvent[], date: stri
         deliverables: [event.evidenceRequired ? "补一条 Evidence Gate 证据" : "完成自定义日程"],
         interviewQuestions: type === "interview" ? [event.title] : [],
         acceptanceCriteria: event.evidenceRequired ? "完成后补齐一条可读回证据。" : "完成并记录结果。",
-        javaMapping: "由用户画像、知识边界或 AI 草稿生成",
+        javaMapping: "由当前用户画像、知识边界或 AI 建议生成",
         tags: ["自定义日程", coachEventLabel(event.kind)],
         riskIds: [],
         evidenceRequired: event.evidenceRequired ? evidenceRequiredFor(type) : [],
-        sourceLabels: event.acceptedFromArtifactId ? ["AI 草稿已接受"] : ["用户自定义"]
+        sourceLabels: event.acceptedFromArtifactId ? ["AI 建议已接受"] : ["用户自定义"]
       };
     });
 }
 
 function coachEventType(kind: CoachScheduleEvent["kind"]): TaskType {
+  if (kind === "learning") return "project";
   if (kind === "interview") return "interview";
   if (kind === "opportunity") return "delivery";
   if (kind === "review") return "review";
   if (kind === "recovery") return "rest";
-  return "java";
+  return "project";
 }
 
 function coachEventLabel(kind: CoachScheduleEvent["kind"]): string {

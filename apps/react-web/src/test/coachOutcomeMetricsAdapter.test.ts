@@ -1,31 +1,31 @@
 import { buildCoachDashboard } from "../data/coachAdapter";
-import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import type { ReviewEvidence } from "../types/sprint";
+import { buildQaSprint, qaProfile, qaScheduleEvents, qaTaskIds } from "./fixtures/coachFlow";
 
 const now = "2026-07-02T14:05:00+08:00";
 
 describe("coachOutcomeMetricsAdapter", () => {
   it("surfaces outcome metrics for effective actions and interview review completion", () => {
     const evidenceByTaskId: Record<string, ReviewEvidence[]> = {
-      "2026-07-02-1400-java": [{
+      [qaTaskIds.interview]: [{
         id: "evidence-interview-1",
-        taskId: "2026-07-02-1400-java",
+        taskId: qaTaskIds.interview,
         type: "interview_answer",
-        title: "面试复盘证据",
-        content: "围绕 MQ 故障恢复完成一轮面试回答复盘。",
+        title: "测试开发面试复盘证据",
+        content: "围绕 Mock 服务边界完成一轮面试回答复盘。",
         createdAt: now,
         verified: true
       }]
     };
-    const sprint = buildTodaySprint(getScheduleData(), new Date(now), {
-      completed: { "2026-07-02-1400-java": true },
-      evidenceByTaskId,
-      syncState: "local_fallback"
+    const sprint = buildQaSprint({
+      now: new Date(now),
+      completed: { [qaTaskIds.interview]: true },
+      evidenceByTaskId
     });
     const dashboard = buildCoachDashboard({
-      profiles: [],
+      profiles: [qaProfile],
       boundaries: [],
-      scheduleEvents: [],
+      scheduleEvents: qaScheduleEvents,
       artifacts: [],
       evidenceByTaskId,
       sprint

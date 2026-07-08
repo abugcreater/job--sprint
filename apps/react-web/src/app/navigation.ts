@@ -3,13 +3,15 @@ import {
   BriefcaseBusiness,
   CalendarCheck,
   ClipboardCheck,
+  BarChart3,
+  Settings2,
   MessageCircleQuestion,
   MoreHorizontal,
   UserRound,
   type LucideIcon
 } from "lucide-react";
 
-export type AppRouteId = "today" | "coach" | "learn" | "interview" | "applications" | "review" | "more";
+export type AppRouteId = "today" | "stats" | "coach" | "learn" | "interview" | "applications" | "review" | "admin" | "more";
 
 export type AppRoute = {
   id: AppRouteId;
@@ -37,17 +39,29 @@ export const appRoutes: AppRoute[] = [
     primaryFocus: "AI 建议、执行闭环、证据门禁",
     migrationScope: "保持当前任务、证据门和本地记录稳定可用，并显式展示下一步建议"
   },
-  {
+	  {
+	    id: "stats",
+	    label: "统计",
+	    path: "/stats",
+	    icon: BarChart3,
+	    eyebrow: "Stats",
+	    title: "进展统计",
+	    summary: "集中查看今日、画像、知识、面试、机会和复盘统计，不再把指标散落在各模块页头。",
+	    status: "已接入",
+	    primaryFocus: "全局统计、进展摘要、数据完整度",
+	    migrationScope: "汇总个人执行指标；管理员批次指标保留在管理员中心"
+	  },
+	  {
     id: "coach",
     label: "画像",
     path: "/coach",
     icon: UserRound,
     eyebrow: "Coach",
     title: "AI 教练设置",
-    summary: "维护目标画像、知识边界、自定义日程和 AI 草稿，草稿接受后才写入正式记录。",
+    summary: "维护求职画像、知识边界、自定义日程和 AI 建议，建议接受后才写入正式记录。",
     status: "已接入",
-    primaryFocus: "用户画像、知识边界、AI 草稿",
-    migrationScope: "新增画像、知识边界、自定义日程、AI 草稿接受/拒绝和导出恢复"
+    primaryFocus: "用户画像、知识边界、AI 建议",
+    migrationScope: "新增画像、知识边界、自定义日程、AI 建议接受/拒绝和导出恢复"
   },
   {
     id: "learn",
@@ -91,20 +105,32 @@ export const appRoutes: AppRoute[] = [
     path: "/review",
     icon: ClipboardCheck,
     eyebrow: "Review",
-    title: "复盘归因",
-    summary: "完成情况、证据补齐、风险总结、本地 AI 分析和明日建议统一进入本地复盘。",
+    title: "今日复盘",
+    summary: "完成情况、证据补齐、风险总结、复盘建议和明日建议统一进入每日复盘。",
     status: "已接入",
-    primaryFocus: "本地复盘、证据列表、风险归因、明日建议",
-    migrationScope: "已迁移今日完成情况、证据列表、风险总结、明日建议、本地复盘证据和本地规则版 AI 分析"
+    primaryFocus: "今日复盘、证据列表、风险归因、明日建议",
+    migrationScope: "已迁移今日完成情况、证据列表、风险总结、明日建议和复盘建议"
   },
-  {
+	  {
+	    id: "admin",
+	    label: "管理员",
+	    path: "/admin",
+	    icon: Settings2,
+	    eyebrow: "Admin",
+	    title: "管理员中心",
+	    summary: "管理邀请账号、建档批次和账号状态，仅管理员可见。",
+	    status: "管理员",
+	    primaryFocus: "邀请账号、批次首登、权限隔离",
+	    migrationScope: "把邀请用户从画像页移出，收敛到管理员中心"
+	  },
+	  {
     id: "more",
     label: "更多",
     path: "/more",
     icon: MoreHorizontal,
     eyebrow: "More",
     title: "更多入口",
-    summary: "同步状态、localStorage、导出恢复和回滚说明集中处理。",
+	    summary: "同步状态、导出恢复、账号状态和低频入口集中处理；管理员工具按权限隐藏。",
     status: "已接入",
     primaryFocus: "低频工具、导出恢复、离线边界",
     migrationScope: "已迁移同步状态、localStorage 状态、导出恢复和回滚说明"
@@ -113,15 +139,21 @@ export const appRoutes: AppRoute[] = [
 
 export const routeById = Object.fromEntries(appRoutes.map((route) => [route.id, route])) as Record<AppRouteId, AppRoute>;
 
-export const bottomNavRouteIds: AppRouteId[] = ["today", "coach", "learn", "interview", "more"];
+export const bottomNavRouteIds: AppRouteId[] = ["today", "stats", "coach", "interview", "more"];
 
-export const desktopNavRouteIds: AppRouteId[] = ["today", "coach", "learn", "interview", "applications", "review", "more"];
+export const desktopNavRouteIds: AppRouteId[] = ["today", "stats", "coach", "learn", "interview", "applications", "review", "admin", "more"];
+
+export function visibleRouteIds(routeIds: AppRouteId[], options: { owner?: boolean } = {}): AppRouteId[] {
+  return routeIds.filter((id) => id !== "admin" || options.owner);
+}
 
 export function getBottomNavActiveId(pathname: string): AppRouteId {
+  if (pathname.startsWith("/stats")) return "stats";
   if (pathname.startsWith("/coach")) return "coach";
   if (pathname.startsWith("/learn")) return "learn";
   if (pathname.startsWith("/interview")) return "interview";
-  if (pathname.startsWith("/applications")) return "applications";
+  if (pathname.startsWith("/applications")) return "more";
   if (pathname.startsWith("/review") || pathname.startsWith("/more")) return "more";
+  if (pathname.startsWith("/admin")) return "more";
   return "today";
 }

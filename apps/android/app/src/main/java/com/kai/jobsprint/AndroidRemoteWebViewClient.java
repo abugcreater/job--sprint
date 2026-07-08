@@ -30,7 +30,7 @@ final class AndroidRemoteWebViewClient extends WebViewClient {
     @Override
     public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
         Uri uri = request.getUrl();
-        if (uri != null && RemoteUrlPolicy.isAllowedWebViewUrl(uri.toString())) {
+        if (uri != null && remoteWebViewController.isAllowedWebViewUrl(uri.toString())) {
             return false;
         }
         remoteWebViewController.loadFallback("拦截未授权远端页面");

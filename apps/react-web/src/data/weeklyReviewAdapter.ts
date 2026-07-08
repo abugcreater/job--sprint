@@ -138,7 +138,7 @@ function buildNextWeekFocus(
     pathIssue ? `围绕「${pathIssue}」安排一条 30 分钟修复任务。` : "",
     typeCounts.delivery_record === 0 ? "至少记录一条机会/JD/沟通反馈，校准知识边界。" : "",
     typeCounts.oral_score + typeCounts.interview_answer === 0 ? "安排一轮口述训练，并把文本或评分沉淀为证据。" : "",
-    aiFeedback?.acceptedOutcomeCount && aiFeedback.acceptedOutcomeRate < 60 ? "下一轮 AI 草稿只保留一条能当天完成的动作。" : "",
+    aiFeedback?.acceptedOutcomeCount && aiFeedback.acceptedOutcomeRate < 60 ? "下一轮 AI 建议只保留一条能当天完成的动作。" : "",
     typeCounts.review === 0 ? "每天收尾补一条复盘证据，先写事实，再写欠缺。" : "",
     "保留本周已证明有效的证据类型，下周只扩一个新变量。"
   ].filter(Boolean).slice(0, 4);

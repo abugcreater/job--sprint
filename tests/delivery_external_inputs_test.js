@@ -3,6 +3,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { validateDeliveryExternalInputs, isInsideRepository } = require("../tools/validate_delivery_external_inputs");
+const { deliveryCommands } = require("../tools/delivery_action_commands");
 const { loadDeliveryEnvFile } = require("../tools/delivery_env_file");
 
 const repoRoot = path.resolve(__dirname, "..");
@@ -46,11 +47,11 @@ function testMissingInputsRequireUserAction() {
   assert(report.nextActions.length >= 4);
   const nextActionText = JSON.stringify(report.nextActions);
   for (const command of [
-    "write:server-sync-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env",
-    "write:remote-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env",
-    "test:android:remote:functional -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env",
-    "build:android:release -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env",
-    "final:delivery -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env"
+    deliveryCommands.serverSync,
+    deliveryCommands.serverRemote,
+    deliveryCommands.androidRemote,
+    deliveryCommands.formalRelease,
+    deliveryCommands.finalDelivery
   ]) {
     assert(nextActionText.includes(command), `delivery input next actions should mention ${command}`);
   }

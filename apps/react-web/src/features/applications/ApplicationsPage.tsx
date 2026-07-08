@@ -1,7 +1,6 @@
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardList, Download, Edit3, FileText, Filter, Send, Target, Trash2, WifiOff } from "lucide-react";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardList, Download, Edit3, FileText, Filter, Send, Target, Trash2 } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { syncStateLabel } from "../../app/syncStatus";
 import {
   applicationStatuses,
   applicationRecordToDraft,
@@ -23,7 +22,7 @@ import { ApplicationForm } from "./components/ApplicationForm";
 export function ApplicationsPage() {
   const sprint = useSprintStore((state) => state.sprint);
   const evidenceByTaskId = useSprintStore((state) => state.evidenceByTaskId);
-  const syncState = useSprintStore((state) => state.syncState);
+  const userProfiles = useSprintStore((state) => state.userProfiles);
   const addEvidence = useSprintStore((state) => state.addEvidence);
   const updateEvidence = useSprintStore((state) => state.updateEvidence);
   const deleteEvidence = useSprintStore((state) => state.deleteEvidence);
@@ -40,6 +39,7 @@ export function ApplicationsPage() {
     () => dashboard.recentRecords.find((record) => record.id === editingRecordId),
     [dashboard.recentRecords, editingRecordId]
   );
+  const hasProfile = userProfiles.length > 0;
 
   const updateDraft = useCallback((patch: Partial<ApplicationFormDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
@@ -115,6 +115,33 @@ export function ApplicationsPage() {
     setExportSummary(`已生成导出 ${payload.count} 条，本地 JSON 已准备。`);
   }, [dashboard.recentRecords, sprint.date]);
 
+  if (!hasProfile) {
+    return (
+      <main className="app-main">
+        <section className="app-page">
+          <article className="command-card p-5">
+            <div className="flex items-center gap-3 text-brand-700">
+              <span className="grid size-12 place-items-center rounded-control bg-brand-100">
+                <BriefcaseBusiness size={22} aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-sm font-black text-brand-700">机会验证</p>
+                <h1 className="text-3xl font-black text-ink-900">先建立你的求职画像</h1>
+              </div>
+            </div>
+            <p className="mt-4 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
+              保存目标岗位并生成个人日历后，机会记录才会绑定到你的岗位、公司和 Evidence Gate。
+            </p>
+            <Link to="/coach" className="primary-button mt-5">
+              <ArrowRight size={16} aria-hidden="true" />
+              去创建画像
+            </Link>
+          </article>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="app-main">
       <section className="app-page">
@@ -132,12 +159,10 @@ export function ApplicationsPage() {
                 这里只记录公司、岗位、JD 命中、沟通反馈和下一步动作；不做自动投递，学习和面试仍回到主线推进。
               </p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[520px]">
-              <MetricTile label="今日目标" value={`${dashboard.todaySignals.length} 项`} />
-              <MetricTile label="本地记录" value={`${dashboard.recordCount} 条`} />
-              <MetricTile label="关联任务" value={`${dashboard.deliveryTasks.length} 个`} />
-              <MetricTile label="同步状态" value={syncStateLabel(syncState)} icon={<WifiOff size={15} aria-hidden="true" />} />
-            </div>
+            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
+              <span className="text-xs font-black text-ink-500">集中统计</span>
+              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看机会记录、状态分布和关联任务</span>
+            </Link>
           </div>
         </header>
 
@@ -190,18 +215,6 @@ export function ApplicationsPage() {
         </section>
       </section>
     </main>
-  );
-}
-
-function MetricTile({ label, value, icon }: { label: string; value: string; icon?: ReactNode }) {
-  return (
-    <div className="rounded-card border border-line bg-surface-0 p-3">
-      <p className="text-[11px] font-black text-ink-500">{label}</p>
-      <p className="mt-1 flex items-center gap-1.5 text-sm font-extrabold leading-5 text-ink-900">
-        {icon}
-        <span>{value}</span>
-      </p>
-    </div>
   );
 }
 

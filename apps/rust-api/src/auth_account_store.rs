@@ -51,6 +51,7 @@ pub(crate) fn provision_user_account_from_invitation(
 
     let username = text(payload, "username");
     let password = text(payload, "password");
+    let account_role = text(payload, "accountRole");
     if !valid_username(&username) {
         return Err((
             StatusCode::BAD_REQUEST,
@@ -68,6 +69,26 @@ pub(crate) fn provision_user_account_from_invitation(
                 "status": "FAIL",
                 "error": "password_too_short",
                 "message": "登录密码至少 8 位。"
+            }),
+        ));
+    }
+    if account_role == "owner" {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            json!({
+                "status": "FAIL",
+                "error": "owner_account_role_forbidden",
+                "message": "邀请账号不能开通 owner 权限；owner 账号只能通过服务端配置。"
+            }),
+        ));
+    }
+    if !account_role.is_empty() && !valid_account_role(&account_role) {
+        return Err((
+            StatusCode::BAD_REQUEST,
+            json!({
+                "status": "FAIL",
+                "error": "invalid_account_role",
+                "message": "邀请账号角色只能是 coach 或 viewer。"
             }),
         ));
     }
@@ -143,7 +164,6 @@ fn merge_user(existing: &Value, next: &Value) -> Value {
 
 fn role_from_payload(payload: &Value) -> String {
     match text(payload, "accountRole").as_str() {
-        "owner" => "owner".to_string(),
         "viewer" => "viewer".to_string(),
         _ => "coach".to_string(),
     }
@@ -151,6 +171,10 @@ fn role_from_payload(payload: &Value) -> String {
 
 fn valid_username(username: &str) -> bool {
     (2..=64).contains(&username.len()) && username.chars().all(|item| USERNAME_CHARS.contains(item))
+}
+
+fn valid_account_role(role: &str) -> bool {
+    role == "coach" || role == "viewer"
 }
 
 fn text(payload: &Value, field: &str) -> String {

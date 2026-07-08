@@ -140,8 +140,10 @@ assert.match(lifecycleController, /speechBridge\.cancelFromLifecycle\(\)/);
 assert.match(activity, /lifecycleController\.onPause\(\)/);
 assert.doesNotMatch(activity, /speechBridge\.cancelFromLifecycle/);
 
-assert.match(html, /id="androidSettingsPanel"/);
-assert.match(html, /id="androidRemoteUrlInput"/);
+assert.match(html, /正在进入 Job Sprint/);
+assert.match(html, /React 今日页/);
+assert.doesNotMatch(html, /id="androidSettingsPanel"/);
+assert.doesNotMatch(html, /id="androidRemoteUrlInput"/);
 assert.match(remoteSettingsBridge, /class AndroidRemoteSettingsBridge/);
 assert.match(remoteSettingsBridge, /setRemoteUrl\(String url\)/);
 assert.match(authSettingsBridge, /class AndroidAuthSettingsBridge/);
@@ -158,20 +160,11 @@ assert.match(remoteWebViewClient, /onReceivedSslError[\s\S]*handler\.cancel\(\)/
 assert.doesNotMatch(activity, /onReceivedSslError\(WebView view, SslErrorHandler handler, SslError error\)/);
 assert.ok(!/onReceivedSslError[\s\S]{0,160}handler\.proceed\(\)/.test(remoteWebViewClient), "SSL errors must not be bypassed");
 
-assert.match(js, /const nativeBridge = window\.AndroidSpeech/);
-assert.match(js, /window\.onAndroidSpeechState/);
-assert.match(js, /window\.onAndroidSpeechPartial/);
-assert.match(js, /window\.onAndroidSpeechFinal/);
-assert.match(js, /window\.onAndroidSpeechError/);
-assert.match(js, /appendFinalText/);
-assert.match(js, /\$\{current\}\\n\$\{text\}/);
-assert.match(js, /startCooldownCountdown/);
-assert.match(js, /els\.voiceStartBtn\.disabled = listening \|\| cooling/);
-assert.match(js, /录音后转写/);
-assert.match(js, /window\.AndroidRecorder/);
-assert.ok(
-  js.indexOf("return;") < js.indexOf("const Recognition = window.SpeechRecognition"),
-  "native bridge branch must return before Web Speech fallback"
-);
+assert.match(js, /reactTodayPath/);
+assert.match(js, /window\.location\.replace/);
+assert.doesNotMatch(js, /const nativeBridge = window\.AndroidSpeech/);
+assert.doesNotMatch(js, /window\.onAndroidSpeechState/);
+assert.doesNotMatch(js, /录音后转写/);
+assert.doesNotMatch(js, /window\.AndroidRecorder/);
 
 console.log("android speech bridge tests passed");

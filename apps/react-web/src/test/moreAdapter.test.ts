@@ -1,6 +1,6 @@
 import { buildMoreDashboard, buildReactStateExportPayload, parseReactStateImportPayload } from "../data/moreAdapter";
-import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import type { BoundarySuggestionFeedback, DelayRecord, LlmRun, ReviewEvidence } from "../types/sprint";
+import { buildQaSprint, qaTaskIds } from "./fixtures/coachFlow";
 
 const fixedNow = new Date("2026-07-02T14:05:00+08:00");
 
@@ -11,19 +11,19 @@ describe("moreAdapter", () => {
 
   it("summarizes React local state and legacy storage keys", () => {
     window.localStorage.setItem("jobSprint.react.v1", JSON.stringify({ state: { completed: {} }, version: 2 }));
-    const sprint = buildTodaySprint(getScheduleData(), fixedNow, { completed: {}, evidenceByTaskId: {}, syncState: "local_fallback" });
+    const sprint = buildQaSprint({ now: fixedNow });
     const evidence: ReviewEvidence = {
       id: "evidence-1",
-      taskId: "2026-07-02-1400-java",
+      taskId: qaTaskIds.interview,
       type: "review",
       title: "复盘证据",
-      content: "本地复盘记录",
+      content: "复盘记录",
       createdAt: "2026-07-02T14:10:00+08:00",
       verified: true
     };
     const delayRecord: DelayRecord = {
       id: "delay-1",
-      taskId: "2026-07-02-1400-java",
+      taskId: qaTaskIds.interview,
       date: "2026-07-02",
       minutes: 30,
       reason: "临时面试",
@@ -54,8 +54,8 @@ describe("moreAdapter", () => {
 
     const dashboard = buildMoreDashboard({
       sprint,
-      completed: { "2026-07-02-1400-java": true },
-      evidenceByTaskId: { "2026-07-02-1400-java": [evidence] },
+      completed: { [qaTaskIds.interview]: true },
+      evidenceByTaskId: { [qaTaskIds.interview]: [evidence] },
       delayRecords: [delayRecord],
       boundarySuggestionFeedback: [boundaryFeedback],
       llmRuns: [llmRun],
@@ -77,15 +77,15 @@ describe("moreAdapter", () => {
   });
 
   it("builds a bounded React state export payload", () => {
-    const sprint = buildTodaySprint(getScheduleData(), fixedNow, { completed: {}, evidenceByTaskId: {}, syncState: "local_fallback" });
+    const sprint = buildQaSprint({ now: fixedNow });
     const payload = buildReactStateExportPayload({
       sprint,
-      completed: { "2026-07-02-1400-java": true },
+      completed: { [qaTaskIds.interview]: true },
       evidenceByTaskId: {},
       delayRecords: [
         {
           id: "delay-1",
-          taskId: "2026-07-02-1400-java",
+          taskId: qaTaskIds.interview,
           date: "2026-07-02",
           minutes: 30,
           reason: "临时面试",
@@ -122,7 +122,7 @@ describe("moreAdapter", () => {
 
     expect(payload.source).toBe("jobSprint.react.v1");
     expect(payload.sprint.date).toBe("2026-07-02");
-    expect(payload.completed["2026-07-02-1400-java"]).toBe(true);
+    expect(payload.completed[qaTaskIds.interview]).toBe(true);
     expect(payload.delayRecords).toHaveLength(1);
     expect(payload.boundarySuggestionFeedback).toHaveLength(1);
     expect(payload.llmRuns).toHaveLength(1);

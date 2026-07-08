@@ -227,8 +227,10 @@ function coachRuntime({
 
     res = await request(server, "GET", "/data/interview_context.json", undefined, { cookie: guestCookie });
     assert.strictEqual(res.status, 200);
-    assert.ok(res.raw.includes("public-safe"));
-    assert.ok(res.raw.includes("候选人"));
+    assert.ok(res.json.version.includes("public-safe"));
+    assert.strictEqual(res.json.profile, null);
+    assert.deepStrictEqual(res.json.questionBank, []);
+    assert.deepStrictEqual(res.json.jdSignals, []);
     assert.ok(!res.raw.includes("候选人"));
     assert.ok(!res.raw.includes("/path/to/local-user"));
 
@@ -269,8 +271,11 @@ function coachRuntime({
 
     res = await request(server, "GET", "/data/interview_context.json", undefined, { cookie: kaiCookie });
     assert.strictEqual(res.status, 200);
-    assert.ok(res.raw.includes("候选人"));
-    assert.ok(res.raw.includes("/path/to/local-user"));
+    assert.strictEqual(res.json.profile, null);
+    assert.deepStrictEqual(res.json.questionBank, []);
+    assert.deepStrictEqual(res.json.jdSignals, []);
+    assert.ok(!res.raw.includes("候选人"));
+    assert.ok(!res.raw.includes("/path/to/resume-materials"));
 
     res = await request(server, "POST", "/api/progress", { "kai-block": true }, { cookie: kaiCookie });
     assert.strictEqual(res.status, 200);

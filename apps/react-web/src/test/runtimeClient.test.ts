@@ -1,5 +1,6 @@
 import {
   RUNTIME_KEEPALIVE_BODY_LIMIT_BYTES,
+  shouldUseServerRuntimeForEnv,
   shouldUseRuntimeKeepalive
 } from "../api/runtimeClient";
 
@@ -15,5 +16,13 @@ describe("runtimeClient", () => {
 
     expect(multibytePayload.length).toBeLessThanOrEqual(RUNTIME_KEEPALIVE_BODY_LIMIT_BYTES);
     expect(shouldUseRuntimeKeepalive(multibytePayload)).toBe(false);
+  });
+
+  it("disables server runtime in plain Vite dev unless explicitly enabled", () => {
+    expect(shouldUseServerRuntimeForEnv({ protocol: "http:", mode: "development", dev: true })).toBe(false);
+    expect(shouldUseServerRuntimeForEnv({ protocol: "http:", mode: "development", dev: true, serverRuntime: "true" })).toBe(true);
+    expect(shouldUseServerRuntimeForEnv({ protocol: "http:", mode: "production", dev: false })).toBe(true);
+    expect(shouldUseServerRuntimeForEnv({ protocol: "http:", mode: "test", dev: false, serverRuntime: "true" })).toBe(false);
+    expect(shouldUseServerRuntimeForEnv({ protocol: "file:", mode: "production", dev: false })).toBe(false);
   });
 });

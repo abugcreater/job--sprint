@@ -1,9 +1,6 @@
-import scheduleJson from "./scheduleCompact.json";
-import type { CoachScheduleEvent, DailySprint, EvidenceType, ReviewEvidence, RiskItem, SyncState, Task, TaskStatus, TaskType } from "../types/sprint";
+import type { CoachScheduleEvent, DailySprint, ReviewEvidence, RiskItem, SyncState, Task } from "../types/sprint";
 import type { LegacySnapshot } from "./legacyAdapters";
 import { buildCoachScheduleTasks } from "./coachScheduleTaskAdapter";
-
-const FIXED_OFFSET = "+08:00";
 
 export interface RawSchedule {
   timezone?: string;
@@ -11,37 +8,7 @@ export interface RawSchedule {
   endDate: string;
   version: string;
   totalDays?: number;
-  days: RawDay[];
-}
-
-export interface RawDay {
-  date: string;
-  weekday: string;
-  dayIndex?: number;
-  theme?: string;
-  goal?: string;
-  risk?: string;
-  javaFocus?: string;
-  blocks: RawBlock[];
-  dailyDeliverables?: string[];
-  mustAnswer?: string[];
-}
-
-export interface RawBlock {
-  id: string;
-  start: string;
-  end: string;
-  endDate?: string;
-  category: string;
-  title: string;
-  description?: string;
-  deliverables?: string[];
-  interviewQuestions?: string[];
-  javaMapping?: string;
-  acceptance?: string;
-  risk?: string;
-  mustRead?: Array<{ label?: string }>;
-  sourceFiles?: Array<{ label?: string }>;
+  days: [];
 }
 
 export interface LocalSprintOverlay {
@@ -52,22 +19,14 @@ export interface LocalSprintOverlay {
   activeProfileId?: string;
 }
 
-interface PlanState {
-  code: "before" | "running" | "waiting" | "day-ended" | "after" | "empty";
-  current: EnrichedBlock | null;
-  next: EnrichedBlock | null;
-  today: RawDay | null;
-  blocks: EnrichedBlock[];
-}
-
-interface EnrichedBlock extends RawBlock {
-  day: RawDay;
-  dayNumber: number;
-  startDateTime: Date;
-  endDateTime: Date;
-}
-
-const scheduleData = scheduleJson as RawSchedule;
+const scheduleData: RawSchedule = {
+  timezone: "Asia/Shanghai",
+  startDate: "",
+  endDate: "",
+  version: "profile-generated-v1",
+  totalDays: 0,
+  days: []
+};
 
 export function getScheduleData(): RawSchedule {
   return scheduleData;
@@ -77,37 +36,26 @@ export function buildTodaySprint(
   schedule: RawSchedule = scheduleData,
   now: Date = new Date(),
   overlay: LocalSprintOverlay = { completed: {}, evidenceByTaskId: {} },
-  legacy: LegacySnapshot = { completed: {}, reviews: {}, applications: [], interviewSessions: [] }
+  _legacy: LegacySnapshot = { completed: {}, reviews: {}, applications: [], interviewSessions: [] }
 ): DailySprint {
-  const completed = { ...legacy.completed, ...overlay.completed };
+  const completed = { ...overlay.completed };
   const evidenceByTaskId = overlay.evidenceByTaskId;
-  const plan = getPlanState(schedule, now);
-  const day = plan.today ?? schedule.days[0];
-  const dayNumber = day ? getDayNumber(schedule, day) : 0;
-  const dayBlocks = plan.blocks.filter((block) => block.day.date === day?.date);
-  const currentBlock = plan.current ?? plan.next ?? dayBlocks.find((block) => !completed[block.id]) ?? dayBlocks[0] ?? null;
-  const profileScheduleEvents = overlay.activeProfileId
-    ? (overlay.coachScheduleEvents ?? []).filter((event) => event.profileId === overlay.activeProfileId)
-    : (overlay.coachScheduleEvents ?? []);
-  const customTasks = buildCoachScheduleTasks(profileScheduleEvents, day?.date ?? "", completed, now);
-  const tasks = [...dayBlocks.map((block) => mapBlockToTask(block, completed, currentBlock?.id, now)), ...customTasks]
+  const sprintDate = formatDate(now);
+  const weekday = formatWeekday(now);
+  const profileScheduleEvents = currentProfileEvents(overlay);
+  const tasks = buildCoachScheduleTasks(profileScheduleEvents, sprintDate, completed, now)
     .sort((a, b) => a.startAt.localeCompare(b.startAt));
-  const dailyEvidence = buildDailyEvidence(day?.date ?? "", legacy);
-  const taskEvidenceMissing = tasks.filter((task) => task.status === "done" && !hasTaskEvidence(task.id, evidenceByTaskId, dailyEvidence)).length;
   const done = tasks.filter((task) => task.status === "done").length;
-  const currentTask = tasks.find((task) => task.id === currentBlock?.id) ?? tasks[0];
-  const nextBlock = currentBlock
-    ? dayBlocks.find((block) => block.startDateTime.getTime() > currentBlock.startDateTime.getTime() && !completed[block.id])
-    : null;
-  const nextTask = tasks.find((task) => task.id === nextBlock?.id);
+  const currentTask = chooseCurrentTask(tasks, completed, now);
+  const nextTask = findNextTask(tasks, completed, currentTask);
 
   return {
-    date: day?.date ?? schedule.startDate,
-    weekday: day?.weekday ?? "",
-    day: dayNumber,
-    totalDays: schedule.totalDays ?? schedule.days.length,
-    theme: productText(day?.theme ?? "今日冲刺"),
-    goal: productText(day?.goal ?? "完成今日求职冲刺任务"),
+    date: sprintDate || schedule.startDate,
+    weekday,
+    day: tasks.length ? 1 : 0,
+    totalDays: tasks.length ? 1 : 0,
+    theme: buildTheme(overlay.activeProfileId, currentTask),
+    goal: buildGoal(overlay.activeProfileId, currentTask),
     tasks,
     currentTaskId: currentTask?.id,
     nextTaskId: nextTask?.id,
@@ -116,61 +64,21 @@ export function buildTodaySprint(
       done,
       pending: Math.max(0, tasks.length - done),
       overdue: tasks.filter((task) => task.status === "pending" && isBefore(task.endAt, now)).length,
-      evidenceMissing: taskEvidenceMissing + (dailyEvidence.length ? 0 : 1)
+      evidenceMissing: tasks.filter((task) => task.evidenceRequired.length && !hasTaskEvidence(task.id, evidenceByTaskId)).length
     },
-    risks: buildRisks(day, currentTask),
-    dailyDeliverables: (day?.dailyDeliverables ?? []).map(productText),
-    mustAnswer: (day?.mustAnswer ?? []).map(productText),
-    nextMilestone: buildNextMilestone(plan, currentTask),
+    risks: buildRisks(currentTask),
+    dailyDeliverables: buildDailyDeliverables(currentTask),
+    mustAnswer: buildMustAnswer(currentTask),
+    nextMilestone: buildNextMilestone(overlay.activeProfileId, currentTask, nextTask),
     syncState: overlay.syncState ?? "local_fallback",
     generatedAt: now.toISOString()
   };
 }
 
 export function buildDailyEvidence(date: string, legacy: LegacySnapshot): ReviewEvidence[] {
-  if (!date) return [];
-
-  const evidence: ReviewEvidence[] = [];
-  const review = getRecordValue(legacy.reviews, date);
-  if (hasReviewContent(review)) {
-    evidence.push({
-      id: `legacy-review-${date}`,
-      taskId: "daily",
-      type: "review",
-      title: "旧版每日复盘",
-      content: "检测到旧版复盘内容，可作为今日完成证据。",
-      createdAt: `${date}T22:30:00${FIXED_OFFSET}`,
-      verified: true
-    });
-  }
-
-  const sessions = legacy.interviewSessions.filter((record) => recordDate(record) === date);
-  sessions.forEach((record, index) => {
-    evidence.push({
-      id: `legacy-oral-${date}-${index + 1}`,
-      taskId: "daily",
-      type: "oral_score",
-      title: "旧版口述评分",
-      content: textFromUnknown(record, "检测到旧版口述记录。"),
-      createdAt: `${date}T20:30:00${FIXED_OFFSET}`,
-      verified: true
-    });
-  });
-
-  const applications = legacy.applications.filter((record) => recordDate(record) === date);
-  applications.forEach((record, index) => {
-    evidence.push({
-      id: `legacy-application-${date}-${index + 1}`,
-      taskId: "daily",
-      type: "delivery_record",
-      title: "旧版机会记录",
-      content: textFromUnknown(record, "检测到旧版机会记录。"),
-      createdAt: `${date}T21:30:00${FIXED_OFFSET}`,
-      verified: true
-    });
-  });
-
-  return evidence;
+  void date;
+  void legacy;
+  return [];
 }
 
 export function getEvidenceSummary(taskId: string, date: string, evidenceByTaskId: Record<string, ReviewEvidence[]>, legacy: LegacySnapshot) {
@@ -187,115 +95,75 @@ export function getEvidenceSummary(taskId: string, date: string, evidenceByTaskI
   };
 }
 
-function mapBlockToTask(block: EnrichedBlock, completed: Record<string, boolean>, currentTaskId: string | undefined, now: Date): Task {
-  const status: TaskStatus = completed[block.id]
-    ? "done"
-    : block.id === currentTaskId
-      ? "active"
-      : block.endDateTime.getTime() < now.getTime()
-        ? "pending"
-        : "pending";
-  const sourceLabels = (block.sourceFiles ?? block.mustRead ?? [])
-    .map((item) => item.label)
-    .filter((label): label is string => Boolean(label));
-
-  return {
-    id: block.id,
-    day: block.dayNumber,
-    date: block.day.date,
-    weekday: block.day.weekday,
-    title: productText(block.title),
-    description: productText(block.description ?? ""),
-    type: normalizeTaskType(block.category),
-    status,
-    startAt: `${block.day.date} ${block.start}`,
-    endAt: `${block.endDate ?? block.day.date} ${block.end}`,
-    durationLabel: `${block.start}-${block.end}`,
-    deliverables: (block.deliverables ?? []).map(productText),
-    interviewQuestions: (block.interviewQuestions ?? []).map(productText),
-    acceptanceCriteria: productText(block.acceptance ?? "完成任务产出并补齐证据。"),
-    javaMapping: productText(block.javaMapping),
-    tags: [categoryLabel(block.category), block.day.javaFocus].filter((tag): tag is string => Boolean(tag)).map(productText),
-    riskIds: block.risk ? [`risk-${block.id}`] : [],
-    evidenceRequired: evidenceRequiredFor(block.category),
-    sourceLabels: sourceLabels.map(productText)
-  };
+function currentProfileEvents(overlay: LocalSprintOverlay): CoachScheduleEvent[] {
+  if (!overlay.activeProfileId) return [];
+  return (overlay.coachScheduleEvents ?? []).filter((event) => event.profileId === overlay.activeProfileId);
 }
 
-function productText(value: string | undefined): string {
-  return (value ?? "")
-    .replace(/投递反馈/g, "机会反馈")
-    .replace(/投递记录/g, "机会记录")
-    .replace(/简历\/投递/g, "简历/机会")
-    .replace(/投递\/证据/g, "机会反馈/证据")
-    .replace(/正式密集投递/g, "正式机会验证")
-    .replace(/正式投递/g, "正式机会验证")
-    .replace(/低风险投递/g, "低风险机会验证")
-    .replace(/投递前/g, "机会验证前")
-    .replace(/投递后/g, "机会反馈后")
-    .replace(/投递/g, "机会验证");
+function buildTheme(activeProfileId: string | undefined, currentTask?: Task): string {
+  if (currentTask) return `个人求职行动：${currentTask.title}`;
+  return activeProfileId ? "等待生成今日日历" : "等待导入简历建档";
 }
 
-function getPlanState(schedule: RawSchedule, now: Date): PlanState {
-  const blocks = flattenBlocks(schedule);
-  const first = blocks[0];
-  const last = blocks[blocks.length - 1];
-  const today = getDayByDate(schedule, formatDate(now));
-
-  if (!first || !last) {
-    return { code: "empty", current: null, next: null, today, blocks };
-  }
-
-  const nowMs = now.getTime();
-  if (nowMs < first.startDateTime.getTime()) {
-    return { code: "before", current: null, next: first, today: getDayByDate(schedule, schedule.startDate), blocks };
-  }
-
-  if (nowMs >= last.endDateTime.getTime()) {
-    return { code: "after", current: null, next: null, today: getDayByDate(schedule, schedule.endDate), blocks };
-  }
-
-  const current = blocks.find((block) => nowMs >= block.startDateTime.getTime() && nowMs < block.endDateTime.getTime()) ?? null;
-  const next = blocks.find((block) => block.startDateTime.getTime() > nowMs) ?? null;
-
-  if (current) {
-    return { code: "running", current, next, today: current.day, blocks };
-  }
-
-  const hasRemainingToday = today
-    ? today.blocks.some((block) => parseDateTime(today.date, block.start).getTime() > nowMs)
-    : false;
-
-  return {
-    code: hasRemainingToday ? "waiting" : "day-ended",
-    current: null,
-    next,
-    today: today ?? next?.day ?? null,
-    blocks
-  };
+function buildGoal(activeProfileId: string | undefined, currentTask?: Task): string {
+  if (currentTask) return currentTask.description || "围绕当前求职画像完成今天的个人行动。";
+  return activeProfileId ? "画像已就绪，先生成今天的个人行动。" : "先导入简历或粘贴 JD，确认求职画像后再生成日历。";
 }
 
-function flattenBlocks(schedule: RawSchedule): EnrichedBlock[] {
-  return schedule.days
-    .flatMap((day, dayIndex) =>
-      day.blocks.map((block) => ({
-        ...block,
-        day,
-        dayNumber: dayIndex + 1,
-        startDateTime: parseDateTime(day.date, block.start),
-        endDateTime: parseDateTime(block.endDate ?? day.date, block.end)
-      }))
-    )
-    .sort((a, b) => a.startDateTime.getTime() - b.startDateTime.getTime());
+function buildRisks(currentTask?: Task): RiskItem[] {
+  if (!currentTask) return [];
+  return [
+    {
+      id: `risk-${currentTask.id}`,
+      level: currentTask.evidenceRequired.length ? "medium" : "low",
+      title: "证据缺口",
+      reason: `「${currentTask.title}」需要绑定真实经历、输出或复盘记录，避免只停留在计划。`,
+      mitigation: currentTask.acceptanceCriteria || "先补一条可读回证据，再标记完成。"
+    }
+  ];
 }
 
-function parseDateTime(date: string, time: string): Date {
-  return new Date(`${date}T${time}:00${FIXED_OFFSET}`);
+function buildDailyDeliverables(currentTask?: Task): string[] {
+  if (!currentTask) return [];
+  return currentTask.deliverables.length ? currentTask.deliverables : [`完成「${currentTask.title}」`];
+}
+
+function buildMustAnswer(currentTask?: Task): string[] {
+  if (!currentTask) return [];
+  if (currentTask.interviewQuestions.length) return currentTask.interviewQuestions;
+  return [
+    `「${currentTask.title}」的可验证证据是什么？`,
+    "哪些经历或结果不能夸大？",
+    "完成后下一步最小动作是什么？"
+  ];
+}
+
+function buildNextMilestone(activeProfileId: string | undefined, currentTask?: Task, nextTask?: Task): string {
+  if (nextTask) return `准备 ${nextTask.durationLabel} 的 ${nextTask.title}`;
+  if (currentTask?.status === "done") return `复盘 ${currentTask.title}`;
+  if (currentTask) return `完成 ${currentTask.durationLabel} 的 ${currentTask.title}`;
+  return activeProfileId ? "生成今日个人行动" : "导入简历生成画像";
+}
+
+function chooseCurrentTask(tasks: Task[], completed: Record<string, boolean>, now: Date): Task | undefined {
+  return tasks.find((task) => task.status === "active")
+    ?? tasks.find((task) => isTaskInCurrentWindow(task, now))
+    ?? tasks.find((task) => !completed[task.id])
+    ?? tasks[0];
+}
+
+function findNextTask(tasks: Task[], completed: Record<string, boolean>, currentTask?: Task): Task | undefined {
+  if (!currentTask) return undefined;
+  return tasks.find((task) => task.id !== currentTask.id && task.startAt > currentTask.startAt && !completed[task.id]);
+}
+
+function hasTaskEvidence(taskId: string, evidenceByTaskId: Record<string, ReviewEvidence[]>): boolean {
+  return Boolean(evidenceByTaskId[taskId]?.length);
 }
 
 function formatDate(date: Date): string {
   const parts = new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Singapore",
+    timeZone: "Asia/Shanghai",
     year: "numeric",
     month: "2-digit",
     day: "2-digit"
@@ -304,133 +172,29 @@ function formatDate(date: Date): string {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-function getDayByDate(schedule: RawSchedule, date: string): RawDay | null {
-  return schedule.days.find((day) => day.date === date) ?? null;
+function formatWeekday(date: Date): string {
+  return new Intl.DateTimeFormat("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    weekday: "short"
+  }).format(date);
 }
 
-function getDayNumber(schedule: RawSchedule, day: RawDay): number {
-  return schedule.days.findIndex((item) => item.date === day.date) + 1;
+function isTaskInCurrentWindow(task: Task, now: Date): boolean {
+  const start = parseTaskDateTime(task.startAt);
+  const end = parseTaskDateTime(task.endAt);
+  if (!start || !end) return false;
+  const nowMs = now.getTime();
+  return nowMs >= start.getTime() && nowMs < end.getTime();
 }
 
-function buildRisks(day: RawDay | null, currentTask?: Task): RiskItem[] {
-  const risks: RiskItem[] = [];
-
-  if (day?.risk) {
-    risks.push({
-      id: `risk-${day.date}`,
-      level: "medium",
-      title: "今日主风险",
-      reason: day.risk,
-      mitigation: "先把任务输出和 Evidence Gate 做实，再扩展其它页面。"
-    });
-  }
-
-  if (currentTask?.riskIds.length) {
-    risks.push({
-      id: currentTask.riskIds[0],
-      level: "medium",
-      title: "当前任务风险",
-      reason: "当前任务有明确风险提示，完成前需要绑定真实项目或证据。",
-      mitigation: currentTask.acceptanceCriteria
-    });
-  }
-
-  return risks.length
-    ? risks
-    : [
-        {
-          id: "risk-evidence-gap",
-          level: "low",
-          title: "证据缺口",
-          reason: "今日任务需要有可复盘证据，不能只标记完成。",
-          mitigation: "先补口述、复盘或机会反馈，再标记完成。"
-        }
-      ];
-}
-
-function buildNextMilestone(plan: PlanState, currentTask?: Task): string {
-  if (plan.current) return `完成 ${plan.current.end} 前的当前任务`;
-  if (plan.next) return `准备 ${plan.next.start} 的 ${plan.next.title}`;
-  return currentTask ? `复盘 ${currentTask.title}` : "完成今日复盘";
-}
-
-function normalizeTaskType(category: string): TaskType {
-  const allowed = new Set<TaskType>([
-    "project",
-    "java",
-    "agent",
-    "rag",
-    "interview",
-    "resume",
-    "delivery",
-    "review",
-    "deployment",
-    "android",
-    "rest",
-    "path-audit",
-    "path-missing",
-    "public-safe",
-    "health-check"
-  ]);
-
-  if (category === "spring") return "java";
-  return allowed.has(category as TaskType) ? (category as TaskType) : "project";
-}
-
-function categoryLabel(category: string): string {
-  const labels: Record<string, string> = {
-    project: "项目",
-    java: "Java",
-    agent: "Agent",
-    rag: "RAG",
-    interview: "面试",
-    resume: "简历",
-    delivery: "机会",
-    review: "复盘",
-    deployment: "部署",
-    android: "Android",
-    rest: "缓冲"
-  };
-
-  return labels[category] ?? category;
-}
-
-function evidenceRequiredFor(category: string): EvidenceType[] {
-  if (category === "interview") return ["oral_score", "interview_answer"];
-  if (category === "delivery" || category === "resume") return ["delivery_record", "learning_note"];
-  if (category === "review") return ["review"];
-  return ["learning_note", "review"];
-}
-
-function hasTaskEvidence(taskId: string, evidenceByTaskId: Record<string, ReviewEvidence[]>, dailyEvidence: ReviewEvidence[]): boolean {
-  return Boolean(evidenceByTaskId[taskId]?.length || dailyEvidence.length);
+function parseTaskDateTime(value: string): Date | null {
+  const [date, time] = value.split(" ");
+  if (!date || !time) return null;
+  const parsed = new Date(`${date}T${time}:00+08:00`);
+  return Number.isFinite(parsed.getTime()) ? parsed : null;
 }
 
 function isBefore(dateTime: string, now: Date): boolean {
-  const [date, time] = dateTime.split(" ");
-  return Boolean(date && time && parseDateTime(date, time).getTime() < now.getTime());
-}
-
-function getRecordValue(source: Record<string, unknown>, key: string): unknown {
-  return Object.prototype.hasOwnProperty.call(source, key) ? source[key] : undefined;
-}
-
-function hasReviewContent(value: unknown): boolean {
-  if (!value || typeof value !== "object") return false;
-  return Object.values(value as Record<string, unknown>).some((item) => String(item ?? "").trim().length > 0);
-}
-
-function recordDate(value: unknown): string | null {
-  if (!value || typeof value !== "object") return null;
-  const record = value as Record<string, unknown>;
-  const raw = record.date ?? record.createdAt ?? record.timestamp ?? record.time;
-  if (!raw) return null;
-  const text = String(raw);
-  return /^\d{4}-\d{2}-\d{2}/.test(text) ? text.slice(0, 10) : null;
-}
-
-function textFromUnknown(value: unknown, fallback: string): string {
-  if (!value || typeof value !== "object") return fallback;
-  const record = value as Record<string, unknown>;
-  return String(record.summary ?? record.title ?? record.question ?? record.company ?? fallback);
+  const parsed = parseTaskDateTime(dateTime);
+  return Boolean(parsed && parsed.getTime() < now.getTime());
 }

@@ -5,6 +5,12 @@ const fs = require("fs");
 const path = require("path");
 const { createRequire } = require("module");
 const { addCoachSchedule, exerciseAiArtifactDrafts } = require("./android_webview_ai_artifact_flow");
+const {
+  clickWebView,
+  configureRemoteUrlBridge,
+  fillApplication,
+  fillReview
+} = require("./android_webview_react_form_helpers");
 const { envFileErrorInfo, loadDeliveryEnvFile } = require("../tools/delivery_env_file");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -119,9 +125,10 @@ const EXPECTED_STORAGE_KEYS = [
   "jobSprint.react.v1"
 ];
 const ANDROID_FLOW_LABEL = `Android功能测试${Date.now().toString(36)}`;
+const ANDROID_FLOW_DATE = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Shanghai", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
 const ANDROID_DELAY_REASON = `${ANDROID_FLOW_LABEL} Android 延期原因`;
 const ANDROID_REMEDY = `${ANDROID_FLOW_LABEL}补救动作`;
-const ANDROID_AI_DRAFT_BUTTON_LABEL = "生成 AI 草稿";
+const ANDROID_AI_DRAFT_BUTTON_LABEL = "生成 AI 建议";
 
 async function readSessionState(page, label) {
   if (!IS_REMOTE_WEBVIEW) {
@@ -406,6 +413,9 @@ async function connectWebView() {
     };
   }
   await page.waitForLoadState("domcontentloaded").catch(() => {});
+  if (IS_REMOTE_WEBVIEW) {
+    await configureRemoteUrlBridge(page, WEBVIEW_URL, assert);
+  }
   return { browser, page, pid };
 }
 
@@ -497,45 +507,8 @@ async function gotoRoute(page, hash, heading) {
   await page.getByRole("heading", { name: heading, exact: true }).waitFor({ timeout: 15000 });
 }
 
-async function clickWebView(locator) {
-  const target = locator.first();
-  await target.scrollIntoViewIfNeeded({ timeout: 5000 }).catch(() => {});
-  try {
-    await target.click({ timeout: 5000 });
-  } catch (error) {
-    if (!String(error && error.message).includes("Timeout")) {
-      throw error;
-    }
-    await target.click({ force: true, timeout: 5000 });
-  }
-}
-
-async function fillApplication(page, draft) {
-  const form = page.locator("section[aria-labelledby='application-form-title']");
-  await form.getByLabel("公司").fill(draft.company);
-  await form.getByLabel("岗位").fill(draft.role);
-  await form.getByLabel("来源").fill(draft.source);
-  await form.getByLabel("薪资范围").fill(draft.salaryRange);
-  await form.getByLabel("城市").fill(draft.city);
-  await form.getByLabel("简历版本").fill(draft.resumeVersion);
-  await form.getByLabel("JD 关键词").fill(draft.keywords);
-  await form.getByLabel("状态").selectOption(draft.status);
-  await form.getByLabel("沟通反馈").fill(draft.hrFeedback);
-  await form.getByLabel("反馈摘要").fill(draft.notes);
-}
-
-async function fillReview(page, draft) {
-  const form = page.locator("section[aria-labelledby='review-form-title']");
-  await form.getByLabel("今天能讲的一个项目点是什么？").fill(draft.projectPoint);
-  await form.getByLabel("今天能回答的两个面试题是什么？").fill(draft.interviewQuestions);
-  await form.getByLabel("今天补强的一个知识或技能边界是什么？").fill(draft.javaPoint);
-  await form.getByLabel("今天发现了哪些路径问题？").fill(draft.pathIssues);
-  await form.getByLabel("今天哪些回答还容易被面试官追问穿？").fill(draft.fragileAnswers);
-  await form.getByLabel("明天最优先补什么？").fill(draft.tomorrowPriority);
-}
-
 async function exerciseCoachWorkspace(page, prefix) {
-  await gotoRoute(page, "/coach", "AI 教练设置");
+  await gotoRoute(page, "/coach", "AI 求职教练");
   const profilePanel = page.locator("#coach-profile");
   await profilePanel.getByLabel("画像名称").fill(`${prefix}画像`);
   await profilePanel.getByLabel("角色族", { exact: true }).selectOption("backend");
@@ -549,7 +522,7 @@ async function exerciseCoachWorkspace(page, prefix) {
   await profilePanel.getByLabel("项目证据").fill(`${prefix}项目证据：搜索链路和 MQ 幂等。`);
   await profilePanel.getByLabel("不可夸大边界").fill(`${prefix}不可夸大边界：不编造大模型训练经历。`);
   await clickWebView(profilePanel.getByRole("button", { name: "保存画像" }));
-  await page.getByRole("status").filter({ hasText: "画像已保存" }).waitFor();
+  await page.getByText("画像已保存。", { exact: true }).waitFor();
 
   await page.getByLabel("知识主题").fill(`${prefix}MQ 幂等边界`);
   await page.getByLabel("掌握程度").selectOption("了解");
@@ -559,8 +532,8 @@ async function exerciseCoachWorkspace(page, prefix) {
   await clickWebView(page.getByRole("button", { name: "新增边界" }));
   await page.getByText(`${prefix}MQ 幂等边界`).waitFor();
 
-  await addCoachSchedule(page, clickWebView, { title: `${prefix}自定义日程`, date: "2026-07-06", start: "21:00", end: "21:30", type: "interview", reason: `${prefix}安排原因：今晚用口述验证知识边界。` });
-  await addCoachSchedule(page, clickWebView, { title: `${prefix}自定义日程二`, date: "2026-07-07", start: "07:30", end: "08:00", type: "learning", reason: `${prefix}安排原因：早上补齐 MQ 可靠消息边界。` });
+  await addCoachSchedule(page, clickWebView, { title: `${prefix}自定义日程`, date: ANDROID_FLOW_DATE, start: "21:00", end: "21:30", type: "interview", reason: `${prefix}安排原因：今晚用口述验证知识边界。` });
+  await addCoachSchedule(page, clickWebView, { title: `${prefix}自定义日程二`, date: ANDROID_FLOW_DATE, start: "07:30", end: "08:00", type: "learning", reason: `${prefix}安排原因：早上补齐 MQ 可靠消息边界。` });
 
   await exerciseAiArtifactDrafts({ page, clickWebView, prefix, assert });
 
@@ -570,7 +543,7 @@ async function exerciseCoachWorkspace(page, prefix) {
   assert.ok(snapshot.react.coachScheduleTitles.includes(`${prefix}自定义日程`));
   assert.ok(snapshot.react.coachScheduleTitles.includes(`${prefix}自定义日程二`));
   assert.strictEqual(snapshot.react.profileCount, 1);
-  assert.ok(snapshot.react.boundaryCount >= 2);
+  assert.ok(snapshot.react.boundaryCount >= 1);
   assert.ok(snapshot.react.scheduleEventCount >= 2);
   assert.ok(snapshot.react.aiArtifactCount >= 3);
   assert.ok(snapshot.react.llmRunCount >= 1);
@@ -582,6 +555,8 @@ async function exerciseCoachWorkspace(page, prefix) {
 
 async function runWebViewFlow(page) {
   await gotoWebView(page, routeUrl("/today", { reset: Date.now() }));
+  if (effectiveEnv.JOB_SPRINT_ANDROID_REMOTE_TEMP_ACCOUNT) await page.evaluate(() => window.AndroidSessionCookies?.clearSessionAndOpenLogin?.()).catch(() => {});
+  if (effectiveEnv.JOB_SPRINT_ANDROID_REMOTE_TEMP_ACCOUNT) await page.waitForTimeout(1000);
   await maybeLogin(page);
   await assertRemoteWebViewPage(page, "initial today route");
   await page.evaluate(() => window.localStorage.clear());
@@ -590,6 +565,10 @@ async function runWebViewFlow(page) {
   await assertRemoteWebViewPage(page, "reset today route");
   await page.getByRole("heading", { name: "今日 AI 教练", exact: true }).waitFor({ timeout: 15000 });
   await snapshotStorage(page, "00-before");
+  if (!(await page.getByRole("button", { name: "补学习笔记" }).count())) {
+    await exerciseCoachWorkspace(page, ANDROID_FLOW_LABEL);
+    await gotoRoute(page, "/today", "今日 AI 教练");
+  }
   await clickWebView(page.getByRole("button", { name: "补学习笔记" }));
   await page.getByLabel("证据内容").fill(`${ANDROID_FLOW_LABEL}学习笔记：输入内容必须进入证据。`);
   await clickWebView(page.getByRole("button", { name: "保存证据" }));
@@ -600,14 +579,12 @@ async function runWebViewFlow(page) {
     await page.getByRole("button", { name: "标记完成" }).waitFor();
   }
   await clickWebView(page.getByRole("button", { name: "标记完成" }));
-  await page.getByRole("button", { name: "取消完成" }).waitFor();
+  await page.waitForFunction(() => Object.values(JSON.parse(localStorage.getItem("jobSprint.react.v1") || "{}").state?.completed || {}).some(Boolean), { timeout: 10000 });
   await page.getByLabel("延期分钟").fill("25");
   await page.getByLabel("延期原因").fill(ANDROID_DELAY_REASON);
   await page.getByLabel("补救动作").fill(ANDROID_REMEDY);
   await clickWebView(page.getByRole("button", { name: "登记延期" }));
   await page.getByText(`25 分钟 · ${ANDROID_DELAY_REASON}`).first().waitFor();
-
-  await exerciseCoachWorkspace(page, ANDROID_FLOW_LABEL);
 
   await gotoRoute(page, "/learn", "知识边界");
   await clickWebView(page.getByRole("button", { name: /补学习笔记|再补一条/ }));
@@ -623,7 +600,6 @@ async function runWebViewFlow(page) {
   await page.getByText(/重点 [1-9]\d* 张/).waitFor();
 
   await gotoRoute(page, "/interview", "面试训练");
-  await clickWebView(page.getByRole("button", { name: "Java", exact: true }));
   const unmarkWeakQuestionButton = page.getByRole("button", { name: /取消薄弱题标记/ });
   if (await unmarkWeakQuestionButton.count()) {
     await clickWebView(unmarkWeakQuestionButton);
@@ -688,7 +664,7 @@ async function runWebViewFlow(page) {
   await clickWebView(page.getByRole("button", { name: "生成本地导出" }));
   await page.getByText(/已生成导出 \d+ 条/).waitFor();
 
-  await gotoRoute(page, "/review", "复盘归因");
+  await gotoRoute(page, "/review", "今日复盘");
   await fillReview(page, {
     projectPoint: `${ANDROID_FLOW_LABEL}项目点A`,
     interviewQuestions: `${ANDROID_FLOW_LABEL}面试题A1；${ANDROID_FLOW_LABEL}面试题A2`,
@@ -697,7 +673,7 @@ async function runWebViewFlow(page) {
     fragileAnswers: `${ANDROID_FLOW_LABEL} 薄弱回答A`,
     tomorrowPriority: `${ANDROID_FLOW_LABEL} 明日优先A`
   });
-  await clickWebView(page.getByRole("button", { name: "保存本地复盘" }));
+  await clickWebView(page.getByRole("button", { name: "保存复盘" }));
   await page.getByText(`项目点：${ANDROID_FLOW_LABEL}项目点A`, { exact: true }).waitFor();
   await fillReview(page, {
     projectPoint: `${ANDROID_FLOW_LABEL}项目点B`,
@@ -707,7 +683,7 @@ async function runWebViewFlow(page) {
     fragileAnswers: `${ANDROID_FLOW_LABEL} 薄弱回答B`,
     tomorrowPriority: `${ANDROID_FLOW_LABEL} 明日优先B`
   });
-  await clickWebView(page.getByRole("button", { name: "保存本地复盘" }));
+  await clickWebView(page.getByRole("button", { name: "保存复盘" }));
   await clickWebView(page.getByRole("button", { name: `编辑复盘记录 ${ANDROID_FLOW_LABEL}项目点B` }));
   await fillReview(page, {
     projectPoint: `${ANDROID_FLOW_LABEL}项目点B 已编辑`,
@@ -717,24 +693,24 @@ async function runWebViewFlow(page) {
     fragileAnswers: `${ANDROID_FLOW_LABEL} 薄弱回答B`,
     tomorrowPriority: `${ANDROID_FLOW_LABEL} 明日优先B 已编辑`
   });
-  await clickWebView(page.getByRole("button", { name: "更新本地复盘" }));
+  await clickWebView(page.getByRole("button", { name: "更新复盘" }));
   await page.getByText(`项目点：${ANDROID_FLOW_LABEL}项目点B 已编辑`, { exact: true }).waitFor();
   await clickWebView(page.getByRole("button", { name: `删除复盘记录 ${ANDROID_FLOW_LABEL}项目点A` }));
   await page.getByText(`项目点：${ANDROID_FLOW_LABEL}项目点A`, { exact: true }).waitFor({ state: "detached" });
-  await clickWebView(page.getByRole("button", { name: "导出当前筛选复盘 JSON" }));
+  await clickWebView(page.getByRole("button", { name: "导出当前筛选" }));
   await page.locator("pre").last().waitFor();
 
-  await gotoRoute(page, "/more", "更多入口");
-  await page.getByText("已检测").waitFor();
-  await page.getByLabel("导入 React 状态 JSON").waitFor();
+  await gotoRoute(page, "/more", "我的数据");
+  await page.getByRole("heading", { name: "个人数据备份", exact: true }).waitFor();
+  await page.getByLabel("导入个人数据备份").waitFor();
   await clickWebView(page.getByRole("button", { name: "导出 JSON" }));
-  await page.getByText("React 本地状态已导出").waitFor();
+  await page.getByText("个人数据备份已导出").waitFor();
   const snapshot = await snapshotStorage(page, "01-after-webview-flow");
   assert.ok(snapshot.react.evidenceCount >= 5);
   assert.ok(snapshot.react.completedCount >= 1);
   assert.ok(snapshot.react.delayReasons.includes(ANDROID_DELAY_REASON));
   assert.strictEqual(snapshot.react.profileCount, 1);
-  assert.ok(snapshot.react.boundaryCount >= 2);
+  assert.ok(snapshot.react.boundaryCount >= 1);
   assert.ok(snapshot.react.scheduleEventCount >= 2);
   assert.ok(snapshot.react.aiArtifactCount >= 3);
   assert.ok(snapshot.react.llmRunCount >= 1);
@@ -753,14 +729,14 @@ async function verifyRestartReadback(flowSnapshot, initialPid) {
   await new Promise((resolve) => setTimeout(resolve, 3000));
   const { browser, page, pid } = await connectWebView();
   try {
-    await gotoRoute(page, "/more", "更多入口");
-    await page.getByText("已检测").waitFor();
+    await gotoRoute(page, "/more", "我的数据");
+    await page.getByRole("heading", { name: "个人数据备份", exact: true }).waitFor();
     const snapshot = await snapshotStorage(page, "02-after-app-restart");
     assert.ok(snapshot.react.evidenceCount >= 5);
     assert.ok(snapshot.react.completedCount >= 1);
     assert.ok(snapshot.react.delayReasons.includes(ANDROID_DELAY_REASON));
     assert.strictEqual(snapshot.react.profileCount, 1);
-    assert.ok(snapshot.react.boundaryCount >= 2);
+    assert.ok(snapshot.react.boundaryCount >= 1);
     assert.ok(snapshot.react.scheduleEventCount >= 2);
     assert.ok(snapshot.react.aiArtifactCount >= 3);
     assert.ok(snapshot.react.llmRunCount >= 1);

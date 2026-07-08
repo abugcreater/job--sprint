@@ -80,10 +80,22 @@ function readJsonFile(file) {
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
-function fileHashMap(dir) {
+function publicSafeCompareText(relativePath, text) {
+  if (relativePath !== "schedule.html") return text;
+  return text.replaceAll("../react/index.html#/today", "./react/index.html#/today");
+}
+
+function fileHashMap(dir, normalizeText = (relativePath, text) => text) {
   return Object.fromEntries(walkFiles(dir)
     .sort()
-    .map((relativePath) => [relativePath, fileSha256(path.join(dir, relativePath))]));
+    .map((relativePath) => {
+      const file = path.join(dir, relativePath);
+      if (relativePath === "schedule.html") {
+        const text = normalizeText(relativePath, fs.readFileSync(file, "utf8"));
+        return [relativePath, crypto.createHash("sha256").update(text).digest("hex")];
+      }
+      return [relativePath, fileSha256(file)];
+    }));
 }
 
 function mapDiff(left, right, leftLabel = "dist", rightLabel = "android_fallback") {
@@ -338,8 +350,8 @@ function publicSafeBundleCheck() {
     };
   }
 
-  const distMap = fileHashMap(distRoot);
-  const androidMap = fileHashMap(androidRoot);
+  const distMap = fileHashMap(distRoot, publicSafeCompareText);
+  const androidMap = fileHashMap(androidRoot, publicSafeCompareText);
   const syncIssues = mapDiff(distMap, androidMap);
   if (syncIssues.length) {
     return {
