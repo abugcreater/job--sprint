@@ -1,0 +1,348 @@
+tests/android_remote_webview_controller_test.js
+  s_8f6b4df0c955b0::t_60d69b5a4da50c 20,30-31,36
+tools/scan_sensitive_content.js
+  s_8f6b4df0c955b0::t_b74b1499888ecc 7,53,57-58,60
+tests/kb_mobile_list_test.js
+  s_8f6b4df0c955b0::t_d59927ddb8aa4d 10-26,29
+tests/android_webview_functional_persistence_test.js
+  s_8f6b4df0c955b0::t_6ff951bb000d9f 713
+  s_8f6b4df0c955b0::t_ec2f1667cad5c0 582
+  s_8f6b4df0c955b0::t_90d4f6f0bcb197 128,535-536,568-571
+  s_8f6b4df0c955b0::t_d4bbf0c4dc6aba 546,739
+  s_8f6b4df0c955b0::t_c94530650b6beb 703,705,707,732
+  s_8f6b4df0c955b0::t_9899fc75afcceb 667,676,686,696,700
+  s_8f6b4df0c955b0::t_27616f84cbb7e7 8-13,416-417
+  s_8f6b4df0c955b0::t_199848bf150ac8 418
+  s_8f6b4df0c955b0::t_7c6c3f882b3e65 131
+  s_8f6b4df0c955b0::t_968697cc9ec54f 525
+  s_8f6b4df0c955b0::t_3f06406443a165 704,733
+  s_8f6b4df0c955b0::t_31587bfa3a285a 511
+  s_8f6b4df0c955b0::t_21d97137dd66c7 558-559
+tests/android_webview_ai_artifact_flow.js
+  s_8f6b4df0c955b0::t_7c6c3f882b3e65 2,4-5,22,24,43
+  s_8f6b4df0c955b0::t_d59ded5a17760b 10-13,15-17,19-21,25-26
+tests/mobile_schedule_detail_test.js
+  s_8f6b4df0c955b0::t_738769e28b0554 8-13,15-21
+tools/validate_feature_parity.js
+  s_8f6b4df0c955b0::t_7c6c3f882b3e65 40-41
+  s_8f6b4df0c955b0::t_233ce4cbf58980 72-73
+  s_8f6b4df0c955b0::t_b977caddd83280 66-67
+  s_8f6b4df0c955b0::t_878d214f5dc719 86
+  s_8f6b4df0c955b0::t_641b93ee83475c 185,242,260-264
+apps/react-web/src/api/runtimeClientTypes.ts
+  s_8f6b4df0c955b0::t_bd1015a223ccd4 1-119
+apps/react-web/src/stores/sprintStoreTypes.ts
+  s_8f6b4df0c955b0::t_d7f2d12d630b9c 1-52
+tests/delivery_action_commands_test.js
+  s_8f6b4df0c955b0::t_f2f2e89fe66019 17,20
+tools/validate_final_delivery_readiness.js
+  s_8f6b4df0c955b0::t_4432ef478eefd0 92-97
+  s_8f6b4df0c955b0::t_60203a8ce49dfe 83-88,91,98,353-354
+tests/final_delivery_readiness_test.js
+  s_8f6b4df0c955b0::t_4bbf714ec5b0c1 7,281,305-306,643
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidRemoteWebViewClient.java
+  s_8f6b4df0c955b0::t_ce52341b724576 33
+tests/page_smoke_test.js
+  s_8f6b4df0c955b0::t_084f1368f95778 111-117,123-126,153-154,158-159,162-164,181-182
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidBasicAuthController.java
+  s_8f6b4df0c955b0::t_ce52341b724576 28
+apps/react-web/src/features/review/components/ReviewEmptyProfile.tsx
+  s_8f6b4df0c955b0::t_af22170e7d2d08 1-29
+tests/ui_category_test.js
+  s_8f6b4df0c955b0::t_a8d564abec1b66 5,22-25
+  s_8f6b4df0c955b0::t_32751ad1830fb4 11,14-15,18-21,31,33-41
+tests/speech_provider_test.js
+  s_8f6b4df0c955b0::t_288a9a547d613b 80-85
+docs/core/05-interview-knowledge-base.md
+  s_8f6b4df0c955b0::t_2a81b0aa427680 19,21,24
+tools/run_android_remote_functional_evidence.js
+  s_8f6b4df0c955b0::t_25131bbedc4bab 1-129,147-202
+  s_8f6b4df0c955b0::t_84c3418727892f 130-146
+tools/build_schedule_and_kb.js
+  s_8f6b4df0c955b0::t_2a81b0aa427680 298-299,306
+tests/product_iteration_workflow_test.js
+  s_8f6b4df0c955b0::t_9c09c2c7ad682a 159-167,178,181
+package.json
+  s_8f6b4df0c955b0::t_59aac8d9025437 42
+tests/android_speech_bridge_test.js
+  s_8f6b4df0c955b0::t_845da98d9a9c50 143-146,163-168
+tests/rust_sqlite_ui_persistence_test.js
+  s_8f6b4df0c955b0::t_ec2f1667cad5c0 311
+  s_8f6b4df0c955b0::t_233ce4cbf58980 363,417
+  s_8f6b4df0c955b0::t_31290d8c6d92e2 43-53,157-162,254,300-305
+  s_8f6b4df0c955b0::t_31587bfa3a285a 229
+  s_8f6b4df0c955b0::t_596ec82c581400 173-179,225
+  s_8f6b4df0c955b0::t_7c6c3f882b3e65 167,206,208-209,218,223
+  s_8f6b4df0c955b0::t_968697cc9ec54f 243
+  s_8f6b4df0c955b0::t_b977caddd83280 342,351
+  s_8f6b4df0c955b0::t_04e38d12bfc4ed 193-204,219
+  s_8f6b4df0c955b0::t_c94530650b6beb 416
+apps/android/app/src/main/java/com/kai/jobsprint/RemoteUrlPolicy.java
+  s_8f6b4df0c955b0::t_ce52341b724576 40-43,54,77,85,89-97,105-115
+apps/android/app/src/main/java/com/kai/jobsprint/RemoteWebViewController.java
+  s_8f6b4df0c955b0::t_ce52341b724576 14,67-74,123
+apps/react-web/src/features/review/ReviewPage.tsx
+  s_8f6b4df0c955b0::t_89155baba78f1e 1,23,45,59,66-69,75,78,87,98,106,114-115,122,127,130,133-136,149-157,305,317,353,361,371,375-386,388-392,401,431-439,465,492,504,535,539
+tools/validate_product_iteration_workflow.js
+  s_8f6b4df0c955b0::t_9c09c2c7ad682a 154-155,159-162
+tests/goal_acceptance_test.js
+  s_8f6b4df0c955b0::t_848d2588f61ca3 7,220,223
+  s_8f6b4df0c955b0::t_2371e0b52da317 233-238,240-243
+tools/delivery_action_commands.js
+  s_8f6b4df0c955b0::t_d8925c8e1681cd 13,16
+tools/run_final_delivery.js
+  s_8f6b4df0c955b0::t_1ce62fdd6f0081 395
+tests/invitation_account_provisioning_test.js
+  s_8f6b4df0c955b0::t_3d27a004b4cf7d 15,132-146
+  s_8f6b4df0c955b0::t_9c7d640a775715 147
+tests/functional_coverage_test.js
+  s_8f6b4df0c955b0::t_878d214f5dc719 24
+  s_8f6b4df0c955b0::t_9a8aa128d8cedf 172-181,194,197
+  s_8f6b4df0c955b0::t_233ce4cbf58980 30-31,36,42-43
+tests/android_remote_functional_entrypoint_test.js
+  s_8f6b4df0c955b0::t_7b51e80a2a27b4 2,9,15,17-18,46-55
+tools/validate_functional_coverage.js
+  s_8f6b4df0c955b0::t_b5ab8e2c301d8b 29,50,73,103,137,225,315,332-336
+  s_8f6b4df0c955b0::t_878d214f5dc719 11
+  s_8f6b4df0c955b0::t_7c6c3f882b3e65 23,44,68
+  s_8f6b4df0c955b0::t_31587bfa3a285a 22,43,67
+  s_8f6b4df0c955b0::t_233ce4cbf58980 30-31,51-52,74-75
+apps/react-web/src/stores/sprintStore.ts
+  s_8f6b4df0c955b0::t_7a1a3b1c1d304b 87-89,96-104,107-123,287-292,303-304
+  s_8f6b4df0c955b0::t_5fdc67b2b9e555 41-49,105-106
+  s_8f6b4df0c955b0::t_14b303ab4f3915 32,34-35,37,230,293-297
+apps/rust-api/src/runtime_store.rs
+  s_8f6b4df0c955b0::t_c277beda94eaff 16
+apps/rust-api/tests/runtime_contract/multi_user.rs
+  s_8f6b4df0c955b0::t_c277beda94eaff 135-138,204-208
+  s_8f6b4df0c955b0::t_9cbcea980d9a38 134
+tests/feature_parity_test.js
+  s_8f6b4df0c955b0::t_233ce4cbf58980 29,37
+  s_8f6b4df0c955b0::t_878d214f5dc719 22
+  s_8f6b4df0c955b0::t_b977caddd83280 36
+  s_8f6b4df0c955b0::t_641b93ee83475c 159-169,182,185
+  s_8f6b4df0c955b0::t_7c6c3f882b3e65 28,35
+tests/architecture_quality_test.js
+  s_8f6b4df0c955b0::t_50b848f70b63e6 148-149
+tests/android_webview_react_form_helpers.js
+  s_8f6b4df0c955b0::t_ba0ce411d2b0ae 1-35
+  s_8f6b4df0c955b0::t_27616f84cbb7e7 36-51
+tests/react_functional_persistence_test.js
+  s_8f6b4df0c955b0::t_31587bfa3a285a 290
+  s_8f6b4df0c955b0::t_7c6c3f882b3e65 320-321,323,326-327,329,333
+  s_8f6b4df0c955b0::t_b977caddd83280 507,516,526,537,542
+  s_8f6b4df0c955b0::t_ec2f1667cad5c0 391
+  s_8f6b4df0c955b0::t_0b5a5ec6209c39 277-286,324
+  s_8f6b4df0c955b0::t_6045ebc02915ab 269-274
+  s_8f6b4df0c955b0::t_968697cc9ec54f 304
+  s_8f6b4df0c955b0::t_233ce4cbf58980 563,599,654,683
+  s_8f6b4df0c955b0::t_c94530650b6beb 684
+  s_8f6b4df0c955b0::t_8b8d491abc1f8b 685
+  s_8f6b4df0c955b0::t_070a46acb2e070 76-86,275,313,373-380
+  s_8f6b4df0c955b0::t_4ec0dcfe2cf7ee 276
+  s_8f6b4df0c955b0::t_62ee6e769f1aca 381
+tests/delivery_external_inputs_test.js
+  s_8f6b4df0c955b0::t_c8de3eec8c2924 6,50-54
+tests/android_remote_url_policy_test.js
+  s_8f6b4df0c955b0::t_60d69b5a4da50c 29,41,43-44,55-57,59
+apps/react-web/src/api/runtimeClient.ts
+  s_8f6b4df0c955b0::t_bc75dc2e32a6d2 3,5,11-34,248-253
+tests/android_remote_webview_client_test.js
+  s_8f6b4df0c955b0::t_60d69b5a4da50c 17
+tests/android_basic_auth_controller_test.js
+  s_8f6b4df0c955b0::t_0fd5c9264788df 27
+tests/scan_sensitive_content_test.js
+  s_8f6b4df0c955b0::t_b74b1499888ecc 28,31,37
+apps/android/app/src/main/assets/react/assets/index-CqayzyCr.css
+  s_8f6b4df0c955b0::t_e3579d2137453d 1
+apps/android/app/src/main/assets/react/assets/index-DcSmK4M1.js
+  s_8f6b4df0c955b0::t_b7a9eb5b9ee506 1,9,17,25,33,41-46,48-50,59,68,77,82,87,92,97,102,107,112,117,122,127,132,137,142,147,152,157,162,167,172,177,182,187,192,197,202,207,212,217,222,227,232,237,242,247,252,257,262,267,272,277,282,287,292,297,302,307,312,317,322,327,332,337,342,347,352,357,362,367,372,377,382,387,392,397,402,407,412,417,422,427,432,437,442,447,452,457,462,467,472-482,484-487
+apps/android/app/src/main/assets/react/index.html
+  s_8f6b4df0c955b0::t_43017470a4d13b 8-9
+apps/android/app/src/main/assets/web/assets/embedded-data.js
+  s_8f6b4df0c955b0::t_acdb3126ba5de2 1
+apps/android/app/src/main/assets/web/assets/schedule.js
+  s_8f6b4df0c955b0::t_b99c1e2a451b68 11-16,18,20-24,28-33,38,40,43-45,49,51-54,58,62-68,71-72,75,77-78,80-81,83,86-90,97-99,102-104,108-110,112,120-127
+apps/android/app/src/main/assets/web/build-manifest.json
+  s_8f6b4df0c955b0::t_b74c05afd98026 10-13,15-16,18
+apps/android/app/src/main/assets/web/data/interview_context.json
+  s_8f6b4df0c955b0::t_0acc12ce3d9e57 2-6,9-14
+apps/android/app/src/main/assets/web/data/interview_kb.json
+  s_8f6b4df0c955b0::t_998f41ea79eafc 2-3,5-6
+apps/android/app/src/main/assets/web/data/schedule.json
+  s_8f6b4df0c955b0::t_c305ae90e792a7 2-8,11-12
+apps/android/app/src/main/assets/web/no-profile-fallback.html
+  s_8f6b4df0c955b0::t_5414c1375e5260 1-51
+apps/android/app/src/main/assets/web/schedule.html
+  s_8f6b4df0c955b0::t_0a222062cd2ec3 4,6-44,47-50
+apps/react-web/README.md
+  s_8f6b4df0c955b0::t_5a1732ea7cdced 7,18,20-24,26,28,35,44,49
+apps/react-web/src/api/authClient.ts
+  s_8f6b4df0c955b0::t_27503474fcf140 107-109,116-123
+apps/react-web/src/app/AppShell.tsx
+  s_8f6b4df0c955b0::t_15cc0c4d832f96 4,6,14,26,44,50,56,87,107,112
+apps/react-web/src/app/MobileBottomNav.tsx
+  s_8f6b4df0c955b0::t_31bf907560d111 2-4,8,10,15
+apps/react-web/src/app/navigation.ts
+  s_8f6b4df0c955b0::t_59b8cfa0ad9acb 6-7,14,42-54,61,63-64,108-109,111-112,114-126,133,142,144-148,151,155,157
+apps/react-web/src/app/router.tsx
+  s_8f6b4df0c955b0::t_3ffa042823f02e 4,11,21,27
+apps/react-web/src/data/applicationsAdapter.ts
+  s_8f6b4df0c955b0::t_6b28cef8fb07cd 8,103
+apps/react-web/src/data/coachAdapter.ts
+  s_8f6b4df0c955b0::t_3b4647b21ad894 173,179,183-184
+apps/react-web/src/data/coachFirstLoginFlowAdapter.ts
+  s_8f6b4df0c955b0::t_31b2e369546a2f 48-52,58,71,100-103
+apps/react-web/src/data/coachOnboardingTemplateAdapter.ts
+  s_8f6b4df0c955b0::t_fbc51d4cac8705 13,33
+apps/react-web/src/data/coachScheduleTaskAdapter.ts
+  s_8f6b4df0c955b0::t_14087f3266ef52 30,34,40,45
+apps/react-web/src/data/coachSetupChecklistAdapter.ts
+  s_8f6b4df0c955b0::t_ddff42360fd3da 47,50,57
+apps/react-web/src/data/interviewAdapter.ts
+  s_8f6b4df0c955b0::t_3515cfd20eae07 1,7-8,81,102,110,238-239,242,250,252-260,263,266
+apps/react-web/src/data/learningAdapter.ts
+  s_8f6b4df0c955b0::t_98ada643eec5f9 83-94,97,248-266
+apps/react-web/src/data/moreAdapter.ts
+  s_8f6b4df0c955b0::t_ecb8cbfe338ce7 53-56,147-149,154,156,161-163,167-169,174-175,192-193,207-210,215,257
+apps/react-web/src/data/moreImportAdapter.ts
+  s_8f6b4df0c955b0::t_5d9000412d7d89 38,45-48,233-239
+apps/react-web/src/data/resumeProfileAdapter.ts
+  s_8f6b4df0c955b0::t_590101478aa008 1-184
+apps/react-web/src/data/reviewAdapter.ts
+  s_8f6b4df0c955b0::t_789084313b507a 142,151,157,220,237,324
+apps/react-web/src/data/scheduleAdapter.ts
+  s_8f6b4df0c955b0::t_7f1719d5f8f375 1,11,22-29,39,41,43-46,49-50,53-58,67,69-72,79-81,98-100,103-105,108-111,113-124,126-129,131-139,141-146,148-152,155-157,160-161,166,175-179,182-187,190-194,198-199
+apps/react-web/src/data/weeklyReviewAdapter.ts
+  s_8f6b4df0c955b0::t_95b7a6963e3b20 141
+apps/react-web/src/features/admin/AdminPage.tsx
+  s_8f6b4df0c955b0::t_946d65b6050768 1-71
+apps/react-web/src/features/applications/ApplicationsPage.tsx
+  s_8f6b4df0c955b0::t_55f80af534fd57 1-2,25,42,118-144,162-165
+apps/react-web/src/features/coach/CoachPage.tsx
+  s_8f6b4df0c955b0::t_7ed9cff347b4d5 3,53,100,113,117-129,134,148,191,239,287,298,308,321,331-332,334,336,345,349,356,362,383,388,391,394-397,428-432
+apps/react-web/src/features/coach/components/ArtifactPanel.tsx
+  s_8f6b4df0c955b0::t_ab6faa1c2bfe0f 39,48,66,72,85,99,107,112,115
+apps/react-web/src/features/coach/components/FirstLoginFlowPanel.tsx
+  s_8f6b4df0c955b0::t_71468f777fe5fc 21,32,39,47,52-54
+apps/react-web/src/features/coach/components/InitializationWizardPanel.tsx
+  s_8f6b4df0c955b0::t_2a65cbebe2979e 1,13,31,48,56,61-72,79-96,107,113,118,127,136,143-144,150-151,160,162-163,167-168,170,189-231,233,235-239,243,247
+apps/react-web/src/features/coach/components/InviteManagementPanel.tsx
+  s_8f6b4df0c955b0::t_534e93f13755fa 367-368
+apps/react-web/src/features/coach/components/InviteOnboardingReportPanel.tsx
+  s_8f6b4df0c955b0::t_b9922348313d90 19,21,32-34,40
+apps/react-web/src/features/coach/components/ProfilePanel.tsx
+  s_8f6b4df0c955b0::t_c6bcec9f177e12 1-2,7-8,13,18,21,24,27-29,32-34,37-44,48-109,112,114-115,117,119-125,130-138
+apps/react-web/src/features/coach/components/inviteManagementConfig.ts
+  s_8f6b4df0c955b0::t_bd98288ea4a9b2 21
+apps/react-web/src/features/interview/InterviewPage.tsx
+  s_8f6b4df0c955b0::t_02f67adcb6050c 1-2,27,40,96-122,140-143,311
+apps/react-web/src/features/interview/components/ScoreAnalysisPanel.tsx
+  s_8f6b4df0c955b0::t_8255062b8f584a 10
+apps/react-web/src/features/learning/LearningPage.tsx
+  s_8f6b4df0c955b0::t_524b4e06c992d2 1,3,23,37,119-145,163-166,300
+apps/react-web/src/features/more/MorePage.tsx
+  s_8f6b4df0c955b0::t_fc51de6ce300e9 13,19-20,26-27,40,62,64-65,72,78,83,92,97,100,103,109-110,116-119,123,126-130,137-151,220,248-249,255,257,280
+apps/react-web/src/features/review/components/WeeklyReviewPanel.tsx
+  s_8f6b4df0c955b0::t_20f87e730caf53 25,55,67,81-86
+apps/react-web/src/features/stats/StatsPage.tsx
+  s_8f6b4df0c955b0::t_5ae56ecdec202b 1-184
+apps/react-web/src/features/today/TodayPage.tsx
+  s_8f6b4df0c955b0::t_6e5490c0a84d0b 1,35-36,66-73,153-154,160-222,224,226,230
+apps/react-web/src/stores/sprintStoreLegacyMigration.ts
+  s_8f6b4df0c955b0::t_663e57f8f23a3b 1-187
+apps/react-web/src/test/ApplicationsPage.test.tsx
+  s_8f6b4df0c955b0::t_80f30bd47af9f5 5,9,17-23,26-28,37-45,51,71,74,76,80,85,95,105,118,121,124,128,135,140
+apps/react-web/src/test/CoachPage.test.tsx
+  s_8f6b4df0c955b0::t_fdfcfe9bc5221f 1-2,31-36,45-49,51-64,67,70,112,114,125-126,129-131,137,150,152-157,160,162,165-169,171,175-176,179-180,186-208,244-245,270-274
+apps/react-web/src/test/InterviewPage.test.tsx
+  s_8f6b4df0c955b0::t_e4cfa9759e6294 6,10,18-24,27-29,38-46,52,62-63,66,71,75,80,88,93,99-100
+apps/react-web/src/test/LearningPage.test.tsx
+  s_8f6b4df0c955b0::t_e477d1ca07ae21 6,10,18-24,27-29,38-46,51-53,63,65,67-68,74-76,78,81,83,89-90,92,98,104,106,111,113-114
+apps/react-web/src/test/MorePage.test.tsx
+  s_8f6b4df0c955b0::t_75e80d06bbe792 5,19,22,27,40,43,45-51,68,70-71,141,144
+apps/react-web/src/test/ReviewPage.test.tsx
+  s_8f6b4df0c955b0::t_3c04ad5803a2ac 5,18,21,26,38,43-47,54-55,57-58,60-61,63,66,68,70,84,86,89,92,96,99,102,109-110,113,121,125
+apps/react-web/src/test/TodayPage.test.tsx
+  s_8f6b4df0c955b0::t_b63049d356bdca 5,9-66,76-82,89,93-97,100-101,104,109,114,124
+apps/react-web/src/test/applicationsAdapter.test.ts
+  s_8f6b4df0c955b0::t_be8e8c0151d70f 10,13,15,18-21,26,29,32-33,38,46,51-53,57,59-62,64,66,71,76,78,81,84-85,90,93-94,99,102,107,109,111
+apps/react-web/src/test/coachFirstLoginFlowAdapter.test.ts
+  s_8f6b4df0c955b0::t_d69607f606efac 17,30,32,55,78
+apps/react-web/src/test/coachOutcomeMetricsAdapter.test.ts
+  s_8f6b4df0c955b0::t_38b26c77ff841a 3,10,12,14-15,20-23,26,28
+apps/react-web/src/test/fixtures/coachFlow.ts
+  s_8f6b4df0c955b0::t_c1a08d1601d621 1-100
+apps/react-web/src/test/interviewAdapter.test.ts
+  s_8f6b4df0c955b0::t_dd635959356ef1 12,15,17,20-25,28,30,33,36,42,46,49-50,56,65-67,69,71,73,78,89,91,93-94
+apps/react-web/src/test/learningAdapter.test.ts
+  s_8f6b4df0c955b0::t_fa614acd6c0199 10,13-20,22,25-32,35,37,40,43,49,53-54,57-59,61-64,69,73-74
+apps/react-web/src/test/moreAdapter.test.ts
+  s_8f6b4df0c955b0::t_7e91985dd88ca9 3,14,17,20,26,57-58,80,83,88,125
+apps/react-web/src/test/navigationRoutes.test.tsx
+  s_8f6b4df0c955b0::t_d39668f3fe8946 4,16-22,25,34,42-43,47,49,51-54,59-60,70-71,75-85
+apps/react-web/src/test/resumeProfileAdapter.test.ts
+  s_8f6b4df0c955b0::t_1dcaa584a43d9c 1-26
+apps/react-web/src/test/reviewAdapter.test.ts
+  s_8f6b4df0c955b0::t_c283abcb71bbd2 3,12,15,17,20-21,24,29,32,35,41,46,49-51,54-57,61-63,66,68,71,75,81,84,90,95,106-108,115,118,122,128,149,154,156,159,163,169,172,178,181,187-189,194,198,205
+apps/react-web/src/test/runtimeClient.test.ts
+  s_8f6b4df0c955b0::t_79e1a446291903 3,20-27
+apps/react-web/src/test/runtimeSyncBridge.test.ts
+  s_8f6b4df0c955b0::t_8d9127fe727fab 1-2,43-84
+apps/react-web/src/test/scheduleAdapter.test.ts
+  s_8f6b4df0c955b0::t_445de27cf0131e 4-19,22,30-34,37-38,41-43,46-48,51,56-65,68-71,74-91,93-97,100-101
+apps/react-web/src/test/sprintStoreCoachIsolation.test.ts
+  s_8f6b4df0c955b0::t_56d8c580d4b0f0 4,79-165
+apps/rust-api/src/ai_tools.rs
+  s_8f6b4df0c955b0::t_4497196af8d7c4 26,46,48,50-53
+apps/rust-api/src/auth_account_store.rs
+  s_8f6b4df0c955b0::t_a4d43586f86792 54,75-94,176-179
+apps/rust-api/tests/runtime_contract/invitation_account.rs
+  s_8f6b4df0c955b0::t_f6c4d992180af6 66-93
+apps/server/ai_tools.js
+  s_8f6b4df0c955b0::t_199ed17d84972a 23,83-85,163,165,167-171,180,183,185,187-188,190-193,196,198-205,224-226,237-238,250
+apps/server/auth_account_store.js
+  s_8f6b4df0c955b0::t_03b67be2a880bb 6,46,201,216-229
+apps/server/runtime_store.js
+  s_8f6b4df0c955b0::t_df170418e7632e 49,71
+assets/schedule.js
+  s_8f6b4df0c955b0::t_837d8f23e6c2b2 11-16,18,20-24,28-33,38,40,43-45,49,51-54,58,62-68,71-72,75,77-78,80-81,83,86-90,97-99,102-104,108-110,112,120-127
+data/interview_context.json
+  s_8f6b4df0c955b0::t_26a8622ed42c7e 2-6,8
+data/interview_kb.json
+  s_8f6b4df0c955b0::t_0f4ac5fce87b39 2-6
+data/schedule.json
+  s_8f6b4df0c955b0::t_e07b3395e763ec 2-8
+docs/core/02-project-plan.md
+  s_8f6b4df0c955b0::t_3df8622cf5d97f 3,7,18,24,27
+docs/core/04-acceptance-and-risk.md
+  s_8f6b4df0c955b0::t_9094ad9194b193 3,27,43-46,61-62,71,77,81
+no-profile-fallback.html
+  s_8f6b4df0c955b0::t_899aac49799e98 1-51
+schedule.html
+  s_8f6b4df0c955b0::t_bef9278a7a514a 4,6-44,47-50
+tests/android_settings_bridge_test.js
+  s_8f6b4df0c955b0::t_71db12f83b2747 86-100
+tests/auth_permissions_test.js
+  s_8f6b4df0c955b0::t_47adce223ee8d0 230-233,274-278
+tests/schedule_logic_test.js
+  s_8f6b4df0c955b0::t_9eb82c2e8aab31 10,19-22,24-28,30-33,64,71,76,79,82-91
+tools/build_public_safe_bundle.js
+  s_8f6b4df0c955b0::t_a04b09837c7b20 17,66-72,185
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "bf75e2f3015b7ee8b4173f8b205d09786356446c",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
