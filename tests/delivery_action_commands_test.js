@@ -14,10 +14,10 @@ for (const [id, command] of Object.entries({
   remoteInvitations: `npm run write:remote-invitation-evidence -- --delivery-env-file ${expectedDeliveryEnvFile} --report docs/evidence/server-remote/coach-invitations.json`,
   remoteInvitationAccount: `npm run write:remote-invitation-account-evidence -- --delivery-env-file ${expectedDeliveryEnvFile} --report docs/evidence/server-remote/coach-invitation-account.json --allow-create-account`,
   remoteLoginSwitch: `npm run write:remote-login-switch-evidence -- --delivery-env-file ${expectedDeliveryEnvFile} --report docs/evidence/server-remote/login-switch.json --allow-create-account`,
-  androidRemote: `npm run test:android:remote:functional -- --delivery-env-file ${expectedDeliveryEnvFile}`,
+  androidRemote: `npm run test:android:remote:functional -- --delivery-env-file ${expectedDeliveryEnvFile} --allow-create-account`,
   androidSigningInit: `npm run init:android-release-signing -- --delivery-env-file ${expectedDeliveryEnvFile} --write-env`,
   formalRelease: `npm run build:android:release -- --delivery-env-file ${expectedDeliveryEnvFile} --report docs/evidence/android-release/formal-release.json`,
-  finalDelivery: `npm run final:delivery -- --delivery-env-file ${expectedDeliveryEnvFile} --report docs/evidence/final-delivery/final-delivery.json`
+  finalDelivery: `npm run final:delivery -- --delivery-env-file ${expectedDeliveryEnvFile} --report docs/evidence/final-delivery/final-delivery.json --allow-create-account`
 })) {
   assert.strictEqual(deliveryCommands[id], command);
 }

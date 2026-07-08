@@ -18,7 +18,7 @@ export const roleFamilyOptions = [
 ];
 
 export const templateVersionOptions = [
-  { value: "role-family-v1", label: "角色族首登模板 v1" },
+  { value: "role-family-v1", label: "角色族建档模板 v1" },
   { value: "jd-focus-v1", label: "JD 焦点模板 v1" },
   { value: "manual-v1", label: "人工配置模板 v1" }
 ];

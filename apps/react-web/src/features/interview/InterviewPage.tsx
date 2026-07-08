@@ -1,7 +1,6 @@
-import { ArrowRight, CheckCircle2, ClipboardCheck, FileQuestion, Filter, MessageCircleQuestion, Mic2, PenLine, RefreshCw, RotateCcw, Search, Star, StarOff, WifiOff } from "lucide-react";
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { ArrowRight, CheckCircle2, ClipboardCheck, FileQuestion, Filter, MessageCircleQuestion, Mic2, PenLine, RefreshCw, RotateCcw, Search, Star, StarOff } from "lucide-react";
+import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { syncStateLabel } from "../../app/syncStatus";
 import {
   buildInterviewDashboard,
   buildOralEvidenceContent,
@@ -25,7 +24,7 @@ import { ScoreAnalysisPanel } from "./components/ScoreAnalysisPanel";
 export function InterviewPage() {
   const sprint = useSprintStore((state) => state.sprint);
   const evidenceByTaskId = useSprintStore((state) => state.evidenceByTaskId);
-  const syncState = useSprintStore((state) => state.syncState);
+  const userProfiles = useSprintStore((state) => state.userProfiles);
   const addEvidence = useSprintStore((state) => state.addEvidence);
   const [mode, setMode] = useState<InterviewMode>("auto");
   const [questionQuery, setQuestionQuery] = useState("");
@@ -38,6 +37,7 @@ export function InterviewPage() {
   const [scoreFeedback, setScoreFeedback] = useState("");
 
   const dashboard = useMemo(() => buildInterviewDashboard(sprint, evidenceByTaskId, mode), [sprint, evidenceByTaskId, mode]);
+  const hasProfile = userProfiles.length > 0;
   const questionCategories = useMemo(() => interviewQuestionCategories(dashboard.candidateQuestions), [dashboard.candidateQuestions]);
   const filteredQuestions = useMemo(
     () =>
@@ -93,6 +93,33 @@ export function InterviewPage() {
     setWeakOnly(false);
   }, []);
 
+  if (!hasProfile) {
+    return (
+      <main className="app-main">
+        <section className="app-page">
+          <article className="command-card p-5">
+            <div className="flex items-center gap-3 text-brand-700">
+              <span className="grid size-12 place-items-center rounded-control bg-brand-100">
+                <MessageCircleQuestion size={22} aria-hidden="true" />
+              </span>
+              <div>
+                <p className="text-sm font-black text-brand-700">面试训练</p>
+                <h1 className="text-3xl font-black text-ink-900">先建立你的目标岗位</h1>
+              </div>
+            </div>
+            <p className="mt-4 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
+              保存求职画像后，候选题会围绕你的目标岗位、经验证据和知识边界呈现。
+            </p>
+            <Link to="/coach" className="primary-button mt-5">
+              <ArrowRight size={16} aria-hidden="true" />
+              去创建画像
+            </Link>
+          </article>
+        </section>
+      </main>
+    );
+  }
+
   return (
     <main className="app-main">
       <section className="app-page">
@@ -110,12 +137,10 @@ export function InterviewPage() {
                 先写一版 60 秒回答，再标记薄弱题；今日追问、题库和本地记录都服务于 Evidence Gate。
               </p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[520px]">
-              <MetricTile label="今日口述任务" value={`${dashboard.oralTasks.length} 个`} />
-              <MetricTile label="候选题目" value={`${dashboard.candidateQuestions.length} 题`} />
-              <MetricTile label="本地记录" value={`${dashboard.recordCount} 条`} />
-              <MetricTile label="同步状态" value={syncStateLabel(syncState)} icon={<WifiOff size={15} aria-hidden="true" />} />
-            </div>
+            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
+              <span className="text-xs font-black text-ink-500">集中统计</span>
+              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看口述任务、候选题目和本地记录</span>
+            </Link>
           </div>
         </header>
 
@@ -170,18 +195,6 @@ export function InterviewPage() {
         </section>
       </section>
     </main>
-  );
-}
-
-function MetricTile({ label, value, icon }: { label: string; value: string; icon?: ReactNode }) {
-  return (
-    <div className="rounded-card border border-line bg-surface-0 p-3">
-      <p className="text-[11px] font-black text-ink-500">{label}</p>
-      <p className="mt-1 flex items-center gap-1.5 text-sm font-extrabold leading-5 text-ink-900">
-        {icon}
-        <span>{value}</span>
-      </p>
-    </div>
   );
 }
 
@@ -295,7 +308,7 @@ function QuestionPicker({
             type="search"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
-            placeholder="Spring / MQ / JVM / 项目"
+            placeholder="能力关键词 / 项目 / 证据"
             className="min-h-11 w-full rounded-control border border-line bg-surface-0 px-3 text-sm font-bold text-ink-900 outline-none transition placeholder:text-ink-400 focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
           />
         </label>

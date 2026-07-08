@@ -73,6 +73,17 @@ function parseJson(value, fallback) {
   }
 }
 
+function todayDateInShanghai() {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).formatToParts(new Date());
+  const values = Object.fromEntries(parts.filter((part) => part.type !== "literal").map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
 function summarizeStorage(raw, label, url) {
   const reactRaw = raw["jobSprint.react.v1"] || "";
   const reactState = parseJson(reactRaw, {});
@@ -255,16 +266,28 @@ async function fillApplication(page, draft) {
 
 async function fillReview(page, draft) {
   const form = page.locator("section[aria-labelledby='review-form-title']");
-  await form.getByLabel("今天能讲的一个项目点是什么？").fill(draft.projectPoint);
-  await form.getByLabel("今天能回答的两个面试题是什么？").fill(draft.interviewQuestions);
-  await form.getByLabel("今天补强的一个知识或技能边界是什么？").fill(draft.javaPoint);
-  await form.getByLabel("今天发现了哪些路径问题？").fill(draft.pathIssues);
-  await form.getByLabel("今天哪些回答还容易被面试官追问穿？").fill(draft.fragileAnswers);
-  await form.getByLabel("明天最优先补什么？").fill(draft.tomorrowPriority);
+  await form.getByLabel("今天完成了什么可证明的结果？").fill(draft.projectPoint);
+  await form.getByLabel("哪些面试题或表达已经能回答？").fill(draft.interviewQuestions);
+  await form.getByLabel("今天补强了哪个知识边界？").fill(draft.javaPoint);
+  await form.getByLabel("今天卡在哪里？").fill(draft.pathIssues);
+  await form.getByLabel("哪个回答还容易被追问？").fill(draft.fragileAnswers);
+  await form.getByLabel("明天第一件事是什么？").fill(draft.tomorrowPriority);
+}
+
+function waitForAcceptedArtifact(page, title) {
+  return page.waitForFunction(
+    (artifactTitle) => {
+      const label = `接受 AI 建议：${artifactTitle}`;
+      return [...document.querySelectorAll("#coach-artifacts button[aria-label]")]
+        .some((button) => button.getAttribute("aria-label") === label && button.disabled);
+    },
+    title,
+    { timeout: 30000 }
+  );
 }
 
 async function exerciseCoachWorkspace(page, baseUrl, prefix) {
-  await gotoRoute(page, baseUrl, "/coach", "AI 教练设置");
+  await gotoRoute(page, baseUrl, "/coach", "AI 求职教练");
   const profilePanel = page.locator("#coach-profile");
   await profilePanel.getByLabel("画像名称").fill(`${prefix}画像`);
   await profilePanel.getByLabel("角色族", { exact: true }).selectOption("backend");
@@ -278,7 +301,7 @@ async function exerciseCoachWorkspace(page, baseUrl, prefix) {
   await profilePanel.getByLabel("项目证据").fill(`${prefix}项目证据：搜索链路、MQ 幂等、异常恢复。`);
   await profilePanel.getByLabel("不可夸大边界").fill(`${prefix}不可夸大边界：不编造大模型训练经历。`);
   await profilePanel.getByRole("button", { name: "保存画像" }).click();
-  await page.getByRole("status").filter({ hasText: "画像已保存" }).waitFor();
+  await page.getByText("画像已保存。", { exact: true }).waitFor();
   await page.getByLabel("知识主题").fill(`${prefix}MQ 幂等边界`);
   await page.getByLabel("掌握程度").selectOption("了解");
   await page.getByLabel("当前缺口").fill(`${prefix}当前缺口：失败重试和重复消费边界还需要讲清。`);
@@ -287,27 +310,27 @@ async function exerciseCoachWorkspace(page, baseUrl, prefix) {
   await page.getByRole("button", { name: "新增边界" }).click();
   await page.getByText(`${prefix}MQ 幂等边界`).waitFor();
   await page.getByLabel("日程标题").fill(`${prefix}自定义日程`);
-  await page.getByLabel("日期").fill("2026-07-06");
+  await page.getByLabel("日期").fill(todayDateInShanghai());
   await page.getByLabel("开始").fill("21:00");
   await page.getByLabel("结束").fill("21:30");
   await page.getByLabel("日程类型").selectOption("interview");
   await page.getByLabel("安排原因").fill(`${prefix}安排原因：今晚用口述验证知识边界。`);
   await page.getByRole("button", { name: "新增日程" }).click();
   await page.getByText(`${prefix}自定义日程`).waitFor();
-  await page.getByRole("button", { name: "生成 AI 草稿" }).click();
-  await page.getByLabel(new RegExp(`AI 草稿标题：${prefix}MQ 幂等边界 面试表达卡`)).waitFor();
+  await page.getByRole("button", { name: "生成 AI 建议" }).click();
+  await page.getByLabel(new RegExp(`AI 建议标题：${prefix}MQ 幂等边界 面试表达卡`)).waitFor();
 
-  await page.getByRole("button", { name: new RegExp(`接受 AI 草稿：${prefix}MQ 幂等边界 面试表达卡`) }).click();
-  await page.getByRole("status").filter({ hasText: "已接受知识卡草稿" }).waitFor();
+  await page.getByRole("button", { name: new RegExp(`接受 AI 建议：${prefix}MQ 幂等边界 面试表达卡`) }).click();
+  await waitForAcceptedArtifact(page, `${prefix}MQ 幂等边界 面试表达卡`);
 
-  await page.getByLabel(new RegExp(`AI 草稿标题：今晚 .*${prefix}MQ 幂等边界`)).fill(`${prefix}AI 日程草稿 已编辑`);
-  await page.getByLabel(new RegExp(`AI 草稿内容：今晚 .*${prefix}MQ 幂等边界`)).fill(`${prefix}AI 日程草稿内容：先补机制，再补项目证据。`);
+  await page.getByLabel(new RegExp(`AI 建议标题：今晚 .*${prefix}MQ 幂等边界`)).fill(`${prefix}AI 日程草稿 已编辑`);
+  await page.getByLabel(new RegExp(`AI 建议内容：今晚 .*${prefix}MQ 幂等边界`)).fill(`${prefix}AI 日程草稿内容：先补机制，再补项目证据。`);
   await page.getByRole("button", { name: "保存编辑" }).nth(1).click();
-  await page.getByRole("button", { name: `接受 AI 草稿：${prefix}AI 日程草稿 已编辑` }).click();
+  await page.getByRole("button", { name: `接受 AI 建议：${prefix}AI 日程草稿 已编辑` }).click();
   await page.getByText(`${prefix}AI 日程草稿 已编辑`).waitFor();
 
   await page.getByLabel(new RegExp(`拒绝原因：.*追问：${prefix}MQ 幂等边界`)).fill(`${prefix}拒绝原因：今天先不加候选题。`);
-  await page.getByRole("button", { name: new RegExp(`拒绝 AI 草稿：.*追问：${prefix}MQ 幂等边界`) }).click();
+  await page.getByRole("button", { name: new RegExp(`拒绝 AI 建议：.*追问：${prefix}MQ 幂等边界`) }).click();
   await page.getByText(`拒绝原因：${prefix}拒绝原因：今天先不加候选题。`).waitFor();
 
   await waitForServerRuntimeText(page, baseUrl, {
@@ -347,7 +370,15 @@ async function runDesktopFlow(baseUrl) {
   await login(page, baseUrl);
   await page.evaluate(() => window.localStorage.clear());
   await gotoRoute(page, baseUrl, "/today", "今日 AI 教练");
-  await snapshotStorage(page, "00-before");
+  await page.getByRole("heading", { name: /先导入简历建档/ }).waitFor();
+  const beforeSnapshot = await snapshotStorage(page, "00-before");
+  assert.strictEqual(beforeSnapshot.react.profileCount, 0);
+  assert.strictEqual(beforeSnapshot.react.scheduleEventCount, 0);
+  assert.strictEqual(beforeSnapshot.react.evidenceCount, 0);
+
+  const coachSnapshot = await exerciseCoachWorkspace(page, baseUrl, "功能测试");
+  assert.strictEqual(coachSnapshot.react.profileCount, 1);
+  await gotoRoute(page, baseUrl, "/today", "今日 AI 教练");
 
   const lockedButton = page.getByRole("button", { name: "先补证据" });
   await lockedButton.waitFor();
@@ -357,7 +388,7 @@ async function runDesktopFlow(baseUrl) {
   await page.getByRole("button", { name: "保存证据" }).click();
   await page.getByText("学习笔记证据").first().waitFor();
   await page.getByRole("button", { name: "标记完成" }).click();
-  await page.getByRole("button", { name: "取消完成" }).waitFor();
+  await page.waitForFunction(() => Object.values(JSON.parse(localStorage.getItem("jobSprint.react.v1") || "{}").state?.completed || {}).some(Boolean));
   await page.getByLabel("延期分钟").fill("45");
   await page.getByLabel("延期原因").fill("功能测试延期原因");
   await page.getByLabel("补救动作").fill("功能测试补救动作");
@@ -369,8 +400,6 @@ async function runDesktopFlow(baseUrl) {
   assert.ok(todaySnapshot.react.evidenceTypes.includes("learning_note"));
   assert.ok(todaySnapshot.react.completedCount >= 1);
   assert.strictEqual(todaySnapshot.react.delayCount, 1);
-  const coachSnapshot = await exerciseCoachWorkspace(page, baseUrl, "功能测试");
-  assert.strictEqual(coachSnapshot.react.profileCount, 1);
 
   await gotoRoute(page, baseUrl, "/learn", "知识边界");
   await page.getByLabel("搜索知识卡").fill("Spring");
@@ -390,9 +419,6 @@ async function runDesktopFlow(baseUrl) {
   assert.strictEqual(learningSnapshot.learningMarkedCount, 1);
 
   await gotoRoute(page, baseUrl, "/interview", "面试训练");
-  await page.getByRole("button", { name: "Java", exact: true }).click();
-  await page.getByLabel("搜索候选题").fill("Spring");
-  await page.getByRole("button", { name: "清空筛选" }).click();
   await page.getByRole("button", { name: /标记薄弱题/ }).first().click();
   await page.getByRole("button", { name: "只看薄弱题" }).click();
   await page.getByText(/薄弱 1 题/).waitFor();
@@ -478,7 +504,7 @@ async function runDesktopFlow(baseUrl) {
   const applicationsSnapshot = await snapshotStorage(page, "04-after-applications");
   assert.ok(applicationsSnapshot.react.evidenceTypes.includes("delivery_record"));
 
-  await gotoRoute(page, baseUrl, "/review", "复盘归因");
+  await gotoRoute(page, baseUrl, "/review", "今日复盘");
   await fillReview(page, {
     projectPoint: "功能测试项目点A",
     interviewQuestions: "功能测试面试题A1；功能测试面试题A2",
@@ -487,7 +513,7 @@ async function runDesktopFlow(baseUrl) {
     fragileAnswers: "功能测试薄弱回答A",
     tomorrowPriority: "功能测试明日优先A"
   });
-  await page.getByRole("button", { name: "保存本地复盘" }).click();
+  await page.getByRole("button", { name: "保存复盘" }).click();
   await page.getByText("项目点：功能测试项目点A", { exact: true }).waitFor();
   await fillReview(page, {
     projectPoint: "功能测试项目点B",
@@ -497,7 +523,7 @@ async function runDesktopFlow(baseUrl) {
     fragileAnswers: "功能测试薄弱回答B",
     tomorrowPriority: "功能测试明日优先B"
   });
-  await page.getByRole("button", { name: "保存本地复盘" }).click();
+  await page.getByRole("button", { name: "保存复盘" }).click();
   await page.getByText("项目点：功能测试项目点B", { exact: true }).waitFor();
   await page.getByRole("button", { name: /编辑复盘记录 功能测试项目点B/ }).click();
   await fillReview(page, {
@@ -508,12 +534,12 @@ async function runDesktopFlow(baseUrl) {
     fragileAnswers: "功能测试薄弱回答B",
     tomorrowPriority: "功能测试明日优先B 已编辑"
   });
-  await page.getByRole("button", { name: "更新本地复盘" }).click();
+  await page.getByRole("button", { name: "更新复盘" }).click();
   await page.getByText("项目点：功能测试项目点B 已编辑", { exact: true }).waitFor();
   await page.getByRole("button", { name: /删除复盘记录 功能测试项目点A/ }).click();
   await page.getByText("项目点：功能测试项目点A", { exact: true }).waitFor({ state: "detached" });
   await page.getByLabel("复盘记录筛选").selectOption("has_tomorrow_priority");
-  await page.getByRole("button", { name: "导出当前筛选复盘 JSON" }).click();
+  await page.getByRole("button", { name: "导出当前筛选" }).click();
   const reviewPreview = await page.locator("pre").last().textContent();
   const reviewExport = JSON.parse(reviewPreview);
   assert.strictEqual(reviewExport.count, 1);
@@ -534,7 +560,7 @@ async function runDesktopFlow(baseUrl) {
   await page.getByText("口述训练证据").first().waitFor();
   await page.getByText("复盘证据").first().waitFor();
   await screenshot(page, "06-today-all-evidence-types");
-  await gotoRoute(page, baseUrl, "/more", "更多入口");
+  await gotoRoute(page, baseUrl, "/more", "我的数据");
   await page.getByText("已检测").waitFor();
   await page.getByText(/本地证据/).waitFor();
   const moreDownload = page.waitForEvent("download");
@@ -570,7 +596,7 @@ async function runDesktopFlow(baseUrl) {
     viewport: { width: 1440, height: 1000 }
   });
   const reopenPage = reopenContext.pages()[0] || await reopenContext.newPage();
-  await gotoRoute(reopenPage, baseUrl, "/more", "更多入口");
+  await gotoRoute(reopenPage, baseUrl, "/more", "我的数据");
   await reopenPage.getByText("已检测").waitFor();
   await screenshot(reopenPage, "08-browser-restart-more-persisted");
   const reopenSnapshot = await snapshotStorage(reopenPage, "07-after-browser-restart");
@@ -625,7 +651,7 @@ async function runMobileReadback(baseUrl, rawStorage, desktopSnapshot) {
         && profiles.length >= 1;
     });
     await screenshot(page, "09-mobile-today-readback");
-    await gotoRoute(page, baseUrl, "/more", "更多入口");
+    await gotoRoute(page, baseUrl, "/more", "我的数据");
     await page.getByText("已检测").waitFor();
     await screenshot(page, "10-mobile-more-readback");
     const snapshot = await snapshotStorage(page, "08-mobile-readback");
@@ -654,9 +680,9 @@ async function runImportRestoreFlow(baseUrl) {
   try {
     const page = await context.newPage();
     await login(page, baseUrl);
-    await gotoRoute(page, baseUrl, "/more", "更多入口");
-    await page.getByLabel("导入 React 状态 JSON").setInputFiles(importPayloadPath);
-    await page.getByText("React 本地状态已导入：完成 1 项，证据 1 条，延期 1 条，画像 1 个，边界反馈 0 条，AI 草稿 1 条，AI 运行 1 条").waitFor();
+    await gotoRoute(page, baseUrl, "/more", "我的数据");
+    await page.getByLabel("导入个人数据备份").setInputFiles(importPayloadPath);
+    await page.getByText("个人数据备份已导入：完成 1 项，证据 1 条，延期 1 条，画像 1 个，知识边界 1 条，AI 建议 1 条").waitFor();
     await waitForServerRuntimeText(page, baseUrl, { includes: ["导入恢复证据", "导入恢复延期原因", "导入后补救动作", "导入恢复画像", "导入恢复 AI 草稿"] });
     await screenshot(page, "11-more-import-restore");
     const snapshot = await snapshotStorage(page, "09-after-more-import-restore");

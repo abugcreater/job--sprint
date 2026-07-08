@@ -39,7 +39,7 @@
     "test:rust:functional": "node tests/rust_sqlite_ui_persistence_test.js",
     "test:local-functional": "npm run test:functional && npm run test:rust:functional",
     "test:android:functional": "node tests/android_webview_functional_persistence_test.js",
-    "test:android:remote:functional": "node tests/android_webview_functional_persistence_test.js --remote",
+    "test:android:remote:functional": "node tools/run_android_remote_functional_evidence.js --remote",
     "tunnel:start": "bash tools/job_sprint_ssh_tunnel.sh start",
     "tunnel:status": "bash tools/job_sprint_ssh_tunnel.sh status",
     "tunnel:stop": "bash tools/job_sprint_ssh_tunnel.sh stop",

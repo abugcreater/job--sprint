@@ -7,9 +7,6 @@
     "dev": "vite --host 0.0.0.0",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
-    "prepare:interview-questions": "node scripts/build-interview-questions.mjs",
-    "prepare:learning-kb": "node scripts/build-learning-knowledge.mjs",
-    "prepare:schedule": "node scripts/build-compact-schedule.mjs",
     "test": "vitest run",
     "typecheck": "tsc -b --pretty false"
   },

@@ -22,7 +22,7 @@ export function WeeklyReviewPanel({
         <div>
           <div className="flex items-center gap-2 text-brand-700">
             <CalendarDays size={18} aria-hidden="true" />
-            <h2 id="weekly-review-title" className="text-base font-black text-ink-900">周复盘归因</h2>
+            <h2 id="weekly-review-title" className="text-base font-black text-ink-900">本周复盘</h2>
           </div>
           <p className="mt-2 text-xs font-bold text-ink-500">{analysis.dateRangeLabel}</p>
           <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">{analysis.summary}</p>
@@ -52,7 +52,7 @@ export function WeeklyReviewPanel({
       <div className="mt-4 rounded-card border border-line bg-surface-0 p-3">
         <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
           <div>
-            <p className="text-sm font-black text-ink-900">服务端周结果归因</p>
+            <p className="text-sm font-black text-ink-900">结果归因</p>
             <p className="mt-1 text-xs font-bold leading-5 text-ink-500">
               {serverOutcome ? serverOutcome.summary : serverOutcomeStatusLabel(serverStatus)}
             </p>
@@ -64,7 +64,7 @@ export function WeeklyReviewPanel({
             onClick={onSaveServerSnapshot}
           >
             <Save size={14} aria-hidden="true" />
-            保存服务端快照
+            保存结果快照
           </button>
         </div>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
@@ -78,12 +78,12 @@ export function WeeklyReviewPanel({
 }
 
 function serverOutcomeStatusLabel(status: ServerOutcomeStatus): string {
-  if (status === "loading") return "正在读取服务端周结果。";
-  if (status === "saving") return "正在保存服务端周结果快照。";
-  if (status === "saved") return "服务端周结果快照已保存。";
-  if (status === "error") return "服务端周结果暂不可用，已保留本地周复盘。";
-  if (status === "local") return "本地模式，可继续记录；上线后会读取服务端持久快照。";
-  return "等待服务端周结果。";
+  if (status === "loading") return "正在读取周结果。";
+  if (status === "saving") return "正在保存周结果快照。";
+  if (status === "saved") return "周结果快照已保存。";
+  if (status === "error") return "周结果暂不可用，已保留当前复盘。";
+  if (status === "local") return "当前可继续记录，稍后可同步结果快照。";
+  return "等待周结果。";
 }
 
 function SmallMetric({ label, value }: { label: string; value: string }) {

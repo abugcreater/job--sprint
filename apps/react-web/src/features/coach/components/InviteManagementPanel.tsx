@@ -364,8 +364,8 @@ export function InviteManagementPanel() {
             <Field label="数据域" value={draft.dataScope} onChange={(value) => setDraft((current) => ({ ...current, dataScope: value }))} placeholder="默认同登录名" />
             <Field label="邀请批次" value={draft.inviteBatch} onChange={(value) => setDraft((current) => ({ ...current, inviteBatch: value }))} />
             <label className="block">
-              <span className="text-sm font-black text-ink-700">首登模板版本</span>
-              <select className="field-control mt-2" value={draft.templateVersion} onChange={(event) => setDraft((current) => ({ ...current, templateVersion: event.target.value }))} aria-label="首登模板版本">
+              <span className="text-sm font-black text-ink-700">建档模板版本</span>
+              <select className="field-control mt-2" value={draft.templateVersion} onChange={(event) => setDraft((current) => ({ ...current, templateVersion: event.target.value }))} aria-label="建档模板版本">
                 {templateVersionOptions.map((option) => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}

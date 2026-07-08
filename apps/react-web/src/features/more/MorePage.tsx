@@ -10,16 +10,21 @@ import {
   ShieldCheck,
   Smartphone,
   Upload,
+  UserRound,
   WifiOff,
   type LucideIcon
 } from "lucide-react";
 import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { isOwnerSession } from "../../api/authClient";
+import { useAuthSessionContext } from "../../app/authSessionContext";
 import { buildMoreDashboard, buildReactStateExportPayload, parseReactStateImportPayload, type MoreExportItem } from "../../data/moreAdapter";
 import { getLegacyStorageStatus } from "../../data/legacyAdapters";
 import { useSprintStore } from "../../stores/sprintStore";
 
 export function MorePage() {
+  const authSession = useAuthSessionContext();
+  const owner = isOwnerSession(authSession);
   const sprint = useSprintStore((state) => state.sprint);
   const completed = useSprintStore((state) => state.completed);
   const evidenceByTaskId = useSprintStore((state) => state.evidenceByTaskId);
@@ -32,6 +37,7 @@ export function MorePage() {
   const llmRuns = useSprintStore((state) => state.llmRuns);
   const syncState = useSprintStore((state) => state.syncState);
   const lastSavedAt = useSprintStore((state) => state.lastSavedAt);
+  const storageOwner = useSprintStore((state) => state.storageOwner);
   const restoreSnapshot = useSprintStore((state) => state.restoreSnapshot);
   const [exportMessage, setExportMessage] = useState("待导出");
   const storage = typeof window !== "undefined" ? window.localStorage : undefined;
@@ -53,28 +59,28 @@ export function MorePage() {
   });
 
   const handleExportReactState = useCallback(() => {
-    const payload = buildReactStateExportPayload({ sprint, completed, evidenceByTaskId, delayRecords, userProfiles, knowledgeBoundaries, boundarySuggestionFeedback, coachScheduleEvents, aiArtifacts, llmRuns, syncState, lastSavedAt });
+    const payload = buildReactStateExportPayload({ sprint, completed, evidenceByTaskId, delayRecords, userProfiles, knowledgeBoundaries, boundarySuggestionFeedback, coachScheduleEvents, aiArtifacts, llmRuns, syncState, lastSavedAt, storageOwner });
     const ok = downloadJson("job-sprint-react-state.json", payload);
-    setExportMessage(ok ? "React 本地状态已导出" : "当前环境不支持浏览器下载");
-  }, [aiArtifacts, boundarySuggestionFeedback, coachScheduleEvents, completed, delayRecords, evidenceByTaskId, knowledgeBoundaries, lastSavedAt, llmRuns, sprint, syncState, userProfiles]);
+    setExportMessage(ok ? "个人数据备份已导出" : "当前环境不支持浏览器下载");
+  }, [aiArtifacts, boundarySuggestionFeedback, coachScheduleEvents, completed, delayRecords, evidenceByTaskId, knowledgeBoundaries, lastSavedAt, llmRuns, sprint, storageOwner, syncState, userProfiles]);
 
   const handleImportReactState = useCallback(
     async (file?: File) => {
       if (!file) return;
       try {
         const payload = JSON.parse(await readFileText(file));
-        const result = parseReactStateImportPayload(payload);
+        const result = parseReactStateImportPayload(payload, { currentDataScope: authSession.user?.dataScope || authSession.user?.username });
         if (!result.ok) {
           setExportMessage(`导入失败：${result.error}`);
           return;
         }
         restoreSnapshot(result.snapshot);
-        setExportMessage(`React 本地状态已导入：完成 ${result.summary.completedCount} 项，证据 ${result.summary.evidenceCount} 条，延期 ${result.summary.delayCount} 条，画像 ${result.summary.profileCount} 个，边界反馈 ${result.summary.boundaryFeedbackCount} 条，AI 草稿 ${result.summary.aiArtifactCount} 条，AI 运行 ${result.summary.llmRunCount} 条`);
+        setExportMessage(`个人数据备份已导入：完成 ${result.summary.completedCount} 项，证据 ${result.summary.evidenceCount} 条，延期 ${result.summary.delayCount} 条，画像 ${result.summary.profileCount} 个，知识边界 ${result.summary.boundaryCount} 条，AI 建议 ${result.summary.aiArtifactCount} 条`);
       } catch {
         setExportMessage("导入失败：JSON 文件无法解析");
       }
     },
-    [restoreSnapshot]
+    [authSession.user?.dataScope, authSession.user?.username, restoreSnapshot]
   );
 
   return (
@@ -83,50 +89,63 @@ export function MorePage() {
         <header className="command-card min-w-0 p-4 md:p-5">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="min-w-0 max-w-3xl">
-              <p className="text-sm font-black text-brand-700">同步 / 导出 / 回滚</p>
+              <p className="text-sm font-black text-brand-700">{owner ? "我的数据 / 管理入口" : "我的数据 / 账号"}</p>
               <div className="mt-2 flex items-center gap-3">
                 <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
                   <DatabaseZap size={22} aria-hidden="true" />
                 </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">更多入口</h1>
+                <h1 className="text-3xl font-black leading-tight md:text-4xl">我的数据</h1>
               </div>
               <p className="mt-4 max-w-3xl break-words text-sm font-semibold leading-6 text-ink-500">
-                集中处理同步状态、本地数据导出、恢复和回滚说明；失败状态必须给出可执行恢复动作。
+                查看保存状态、备份个人数据，并进入低频功能。
               </p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[520px]">
+            <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[420px]">
               <MetricTile label="同步状态" value={dashboard.sync.label} icon={<WifiOff size={15} aria-hidden="true" />} />
               <MetricTile label="本地证据" value={`${dashboard.storage.evidenceCount} 条`} />
               <MetricTile label="完成记录" value={`${dashboard.storage.completedCount} 项`} />
               <MetricTile label="延期记录" value={`${dashboard.storage.delayCount} 条`} />
               <MetricTile label="画像/边界" value={`${dashboard.storage.profileCount}/${dashboard.storage.boundaryCount}`} />
-              <MetricTile label="边界反馈" value={`${dashboard.storage.boundaryFeedbackCount} 条`} />
-              <MetricTile label="AI 草稿" value={`${dashboard.storage.aiArtifactCount} 条`} />
-              <MetricTile label="AI 运行" value={`${dashboard.storage.llmRunCount} 条`} />
-              <MetricTile label="旧版记录" value={`${dashboard.storage.legacyDetectedCount} 类`} />
+              <MetricTile label="AI 建议" value={`${dashboard.storage.aiArtifactCount} 条`} />
+              {owner ? <MetricTile label="后台记录" value={`${dashboard.storage.legacyDetectedCount} 类`} /> : null}
             </div>
           </div>
         </header>
 
         <section className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-          <aside className="min-w-0 space-y-4">
-            <StatusPanel dashboard={dashboard} />
-            <FallbackPanel dashboard={dashboard} />
-          </aside>
+	          <aside className="min-w-0 space-y-4">
+	            <StatusPanel dashboard={dashboard} />
+	            {owner ? <FallbackPanel dashboard={dashboard} /> : <AccountPanel />}
+	          </aside>
 
           <section className="min-w-0 space-y-4">
             <ExportPanel
-              items={dashboard.exportItems}
+              items={owner ? dashboard.exportItems : dashboard.exportItems.filter((item) => item.id === "react-state")}
               exportMessage={exportMessage}
               onExportReactState={handleExportReactState}
-              onImportReactState={handleImportReactState}
-            />
-            <RollbackPanel dashboard={dashboard} />
-            <NextEntries entries={dashboard.nextEntries} />
-          </section>
+	              onImportReactState={handleImportReactState}
+	            />
+	            {owner ? <RollbackPanel dashboard={dashboard} /> : null}
+	            <NextEntries entries={owner ? [...dashboard.nextEntries, { label: "管理员中心", path: "/admin", description: "管理账号邀请和使用状态。" }] : [{ label: "查看统计", path: "/stats", description: "集中查看个人进展和数据完整度。" }, ...dashboard.nextEntries]} />
+	          </section>
         </section>
       </section>
     </main>
+  );
+}
+
+function AccountPanel() {
+  return (
+    <article className="min-w-0 rounded-card border border-line bg-white p-5 shadow-soft">
+      <PanelTitle icon={UserRound} title="我的账号" />
+      <p className="mt-4 break-words text-sm font-semibold leading-6 text-ink-500">
+        当前账号可维护自己的求职画像、执行记录、机会、面试和复盘。需要换设备时，先导出个人数据备份。
+      </p>
+      <Link to="/stats" className="secondary-button mt-4">
+        <ArrowRight size={16} aria-hidden="true" />
+        查看统计
+      </Link>
+    </article>
   );
 }
 
@@ -198,7 +217,7 @@ function ExportPanel({
 }) {
   return (
     <article className="min-w-0 rounded-card border border-line bg-white p-5 shadow-soft">
-      <PanelTitle icon={Download} title="导出与恢复" />
+      <PanelTitle icon={Download} title="个人数据备份" />
       <div className="mt-4 grid gap-3">
         {items.map((item) => (
           <div key={item.id} className="min-w-0 rounded-card bg-surface-0 p-4">
@@ -226,16 +245,16 @@ function ExportPanel({
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="min-w-0">
             <span className="rounded-control bg-white px-2 py-1 text-xs font-black text-ink-500">可导入</span>
-            <h3 className="mt-2 break-words text-base font-black leading-6 text-ink-900">导入 React 状态 JSON</h3>
-            <p className="mt-1 break-words text-sm font-semibold leading-6 text-ink-500">只接受 jobSprint.react.v1 导出文件，并恢复完成、证据、延期、画像、知识边界、AI 草稿和 AI 运行记录。</p>
+            <h3 className="mt-2 break-words text-base font-black leading-6 text-ink-900">导入个人数据备份</h3>
+            <p className="mt-1 break-words text-sm font-semibold leading-6 text-ink-500">恢复完成记录、证据、延期、画像、知识边界和 AI 建议。</p>
           </div>
           <label
             className="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-control border border-brand-700 bg-white px-4 text-sm font-black text-brand-700 shadow-soft transition hover:bg-brand-100 focus-within:outline-none focus-within:ring-2 focus-within:ring-brand-600 focus-within:ring-offset-2"
           >
             <Upload size={16} aria-hidden="true" />
-            导入 JSON
+            导入备份
             <input
-              aria-label="导入 React 状态 JSON"
+              aria-label="导入个人数据备份"
               className="sr-only"
               type="file"
               accept="application/json,.json"
@@ -258,7 +277,7 @@ function RollbackPanel({ dashboard }: { dashboard: ReturnType<typeof buildMoreDa
   const rows = [
     { icon: DatabaseZap, label: "React build", value: dashboard.fallback.reactEntry },
     { icon: RotateCcw, label: "旧版 Web", value: dashboard.fallback.webFallbackEntry },
-    { icon: Smartphone, label: "Android fallback", value: dashboard.fallback.androidFallbackEntry }
+    { icon: Smartphone, label: "Android 离线入口", value: dashboard.fallback.androidFallbackEntry }
   ];
 
   return (

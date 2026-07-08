@@ -10,10 +10,10 @@ const deliveryCommands = {
   remoteInvitations: `npm run write:remote-invitation-evidence -- --delivery-env-file ${defaultDeliveryEnvFile} --report docs/evidence/server-remote/coach-invitations.json`,
   remoteInvitationAccount: `npm run write:remote-invitation-account-evidence -- --delivery-env-file ${defaultDeliveryEnvFile} --report docs/evidence/server-remote/coach-invitation-account.json --allow-create-account`,
   remoteLoginSwitch: `npm run write:remote-login-switch-evidence -- --delivery-env-file ${defaultDeliveryEnvFile} --report docs/evidence/server-remote/login-switch.json --allow-create-account`,
-  androidRemote: `npm run test:android:remote:functional -- --delivery-env-file ${defaultDeliveryEnvFile}`,
+  androidRemote: `npm run test:android:remote:functional -- --delivery-env-file ${defaultDeliveryEnvFile} --allow-create-account`,
   androidSigningInit: `npm run init:android-release-signing -- --delivery-env-file ${defaultDeliveryEnvFile} --write-env`,
   formalRelease: `npm run build:android:release -- --delivery-env-file ${defaultDeliveryEnvFile} --report docs/evidence/android-release/formal-release.json`,
-  finalDelivery: `npm run final:delivery -- --delivery-env-file ${defaultDeliveryEnvFile} --report docs/evidence/final-delivery/final-delivery.json`
+  finalDelivery: `npm run final:delivery -- --delivery-env-file ${defaultDeliveryEnvFile} --report docs/evidence/final-delivery/final-delivery.json --allow-create-account`
 };
 
 module.exports = {

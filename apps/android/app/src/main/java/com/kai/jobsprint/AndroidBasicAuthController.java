@@ -25,7 +25,7 @@ final class AndroidBasicAuthController {
     }
 
     void handleHttpAuthRequest(HttpAuthHandler handler, String host, String realm) {
-        if (!RemoteUrlPolicy.isAllowedRemoteHost(host)) {
+        if (!remoteWebViewController.isAllowedRemoteHost(host)) {
             handler.cancel();
             remoteWebViewController.loadFallback("拦截未授权远端认证域名");
             return;

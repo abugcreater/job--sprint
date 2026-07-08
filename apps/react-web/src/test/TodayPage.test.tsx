@@ -2,8 +2,67 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { App } from "../App";
 import { getScheduleData, buildTodaySprint } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";
+import type { CoachScheduleEvent, UserProfile } from "../types/sprint";
 
 const fixedNow = new Date("2026-07-02T10:00:00+08:00");
+
+const qaProfile: UserProfile = {
+  id: "profile-qa",
+  name: "测试开发工程师求职画像",
+  roleFamily: "qa",
+  targetRole: "测试开发工程师",
+  targetLevel: "6年",
+  cities: "杭州、上海",
+  salaryTarget: "28-35K",
+  companyTypes: "互联网平台",
+  experienceSummary: "6 年测试平台和接口自动化经验。",
+  projectEvidence: "质量平台、CI 稳定性和缺陷归因。",
+  nonClaims: "不包装算法训练经验。",
+  dailyMinutes: 60,
+  active: true,
+  createdAt: "2026-07-02T09:00:00+08:00",
+  updatedAt: "2026-07-02T09:00:00+08:00"
+};
+
+const qaScheduleEvent: CoachScheduleEvent = {
+  id: "event-qa-1",
+  profileId: "profile-qa",
+  date: "2026-07-02",
+  start: "09:30",
+  end: "11:30",
+  kind: "learning",
+  title: "补 缺陷归因 面试表达",
+  reason: "围绕测试开发画像补齐缺陷归因证据。",
+  evidenceRequired: true,
+  createdAt: "2026-07-02T09:00:00+08:00",
+  updatedAt: "2026-07-02T09:00:00+08:00"
+};
+
+function resetStoreWithGeneratedCalendar() {
+  const completed = {};
+  const evidenceByTaskId = {};
+  const coachScheduleEvents = [qaScheduleEvent];
+  useSprintStore.setState({
+    completed,
+    evidenceByTaskId,
+    delayRecords: [],
+    userProfiles: [qaProfile],
+    knowledgeBoundaries: [],
+    boundarySuggestionFeedback: [],
+    coachScheduleEvents,
+    aiArtifacts: [],
+    llmRuns: [],
+    syncState: "local_fallback",
+    lastSavedAt: undefined,
+    sprint: buildTodaySprint(getScheduleData(), fixedNow, {
+      completed,
+      evidenceByTaskId,
+      syncState: "local_fallback",
+      coachScheduleEvents,
+      activeProfileId: qaProfile.id
+    })
+  });
+}
 
 describe("React Job Sprint today workspace", () => {
   beforeEach(() => {
@@ -14,39 +73,45 @@ describe("React Job Sprint today workspace", () => {
     useSprintStore.setState({
       completed,
       evidenceByTaskId,
+      delayRecords: [],
+      userProfiles: [],
+      knowledgeBoundaries: [],
+      boundarySuggestionFeedback: [],
+      coachScheduleEvents: [],
+      aiArtifacts: [],
+      llmRuns: [],
       syncState: "local_fallback",
       lastSavedAt: undefined,
       sprint: buildTodaySprint(getScheduleData(), fixedNow, { completed, evidenceByTaskId, syncState: "local_fallback" })
     });
   });
 
-  it("renders the command workspace from schedule data", () => {
+  it("shows onboarding instead of demo tasks before a profile is generated", () => {
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "今日 AI 教练" })).toBeInTheDocument();
-    expect(screen.getByText("Spring 事务与搜索链路边界")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "Evidence Gate（证据门）" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "查看原因" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "重试同步" })).toBeInTheDocument();
-    expect(screen.getByText("今日风险")).toBeInTheDocument();
-    expect(screen.getByText("今日口述入口")).toBeInTheDocument();
-    expect(screen.queryByRole("button", { name: "登记机会反馈" })).not.toBeInTheDocument();
-    expect(screen.getByRole("navigation", { name: "移动端底部导航" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "先导入简历建档，再开始今日任务" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /导入简历建档/ })).toBeInTheDocument();
+    expect(screen.queryByText(/Spring 事务/)).not.toBeInTheDocument();
+    expect(screen.queryByText("今日风险")).not.toBeInTheDocument();
+    expect(screen.queryByText("Evidence Gate（证据门）")).not.toBeInTheDocument();
   });
 
-  it("requires evidence before marking the current task complete", async () => {
+  it("requires evidence before marking the generated current task complete", async () => {
+    resetStoreWithGeneratedCalendar();
     render(<App />);
 
+    expect(screen.getByRole("heading", { name: "补 缺陷归因 面试表达" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "先补证据" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "补学习笔记" }));
     fireEvent.change(screen.getByLabelText("证据内容"), {
-      target: { value: "手动学习笔记：事务边界、搜索链路和异常回滚已经整理成面试表达。" }
+      target: { value: "手动学习笔记：质量平台缺陷归因、CI 稳定性指标和 Mock 边界已经整理成面试表达。" }
     });
     fireEvent.click(screen.getByRole("button", { name: "保存证据" }));
 
     expect(await screen.findByText("学习笔记证据")).toBeInTheDocument();
-    expect(screen.getByText(/手动学习笔记/)).toBeInTheDocument();
+    expect(screen.getByText(/质量平台缺陷归因/)).toBeInTheDocument();
     const completeButton = screen.getByRole("button", { name: "标记完成" });
     expect(completeButton).toBeEnabled();
 
@@ -56,6 +121,7 @@ describe("React Job Sprint today workspace", () => {
   });
 
   it("records oral text, delay feedback and opens compact evidence details", async () => {
+    resetStoreWithGeneratedCalendar();
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "补学习笔记" }));

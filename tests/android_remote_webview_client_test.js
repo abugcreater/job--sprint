@@ -14,7 +14,7 @@ assert.match(client, /private final RemoteWebViewController remoteWebViewControl
 assert.match(client, /public void onReceivedHttpAuthRequest\(WebView view, HttpAuthHandler handler, String host, String realm\)/);
 assert.match(client, /basicAuthController\.handleHttpAuthRequest\(handler, host, realm\)/);
 assert.match(client, /public boolean shouldOverrideUrlLoading\(WebView view, WebResourceRequest request\)/);
-assert.match(client, /RemoteUrlPolicy\.isAllowedWebViewUrl\(uri\.toString\(\)\)/);
+assert.match(client, /remoteWebViewController\.isAllowedWebViewUrl\(uri\.toString\(\)\)/);
 assert.match(client, /remoteWebViewController\.loadFallback\("拦截未授权远端页面"\)/);
 assert.match(client, /remoteWebViewController\.setLastLoadedUrl\(url\)/);
 assert.match(client, /public WebResourceResponse shouldInterceptRequest\(WebView view, WebResourceRequest request\)/);

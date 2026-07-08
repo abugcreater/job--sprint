@@ -5,7 +5,7 @@ export type ApplicationStatusFilter = "all" | ApplicationStatus;
 
 export const applicationStatuses: ApplicationStatus[] = ["已记录", "待沟通", "已沟通", "约面", "不匹配"];
 
-export const applicationTagOptions = ["Java", "Spring", "MQ", "RAG", "Agent", "稳定性治理"] as const;
+export const applicationTagOptions = ["岗位匹配", "项目经验", "业务理解", "工程质量", "AI 工具", "稳定性治理"] as const;
 
 export interface ApplicationFormDraft {
   company: string;
@@ -100,7 +100,7 @@ export function createApplicationDraft(): ApplicationFormDraft {
     keywords: "",
     resumeVersion: "",
     status: "已记录",
-    tags: ["Java"],
+    tags: [],
     hrFeedback: "",
     notes: ""
   };

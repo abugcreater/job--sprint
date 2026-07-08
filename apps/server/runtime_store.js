@@ -46,14 +46,7 @@ function readRuntimeEnvelope() {
         updatedAt: parsed.updatedAt || null
       };
     }
-    const config = getAuthConfig();
-    return {
-      schemaVersion: 2,
-      users: {
-        [config.dataOwner || "kai"]: normalizeRuntimeState(parsed)
-      },
-      updatedAt: new Date().toISOString()
-    };
+    return emptyRuntimeEnvelope();
   } catch (_) {
     return emptyRuntimeEnvelope();
   }
@@ -75,7 +68,7 @@ function userDataScope(authState) {
   if (authState && authState.userProfile && authState.userProfile.dataScope) {
     return authState.userProfile.dataScope;
   }
-  return getAuthConfig().dataOwner || "kai";
+  return getAuthConfig().dataOwner || "anonymous-local";
 }
 
 function readUserRuntimeState(authState) {

@@ -14,6 +14,7 @@ const privateNamePattern = new RegExp(["冯", "凯"].join(""), "g");
 const sourceFiles = [
   "schedule.html",
   "login.html",
+  "no-profile-fallback.html",
   "assets/schedule.css",
   "assets/schedule.js",
   "assets/auth.js",
@@ -62,6 +63,13 @@ function syncAndroidAssets() {
   fs.rmSync(androidAssetRoot, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(androidAssetRoot), { recursive: true });
   fs.cpSync(outRoot, androidAssetRoot, { recursive: true });
+  const androidScheduleHtml = path.join(androidAssetRoot, "schedule.html");
+  if (fs.existsSync(androidScheduleHtml)) {
+    fs.writeFileSync(
+      androidScheduleHtml,
+      fs.readFileSync(androidScheduleHtml, "utf8").replaceAll("./react/index.html#/today", "../react/index.html#/today")
+    );
+  }
 }
 
 function scrubText(value) {
@@ -174,6 +182,7 @@ fs.mkdirSync(outRoot, { recursive: true });
 
 copyFile("schedule.html");
 copyFile("login.html");
+copyFile("no-profile-fallback.html");
 copyFile("assets/schedule.css");
 copyFile("assets/schedule.js");
 copyFile("assets/auth.js");

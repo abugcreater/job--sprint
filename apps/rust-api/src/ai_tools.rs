@@ -23,7 +23,7 @@ pub(crate) fn score_answer_payload(payload: &Value) -> Result<Value, (StatusCode
         "level": if score >= 70 { "可用，但还要压实证据" } else { "基本能接，需要补链路" },
         "strengths": ["至少完成了第一版回答"],
         "weaknesses": ["请补充真实项目证据和边界说明"],
-        "rewrite": "建议按“背景 -> 我的职责 -> 关键链路 -> 异常/边界 -> Java 映射”重答。",
+        "rewrite": "建议按“背景 -> 我的职责 -> 关键链路 -> 异常/边界 -> 岗位能力映射”重答。",
         "followUp": "请补充一个真实项目证据：文件、链路、指标或排查命令任选一个。",
         "raw": null
     }))
@@ -43,14 +43,14 @@ pub(crate) fn generate_kb_payload(
         "entries": [
             {
                 "id": generated_id,
-                "category": "动态生成 · Java 项目深挖",
+                "category": "动态生成 · 项目深挖",
                 "title": format!("{topic}：项目链路追问"),
-                "publicSummary": "根据高级 Java 后端背景生成，要求回答真实职责、链路证据、异常分支和边界。",
+                "publicSummary": "根据当前画像生成，要求回答真实职责、链路证据、异常分支和边界。",
                 "interviewQuestion": format!("围绕“{topic}”，请讲清你的职责边界、核心链路、异常分支和可证明证据。"),
-                "answer60s": "按背景、职责、链路、异常/边界、Java 映射回答。",
-                "answer3min": "展开入口、服务编排、缓存/MQ/DB、观测与复盘。",
-                "javaMapping": "高级 Java 后端、复杂业务链路、稳定性治理",
-                "projectEvidence": "绑定真实搜索链路、Spring/JVM/MQ/Redis 或 AI 工程化增强项目证据。",
+                "answer60s": "按背景、职责、链路、异常/边界、岗位能力映射回答。",
+                "answer3min": "展开入口、流程、关键依赖、证据与复盘。",
+                "javaMapping": "当前画像目标岗位、真实经历、可验证能力边界",
+                "projectEvidence": "绑定当前用户自己的真实项目、文件、指标、输出或复盘证据。",
                 "risk": "不要把团队成果或生产化设想说成个人已完整落地。",
                 "doNotSay": ["全链路都是我一个人负责"],
                 "safeWording": ["我负责边界清晰模块，并参与链路治理"]

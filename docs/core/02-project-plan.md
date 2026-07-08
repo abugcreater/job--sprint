@@ -1,10 +1,10 @@
 # 项目规划
 
-日期：2026-07-07
+日期：2026-07-08
 
 ## 当前阶段目标
 
-把 Job Sprint 从“个人私有可用 + 可演示 + 可验证”的状态，推进到“面向泛 IT 求职者的小范围邀请制 AI 求职教练”。下一步优先补用户画像、知识边界、AI artifact 草稿、有效求职推进数和多用户隔离能力，而不是继续堆普通日程、题库或笔记功能。
+把 Job Sprint 从“个人私有可用 + 可演示 + 可验证”的状态，推进到“普通用户可闭环使用、管理员能力按权限收敛”的 AI 求职教练。当前优先级是求职画像、简历导入建档、知识边界、AI 建议、复盘闭环、统计集中和多用户隔离，而不是继续堆普通日程、题库或后台台账。
 
 ## 已完成主线
 
@@ -15,15 +15,16 @@
 5. Web runtime 同步已通过刷新、浏览器重启、移动视口读回、延期记录、导入恢复和服务端 `/api/runtime` 证据验证。
 6. Android 本地 WebView 保存进度已通过点击全流程、延期记录、导入控件存在性、杀进程重启读回和 localStorage hash 对比验证。
 7. Codex AI 团队已抽离为全局入口，Job Sprint 只保留适配和验证工具。
+8. 2026-07-08 已完成一轮产品闭环修复：普通用户画像页改为“导入简历建档 -> 确认求职画像 -> 采纳知识边界 -> 生成今日行动 -> 处理 AI 建议”，新用户知识/面试空态不再加载旧 Java 内容，更多页普通用户只保留账号、同步、个人备份和常用入口，管理员邀请与批次能力收敛到管理员中心；Web build 已同步到 Android `assets/react` 并通过目录 diff。
 
 ## 下一阶段优先级
 
 | 优先级 | 事项 | 目标 |
 |---|---|---|
-| P0 | 泛 IT AI 求职教练 PRD 落地 | 以 `docs/product/it-job-coach-v1/prd-recommended.md` 为主合同，先完成定位、画像、知识边界、AI artifact 草稿和有效推进数闭环；所有改动必须遵守 `docs/product/it-job-coach-v1/development-workflow.md`。 |
+| P0 | AI 求职教练产品闭环 | 以 `docs/product/it-job-coach-v1/prd-recommended.md` 为主合同，先完成定位、简历导入建档、求职画像、知识边界、AI 建议和有效推进数闭环；所有改动必须遵守 `docs/product/it-job-coach-v1/development-workflow.md`。 |
 | P0 | 防 P0 回归门禁 | 每个新入口必须有输入、反馈、保存、刷新读回、移动端验证和失败态；不能再出现“按钮能点但流程不可用”。 |
 | P0 | 多用户隔离设计 | 以邀请制小规模为边界，新增用户画像、日程、知识边界和 AI artifact 时必须服务端强制 user scope，不能只靠前端过滤。 |
-| P0 | AI artifact pipeline | AI 只生成草稿，不直接改正式日程；生成物必须可接受、编辑、拒绝，并记录 prompt version、schema 校验、引用证据、用户反馈和机会/JD 信号。 |
+| P0 | AI 建议 pipeline | AI 只生成待确认建议，不直接改正式日程；生成物必须可接受、编辑、拒绝，并记录 prompt version、schema 校验、引用证据、用户反馈和机会/JD 信号。 |
 | P1 | 正式域名公网稳定首访 | 完成备案/接入备案或迁移方案，关闭公网 reset 风险。 |
 | P1 | Rust/SQLite 服务端持续验收 | 维持服务器 Rust/SQLite 入口，域名恢复后补远端 HTTPS 首访、登录、保存和重启读回验收；远端同步后用 `npm run restart:remote-service -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/server-remote/service-restart.json` 证明服务进程加载当前 manifest；远端 Web/服务器验收可用 `JOB_SPRINT_SERVER_REMOTE_ACCEPTANCE_EVIDENCE=<report.json> npm run write:remote-evidence` 生成可复核 JSON，脚本会在现有 `/api/progress` 上合并 `remoteAcceptance` marker 并读回确认；涉及 React 新入口或邀请台账时用 `npm run write:remote-invitation-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/server-remote/coach-invitations.json` 证明远端 React asset marker 和 `/api/coach/invitations` 新增/读回/批量导入。 |
 | P1 | 目标级验收门禁 | 每次收口先跑 `npm run validate:goal-acceptance -- --allow-user-action`，按原始 7 项目标确认哪些已完全证明、哪些只是本地通过或仍需外部输入；该门禁已接入 `npm run validate:delivery`，避免把 Web/Android 本地测试、Rust/SQLite 入库或本地 APK 误报成服务器同步和正式 APK 已完成。 |

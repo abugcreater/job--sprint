@@ -17,7 +17,7 @@ const remoteWebViewClient = fs.readFileSync(
 
 assert.match(controller, /final class RemoteWebViewController/);
 assert.match(controller, /LOCAL_REACT_ASSET_PATH = "react\/index\.html"/);
-assert.match(controller, /LOCAL_FALLBACK_URL = "file:\/\/\/android_asset\/web\/schedule\.html"/);
+assert.match(controller, /LOCAL_FALLBACK_URL = "file:\/\/\/android_asset\/web\/no-profile-fallback\.html"/);
 assert.match(controller, /void loadRemoteOrFallback\(String fallbackReason\)/);
 assert.match(controller, /String getConfiguredRemoteUrl\(\)/);
 assert.match(controller, /boolean saveRemoteUrl\(String url\)/);
@@ -27,10 +27,13 @@ assert.match(controller, /void loadFallback\(String reason\)/);
 assert.match(controller, /RemoteUrlPolicy\.normalizeRemoteUrl/);
 assert.match(controller, /RemoteUrlPolicy\.isUsableRemoteUrl/);
 assert.match(controller, /RemoteUrlPolicy\.loginUrlFor\(getConfiguredRemoteUrl\(\)\)/);
+assert.match(controller, /RemoteUrlPolicy\.isAllowedWebViewUrl\(url, getConfiguredRemoteUrl\(\)\)/);
+assert.match(controller, /RemoteUrlPolicy\.isAllowedRemoteHost\(host, getConfiguredRemoteUrl\(\)\)/);
 assert.match(controller, /webView\.loadUrl\(loginUrl\)/);
 assert.match(controller, /lastLoadedUrl = loginUrl/);
 assert.match(controller, /settings\.setAllowFileAccess\(false\)/);
 assert.match(controller, /settings\.setAllowFileAccess\(true\)/);
+assert.doesNotMatch(controller, /旧版离线页面/);
 
 assert.match(startup, /RemoteWebViewController remoteWebViewController = new RemoteWebViewController/);
 assert.match(startup, /remoteWebViewController\.loadRemoteOrFallback/);

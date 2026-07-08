@@ -1,8 +1,6 @@
-import learningKnowledgeJson from "./learningKnowledgeCompact.json";
 import type { DailySprint, ReviewEvidence, Task, TaskType } from "../types/sprint";
 
 const learningTaskTypes = new Set<TaskType>(["java", "agent", "rag", "project", "path-audit"]);
-const learningKeywords = ["Java", "Spring", "JVM", "Redis", "MQ", "缓存", "事务", "稳定性", "证据", "搜索", "学习"];
 
 export interface LearningTaskSummary {
   id: string;
@@ -72,26 +70,31 @@ export interface LearningDashboard {
 
 export const LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY = "jobSprint.react.learningKnowledgeMarks.v1";
 
-interface CompactKnowledgeFile {
-  entries: LearningKnowledgeCard[];
-}
-
 interface StorageLike {
   getItem: (key: string) => string | null;
   setItem: (key: string, value: string) => void;
 }
-
-const learningKnowledge = learningKnowledgeJson as CompactKnowledgeFile;
 
 export function buildLearningDashboard(
   sprint: DailySprint,
   evidenceByTaskId: Record<string, ReviewEvidence[]>
 ): LearningDashboard {
   const sourceTasks = sortLearningTasks(sprint.tasks.filter(isLearningTask), sprint.currentTaskId);
+  if (!sourceTasks.length) {
+    return {
+      dateLabel: `${sprint.date} ${sprint.weekday}`,
+      learningTasks: [],
+      resources: [],
+      knowledgeCards: [],
+      knowledgeCategories: [],
+      noteCount: 0,
+      recentNotes: [],
+      deliverableCount: 0
+    };
+  }
   const learningTasks = sourceTasks.map((task) => toLearningTask(task, evidenceByTaskId, task.id === sprint.currentTaskId));
   const resources = buildResources(sourceTasks);
-  const context = buildContext(sourceTasks, resources);
-  const knowledgeCards = rankKnowledgeCards(context).slice(0, 6);
+  const knowledgeCards = buildTaskKnowledgeCards(sourceTasks).slice(0, 6);
   const knowledgeCategories = learningKnowledgeCategories(knowledgeCards);
   const noteCount = learningTasks.reduce((sum, task) => sum + task.noteCount, 0);
   const recentNotes = learningTasks.flatMap((task) => task.notes).sort((a, b) => timestampOf(b.createdAt) - timestampOf(a.createdAt)).slice(0, 8);
@@ -242,34 +245,25 @@ function buildResources(tasks: Task[]): LearningResource[] {
   return Array.from(resources.values()).sort((a, b) => b.taskTitles.length - a.taskTitles.length || a.label.localeCompare(b.label, "zh-Hans-CN"));
 }
 
-function buildContext(tasks: Task[], resources: LearningResource[]): string {
-  return [
-    tasks.map((task) => [task.title, task.description, task.tags.join(" "), task.deliverables.join(" "), task.interviewQuestions.join(" ")].join(" ")).join(" "),
-    resources.map((resource) => resource.label).join(" ")
-  ].join(" ");
-}
-
-function rankKnowledgeCards(context: string): LearningKnowledgeCard[] {
-  const normalizedContext = context.toLowerCase();
-
-  return [...(learningKnowledge.entries ?? [])].sort((a, b) => scoreKnowledgeCard(b, normalizedContext) - scoreKnowledgeCard(a, normalizedContext));
-}
-
-function scoreKnowledgeCard(card: LearningKnowledgeCard, normalizedContext: string): number {
-  const text = [
-    card.category,
-    card.title,
-    card.publicSummary,
-    card.interviewQuestion,
-    card.javaMapping,
-    card.projectEvidence,
-    card.sourceLabels.join(" ")
-  ].join(" ").toLowerCase();
-
-  return learningKeywords.reduce((score, keyword) => {
-    const normalizedKeyword = keyword.toLowerCase();
-    return score + (normalizedContext.includes(normalizedKeyword) && text.includes(normalizedKeyword) ? 1 : 0);
-  }, 0);
+function buildTaskKnowledgeCards(tasks: Task[]): LearningKnowledgeCard[] {
+  return tasks.map((task, index) => {
+    const primaryQuestion = task.interviewQuestions[0] ?? `如何用真实证据说明「${task.title}」？`;
+    const deliverable = task.deliverables[0] ?? "完成一条可读回学习产出";
+    return {
+      id: `${task.id}-knowledge-${index + 1}`,
+      category: task.tags[1] ?? task.tags[0] ?? "今日个人任务",
+      title: task.title,
+      publicSummary: task.description || `围绕「${task.title}」整理当前画像需要补齐的知识边界。`,
+      interviewQuestion: primaryQuestion,
+      javaMapping: task.javaMapping ?? "当前画像生成任务",
+      projectEvidence: deliverable,
+      safeWording: [
+        task.acceptanceCriteria || "只讲自己能证明的经历、文件、指标或复盘结论。",
+        "不引用系统示例、不套用他人岗位经历。"
+      ],
+      sourceLabels: task.sourceLabels.length ? task.sourceLabels : ["当前画像生成日历"]
+    };
+  });
 }
 
 function normalizeSearch(value?: string): string {

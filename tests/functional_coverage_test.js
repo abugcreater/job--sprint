@@ -21,26 +21,26 @@ function makeFixture() {
       "test:functional": "node tests/react_functional_persistence_test.js",
       "test:rust:functional": "node tests/rust_sqlite_ui_persistence_test.js",
       "test:android:functional": "node tests/android_webview_functional_persistence_test.js",
-      "test:android:remote:functional": "node tests/android_webview_functional_persistence_test.js --remote",
+      "test:android:remote:functional": "node tools/run_android_remote_functional_evidence.js --remote",
       "test:local-functional": "npm run test:functional && npm run test:rust:functional",
       "test:release": "npm test && npm run test:local-functional"
     }
   }, null, 2));
   writeFile(root, "tests/react_functional_persistence_test.js", [
-    "今日 AI 教练 延期原因 AI 教练设置 生成 AI 草稿 userProfiles aiArtifacts 知识边界 面试训练 机会验证 复盘归因 更多入口",
-    "导入 React 状态 JSON browser restart should preserve expected localStorage bytes and hashes",
+    "今日 AI 教练 延期原因 AI 求职教练 生成 AI 建议 userProfiles aiArtifacts 知识边界 面试训练 机会验证 今日复盘 我的数据",
+    "导入个人数据备份 browser restart should preserve expected localStorage bytes and hashes",
     "mobile viewport should read the injected desktop storage without mutation waitForServerRuntimeText",
     "react-functional-persistence-report.json"
   ].join("\n"));
   writeFile(root, "tests/android_webview_functional_persistence_test.js", [
-    "Android 延期原因 AI 教练设置 生成 AI 草稿 profileCount aiArtifactCount 知识边界 面试训练 机会验证 复盘归因 更多入口 导入 React 状态 JSON",
+    "Android 延期原因 AI 求职教练 生成 AI 建议 profileCount aiArtifactCount 知识边界 面试训练 机会验证 今日复盘 我的数据 导入个人数据备份",
     "AUTH_EVIDENCE sessionStates am\", \"force-stop\"",
     "Android app restart should preserve expected localStorage bytes and hashes",
     "android-webview-functional-persistence-report.json"
   ].join("\n"));
   writeFile(root, "tests/rust_sqlite_ui_persistence_test.js", [
-    "JOB_SPRINT_RUNTIME_DB_PATH runtimeStorage === \"sqlite\" 延期原因 AI 教练设置 生成 AI 草稿 userProfiles aiArtifacts 面试训练 机会验证 复盘归因 更多入口",
-    "导入 React 状态 JSON sqliteSnapshot runtime_items progress reviews applications interview_mistakes",
+    "JOB_SPRINT_RUNTIME_DB_PATH runtimeStorage === \"sqlite\" 延期原因 AI 求职教练 生成 AI 建议 userProfiles aiArtifacts 面试训练 机会验证 今日复盘 我的数据",
+    "导入个人数据备份 sqliteSnapshot runtime_items progress reviews applications interview_mistakes",
     "rust-sqlite-ui-persistence-report.json"
   ].join("\n"));
   writeFile(root, "docs/evidence/android-functional/android-webview-functional-persistence-report.json", JSON.stringify({
@@ -169,6 +169,16 @@ function testMissingAndroidAuthEvidenceFails() {
   )));
 }
 
+function testMissingOptionalEvidenceWarnsOnly() {
+  const root = makeFixture();
+  fs.rmSync(path.join(root, "docs/evidence"), { recursive: true, force: true });
+  const report = validateFunctionalCoverage(root);
+  assert.strictEqual(report.ok, true, JSON.stringify(report, null, 2));
+  const missingEvidence = report.findings.filter((item) => item.code === "functional_evidence_report_missing");
+  assert.strictEqual(missingEvidence.length, 2);
+  assert(missingEvidence.every((item) => item.severity === "warning"));
+}
+
 function testCurrentRepoPasses() {
   const report = validateFunctionalCoverage(repoRoot);
   assert.strictEqual(report.ok, true, JSON.stringify(report, null, 2));
@@ -181,6 +191,7 @@ testFixturePasses();
 testMissingAndroidRestartCoverageFails();
 testInvalidEvidenceFails();
 testMissingAndroidAuthEvidenceFails();
+testMissingOptionalEvidenceWarnsOnly();
 testCurrentRepoPasses();
 
-console.log("功能覆盖门禁测试：6 项通过。");
+console.log("功能覆盖门禁测试：7 项通过。");

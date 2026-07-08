@@ -6,76 +6,72 @@ import {
   toggleLearningKnowledgeMark,
   writeLearningKnowledgeMarks
 } from "../data/learningAdapter";
-import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import type { ReviewEvidence } from "../types/sprint";
-
-const fixedNow = new Date("2026-07-02T10:00:00+08:00");
+import { buildQaSprint, qaTaskIds } from "./fixtures/coachFlow";
 
 describe("learningAdapter", () => {
-  it("builds the learning dashboard from real schedule and sanitized knowledge data", () => {
-    const evidenceByTaskId: Record<string, ReviewEvidence[]> = {};
-    const sprint = buildTodaySprint(getScheduleData(), fixedNow, { completed: {}, evidenceByTaskId, syncState: "local_fallback" });
-    const dashboard = buildLearningDashboard(sprint, evidenceByTaskId);
+  it("stays empty before a profile-generated learning task exists", () => {
+    const dashboard = buildLearningDashboard(buildQaSprint({ now: new Date("2026-07-03T10:00:00+08:00") }), {});
 
-    expect(dashboard.learningTasks.map((task) => task.title)).toContain("Spring 事务与搜索链路边界");
-    expect(dashboard.resources.map((resource) => resource.label)).toContain("SpringBoot 工程入口 XMind");
-    expect(dashboard.knowledgeCards.map((card) => card.title)).toContain("Spring 事务、MySQL、Redis 高频追问");
-    expect(JSON.stringify(dashboard.knowledgeCards)).not.toContain("/Users/");
+    expect(dashboard.learningTasks).toEqual([]);
+    expect(dashboard.knowledgeCards).toEqual([]);
   });
 
-  it("counts local learning note evidence per task", () => {
+  it("builds learning cards from the active profile calendar only", () => {
+    const evidenceByTaskId: Record<string, ReviewEvidence[]> = {};
+    const sprint = buildQaSprint({ now: new Date("2026-07-02T10:00:00+08:00"), evidenceByTaskId });
+    const dashboard = buildLearningDashboard(sprint, evidenceByTaskId);
+
+    expect(dashboard.learningTasks.map((task) => task.title)).toContain("补 缺陷归因 面试表达");
+    expect(dashboard.knowledgeCards.map((card) => card.title)).toEqual(["补 缺陷归因 面试表达"]);
+    expect(dashboard.knowledgeCards[0]).toMatchObject({
+      category: "知识任务",
+      javaMapping: "由当前用户画像、知识边界或 AI 建议生成"
+    });
+    expect(JSON.stringify(dashboard)).not.toContain("Spring 事务");
+    expect(JSON.stringify(dashboard)).not.toContain("/Users/");
+  });
+
+  it("counts local learning notes against generated task ids", () => {
     const evidenceByTaskId: Record<string, ReviewEvidence[]> = {
-      "2026-07-02-0930-java": [
+      [qaTaskIds.learning]: [
         {
           id: "note-1",
-          taskId: "2026-07-02-0930-java",
+          taskId: qaTaskIds.learning,
           type: "learning_note",
           title: "学习笔记证据",
-          content: "已补笔记",
+          content: "手动笔记：缺陷归因需要包含复现、影响面、定位过程和修复验证。",
           createdAt: "2026-07-02T10:05:00+08:00",
           verified: true
         }
       ]
     };
-    const sprint = buildTodaySprint(getScheduleData(), fixedNow, { completed: {}, evidenceByTaskId, syncState: "local_fallback" });
+    const sprint = buildQaSprint({ now: new Date("2026-07-02T10:00:00+08:00"), evidenceByTaskId });
     const dashboard = buildLearningDashboard(sprint, evidenceByTaskId);
 
     expect(dashboard.noteCount).toBe(1);
-    expect(dashboard.learningTasks.find((task) => task.id === "2026-07-02-0930-java")?.statusLabel).toBe("已补 1 条学习笔记");
+    expect(dashboard.learningTasks.find((task) => task.id === qaTaskIds.learning)?.statusLabel).toBe("已补 1 条学习笔记");
+    expect(dashboard.recentNotes[0]?.preview).toContain("缺陷归因");
   });
 
-  it("prioritizes the current task when the Evidence Gate points at a learning task", () => {
-    const now = new Date("2026-07-02T14:05:00+08:00");
-    const evidenceByTaskId: Record<string, ReviewEvidence[]> = {};
-    const sprint = buildTodaySprint(getScheduleData(), now, { completed: {}, evidenceByTaskId, syncState: "local_fallback" });
-    const dashboard = buildLearningDashboard(sprint, evidenceByTaskId);
+  it("filters generated knowledge cards by query, category and local marked state", () => {
+    const dashboard = buildLearningDashboard(buildQaSprint({ now: new Date("2026-07-02T10:00:00+08:00") }), {});
+    const target = dashboard.knowledgeCards[0];
 
-    expect(dashboard.learningTasks[0]?.id).toBe(sprint.currentTaskId);
-    expect(dashboard.learningTasks[0]?.isCurrent).toBe(true);
-  });
-
-  it("filters sanitized knowledge cards by query, category and local marked state", () => {
-    const evidenceByTaskId: Record<string, ReviewEvidence[]> = {};
-    const sprint = buildTodaySprint(getScheduleData(), fixedNow, { completed: {}, evidenceByTaskId, syncState: "local_fallback" });
-    const dashboard = buildLearningDashboard(sprint, evidenceByTaskId);
-    const springCards = filterLearningKnowledgeCards(dashboard.knowledgeCards, { query: "Spring" });
-    const target = springCards.find((card) => card.title === "Spring 事务、MySQL、Redis 高频追问");
-
-    expect(target).toBeDefined();
-    expect(dashboard.knowledgeCategories).toContain("Spring / MySQL / Redis / MQ 经验");
-    expect(filterLearningKnowledgeCards(dashboard.knowledgeCards, { category: "Spring / MySQL / Redis / MQ 经验" }).every((card) => card.category === "Spring / MySQL / Redis / MQ 经验")).toBe(true);
-    expect(filterLearningKnowledgeCards(dashboard.knowledgeCards, { markedOnly: true, markedIds: new Set([target?.id ?? ""]) })).toEqual([target]);
-    expect(JSON.stringify(dashboard.knowledgeCards)).not.toContain("/Users/");
+    expect(filterLearningKnowledgeCards(dashboard.knowledgeCards, { query: "缺陷归因" })).toEqual([target]);
+    expect(dashboard.knowledgeCategories).toEqual(["知识任务"]);
+    expect(filterLearningKnowledgeCards(dashboard.knowledgeCards, { category: "知识任务" })).toEqual([target]);
+    expect(filterLearningKnowledgeCards(dashboard.knowledgeCards, { markedOnly: true, markedIds: new Set([target.id]) })).toEqual([target]);
   });
 
   it("persists local knowledge marks without touching the legacy favorite key", () => {
     window.localStorage.clear();
-    const marked = toggleLearningKnowledgeMark(new Set<string>(), "kb-spring-db-cache-001");
+    const marked = toggleLearningKnowledgeMark(new Set<string>(), `${qaTaskIds.learning}-knowledge-1`);
 
     writeLearningKnowledgeMarks(marked, window.localStorage);
 
-    expect(readLearningKnowledgeMarks(window.localStorage).has("kb-spring-db-cache-001")).toBe(true);
-    expect(window.localStorage.getItem(LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY)).toBe(JSON.stringify(["kb-spring-db-cache-001"]));
+    expect(readLearningKnowledgeMarks(window.localStorage).has(`${qaTaskIds.learning}-knowledge-1`)).toBe(true);
+    expect(window.localStorage.getItem(LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY)).toBe(JSON.stringify([`${qaTaskIds.learning}-knowledge-1`]));
     expect(window.localStorage.getItem("jobSprint.kbFavorites.v1")).toBeNull();
   });
 });

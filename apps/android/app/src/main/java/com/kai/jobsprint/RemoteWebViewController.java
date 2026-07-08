@@ -11,7 +11,7 @@ import java.io.InputStream;
 final class RemoteWebViewController {
     private static final String LOCAL_REACT_ASSET_PATH = "react/index.html";
     private static final String LOCAL_REACT_URL = "file:///android_asset/" + LOCAL_REACT_ASSET_PATH;
-    private static final String LOCAL_FALLBACK_URL = "file:///android_asset/web/schedule.html";
+    private static final String LOCAL_FALLBACK_URL = "file:///android_asset/web/no-profile-fallback.html";
 
     private final Activity activity;
     private final WebView webView;
@@ -64,6 +64,14 @@ final class RemoteWebViewController {
         return true;
     }
 
+    boolean isAllowedRemoteHost(String host) {
+        return RemoteUrlPolicy.isAllowedRemoteHost(host, getConfiguredRemoteUrl());
+    }
+
+    boolean isAllowedWebViewUrl(String url) {
+        return RemoteUrlPolicy.isAllowedWebViewUrl(url, getConfiguredRemoteUrl());
+    }
+
     boolean loadLoginOrFallback() {
         String loginUrl = RemoteUrlPolicy.loginUrlFor(getConfiguredRemoteUrl());
         if (loginUrl.isEmpty()) {
@@ -112,7 +120,7 @@ final class RemoteWebViewController {
         fallbackLoaded = true;
         legacyFallbackLoaded = true;
         configureLocalFallbackWebSettings();
-        Toast.makeText(activity, reason + "，已切换到旧版离线页面", Toast.LENGTH_LONG).show();
+        Toast.makeText(activity, reason + "，请重新同步 React 资产后再使用", Toast.LENGTH_LONG).show();
         lastLoadedUrl = LOCAL_FALLBACK_URL;
         webView.loadUrl(LOCAL_FALLBACK_URL);
     }

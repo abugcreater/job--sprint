@@ -1,6 +1,5 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import type { RuntimeData } from "../api/runtimeClient";
 import {
   addAiArtifactsPatch,
   addLlmRunPatch,
@@ -17,7 +16,6 @@ import {
   saveKnowledgeBoundaryPatch,
   saveUserProfilePatch
 } from "./sprintCoachActions";
-import type { CoachScheduleDraft, KnowledgeBoundaryDraft, ProfileDraft } from "../data/coachAdapter";
 import {
   isDelayRecord,
   isRecord,
@@ -31,69 +29,24 @@ import {
   sanitizeEvidenceByTaskId
 } from "./sprintStoreParsers";
 import { createSprint, currentSprintTime } from "./sprintStateFactory";
+import { sanitizePersistedSprintState } from "./sprintStoreLegacyMigration";
 import { getStorage } from "./sprintStoreStorage";
-import type { AiArtifact, BoundarySuggestionFeedback, CoachScheduleEvent, DailySprint, DelayRecord, EvidenceType, KnowledgeBoundary, LlmRun, ReviewEvidence, SprintRestoreSnapshot, SyncState, UserProfile } from "../types/sprint";
-import type { BoundarySuggestionFeedbackDraft } from "../data/boundarySuggestionFeedbackAdapter";
+import type { CoachScheduleEvent, DelayRecord, ReviewEvidence, SyncState } from "../types/sprint";
+import type { RuntimeStorageOwner, SprintState } from "./sprintStoreTypes";
 
-export interface RuntimeStorageOwner {
-  username?: string;
-  dataScope?: string;
-}
-
-export interface SprintState {
-  sprint: DailySprint;
-  completed: Record<string, boolean>;
-  evidenceByTaskId: Record<string, ReviewEvidence[]>;
-  delayRecords: DelayRecord[];
-  userProfiles: UserProfile[];
-  knowledgeBoundaries: KnowledgeBoundary[];
-  boundarySuggestionFeedback: BoundarySuggestionFeedback[];
-  coachScheduleEvents: CoachScheduleEvent[];
-  aiArtifacts: AiArtifact[];
-  llmRuns: LlmRun[];
-  syncState: SyncState;
-  hasHydrated: boolean;
-  lastSavedAt?: string;
-  storageOwner?: RuntimeStorageOwner;
-  setSprint: (sprint: DailySprint) => void;
-  setSyncState: (syncState: SyncState) => void;
-  markHydrated: () => void;
-  replaceRuntimeData: (data: RuntimeData, syncState?: SyncState, storageOwner?: RuntimeStorageOwner) => void;
-  resetRuntimeForOwner: (storageOwner?: RuntimeStorageOwner, syncState?: SyncState) => void;
-  toggleTaskCompletion: (taskId: string) => void;
-  addEvidence: (taskId: string, type: EvidenceType, title: string, content: string) => void;
-  updateEvidence: (taskId: string, evidenceId: string, patch: Partial<Pick<ReviewEvidence, "title" | "content" | "verified">>) => void;
-  deleteEvidence: (taskId: string, evidenceId: string) => void;
-  addDelayRecord: (record: Pick<DelayRecord, "taskId" | "date" | "minutes" | "reason" | "recoveryAction">) => void;
-  saveUserProfile: (draft: ProfileDraft) => void;
-  activateUserProfile: (profileId: string) => void;
-  deleteUserProfile: (profileId: string) => void;
-  saveKnowledgeBoundary: (draft: KnowledgeBoundaryDraft) => void;
-  recordBoundarySuggestionFeedback: (draft: BoundarySuggestionFeedbackDraft) => void;
-  deleteKnowledgeBoundary: (boundaryId: string) => void;
-  saveCoachScheduleEvent: (draft: CoachScheduleDraft) => void;
-  deleteCoachScheduleEvent: (eventId: string) => void;
-  generateAiArtifacts: () => void;
-  addAiArtifacts: (artifacts: AiArtifact[]) => void;
-  addLlmRun: (run: LlmRun) => void;
-  acceptAiArtifact: (artifactId: string) => void;
-  rejectAiArtifact: (artifactId: string, rejectionReason: string) => void;
-  editAiArtifact: (artifactId: string, patch: Pick<AiArtifact, "title" | "body">) => void;
-  restoreSnapshot: (snapshot: SprintRestoreSnapshot) => void;
-  refreshSprint: () => void;
-}
+export type { RuntimeStorageOwner, SprintState } from "./sprintStoreTypes";
 export const useSprintStore = create<SprintState>()(
   persist(
     (set, get) => {
-      const completed: Record<string, boolean> = {};
-      const evidenceByTaskId: Record<string, ReviewEvidence[]> = {};
-      const delayRecords: DelayRecord[] = [];
-      const userProfiles: UserProfile[] = [];
-      const knowledgeBoundaries: KnowledgeBoundary[] = [];
-      const boundarySuggestionFeedback: BoundarySuggestionFeedback[] = [];
-      const coachScheduleEvents: CoachScheduleEvent[] = [];
-      const aiArtifacts: AiArtifact[] = [];
-      const llmRuns: LlmRun[] = [];
+      const completed: SprintState["completed"] = {};
+      const evidenceByTaskId: SprintState["evidenceByTaskId"] = {};
+      const delayRecords: SprintState["delayRecords"] = [];
+      const userProfiles: SprintState["userProfiles"] = [];
+      const knowledgeBoundaries: SprintState["knowledgeBoundaries"] = [];
+      const boundarySuggestionFeedback: SprintState["boundarySuggestionFeedback"] = [];
+      const coachScheduleEvents: SprintState["coachScheduleEvents"] = [];
+      const aiArtifacts: SprintState["aiArtifacts"] = [];
+      const llmRuns: SprintState["llmRuns"] = [];
       const syncState: SyncState = "local_fallback";
 
       return {
@@ -131,43 +84,43 @@ export const useSprintStore = create<SprintState>()(
             const aiArtifacts = parseAiArtifacts(coach.aiArtifacts);
             const llmRuns = parseLlmRuns(coach.llmRuns);
             const lastSavedAt = data.progress.lastSavedAt ?? new Date().toISOString();
-	            return {
-	              completed,
-	              evidenceByTaskId,
+            return {
+              completed,
+              evidenceByTaskId,
               delayRecords,
               userProfiles,
               knowledgeBoundaries,
               boundarySuggestionFeedback,
               coachScheduleEvents,
               aiArtifacts,
-	              llmRuns,
-	              syncState: nextSyncState,
-	              storageOwner: storageOwner ?? state.storageOwner,
-	              lastSavedAt,
-	              sprint: createSprint(completed, evidenceByTaskId, nextSyncState, coachScheduleEvents, currentSprintTime(state.sprint), userProfiles)
-	            };
-	          }),
-	        resetRuntimeForOwner: (storageOwner, nextSyncState = "syncing") =>
-	          set((state) => {
-	            const completed: Record<string, boolean> = {};
-	            const evidenceByTaskId: Record<string, ReviewEvidence[]> = {};
-	            const coachScheduleEvents: CoachScheduleEvent[] = [];
-	            return {
-	              completed,
-	              evidenceByTaskId,
-	              delayRecords: [],
-	              userProfiles: [],
-	              knowledgeBoundaries: [],
-	              boundarySuggestionFeedback: [],
-	              coachScheduleEvents,
-	              aiArtifacts: [],
-	              llmRuns: [],
-	              syncState: nextSyncState,
-	              storageOwner,
-	              lastSavedAt: undefined,
-	              sprint: createSprint(completed, evidenceByTaskId, nextSyncState, coachScheduleEvents, currentSprintTime(state.sprint), [])
-	            };
-	          }),
+              llmRuns,
+              syncState: nextSyncState,
+              storageOwner: storageOwner ?? state.storageOwner,
+              lastSavedAt,
+              sprint: createSprint(completed, evidenceByTaskId, nextSyncState, coachScheduleEvents, currentSprintTime(state.sprint), userProfiles)
+            };
+          }),
+        resetRuntimeForOwner: (storageOwner, nextSyncState = "syncing") =>
+          set((state) => {
+            const completed: SprintState["completed"] = {};
+            const evidenceByTaskId: SprintState["evidenceByTaskId"] = {};
+            const coachScheduleEvents: CoachScheduleEvent[] = [];
+            return {
+              completed,
+              evidenceByTaskId,
+              delayRecords: [],
+              userProfiles: [],
+              knowledgeBoundaries: [],
+              boundarySuggestionFeedback: [],
+              coachScheduleEvents,
+              aiArtifacts: [],
+              llmRuns: [],
+              syncState: nextSyncState,
+              storageOwner,
+              lastSavedAt: undefined,
+              sprint: createSprint(completed, evidenceByTaskId, nextSyncState, coachScheduleEvents, currentSprintTime(state.sprint), [])
+            };
+          }),
         toggleTaskCompletion: (taskId) =>
           set((state) => {
             const completed = { ...state.completed, [taskId]: !state.completed[taskId] };
@@ -274,7 +227,7 @@ export const useSprintStore = create<SprintState>()(
             };
           }),
         deleteUserProfile: (profileId) =>
-          set((state) => deleteUserProfilePatch(state, profileId, (events) => createSprint(state.completed, state.evidenceByTaskId, state.syncState, events, currentSprintTime(state.sprint), state.userProfiles.filter((profile) => profile.id !== profileId)))),
+          set((state) => deleteUserProfilePatch(state, profileId, (events, profiles = state.userProfiles.filter((profile) => profile.id !== profileId)) => createSprint(state.completed, state.evidenceByTaskId, state.syncState, events, currentSprintTime(state.sprint), profiles))),
         saveKnowledgeBoundary: (draft) => set((state) => saveKnowledgeBoundaryPatch(state, draft)),
         recordBoundarySuggestionFeedback: (draft) => set((state) => recordBoundarySuggestionFeedbackPatch(state, draft)),
         deleteKnowledgeBoundary: (boundaryId) => set((state) => deleteKnowledgeBoundaryPatch(state, boundaryId)),
@@ -331,58 +284,21 @@ export const useSprintStore = create<SprintState>()(
         knowledgeBoundaries: state.knowledgeBoundaries,
         boundarySuggestionFeedback: state.boundarySuggestionFeedback,
         coachScheduleEvents: state.coachScheduleEvents,
-	        aiArtifacts: state.aiArtifacts,
-	        llmRuns: state.llmRuns,
-	        syncState: state.syncState,
-	        storageOwner: state.storageOwner,
-	        lastSavedAt: state.lastSavedAt
-	      }),
-      migrate: (persistedState) => {
-        const state = persistedState as Partial<SprintState> | undefined;
-        const completed = state?.completed ?? {};
-        const evidenceByTaskId = state?.evidenceByTaskId ?? {};
-        const delayRecords = Array.isArray(state?.delayRecords) ? state.delayRecords.filter(isDelayRecord) : [];
-        const userProfiles = parseUserProfiles(state?.userProfiles);
-        const knowledgeBoundaries = parseKnowledgeBoundaries(state?.knowledgeBoundaries);
-        const boundarySuggestionFeedback = parseBoundarySuggestionFeedback(state?.boundarySuggestionFeedback);
-        const coachScheduleEvents = parseCoachScheduleEvents(state?.coachScheduleEvents);
-        const aiArtifacts = parseAiArtifacts(state?.aiArtifacts);
-	        const llmRuns = parseLlmRuns(state?.llmRuns);
-	        const syncState = state?.syncState ?? "local_fallback";
-	        const storageOwner = parseStorageOwner(state?.storageOwner);
-	        return {
-	          completed,
-	          evidenceByTaskId,
-          delayRecords,
-          userProfiles,
-          knowledgeBoundaries,
-          boundarySuggestionFeedback,
-          coachScheduleEvents,
-          aiArtifacts,
-	          llmRuns,
-	          syncState,
-	          storageOwner,
-	          hasHydrated: true,
-	          lastSavedAt: state?.lastSavedAt,
-	          sprint: createSprint(completed, evidenceByTaskId, syncState, coachScheduleEvents, new Date(), userProfiles)
-	        };
-      },
+        aiArtifacts: state.aiArtifacts,
+        llmRuns: state.llmRuns,
+        syncState: state.syncState,
+        storageOwner: state.storageOwner,
+        lastSavedAt: state.lastSavedAt
+      }),
+      migrate: (persistedState) => sanitizePersistedSprintState(persistedState),
+      merge: (persistedState, currentState) => ({
+        ...currentState,
+        ...sanitizePersistedSprintState(persistedState)
+      }),
       onRehydrateStorage: () => (state) => {
         state?.markHydrated();
         state?.refreshSprint();
       }
     }
-	  )
-	);
-
-function parseStorageOwner(value: unknown): RuntimeStorageOwner | undefined {
-  if (!value || typeof value !== "object") return undefined;
-  const owner = value as Record<string, unknown>;
-  const username = typeof owner.username === "string" ? owner.username.trim() : "";
-  const dataScope = typeof owner.dataScope === "string" ? owner.dataScope.trim() : "";
-  if (!username && !dataScope) return undefined;
-  return {
-    ...(username ? { username } : {}),
-    ...(dataScope ? { dataScope } : {})
-  };
-}
+  )
+);

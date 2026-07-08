@@ -36,7 +36,7 @@ export function ArtifactPanel({
   const hiddenCount = Math.max(0, artifacts.length - visibleArtifacts.length);
   return (
     <article className="command-panel">
-      <PanelTitle icon={<Sparkles size={18} aria-hidden="true" />} title="AI 草稿" />
+      <PanelTitle icon={<Sparkles size={18} aria-hidden="true" />} title="AI 建议" />
       <div className="mt-4 rounded-card bg-surface-0 p-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -45,7 +45,7 @@ export function ArtifactPanel({
           </div>
           <button type="button" className="primary-button shrink-0" disabled={isGenerating} onClick={onGenerate}>
             <Sparkles size={16} aria-hidden="true" />
-            {isGenerating ? "生成中" : "生成 AI 草稿"}
+            {isGenerating ? "生成中" : "生成 AI 建议"}
           </button>
         </div>
       </div>
@@ -63,13 +63,13 @@ export function ArtifactPanel({
                   </div>
                   <input
                     className="field-control mt-3 font-black"
-                    aria-label={`AI 草稿标题：${artifact.title}`}
+                    aria-label={`AI 建议标题：${artifact.title}`}
                     value={edit.title}
                     onChange={(event) => onEditDraft(artifact, { title: event.target.value })}
                   />
                   <textarea
                     className="field-control mt-3 min-h-24 resize-y leading-6"
-                    aria-label={`AI 草稿内容：${artifact.title}`}
+                    aria-label={`AI 建议内容：${artifact.title}`}
                     value={edit.body}
                     onChange={(event) => onEditDraft(artifact, { body: event.target.value })}
                   />
@@ -82,7 +82,7 @@ export function ArtifactPanel({
                     <Edit3 size={15} aria-hidden="true" />
                     保存编辑
                   </button>
-                  <button type="button" className="primary-button min-h-10 px-3" aria-label={`接受 AI 草稿：${artifact.title}`} disabled={artifact.status === "accepted"} onClick={() => onAccept(artifact)}>
+                  <button type="button" className="primary-button min-h-10 px-3" aria-label={`接受 AI 建议：${artifact.title}`} disabled={artifact.status === "accepted"} onClick={() => onAccept(artifact)}>
                     <CheckCircle2 size={15} aria-hidden="true" />
                     接受
                   </button>
@@ -96,7 +96,7 @@ export function ArtifactPanel({
                   onChange={(event) => onReasonChange(artifact.id, event.target.value)}
                   placeholder="不采纳的原因"
                 />
-                <button type="button" className="secondary-button min-h-11 px-3" aria-label={`拒绝 AI 草稿：${artifact.title}`} disabled={artifact.status === "accepted" || artifact.status === "rejected"} onClick={() => onReject(artifact)}>
+                <button type="button" className="secondary-button min-h-11 px-3" aria-label={`拒绝 AI 建议：${artifact.title}`} disabled={artifact.status === "accepted" || artifact.status === "rejected"} onClick={() => onReject(artifact)}>
                   <CircleAlert size={15} aria-hidden="true" />
                   拒绝
                 </button>
@@ -104,15 +104,15 @@ export function ArtifactPanel({
             </div>
           );
         }) : (
-          <p className="rounded-card bg-surface-0 p-4 text-sm font-semibold text-ink-500">暂无 AI 草稿。</p>
+          <p className="rounded-card bg-surface-0 p-4 text-sm font-semibold text-ink-500">暂无 AI 建议。</p>
         )}
         {artifacts.length > 8 ? (
           <div className="flex flex-col gap-2 rounded-card border border-line bg-white p-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm font-bold text-ink-500">
-              {showAll ? `已显示全部 ${artifacts.length} 条 AI 草稿。` : `还有 ${hiddenCount} 条 AI 草稿未显示，先处理最靠前的建议。`}
+              {showAll ? `已显示全部 ${artifacts.length} 条 AI 建议。` : `还有 ${hiddenCount} 条 AI 建议未显示，先处理最靠前的建议。`}
             </p>
             <button type="button" className="secondary-button min-h-10 px-3" onClick={onToggleShowAll}>
-              {showAll ? "收起 AI 草稿" : "查看全部 AI 草稿"}
+              {showAll ? "收起 AI 建议" : "查看全部 AI 建议"}
             </button>
           </div>
         ) : null}

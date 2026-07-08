@@ -18,7 +18,7 @@ export function FirstLoginFlowPanel({
   const nextStep = flow.nextStep;
   const handlePrimaryAction = () => {
     if (!nextStep) return;
-    if (nextStep.id === "ai_review" && nextStep.actionLabel === "生成 AI 草稿") {
+    if (nextStep.id === "ai_review") {
       onGenerate();
       return;
     }
@@ -29,14 +29,14 @@ export function FirstLoginFlowPanel({
     <article className="command-panel border-brand-100">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <PanelTitle icon={<LogIn size={18} aria-hidden="true" />} title="邀请制首登编排" />
+          <PanelTitle icon={<LogIn size={18} aria-hidden="true" />} title="建档进度" />
           <p className="mt-2 text-sm font-semibold leading-6 text-ink-500">{flow.summary}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <span className="status-chip bg-brand-100 text-brand-700">{flow.progressLabel}</span>
           <button type="button" className="secondary-button min-h-10 px-3" disabled={isRecordingInsight} onClick={onRecordInsight}>
             <ClipboardCheck size={15} aria-hidden="true" />
-            {isRecordingInsight ? "记录中" : "记录首登观察"}
+            {isRecordingInsight ? "记录中" : "记录建档进度"}
           </button>
           {nextStep ? (
             <button type="button" className="primary-button min-h-10 px-3" disabled={isGenerating} onClick={handlePrimaryAction}>
@@ -44,14 +44,14 @@ export function FirstLoginFlowPanel({
               {isGenerating && nextStep.id === "ai_review" ? "生成中" : nextStep.actionLabel}
             </button>
           ) : (
-            <span className="status-chip bg-success-100 text-success-600">首登完成</span>
+            <span className="status-chip bg-success-100 text-success-600">建档完成</span>
           )}
         </div>
       </div>
       <div className="mt-3 flex flex-wrap gap-2 text-sm font-bold">
-        <span className="status-chip border border-line bg-white text-ink-700">首登完成率 {flow.insight.completionRateLabel}</span>
-        <span className="status-chip border border-line bg-white text-ink-700">当前放弃点 {flow.insight.dropOffLabel}</span>
-        <span className="status-chip border border-line bg-white text-ink-700">首登风险 {flow.insight.riskLabel}</span>
+        <span className="status-chip border border-line bg-white text-ink-700">建档完成度 {flow.insight.completionRateLabel}</span>
+        <span className="status-chip border border-line bg-white text-ink-700">下一项 {flow.insight.dropOffLabel}</span>
+        <span className="status-chip border border-line bg-white text-ink-700">当前风险 {flow.insight.riskLabel}</span>
         <span className="status-chip border border-line bg-white text-ink-700">下一步 {flow.insight.nextActionLabel}</span>
       </div>
       <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-5">

@@ -1,6 +1,6 @@
 import { Bot } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { fetchCoachOnboardingReport, type CoachOnboardingReportResponse } from "../../api/coachOnboardingReportClient";
+import { Link } from "react-router-dom";
 import {
   generateBoundarySuggestionsOnServer,
   generateCoachArtifactsOnServer,
@@ -32,11 +32,8 @@ import { AiFeedbackPanel } from "./components/AiFeedbackPanel";
 import { ArtifactPanel } from "./components/ArtifactPanel";
 import { BoundaryPanel } from "./components/BoundaryPanel";
 import { BoundarySuggestionPanel } from "./components/BoundarySuggestionPanel";
-import { MetricTile } from "./components/CoachPrimitives";
 import { FirstLoginFlowPanel } from "./components/FirstLoginFlowPanel";
 import { InitializationWizardPanel } from "./components/InitializationWizardPanel";
-import { InviteManagementPanel } from "./components/InviteManagementPanel";
-import { InviteOnboardingReportPanel } from "./components/InviteOnboardingReportPanel";
 import { LlmRunPanel } from "./components/LlmRunPanel";
 import { ProfilePanel } from "./components/ProfilePanel";
 import { SchedulePanel } from "./components/SchedulePanel";
@@ -53,6 +50,7 @@ export function CoachPage() {
   const llmRuns = useSprintStore((state) => state.llmRuns);
   const saveUserProfile = useSprintStore((state) => state.saveUserProfile);
   const activateUserProfile = useSprintStore((state) => state.activateUserProfile);
+  const deleteUserProfile = useSprintStore((state) => state.deleteUserProfile);
   const saveKnowledgeBoundary = useSprintStore((state) => state.saveKnowledgeBoundary);
   const recordBoundarySuggestionFeedback = useSprintStore((state) => state.recordBoundarySuggestionFeedback);
   const deleteKnowledgeBoundary = useSprintStore((state) => state.deleteKnowledgeBoundary);
@@ -98,9 +96,8 @@ export function CoachPage() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExtractingBoundaries, setIsExtractingBoundaries] = useState(false);
   const [isRecordingFirstLogin, setIsRecordingFirstLogin] = useState(false);
-  const [onboardingReport, setOnboardingReport] = useState<CoachOnboardingReportResponse | null>(null);
-  const [onboardingReportStatus, setOnboardingReportStatus] = useState<"idle" | "loading" | "ready" | "local" | "error">("idle");
   const [feedback, setFeedback] = useState("");
+  const [profileFeedback, setProfileFeedback] = useState("");
 
   useEffect(() => {
     setProfileDraft(createProfileDraft(dashboard.activeProfile));
@@ -110,33 +107,31 @@ export function CoachPage() {
     setScheduleDraft(createScheduleDraft(sprint.date));
   }, [dashboard.activeProfile?.id, sprint.date]);
 
-  useEffect(() => {
-    void loadOnboardingReport();
-  }, []);
-
-  const loadOnboardingReport = async () => {
-    setOnboardingReportStatus("loading");
-    try {
-      const report = await fetchCoachOnboardingReport();
-      setOnboardingReport(report);
-      setOnboardingReportStatus(report ? "ready" : "local");
-    } catch (_) {
-      setOnboardingReportStatus("error");
-    }
-  };
-
   const handleSaveProfile = () => {
     if (!canSaveProfile(profileDraft)) {
       setFeedback("请至少填写目标岗位、经验摘要和每日可投入时间。");
+      setProfileFeedback("保存失败：请补齐目标岗位、经验摘要和每日可投入时间。");
       return;
     }
     saveUserProfile(profileDraft);
-    setFeedback("画像已保存，后续 AI 草稿会引用该画像。");
+    setFeedback("求职画像已保存，后续 AI 建议会引用这份画像。");
+    setProfileFeedback("画像已保存。");
+  };
+
+  const handleDeleteProfile = (profileId: string) => {
+    const profile = dashboard.profiles.find((item) => item.id === profileId);
+    if (!profile) return;
+    const confirmed = window.confirm(`删除「${profile.name}」画像？关联知识边界、个人日程和 AI 建议也会一起移除。`);
+    if (!confirmed) return;
+    deleteUserProfile(profileId);
+    setProfileDraft(createProfileDraft());
+    setFeedback(`已删除「${profile.name}」画像。`);
+    setProfileFeedback(`已删除「${profile.name}」，关联边界、日程和 AI 建议已同步清理。`);
   };
 
   const handleSaveBoundary = () => {
     if (!dashboard.activeProfile) {
-      setFeedback("请先保存一个目标画像。");
+      setFeedback("请先保存一份求职画像。");
       return;
     }
     if (!canSaveBoundary(boundaryDraft)) {
@@ -150,7 +145,7 @@ export function CoachPage() {
 
   const handleGenerateBoundarySuggestions = async () => {
     if (!dashboard.activeProfile) {
-      setFeedback("请先保存一个目标画像。");
+      setFeedback("请先保存一份求职画像。");
       return;
     }
     if (boundarySourceText.trim().length < 12) {
@@ -193,7 +188,7 @@ export function CoachPage() {
 
   const handleAcceptBoundarySuggestion = (suggestion: BoundarySuggestionDraft) => {
     if (!dashboard.activeProfile) {
-      setFeedback("请先保存一个目标画像。");
+      setFeedback("请先保存一份求职画像。");
       return;
     }
     recordBoundarySuggestionDecision(suggestion, "accepted");
@@ -241,7 +236,7 @@ export function CoachPage() {
 
   const handleSaveSchedule = () => {
     if (!dashboard.activeProfile) {
-      setFeedback("请先保存一个目标画像。");
+      setFeedback("请先保存一份求职画像。");
       return;
     }
     if (!canSaveScheduleEvent(scheduleDraft)) {
@@ -289,7 +284,7 @@ export function CoachPage() {
             warning: response.warning
           }));
         const mode = response.provider === "anthropic-compatible" ? "服务端大模型" : "服务端规则 fallback";
-        setFeedback(`${mode}已生成 AI 草稿，接受后才会写入正式记录。`);
+        setFeedback(`${mode}已生成 AI 建议，接受后才会写入正式记录。`);
         return;
       }
       generateAiArtifacts();
@@ -300,7 +295,7 @@ export function CoachPage() {
         artifactCount: dashboard.boundaries.length ? 3 : 1,
         warning: "server_unavailable"
       }));
-      setFeedback("服务端 AI 暂不可用，已使用本地规则生成草稿。");
+      setFeedback("服务端 AI 暂不可用，已使用本地规则生成 AI 建议。");
     } catch (_) {
       generateAiArtifacts();
       addLlmRun(createLlmRun({
@@ -310,7 +305,7 @@ export function CoachPage() {
         artifactCount: dashboard.boundaries.length ? 3 : 1,
         warning: "server_generation_failed"
       }));
-      setFeedback("服务端 AI 生成失败，已使用本地规则生成草稿。");
+      setFeedback("服务端 AI 生成失败，已使用本地规则生成 AI 建议。");
     } finally {
       setIsGenerating(false);
     }
@@ -323,7 +318,7 @@ export function CoachPage() {
       const event = await submitCoachOnboardingEvent({
         profileId: dashboard.activeProfile?.id,
         stepId: step?.id ?? "complete",
-        stepLabel: step?.label ?? "首登完成",
+        stepLabel: step?.label ?? "建档完成",
         progressLabel: firstLoginFlow.progressLabel,
         completionRate: firstLoginFlow.insight.completionRate,
         completionRateLabel: firstLoginFlow.insight.completionRateLabel,
@@ -333,13 +328,12 @@ export function CoachPage() {
         source: "react-first-login"
       });
       if (event) {
-        setFeedback(`已记录服务端首登观察：${event.completionRateLabel} · ${event.dropOffLabel}。`);
-        void loadOnboardingReport();
-        return;
+        setFeedback(`已记录服务端建档进度：${event.completionRateLabel} · ${event.dropOffLabel}。`);
+	        return;
       }
-      setFeedback("当前处于本地模式，首登观察未写入服务端。");
+      setFeedback("当前处于本地模式，建档进度未写入服务端。");
     } catch (_) {
-      setFeedback("首登观察写入服务端失败，请稍后重试。");
+      setFeedback("建档进度写入服务端失败，请稍后重试。");
     } finally {
       setIsRecordingFirstLogin(false);
     }
@@ -348,24 +342,24 @@ export function CoachPage() {
   const handleEditArtifact = (artifact: AiArtifact) => {
     const patch = artifactEdits[artifact.id] ?? { title: artifact.title, body: artifact.body };
     if (!patch.title.trim() || !patch.body.trim()) {
-      setFeedback("AI 草稿标题和内容不能为空。");
+      setFeedback("AI 建议标题和内容不能为空。");
       return;
     }
     editAiArtifact(artifact.id, patch);
-    setFeedback("AI 草稿已编辑，仍需接受或拒绝。");
+    setFeedback("AI 建议已编辑，仍需接受或拒绝。");
   };
 
   const handleRejectArtifact = (artifact: AiArtifact) => {
     const reason = rejectionReasons[artifact.id] ?? "";
     rejectAiArtifact(artifact.id, reason);
     recordArtifactFeedback(artifact, "rejected", reason);
-    setFeedback("已拒绝 AI 草稿，拒绝原因会进入后续复盘统计。");
+    setFeedback("已拒绝 AI 建议，拒绝原因会进入后续复盘统计。");
   };
 
   const handleAcceptArtifact = (artifact: AiArtifact) => {
     acceptAiArtifact(artifact.id);
     recordArtifactFeedback(artifact, "accepted");
-    setFeedback(artifact.type === "knowledge_card" ? "已接受知识卡草稿，并写入知识边界。" : "已接受 AI 草稿，并写入自定义日程。");
+    setFeedback(artifact.type === "knowledge_card" ? "已接受知识卡建议，并写入知识边界。" : "已接受 AI 建议，并写入自定义日程。");
   };
 
   const recordArtifactFeedback = (artifact: AiArtifact, decision: "accepted" | "rejected", reason = "") => {
@@ -386,29 +380,21 @@ export function CoachPage() {
         <header className="command-card p-4 md:p-5">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">画像 · 知识边界 · AI 草稿</p>
+              <p className="text-sm font-black text-brand-700">求职画像 · 知识边界 · AI 建议</p>
               <div className="mt-2 flex items-center gap-3">
                 <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
                   <Bot size={22} aria-hidden="true" />
                 </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">AI 教练设置</h1>
+                <h1 className="text-3xl font-black leading-tight md:text-4xl">AI 求职教练</h1>
               </div>
               <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                先保存目标画像和知识边界，再让 AI 生成草稿；草稿必须经你接受后才会写入日程或知识边界。
+                先确认求职画像和知识边界，再让 AI 生成建议；建议必须经你接受后才会写入日程或知识边界。
               </p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[560px]">
-              <MetricTile label="画像" value={`${dashboard.metrics.profileCount} 个`} />
-              <MetricTile label="知识边界" value={`${dashboard.metrics.boundaryCount} 条`} />
-              <MetricTile label="AI 草稿" value={`${dashboard.metrics.draftCount} 条`} />
-              <MetricTile label="AI 运行" value={`${dashboard.metrics.llmRunCount} 条`} />
-              <MetricTile label="机会信号" value={`${opportunitySignals.length} 条`} />
-              <MetricTile label="已采纳/拒绝" value={`${dashboard.metrics.acceptedCount}/${dashboard.metrics.rejectedCount}`} />
-              <MetricTile label="AI 采纳率" value={dashboard.feedbackSummary.acceptanceRateLabel} />
-              <MetricTile label="本周有效推进" value={dashboard.outcomeMetrics.effectiveActionLabel} />
-              <MetricTile label="采纳后完成" value={dashboard.outcomeMetrics.acceptedScheduleCompletionLabel} />
-              <MetricTile label="面试复盘" value={dashboard.outcomeMetrics.interviewReviewRateLabel} />
-            </div>
+	            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
+	              <span className="text-xs font-black text-ink-500">集中统计</span>
+	              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看画像、边界、AI 建议和本周推进</span>
+	            </Link>
           </div>
           {feedback ? (
             <p className="mt-4 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" role="status">
@@ -424,8 +410,6 @@ export function CoachPage() {
           onGenerate={handleGenerate}
           onRecordInsight={handleRecordFirstLoginInsight}
         />
-        <InviteOnboardingReportPanel report={onboardingReport} status={onboardingReportStatus} onRefresh={loadOnboardingReport} />
-        <InviteManagementPanel />
         {dashboard.setupChecklist.status !== "ready" ? <InitializationWizardPanel /> : null}
 
         <section className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
@@ -441,9 +425,11 @@ export function CoachPage() {
                   activateUserProfile(profile.id);
                   setFeedback(`已切换到「${profile.name}」。`);
                 }}
-                onEdit={(profile) => setProfileDraft(createProfileDraft(profile))}
-                onSave={handleSaveProfile}
-              />
+	                onEdit={(profile) => setProfileDraft(createProfileDraft(profile))}
+	                onDelete={handleDeleteProfile}
+	                onSave={handleSaveProfile}
+	                feedback={profileFeedback}
+	              />
             </div>
             <div id="coach-schedule" className="scroll-mt-4">
               <SchedulePanel

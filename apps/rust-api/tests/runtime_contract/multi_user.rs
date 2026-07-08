@@ -131,8 +131,11 @@ pub async fn verify_multi_user_permissions() {
     )
     .await;
     assert_eq!(res.status, StatusCode::OK);
-    assert!(res.raw.contains("candidate-interview-context-v1"));
-    assert!(res.raw.contains("候选人"));
+    assert_eq!(res.json["version"], "profile-generated-v1-public-safe");
+    assert!(res.json["profile"].is_null());
+    assert_eq!(res.json["questionBank"], json!([]));
+    assert!(!res.raw.contains("candidate-interview-context-v1"));
+    assert!(!res.raw.contains("高级 Java"));
     assert!(!res.raw.contains("/path/to/local-user"));
 
     res = raw_request(
@@ -198,8 +201,11 @@ pub async fn verify_multi_user_permissions() {
     )
     .await;
     assert_eq!(res.status, StatusCode::OK);
-    assert!(res.raw.contains("candidate-interview-context-v1"));
-    assert!(res.raw.contains("候选人"));
+    assert_eq!(res.json["version"], "profile-generated-v1");
+    assert!(res.json["profile"].is_null());
+    assert_eq!(res.json["questionBank"], json!([]));
+    assert!(!res.raw.contains("candidate-interview-context-v1"));
+    assert!(!res.raw.contains("高级 Java"));
     assert!(!res.raw.contains("/path/to/local-user"));
 
     res = request(

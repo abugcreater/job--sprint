@@ -2,10 +2,11 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { App } from "../App";
 import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";
+import { buildQaSprint, qaProfile, qaScheduleEvents, qaTaskIds } from "./fixtures/coachFlow";
 
 const fixedNow = new Date("2026-07-02T14:05:00+08:00");
 
-function resetSprint(hash = "#/applications") {
+function resetSprint(hash = "#/applications", withProfile = true) {
   window.location.hash = hash;
   window.localStorage.clear();
   const completed = {};
@@ -13,9 +14,18 @@ function resetSprint(hash = "#/applications") {
   useSprintStore.setState({
     completed,
     evidenceByTaskId,
+    delayRecords: [],
+    userProfiles: withProfile ? [qaProfile] : [],
+    knowledgeBoundaries: [],
+    boundarySuggestionFeedback: [],
+    coachScheduleEvents: withProfile ? qaScheduleEvents : [],
+    aiArtifacts: [],
+    llmRuns: [],
     syncState: "local_fallback",
     lastSavedAt: undefined,
-    sprint: buildTodaySprint(getScheduleData(), fixedNow, { completed, evidenceByTaskId, syncState: "local_fallback" })
+    sprint: withProfile
+      ? buildQaSprint({ now: fixedNow, completed, evidenceByTaskId })
+      : buildTodaySprint(getScheduleData(), fixedNow, { completed, evidenceByTaskId, syncState: "local_fallback" })
   });
 }
 
@@ -24,12 +34,21 @@ describe("React Job Sprint applications workspace", () => {
     resetSprint();
   });
 
+  it("shows a profile-first empty state for a new user", async () => {
+    resetSprint("#/applications", false);
+    render(<App />);
+
+    expect(await screen.findByRole("heading", { name: "先建立你的求职画像" })).toBeInTheDocument();
+    expect(screen.getByText(/机会记录才会绑定到你的岗位、公司和 Evidence Gate/)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "去创建画像" })).toHaveAttribute("href", "#/coach");
+  });
+
   it("renders opportunity targets, record list first and opens the local form on demand", async () => {
     render(<App />);
 
     expect(await screen.findByRole("heading", { name: "机会验证" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "今日机会目标" })).toBeInTheDocument();
-    expect(screen.getByText("一条证据/简历/机会更新")).toBeInTheDocument();
+    expect(screen.getAllByText("记录测试开发岗位机会反馈").length).toBeGreaterThan(0);
     expect(screen.queryByLabelText("公司")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "新增机会记录" })).toBeInTheDocument();
 
@@ -49,21 +68,21 @@ describe("React Job Sprint applications workspace", () => {
     fireEvent.click(await screen.findByRole("button", { name: "新增机会记录" }));
 
     fireEvent.change(screen.getByLabelText("公司"), { target: { value: "Example Cloud" } });
-    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "Senior Java Backend" } });
+    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "测试开发工程师" } });
     fireEvent.change(screen.getByLabelText("来源"), { target: { value: "Boss 直聘" } });
     fireEvent.change(screen.getByLabelText("薪资范围"), { target: { value: "25-35K · 14薪" } });
-    fireEvent.change(screen.getByLabelText("JD 关键词"), { target: { value: "Java MQ Redis" } });
+    fireEvent.change(screen.getByLabelText("JD 关键词"), { target: { value: "自动化 质量平台 Mock" } });
     fireEvent.change(screen.getByLabelText("沟通反馈"), { target: { value: "HR 约下周一技术面" } });
-    fireEvent.change(screen.getByLabelText("反馈摘要"), { target: { value: "HR 要求补充高并发项目证据" } });
+    fireEvent.change(screen.getByLabelText("反馈摘要"), { target: { value: "HR 要求补充质量平台项目证据" } });
     fireEvent.click(screen.getByRole("button", { name: "记录机会反馈" }));
 
     expect(await screen.findByText("已新增机会验证记录。")).toBeInTheDocument();
-    expect(useSprintStore.getState().evidenceByTaskId["2026-07-02-2130-delivery"]).toHaveLength(1);
+    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.opportunity]).toHaveLength(1);
     expect(screen.getByText(/Example Cloud/)).toBeInTheDocument();
     expect(screen.getByText(/Boss 直聘/)).toBeInTheDocument();
     expect(screen.getByText(/HR 约下周一技术面/)).toBeInTheDocument();
 
-    expect(useSprintStore.getState().evidenceByTaskId["2026-07-02-1400-java"]).toBeUndefined();
+    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.interview]).toBeUndefined();
   });
 
   it("filters, edits, deletes and exports local application records", async () => {
@@ -73,7 +92,7 @@ describe("React Job Sprint applications workspace", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "新增机会记录" }));
     fireEvent.change(screen.getByLabelText("公司"), { target: { value: "Alpha Cloud" } });
-    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "Senior Java Backend" } });
+    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "测试开发工程师" } });
     fireEvent.change(screen.getByLabelText("来源"), { target: { value: "官网" } });
     fireEvent.change(screen.getByLabelText("薪资范围"), { target: { value: "20-30K" } });
     fireEvent.change(screen.getByLabelText("状态"), { target: { value: "已记录" } });
@@ -83,7 +102,7 @@ describe("React Job Sprint applications workspace", () => {
 
     fireEvent.click(await screen.findByRole("button", { name: "新增机会记录" }));
     fireEvent.change(screen.getByLabelText("公司"), { target: { value: "Beta AI" } });
-    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "Platform Backend" } });
+    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "质量平台工程师" } });
     fireEvent.change(screen.getByLabelText("来源"), { target: { value: "内推" } });
     fireEvent.change(screen.getByLabelText("薪资范围"), { target: { value: "30-40K" } });
     fireEvent.change(screen.getByLabelText("状态"), { target: { value: "约面" } });
@@ -96,28 +115,28 @@ describe("React Job Sprint applications workspace", () => {
     fireEvent.change(screen.getByLabelText("机会状态筛选"), { target: { value: "约面" } });
 
     expect(screen.getByText("共 2 条，当前显示 1 条。")).toBeInTheDocument();
-    expect(screen.getByText(/Beta AI · Platform Backend/)).toBeInTheDocument();
+    expect(screen.getByText(/Beta AI · 质量平台工程师/)).toBeInTheDocument();
     expect(screen.getByText(/内推 \/ 30-40K/)).toBeInTheDocument();
     expect(screen.getByText(/沟通反馈：HR 约周三一面/)).toBeInTheDocument();
-    expect(screen.queryByText(/Alpha Cloud · Senior Java Backend/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Alpha Cloud · 测试开发工程师/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "编辑机会记录：Beta AI" }));
-    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "Lead Java Backend" } });
+    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "质量平台负责人" } });
     fireEvent.change(screen.getByLabelText("沟通反馈"), { target: { value: "HR 改约周四二面" } });
     fireEvent.click(screen.getByRole("button", { name: "保存机会反馈" }));
 
-    expect(screen.getByText(/Beta AI · Lead Java Backend/)).toBeInTheDocument();
+    expect(screen.getByText(/Beta AI · 质量平台负责人/)).toBeInTheDocument();
     expect(screen.getByText(/沟通反馈：HR 改约周四二面/)).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("机会状态筛选"), { target: { value: "all" } });
     fireEvent.click(screen.getByRole("button", { name: "删除机会记录：Alpha Cloud" }));
 
     expect(screen.getByText("共 1 条，当前显示 1 条。")).toBeInTheDocument();
-    expect(screen.queryByText(/Alpha Cloud · Senior Java Backend/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Alpha Cloud · 测试开发工程师/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "生成本地导出" }));
 
     expect(screen.getByText("已生成导出 1 条，本地 JSON 已准备。")).toBeInTheDocument();
-    expect(useSprintStore.getState().evidenceByTaskId["2026-07-02-2130-delivery"]).toHaveLength(1);
+    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.opportunity]).toHaveLength(1);
   });
 });

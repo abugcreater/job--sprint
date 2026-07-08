@@ -108,66 +108,22 @@ async function getJson(server, requestPath, cookie) {
 
     res = await request(server, "GET", "/schedule.html", undefined, { cookie });
     assert.strictEqual(res.status, 200);
-    assert.match(res.raw, /AI 求职教练/);
-    assert.match(res.raw, /当前任务/);
-    assert.match(res.raw, /今日/);
-    assert.match(res.raw, /日程/);
-    assert.match(res.raw, /知识/);
-    assert.match(res.raw, /面试/);
-    assert.match(res.raw, /知识库/);
-    assert.match(res.raw, /机会/);
-    assert.match(res.raw, /复盘/);
-    assert.match(res.raw, /维护/);
-    assert.match(res.raw, /设置/);
-    assert.match(res.raw, /id="sectionNav"/);
-    assert.match(res.raw, /今日时间线/);
-    assert.match(res.raw, /维护与导出/);
-    assert.match(res.raw, /计划设置/);
-    assert.match(res.raw, /本地面试知识库/);
-    assert.match(res.raw, /generateKbBtn/);
-    assert.match(res.raw, /kbGenerateForm/);
-    assert.match(res.raw, /根据我的背景生成/);
-    assert.match(res.raw, /机会记录/);
-    assert.match(res.raw, /证据状态/);
-    assert.match(res.raw, /evidenceStatusCard/);
-    assert.match(res.raw, /去复盘补证据/);
-    assert.match(res.raw, /todayInterviewText/);
-    assert.match(res.raw, /开始口述一题/);
-    assert.match(res.raw, /coach-primary-card/);
-    assert.match(res.raw, /待重练错题/);
-    assert.match(res.raw, /mistakeList/);
-    assert.match(res.raw, /runtimeNotice/);
-    assert.match(res.raw, /applicationCards/);
-    assert.match(res.raw, /application-table-wrap/);
-    assert.match(res.raw, /delayImpactSummary/);
-    assert.match(res.raw, /查看下一项补做/);
-    const mainFilterMarkup = res.raw.match(/id="primaryFilters"[\s\S]*?<\/section>/);
-    assert.ok(mainFilterMarkup);
-    assert.ok(!/Android|部署|路径缺失/.test(mainFilterMarkup[0]));
-    const toolsMarkup = res.raw.match(/data-view="tools"[\s\S]*?data-view="settings"/);
-    assert.ok(toolsMarkup);
-    assert.ok(!/工程工具/.test(toolsMarkup[0]));
-    assert.match(toolsMarkup[0], /APK/);
-    assert.match(toolsMarkup[0], /云端发布/);
-    assert.match(toolsMarkup[0], /路径审计/);
+    assert.match(res.raw, /正在进入 Job Sprint/);
+    assert.match(res.raw, /导入画像 -> 生成个人日历/);
+    assert.match(res.raw, /旧静态日程不再作为用户入口/);
+    assert.match(res.raw, /\.\/react\/index\.html#\/today/);
+    assert.doesNotMatch(res.raw, /id="sectionNav"/);
+    assert.doesNotMatch(res.raw, /今日时间线/);
+    assert.doesNotMatch(res.raw, /本地面试知识库/);
 
     res = await request(server, "GET", "/assets/schedule.js");
     assert.strictEqual(res.status, 200);
-    assert.match(res.raw, /loadServerRuntimeState/);
     assert.match(res.raw, /CATEGORY_META/);
     assert.match(res.raw, /NAV_META/);
-    assert.match(res.raw, /function renderSectionNav/);
-    assert.match(res.raw, /openTaskDetail/);
-    assert.match(res.raw, /renderTaskDetailSheet/);
-    assert.match(res.raw, /openKbDetail/);
-    assert.match(res.raw, /renderKbDetailSheet/);
-    assert.match(res.raw, /generateKnowledgeEntries/);
-    assert.match(res.raw, /GENERATED_KB_KEY/);
-    assert.match(res.raw, /window\.AndroidSpeech/);
-    assert.match(res.raw, /APPLICATION_STATUSES/);
-    assert.match(res.raw, /delayRecoverySummary/);
-    assert.match(res.raw, /查看计划设置/);
-    assert.match(res.raw, /localStorage fallback/);
+    assert.match(res.raw, /reactTodayPath/);
+    assert.match(res.raw, /window\.location\.replace/);
+    assert.doesNotMatch(res.raw, /function renderSectionNav/);
+    assert.doesNotMatch(res.raw, /loadServerRuntimeState/);
 
     res = await request(server, "GET", "/assets/auth.js");
     assert.strictEqual(res.status, 200);
@@ -194,14 +150,18 @@ async function getJson(server, requestPath, cookie) {
 
     const schedule = await getJson(server, "/data/schedule.json", cookie);
     assert.ok(Array.isArray(schedule.days));
-    assert.ok(schedule.days.length >= 14);
+    assert.strictEqual(schedule.days.length, 0);
+    assert.match(schedule.positioning, /用户先导入画像/);
 
     const kb = await getJson(server, "/data/interview_kb.json", cookie);
     assert.ok(Array.isArray(kb.entries));
-    assert.ok(kb.entries.length > 0);
+    assert.strictEqual(kb.entries.length, 0);
+    assert.match(kb.scope, /空知识库占位/);
 
     const context = await getJson(server, "/data/interview_context.json", cookie);
-    assert.ok(context.profile);
+    assert.strictEqual(context.profile, null);
+    assert.ok(Array.isArray(context.questionBank));
+    assert.ok(context.scoringRubric);
 
     res = await request(server, "POST", "/api/score-answer", {
       question: "G1 和 ZGC 的差异是什么？",
@@ -218,7 +178,8 @@ async function getJson(server, requestPath, cookie) {
 
     res = await request(server, "GET", "/job-sprint/schedule.html", undefined, { cookie });
     assert.strictEqual(res.status, 200);
-    assert.match(res.raw, /计划设置/);
+    assert.match(res.raw, /正在进入 Job Sprint/);
+    assert.match(res.raw, /\.\/react\/index\.html#\/today/);
 
     res = await request(server, "GET", "/job-sprint/assets/schedule.js");
     assert.strictEqual(res.status, 200);

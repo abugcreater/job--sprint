@@ -8,54 +8,52 @@ import {
   toggleInterviewWeakQuestion,
   writeInterviewWeakQuestionMarks
 } from "../data/interviewAdapter";
-import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import type { ReviewEvidence } from "../types/sprint";
-
-const fixedNow = new Date("2026-07-02T14:05:00+08:00");
+import { buildQaSprint, qaTaskIds } from "./fixtures/coachFlow";
 
 describe("interviewAdapter", () => {
-  it("builds interview dashboard from schedule questions and sanitized question bank", () => {
+  it("builds questions from the current generated interview task", () => {
     const evidenceByTaskId: Record<string, ReviewEvidence[]> = {};
-    const sprint = buildTodaySprint(getScheduleData(), fixedNow, { completed: {}, evidenceByTaskId, syncState: "local_fallback" });
+    const sprint = buildQaSprint({ evidenceByTaskId });
     const dashboard = buildInterviewDashboard(sprint, evidenceByTaskId);
 
-    expect(dashboard.targetTask?.title).toBe("JVM G1/ZGC 与线上抖动排查");
-    expect(dashboard.oralTasks.map((task) => task.title)).toContain("压力小面：Spring/JVM/MQ 三连");
-    expect(dashboard.candidateQuestions.map((question) => question.question)).toContain("G1 和 ZGC 的底层差异是什么？");
-    expect(JSON.stringify(dashboard.candidateQuestions)).not.toContain("/Users/");
+    expect(dashboard.targetTask?.id).toBe(qaTaskIds.interview);
+    expect(dashboard.targetTask?.title).toBe("练 Mock 服务边界 60 秒回答");
+    expect(dashboard.candidateQuestions.map((question) => question.question)).toEqual(["练 Mock 服务边界 60 秒回答"]);
+    expect(interviewQuestionCategories(dashboard.candidateQuestions).map((item) => item.label)).toEqual(["当前任务"]);
+    expect(JSON.stringify(dashboard)).not.toContain("G1/ZGC");
+    expect(JSON.stringify(dashboard)).not.toContain("Spring 事务");
   });
 
-  it("counts oral evidence records for today tasks", () => {
+  it("counts oral evidence records for generated tasks", () => {
     const evidenceByTaskId: Record<string, ReviewEvidence[]> = {
-      "2026-07-02-1400-java": [
+      [qaTaskIds.interview]: [
         {
           id: "oral-1",
-          taskId: "2026-07-02-1400-java",
+          taskId: qaTaskIds.interview,
           type: "oral_score",
           title: "口述训练证据",
-          content: "已完成本地口述",
+          content: "已完成 Mock 服务边界口述。",
           createdAt: "2026-07-02T14:10:00+08:00",
           verified: true
         }
       ]
     };
-    const sprint = buildTodaySprint(getScheduleData(), fixedNow, { completed: {}, evidenceByTaskId, syncState: "local_fallback" });
+    const sprint = buildQaSprint({ evidenceByTaskId });
     const dashboard = buildInterviewDashboard(sprint, evidenceByTaskId);
 
     expect(dashboard.recordCount).toBe(1);
-    expect(dashboard.oralTasks.find((task) => task.id === "2026-07-02-1400-java")?.evidenceCount).toBe(1);
+    expect(dashboard.oralTasks.find((task) => task.id === qaTaskIds.interview)?.evidenceCount).toBe(1);
   });
 
-  it("scores oral answers with local rubric fallback", () => {
-    const evidenceByTaskId: Record<string, ReviewEvidence[]> = {};
-    const sprint = buildTodaySprint(getScheduleData(), fixedNow, { completed: {}, evidenceByTaskId, syncState: "local_fallback" });
-    const dashboard = buildInterviewDashboard(sprint, evidenceByTaskId);
+  it("scores oral answers with the local rubric", () => {
+    const dashboard = buildInterviewDashboard(buildQaSprint(), {});
     const question = dashboard.candidateQuestions[0];
 
     const analysis = scoreOralAnswer(
       dashboard.targetTask!,
       question,
-      "先说结论，G1 和 ZGC 的边界不同。我的项目里会按 JFR、jcmd、GC log、P99 指标和线程池链路排查，再看异常分支、降级和复盘验证。"
+      "先说结论，Mock 服务边界是只模拟外部依赖响应，不替代真实联调。我的证据包括接口用例、缺陷记录、失败恢复、验证指标和复盘下一步。"
     );
 
     expect(analysis.provider).toBe("local_rubric");
@@ -64,25 +62,20 @@ describe("interviewAdapter", () => {
     expect(analysis.nextQuestions).toHaveLength(3);
   });
 
-  it("filters candidate questions by search, category and weak marks", () => {
-    const evidenceByTaskId: Record<string, ReviewEvidence[]> = {};
-    const sprint = buildTodaySprint(getScheduleData(), fixedNow, { completed: {}, evidenceByTaskId, syncState: "local_fallback" });
-    const dashboard = buildInterviewDashboard(sprint, evidenceByTaskId);
+  it("filters generated candidate questions by search and weak marks", () => {
+    const dashboard = buildInterviewDashboard(buildQaSprint(), {});
+    const targetId = `${qaTaskIds.interview}-question-1`;
 
-    expect(interviewQuestionCategories(dashboard.candidateQuestions).map((item) => item.label)).toContain("Java");
+    expect(filterInterviewQuestions(dashboard.candidateQuestions, { query: "Mock" }).map((question) => question.id)).toEqual([targetId]);
 
-    const rabbitQuestions = filterInterviewQuestions(dashboard.candidateQuestions, { query: "RabbitMQ" });
-    expect(rabbitQuestions).toHaveLength(1);
-    expect(rabbitQuestions[0].id).toBe("java-core-003");
-
-    const weakQuestionIds = toggleInterviewWeakQuestion(new Set<string>(), "java-core-003");
+    const weakQuestionIds = toggleInterviewWeakQuestion(new Set<string>(), targetId);
     const weakQuestions = filterInterviewQuestions(dashboard.candidateQuestions, {
-      category: "java-core",
+      category: "current-task",
       weakOnly: true,
       weakQuestionIds
     });
 
-    expect(weakQuestions.map((question) => question.id)).toEqual(["java-core-003"]);
+    expect(weakQuestions.map((question) => question.id)).toEqual([targetId]);
   });
 
   it("persists React weak-question marks without touching legacy mistake storage", () => {
@@ -93,11 +86,12 @@ describe("interviewAdapter", () => {
         items.set(key, value);
       }
     };
+    const targetId = `${qaTaskIds.interview}-question-1`;
 
-    writeInterviewWeakQuestionMarks(new Set(["java-core-003", "java-core-001"]), storage);
+    writeInterviewWeakQuestionMarks(new Set([targetId]), storage);
 
-    expect(readInterviewWeakQuestionMarks(storage)).toEqual(new Set(["java-core-001", "java-core-003"]));
-    expect(items.get(INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY)).toBe(JSON.stringify(["java-core-001", "java-core-003"]));
+    expect(readInterviewWeakQuestionMarks(storage)).toEqual(new Set([targetId]));
+    expect(items.get(INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY)).toBe(JSON.stringify([targetId]));
     expect(items.has("jobSprint.interviewMistakes.v1")).toBe(false);
   });
 });

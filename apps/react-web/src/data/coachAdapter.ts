@@ -170,18 +170,18 @@ export function buildCoachDashboard({
     ? {
         status: "needs_profile" as const,
         label: "需要画像",
-        detail: "先保存一个目标画像，AI 草稿才能引用岗位、城市、时间投入和不可夸大边界。"
+        detail: "先保存求职画像，AI 建议才能引用岗位、城市、时间投入和不可夸大边界。"
       }
     : profileBoundaries.length === 0
       ? {
           status: "needs_boundary" as const,
           label: "需要知识边界",
-          detail: "至少录入一个知识边界，否则 AI 草稿只能给出 unknown 或追问，不能假装了解你。"
+          detail: "至少录入一个知识边界，否则 AI 建议无法贴合你的实际情况。"
         }
       : {
           status: "ready" as const,
-          label: "可生成草稿",
-          detail: "画像和知识边界已具备，AI 草稿会先进入待确认区，接受后才写入日程或边界。"
+          label: "可生成建议",
+          detail: "画像和知识边界已具备，AI 建议会先进入待确认区，接受后才写入日程或边界。"
         };
 
   return {

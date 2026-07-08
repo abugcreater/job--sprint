@@ -145,7 +145,8 @@ function testCurrentRepoPassesArchitectureGate() {
   assert.strictEqual(report.ok, true, JSON.stringify(report, null, 2));
   assert(report.metrics.sourceFileCount > 50);
   assert(report.metrics.semanticBoundaryRuleCount >= 3);
-  assert(report.metrics.largestFiles.some((item) => item.file === "assets/schedule.js"));
+  assert(fs.readFileSync(path.join(repoRoot, "assets/schedule.js"), "utf8").includes("reactTodayPath"));
+  assert(!report.metrics.largestFiles.some((item) => item.file === "assets/schedule.js"));
 }
 
 function testReadinessArchitectureWrapperFailsOnMissingModules() {

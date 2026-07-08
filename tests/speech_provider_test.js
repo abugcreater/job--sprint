@@ -32,7 +32,6 @@ const remoteWebViewController = fs.readFileSync(
 );
 const remotePolicy = fs.readFileSync("apps/android/app/src/main/java/com/kai/jobsprint/RemoteUrlPolicy.java", "utf8");
 const js = fs.readFileSync("assets/schedule.js", "utf8");
-const css = fs.readFileSync("assets/schedule.css", "utf8");
 const manifest = fs.readFileSync("apps/android/app/src/main/AndroidManifest.xml", "utf8");
 
 assert.doesNotMatch(activity, /googlequicksearchbox|GoogleRecognitionService|knownGoogleRecognitionService/);
@@ -78,19 +77,11 @@ assert.match(
   /if \(!wasReadyForSpeech && PHASE_STARTING\.equals\(phaseAtError\)\) \{\s*return 0L;\s*\}/
 );
 
-assert.match(js, /const nativeBridge = window\.AndroidSpeech/);
-assert.match(js, /const recorderBridge = window\.AndroidRecorder/);
-assert.match(js, /setupRecordUploadProvider/);
-assert.match(js, /录音后转写/);
-assert.match(js, /const Recognition = window\.SpeechRecognition \|\| window\.webkitSpeechRecognition/);
-assert.match(js, /当前浏览器没有语音能力；可手动输入/);
-assert.match(js, /appendFinalText\(data\.text \|\| ""\)/);
-assert.match(js, /startCooldownCountdown\(cooldownMs/);
-assert.match(css, /\.primary-btn:disabled/);
-assert.match(css, /cursor: not-allowed/);
-
-const nativeBranchStart = js.indexOf("const nativeBridge = window.AndroidSpeech");
-const webSpeechStart = js.indexOf("const Recognition = window.SpeechRecognition");
-assert.ok(nativeBranchStart >= 0 && webSpeechStart > nativeBranchStart, "Android native provider must be checked before Web Speech");
+assert.match(js, /reactTodayPath/);
+assert.match(js, /window\.location\.replace/);
+assert.doesNotMatch(js, /const nativeBridge = window\.AndroidSpeech/);
+assert.doesNotMatch(js, /const recorderBridge = window\.AndroidRecorder/);
+assert.doesNotMatch(js, /setupRecordUploadProvider/);
+assert.doesNotMatch(js, /const Recognition = window\.SpeechRecognition \|\| window\.webkitSpeechRecognition/);
 
 console.log("speech provider tests passed");

@@ -16,9 +16,9 @@ export function InviteOnboardingReportPanel({
     <article className="command-panel">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
-          <PanelTitle icon={<UsersRound size={18} aria-hidden="true" />} title="邀请批次首登看板" />
+          <PanelTitle icon={<UsersRound size={18} aria-hidden="true" />} title="管理员建档批次看板" />
           <p className="mt-2 text-sm font-semibold leading-6 text-ink-500">
-            按账号数据域和邀请批次查看首登完成、放弃点和风险，避免只看单个用户截图。
+            按账号数据域和批次查看建档完成、放弃点和风险。
           </p>
         </div>
         <button type="button" className="secondary-button min-h-10 px-3" onClick={onRefresh} disabled={status === "loading"}>
@@ -29,15 +29,15 @@ export function InviteOnboardingReportPanel({
 
       {summary ? (
         <div className="mt-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-5">
-          <MetricTile label="邀请用户" value={`${summary.totalUsers} 人`} />
-          <MetricTile label="已开始首登" value={`${summary.startedCount} 人`} />
-          <MetricTile label="已完成首登" value={`${summary.completedCount} 人`} />
+          <MetricTile label="账号数" value={`${summary.totalUsers} 人`} />
+          <MetricTile label="已开始建档" value={`${summary.startedCount} 人`} />
+          <MetricTile label="已完成建档" value={`${summary.completedCount} 人`} />
           <MetricTile label="完成率" value={summary.completionRateLabel} />
           <MetricTile label="最高风险" value={summary.highestRiskLabel} />
         </div>
       ) : (
         <p className="mt-4 rounded-card bg-surface-100 p-4 text-sm font-semibold leading-6 text-ink-500">
-          {status === "error" ? "首登报表读取失败，请稍后刷新。" : status === "loading" ? "正在读取服务端首登报表。" : "服务端报表未连接；本地仍可继续完成首登编排。"}
+          {status === "error" ? "建档报表读取失败，请稍后刷新。" : status === "loading" ? "正在读取服务端建档报表。" : "服务端报表未连接；个人建档仍可继续。"}
         </p>
       )}
 

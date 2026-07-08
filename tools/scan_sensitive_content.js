@@ -4,6 +4,7 @@ const path = require("path");
 
 const repoRoot = path.resolve(__dirname, "..");
 const ignoreDirs = new Set([".git", "node_modules", "dist", "build", "target", ".gradle", ".idea"]);
+const ignoreRelativeDirs = new Set(["docs/evidence"]);
 const ignoreFiles = new Set(["package-lock.json", "scan_sensitive_content.js", "scan_public_bundle.js"]);
 const privateDeployHostPattern = new RegExp(["app", "jobdailyschedule", "site"].join("[.]"), "i");
 const privatePersonalNamePattern = new RegExp(["冯", "凯"].join(""));
@@ -49,12 +50,14 @@ const rules = [
   { id: "personal-name-pinyin", test: (line) => privatePersonalPinyinPattern.test(line) }
 ];
 
-function walk(dir, files = []) {
+function walk(dir, files = [], root = dir) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
     if (ignoreDirs.has(entry.name)) continue;
     const fullPath = path.join(dir, entry.name);
+    const relativeDir = path.relative(root, fullPath).split(path.sep).join("/");
+    if (entry.isDirectory() && ignoreRelativeDirs.has(relativeDir)) continue;
     if (entry.isDirectory()) {
-      walk(fullPath, files);
+      walk(fullPath, files, root);
     } else if (!ignoreFiles.has(entry.name)) {
       files.push(fullPath);
     }

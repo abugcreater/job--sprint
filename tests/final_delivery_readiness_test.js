@@ -4,6 +4,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
+const { deliveryCommands } = require("../tools/delivery_action_commands");
 const { evaluateReadiness } = require("../tools/validate_final_delivery_readiness");
 
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "job-sprint-release-readiness-"));
@@ -25,11 +26,9 @@ const serverSyncEvidenceTool = fs.readFileSync("tools/write_server_sync_evidence
 const remoteHttpScript = fs.readFileSync("tools/remote_job_sprint_check.sh", "utf8");
 const remoteHttpsScript = fs.readFileSync("tools/remote_https_job_sprint_check.sh", "utf8");
 const fakeSensitiveValue = ["password", "that", "should", "not", "leak"].join("-");
-
 function sha256File(file) {
   return crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex");
 }
-
 for (const required of [
   "public_safe_bundle",
   "build-manifest.json",
@@ -279,7 +278,7 @@ const remote = report.checks.find((check) => check.id === "server_remote_accepta
 assert(["USER_ACTION_REQUIRED", "FAIL"].includes(remote.status));
 assert(["remote_base_url_missing", "server_remote_acceptance_evidence_file_missing"].includes(remote.reason));
 if (remote.status === "USER_ACTION_REQUIRED") {
-  assert(remote.requiredInputs.some((item) => item.includes("write:remote-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env")));
+  assert(remote.requiredInputs.some((item) => item.includes(deliveryCommands.serverRemote)));
 } else {
   assert(remote.evidence.includes("missing-server-remote.json"));
 }
@@ -303,7 +302,8 @@ assert.strictEqual(architectureQuality.status, "PASS");
 assert.ok(architectureQuality.sourceFileCount > 50);
 assert.ok(architectureQuality.requiredFileCount >= 50);
 assert.ok(architectureQuality.semanticBoundaryRuleCount >= 3);
-assert.ok(architectureQuality.largestFiles.some((item) => item.file === "assets/schedule.js"));
+assert.ok(!architectureQuality.largestFiles.some((item) => item.file === "assets/schedule.js"));
+assert.ok(fs.readFileSync("assets/schedule.js", "utf8").includes("reactTodayPath"));
 
 const functionalCoverage = report.checks.find((check) => check.id === "functional_coverage");
 assert.strictEqual(functionalCoverage.status, "PASS");
@@ -640,7 +640,7 @@ assert.ok(invalidServerEvidenceCheck.issues.some((issue) => issue.includes("api_
 const signing = report.checks.find((check) => check.id === "android_formal_signing_env");
 assert.strictEqual(signing.status, "USER_ACTION_REQUIRED");
 assert.ok(signing.missing.includes("JOB_SPRINT_ANDROID_KEYSTORE"));
-assert(signing.requiredInputs.some((item) => item.includes("build:android:release -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env")));
+assert(signing.requiredInputs.some((item) => item.includes(deliveryCommands.formalRelease)));
 assert.ok(!result.stdout.includes("password-that-should-not-leak"));
 
 const releaseVerification = report.checks.find((check) => check.id === "android_formal_release_verification");
