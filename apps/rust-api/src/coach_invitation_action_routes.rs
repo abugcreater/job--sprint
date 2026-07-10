@@ -88,8 +88,9 @@ pub(crate) async fn update_invitation_batch_status_response(
 pub(crate) async fn update_invitation_account_status_response(
     state: &AppState,
     payload: &Value,
+    current_username: &str,
 ) -> Response {
-    let account_action = match update_user_account_status(payload) {
+    let account_action = match update_user_account_status(payload, current_username) {
         Ok(value) => value,
         Err((status, value)) => {
             return json_response(
@@ -113,8 +114,9 @@ pub(crate) async fn update_invitation_account_status_response(
 pub(crate) async fn update_invitation_account_batch_status_response(
     state: &AppState,
     payload: &Value,
+    current_username: &str,
 ) -> Response {
-    let account_batch_action = match update_user_account_batch_status(payload) {
+    let account_batch_action = match update_user_account_batch_status(payload, current_username) {
         Ok(value) => value,
         Err((status, value)) => {
             return json_response(

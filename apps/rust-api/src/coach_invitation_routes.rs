@@ -7,13 +7,15 @@ use axum::{
 use serde_json::{Value, json};
 
 use crate::AppState;
-use crate::auth_account_actions::user_accounts_for_management;
+use crate::auth_account_actions::{
+    account_audit_events_for_management, user_accounts_for_management,
+};
 use crate::auth_account_store::{
     account_provisioning_capability, provision_user_account_from_invitation,
 };
 use crate::auth_config::UserConfig;
 use crate::auth_config::get_auth_config;
-use crate::auth_state::{now_millis, require_auth, require_permission};
+use crate::auth_state::{now_millis, require_auth, require_permission, user_username};
 use crate::coach_invitations::{
     coach_invitation_from_payload, list_coach_invitations, summarize_coach_invitations,
     upsert_coach_invitation,
@@ -57,13 +59,17 @@ pub(crate) async fn record_coach_invitation(
     };
     if payload.get("operation").and_then(Value::as_str) == Some("account-status") {
         return crate::coach_invitation_action_routes::update_invitation_account_status_response(
-            &state, &payload,
+            &state,
+            &payload,
+            &user_username(&auth),
         )
         .await;
     }
     if payload.get("operation").and_then(Value::as_str) == Some("account-batch-status") {
         return crate::coach_invitation_action_routes::update_invitation_account_batch_status_response(
-            &state, &payload,
+            &state,
+            &payload,
+            &user_username(&auth),
         )
         .await;
     }
@@ -102,10 +108,10 @@ pub(crate) async fn record_coach_invitation(
             .is_some();
     let mut account_provisioning = account_provisioning_capability();
     if should_provision {
-        match provision_user_account_from_invitation(&merge_invitation_payload(
-            &payload,
-            &invitation,
-        )) {
+        match provision_user_account_from_invitation(
+            &merge_invitation_payload(&payload, &invitation),
+            &user_username(&auth),
+        ) {
             Ok(result) => {
                 account_provisioning = result;
                 invitation["status"] = Value::String("active".to_string());
@@ -146,6 +152,7 @@ pub(crate) fn response_value(users: &[UserConfig], invitations: Vec<Value>) -> V
         "storage": "sqlite",
         "invitations": invitations,
         "configuredUsers": configured_users(users),
+        "accountAuditEvents": account_audit_events_for_management(),
         "summary": summary,
         "accountProvisioning": account_provisioning_capability()
     })

@@ -9,6 +9,7 @@ mod app_bootstrap;
 mod app_schema;
 mod app_schema_boundary_feedback;
 mod application_routes;
+mod auth_account_audit;
 mod auth_account_actions;
 mod auth_account_batch_actions;
 mod auth_account_store;

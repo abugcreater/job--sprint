@@ -163,6 +163,14 @@ pub(crate) fn user_data_scope(auth_state: &AuthState) -> String {
         .unwrap_or_else(|| get_auth_config().data_owner)
 }
 
+pub(crate) fn user_username(auth_state: &AuthState) -> String {
+    auth_state
+        .user_profile
+        .as_ref()
+        .map(|user| user.username.clone())
+        .unwrap_or_else(|| get_auth_config().data_owner)
+}
+
 pub(crate) fn now_millis() -> i64 {
     SystemTime::now()
         .duration_since(UNIX_EPOCH)
