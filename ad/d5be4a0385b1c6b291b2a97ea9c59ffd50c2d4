@@ -1,0 +1,55 @@
+docs/README.md
+  s_8f6b4df0c955b0::t_7c263271900f22 23
+docs/product/product-ops/daily-product-iteration.md
+  s_8f6b4df0c955b0::t_7c263271900f22 3,22,32-37,66-67,73,95,103-104,106,124
+docs/product/product-ops/gitflow-development-governance.md
+  s_8f6b4df0c955b0::t_2174e2bf8d81c3 1-175
+tests/product_iteration_workflow_test.js
+  s_8f6b4df0c955b0::t_417291a9a67507 27,182
+  s_8f6b4df0c955b0::t_92513d82095d0f 30-32,78-79,85-115,201-219,254-255,260
+  s_8f6b4df0c955b0::t_5b84175011cb78 22
+.github/workflows/gitflow-policy.yml
+  s_8f6b4df0c955b0::t_2174e2bf8d81c3 1-32
+docs/product/product-ops/README.md
+  s_8f6b4df0c955b0::t_7c263271900f22 3,13,20,24
+CONTRIBUTING.md
+  s_8f6b4df0c955b0::t_2174e2bf8d81c3 1,3,5,7-25,28-29,33,35,37-43,45
+package.json
+  s_8f6b4df0c955b0::t_92513d82095d0f 55-58
+  s_8f6b4df0c955b0::t_26162b8d274a9f 54
+.github/pull_request_template.md
+  s_8f6b4df0c955b0::t_2174e2bf8d81c3 1-34
+docs/product/product-ops/requirement-development-template.md
+  s_8f6b4df0c955b0::t_7c263271900f22 3,33-35,50-51,64,85-87,104,109-119,182,192-194,499,501-502,504-508,515-516,520,533,535,568-569,581-582
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_417291a9a67507 24
+tests/gitflow_policy_test.js
+  s_8f6b4df0c955b0::t_4c0f64ecf234cd 1-125
+docs/product/README.md
+  s_8f6b4df0c955b0::t_7c263271900f22 16,22
+tools/validate_gitflow_policy.js
+  s_8f6b4df0c955b0::t_28d0f1687fe541 1-175
+tools/validate_product_iteration_workflow.js
+  s_8f6b4df0c955b0::t_5b84175011cb78 229
+  s_8f6b4df0c955b0::t_92513d82095d0f 46-66,234,248-253
+AGENTS.md
+  s_8f6b4df0c955b0::t_7c263271900f22 55-69
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_417291a9a67507 33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "add5be4a0385b1c6b291b2a97ea9c59ffd50c2d4",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
