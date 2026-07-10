@@ -41,6 +41,31 @@ const docChecks = [
     tokens: ["current_thread_quarantine=true", "TEAM_ROOM_PARTIAL", "不能标 `TEAM_ROOM_PASS`"]
   },
   {
+    id: "requirement_development_template_reusable",
+    file: "docs/product/product-ops/requirement-development-template.md",
+    tokens: ["# 需求开发复用模板", "复制入口", "标准需求卡", "GitFlow", "工作分支", "数据隔离清单", "UI/UX 实现约束", "分层验收命令", "最终报告模板"]
+  },
+  {
+    id: "gitflow_development_governance",
+    file: "docs/product/product-ops/gitflow-development-governance.md",
+    tokens: ["# GitFlow 开发与版本治理规范", "main", "develop", "Conventional Commits", "release/vX.Y.Z", "hotfix/", "npm run validate:gitflow", "普通需求 PR 使用 squash merge"]
+  },
+  {
+    id: "gitflow_contributing_entry",
+    file: "CONTRIBUTING.md",
+    tokens: ["轻量 GitFlow", "main", "develop", "type(scope): description", "npm run validate:gitflow"]
+  },
+  {
+    id: "gitflow_pull_request_template",
+    file: ".github/pull_request_template.md",
+    tokens: ["需求/Issue", "目标分支", "GitFlow", "npm run scan:sensitive", "回滚方式"]
+  },
+  {
+    id: "gitflow_github_action",
+    file: ".github/workflows/gitflow-policy.yml",
+    tokens: ["name: GitFlow Policy", "pull_request:", "validate_gitflow_policy.js", "GITFLOW_PR_TITLE", "gitflow_policy_test.js"]
+  },
+  {
     id: "completion_audit_scope",
     file: "docs/product/it-job-coach-v1/completion-audit.md",
     tokens: ["PASS_WITH_LIMITS", "当前团队工作是 `TEAM_ROOM_PARTIAL`", "远端真实 LLM provider evidence", "Android 远端 HTTPS evidence"]
@@ -201,16 +226,24 @@ function validateProductIterationWorkflow(root = repoRoot) {
   requireScriptContains(root, findings, "test", [
     "npm --prefix apps/react-web run typecheck",
     "npm --prefix apps/react-web test",
+    "node tests/gitflow_policy_test.js",
     "node tests/product_iteration_workflow_test.js"
   ]);
   requireScriptContains(root, findings, "test:release", [
     "npm test",
+    "npm run test:gitflow",
     "npm run test:local-functional",
     "npm run build:rust:linux",
     "npm run build:server-delivery"
   ]);
   requireScriptContains(root, findings, "validate:product-iteration", [
     "node tools/validate_product_iteration_workflow.js"
+  ]);
+  requireScriptContains(root, findings, "validate:gitflow", [
+    "node tools/validate_gitflow_policy.js"
+  ]);
+  requireScriptContains(root, findings, "test:gitflow", [
+    "node tests/gitflow_policy_test.js"
   ]);
   validateCoachEvidence(root, findings, warnings);
 

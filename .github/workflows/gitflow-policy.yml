@@ -1,0 +1,32 @@
+name: GitFlow Policy
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Validate branch, base, and PR title
+        env:
+          GITFLOW_PR_TITLE: ${{ github.event.pull_request.title }}
+        run: >-
+          node tools/validate_gitflow_policy.js
+          --phase pr
+          --branch "$GITHUB_HEAD_REF"
+          --base "$GITHUB_BASE_REF"
+
+      - name: Test GitFlow policy
+        run: node tests/gitflow_policy_test.js

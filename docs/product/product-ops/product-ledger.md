@@ -21,6 +21,7 @@
 
 | 日期 | 决策 | 理由 | 取舍 |
 |---|---|---|---|
+| 2026-07-10 | 所有新需求统一采用轻量 GitFlow，并以脚本、PR 模板和 CI 门禁强制执行。 | 当前项目已经进入持续迭代和 GitHub 协作阶段，仅靠口头约定无法阻止直接提交稳定分支、错误 PR 目标、混合提交和发布分支失控。 | `main` 只承载可发布版本，`develop` 承载日常集成；普通需求从 `develop` 创建 `feature/fix/refactor/docs/chore/test/spike` 分支并通过 squash PR 回到 `develop`，`release/*` 与 `hotfix/*` 才能进入 `main`，hotfix 必须回同步 `develop`；新增 `validate:gitflow`、`test:gitflow`、GitHub Actions 和 PR 清单。`develop` 已从 `main` 初始化，`main/develop` 的远端保护需以 ruleset 实际启用结果为准。 |
 | 2026-07-06 | 选择“AI 原生求职教练叙事 + 收敛 MVP 工程边界”。 | 用户需要从个人工具扩展到泛 IT 求职者，吸引力来自个性化建议而非普通日程。 | 不做公开注册、组织租户、自动投递和自动 agent。 |
 | 2026-07-06 | AI 建议必须是草稿，不能直接改正式数据。 | 降低幻觉和误改日程风险。 | 用户需要多一步接受/拒绝操作。 |
 | 2026-07-06 | Java 后端保留为示例路径，不再作为产品主定位。 | 用户个人路径仍有价值，但产品主身份要面向泛 IT 求职者。 | 知识库中仍会保留部分 Java 示例，后续按角色族扩展。 |
