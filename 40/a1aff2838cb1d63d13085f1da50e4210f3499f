@@ -1,0 +1,162 @@
+apps/server/auth_account_audit_store.js
+  s_8f6b4df0c955b0::t_c85b8a8b5fc637 1-86
+apps/rust-api/tests/runtime_contract/invitation_account.rs
+  s_8f6b4df0c955b0::t_9c0f95965bbff3 117-119,217-218,311-313,400-401,419-434
+tests/invitation_account_provisioning_test.js
+  s_8f6b4df0c955b0::t_b827cc47a07575 166-168,216-217,232-233,288-290,323-324,337-345
+apps/react-web/src/features/admin/AdminPage.tsx
+  s_8f6b4df0c955b0::t_de6c92495f4762 2,72,75,81,84,93-100,102-107,109,118,121,126,128-129,142-143
+  s_8f6b4df0c955b0::t_e14f661d883e53 1,11-12,18,56-67,69-71,73-74,76-80,82-83,85-88,92,101,110,115-117,119-120,122-125,127,130-141,144-150
+  s_8f6b4df0c955b0::t_79f2348b6569ad 108
+  s_8f6b4df0c955b0::t_175658ff771479 151-152
+apps/server/auth_account_batch_store.js
+  s_8f6b4df0c955b0::t_40ba0b1fe31c79 7-10
+  s_8f6b4df0c955b0::t_72739a062492dd 59-74,92-94
+  s_8f6b4df0c955b0::t_f6a6bb57e12df0 95-96
+apps/react-web/src/features/coach/components/InviteManagementFilters.tsx
+  s_8f6b4df0c955b0::t_633f582dc04cbc 88
+  s_8f6b4df0c955b0::t_7312f2f7483a56 1-87,89-147
+apps/react-web/src/features/coach/components/InviteOnboardingReportPanel.tsx
+  s_8f6b4df0c955b0::t_a9a21af3560905 2,6-8,18-22,24-43,73-103,105,119-126,128-131,134,136,149-156,158-161,166-177
+  s_8f6b4df0c955b0::t_5ed0f73d83bd71 109
+apps/rust-api/src/auth_state.rs
+  s_8f6b4df0c955b0::t_82dd1421645d5e 166-173
+apps/react-web/src/test/InviteManagementPanel.test.tsx
+  s_8f6b4df0c955b0::t_1640cb77f3dfc7 2-3,6-7,10-14,18-55,121-123,126-151,335-336
+  s_8f6b4df0c955b0::t_8be503fc862f3a 56-99,152-175
+  s_8f6b4df0c955b0::t_222677bc4469ae 4-5
+  s_8f6b4df0c955b0::t_11ec41a951348f 1,9,16-17,100-120,125,247-334
+  s_8f6b4df0c955b0::t_3ef35350c1b307 8,15,124,176-177,206-246
+  s_8f6b4df0c955b0::t_c6d29133ff6527 178-205
+apps/rust-api/src/coach_invitation_action_routes.rs
+  s_8f6b4df0c955b0::t_9d4bea56760907 91,93,117,119
+apps/react-web/src/features/coach/components/inviteManagementOnboarding.ts
+  s_8f6b4df0c955b0::t_aad7df78e05732 1-15
+apps/react-web/src/features/coach/components/inviteManagementDraft.ts
+  s_8f6b4df0c955b0::t_0cf0375d999400 1-44
+apps/react-web/src/features/coach/components/InviteManagementPanel.tsx
+  s_8f6b4df0c955b0::t_02c3c25cc7fd0c 28,288,324-351
+  s_8f6b4df0c955b0::t_2e08a240e23c1e 523,535-536,541-546,548-550
+  s_8f6b4df0c955b0::t_5845f7b4ef3eb7 48
+  s_8f6b4df0c955b0::t_12851b7e7f714a 323,352-378
+  s_8f6b4df0c955b0::t_9505f56548c301 33,219,224,226,232
+  s_8f6b4df0c955b0::t_99cf8042d2ae13 22,34,36,297
+  s_8f6b4df0c955b0::t_76efb840dff314 220-221,233-234
+  s_8f6b4df0c955b0::t_05028750e4ea39 2,50,210-217,229-230,547
+  s_8f6b4df0c955b0::t_abd9cda1d7485e 1,29
+  s_8f6b4df0c955b0::t_62fd3939227d7a 289-293
+  s_8f6b4df0c955b0::t_8512baef010b27 27,49,218,231,510-517,524-534,537
+  s_8f6b4df0c955b0::t_9b49f803ab3341 222-223,225,227-228
+  s_8f6b4df0c955b0::t_a481491e9b6320 15,31,43,47,154,294-296,382-412
+  s_8f6b4df0c955b0::t_8fc61837489c60 17
+  s_8f6b4df0c955b0::t_ede064419a7830 551
+apps/rust-api/src/coach_invitation_routes.rs
+  s_8f6b4df0c955b0::t_ea1f31b3589f30 62-64,70-72
+  s_8f6b4df0c955b0::t_ee01fff88bc3b2 10-12,18,111-114,155
+apps/react-web/src/api/coachInvitationExport.ts
+  s_8f6b4df0c955b0::t_f56b7fd095a80d 1-28
+apps/rust-api/src/lib.rs
+  s_8f6b4df0c955b0::t_49695bb5e9cf74 12
+apps/react-web/src/api/coachInvitationClient.ts
+  s_8f6b4df0c955b0::t_51d0db27486a99 31-47,96
+  s_8f6b4df0c955b0::t_cda0a0aafef9a9 2
+apps/react-web/src/features/coach/components/InviteManagementLedger.tsx
+  s_8f6b4df0c955b0::t_734b4ba0b37b7c 109,212
+  s_8f6b4df0c955b0::t_5f03967935a85c 250
+  s_8f6b4df0c955b0::t_153f2b07adad3b 96-99,101,105,108,111,113-117,119-120,122-183,185-186
+  s_8f6b4df0c955b0::t_82878dd4f717ac 74,207-209,213,215-216,229-232,237-249,251-272,279-287
+  s_8f6b4df0c955b0::t_02274619835cf7 15-19,33-54,73
+  s_8f6b4df0c955b0::t_eb326519d97fbd 31-32,67-69,86-88,100,102,106,118,203-206,210,220,274-275
+  s_8f6b4df0c955b0::t_a52d899d64988e 1-14,20-26,29-30,55-66,70-72,75-85,89-95,103-104,112,121,184,187-189,199-202,217-219,221-228,233-236,273,276-278,288-295
+  s_8f6b4df0c955b0::t_4e06366f6d362c 190-198
+  s_8f6b4df0c955b0::t_d2284b50de4477 27-28,107,110,211,214
+apps/react-web/src/features/coach/components/inviteManagementTimeline.ts
+  s_8f6b4df0c955b0::t_54213f8584fe24 92-112,120-121,128,135-137,139-140,181-183,186
+  s_8f6b4df0c955b0::t_da75d3ed31902e 1,3-16,27-62,149-178,184-185,187-189,191-195,197-210
+  s_8f6b4df0c955b0::t_aa5dc567202bb7 17-26,82-91,113-114,117-119,122-123,127,129-134,138,180
+  s_8f6b4df0c955b0::t_ab8c9774afc0c1 2,63-80,115-116,124-126,141-148,179,190,196
+  s_8f6b4df0c955b0::t_754a025e807ebb 81
+apps/react-web/src/test/InviteManagementDetailPanel.test.tsx
+  s_8f6b4df0c955b0::t_ba96ef959f2f8f 32-33,114-127,144-145,264,271
+  s_8f6b4df0c955b0::t_5313ff212a8209 328
+  s_8f6b4df0c955b0::t_7084abdad48c4b 2-3,5-7,9-13,16-31,146-158,160-174,235-237,239-242,244,246,248-251,253,255-257,321-327,334,336,339-340
+  s_8f6b4df0c955b0::t_96b13ad7d2091e 1,8,14-15,66-81,128-143,238,243,266,276-282,284-288,291,296-297,311-320
+  s_8f6b4df0c955b0::t_65b9b33d81fcc0 338
+  s_8f6b4df0c955b0::t_b8a94ba6b2a478 4,175-206,220-234,245,258-262
+  s_8f6b4df0c955b0::t_732a19328234a6 252,335,337
+  s_8f6b4df0c955b0::t_9aae50396de143 34-65,82-113,265,269-270,273,283,289-290,292-295
+  s_8f6b4df0c955b0::t_a820ebafa1f0e3 329
+  s_8f6b4df0c955b0::t_300432d59464a1 254
+  s_8f6b4df0c955b0::t_153fcab2b5f762 247
+  s_8f6b4df0c955b0::t_c8e9b5b51e9aa8 272
+  s_8f6b4df0c955b0::t_efa1fdf2d391f4 159,207-219,263,267-268,274-275,330-333
+  s_8f6b4df0c955b0::t_567a70d05f0d95 298-310
+apps/react-web/src/test/InviteOnboardingReportPanel.test.tsx
+  s_8f6b4df0c955b0::t_2007ba1d504eab 1-41,44-50,52-56,60-107
+  s_8f6b4df0c955b0::t_88cde9ff217412 42-43,51,57-59
+apps/rust-api/src/auth_account_store.rs
+  s_8f6b4df0c955b0::t_628bb57eab0355 5-6,8
+  s_8f6b4df0c955b0::t_4afad2cd928127 7,41,122-136
+  s_8f6b4df0c955b0::t_d79c8aea4351a0 101
+apps/react-web/src/test/InviteManagementBatchAccountActions.test.tsx
+  s_8f6b4df0c955b0::t_a481491e9b6320 1-112
+apps/rust-api/src/auth_account_audit.rs
+  s_8f6b4df0c955b0::t_e6717875138578 1-166
+apps/rust-api/src/auth_account_batch_actions.rs
+  s_8f6b4df0c955b0::t_d45918261f95cb 66-70
+  s_8f6b4df0c955b0::t_235472adbe55d0 117,119,202-204
+  s_8f6b4df0c955b0::t_aab10dbed9599a 6-7,9
+  s_8f6b4df0c955b0::t_d6962fa0ecbf58 8,15,34,54,82-99,113-116,118,198-201
+  s_8f6b4df0c955b0::t_93658c2b0cb622 120-121
+  s_8f6b4df0c955b0::t_86fb0e76e7b556 205-206
+docs/core/04-acceptance-and-risk.md
+  s_8f6b4df0c955b0::t_880fa19907078f 27
+apps/rust-api/src/auth_account_actions.rs
+  s_8f6b4df0c955b0::t_dd48cffef61064 44-57
+  s_8f6b4df0c955b0::t_7ce47690e2db1c 8,58-61,87,90-94,96,133-147
+  s_8f6b4df0c955b0::t_5c88bec8a0fbc2 116-117
+  s_8f6b4df0c955b0::t_710cbe971955bc 6-7,9
+apps/server/auth_account_store.js
+  s_8f6b4df0c955b0::t_72313fbe40e945 36,38-39
+  s_8f6b4df0c955b0::t_8e625da1fc6e9b 40,96-107,187-198,232-240,292-293,347
+  s_8f6b4df0c955b0::t_cc65ea851ee066 4-8,37
+apps/react-web/src/test/AdminPage.test.tsx
+  s_8f6b4df0c955b0::t_182510524222e3 32,40
+  s_8f6b4df0c955b0::t_e14f661d883e53 1-22,24-31,33-39,41-44
+  s_8f6b4df0c955b0::t_72f918c9466116 23
+apps/server/coach_invitations_routes.js
+  s_8f6b4df0c955b0::t_3edc82348eaed4 3,118,320
+apps/react-web/src/features/coach/components/inviteManagementBatchActions.ts
+  s_8f6b4df0c955b0::t_222677bc4469ae 3-15,46
+  s_8f6b4df0c955b0::t_a481491e9b6320 1-2,16-45
+apps/react-web/src/features/coach/components/InviteManagementDetailPanel.tsx
+  s_8f6b4df0c955b0::t_819cf9cc2e8106 9,25,57,61-93,385,421
+  s_8f6b4df0c955b0::t_f1311557c7f0ff 27,29,140-141,146-147,153,159,161-183,307-316,387-393
+  s_8f6b4df0c955b0::t_4c82697892bab5 58-60
+  s_8f6b4df0c955b0::t_d47ef4342105e3 2
+  s_8f6b4df0c955b0::t_6aecb722beae57 5,24,213,239-241,386,422
+  s_8f6b4df0c955b0::t_60739dab323321 217-219,222
+  s_8f6b4df0c955b0::t_bcf836b88dc6fc 336,338,343-345,366
+  s_8f6b4df0c955b0::t_323804716a622e 233-238,242-243,286-296,303-306
+  s_8f6b4df0c955b0::t_bb3f00aac48ef2 11-16,94-112,209-212,214,223-224,227,230-231,244,246-253,258-263,277-282,302
+  s_8f6b4df0c955b0::t_2afbbad6801473 4,26,30,33-34,113-139,142-145,148-152,154-158,160,184-192,194-208,215-216,220-221,225-226,228-229,232,245,254-257,264-276,283-285,297-301
+  s_8f6b4df0c955b0::t_abcccb634f7448 3,6-8,10,17-23,28,31-32,35-56,335,361-364,369-384,394-396,400-420,425,428-429
+  s_8f6b4df0c955b0::t_75b5bcce6b47bf 193
+  s_8f6b4df0c955b0::t_3fd6316a26e8dc 1,317-334,337,339-342,346-360,365,367-368,397-399,423-424,426-427
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "40a1aff2838cb1d63d13085f1da50e4210f3499f",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
