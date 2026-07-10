@@ -48,11 +48,13 @@ describe("React Job Sprint interview workspace", () => {
     render(<App />);
 
     expect(await screen.findByRole("heading", { name: "面试训练" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "今日口述任务" })).toBeInTheDocument();
-    expect(screen.getAllByText("练 Mock 服务边界 60 秒回答").length).toBeGreaterThan(0);
-    expect(screen.getByLabelText("我的口述回答")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "AI评分并生成复盘" })).toBeInTheDocument();
-  });
+	    expect(screen.getByRole("heading", { name: "今日口述任务" })).toBeInTheDocument();
+	    expect(screen.getAllByText("练 Mock 服务边界 60 秒回答").length).toBeGreaterThan(0);
+	    expect(screen.getByLabelText("我的口述回答")).toBeInTheDocument();
+	    expect(screen.getByText("先写一段口述回答，才能评分或保存到 Evidence Gate。")).toBeInTheDocument();
+	    expect(screen.getByRole("button", { name: "保存口述与AI分析" })).toBeDisabled();
+	    expect(screen.getByRole("button", { name: "AI评分并生成复盘" })).toBeInTheDocument();
+	  });
 
   it("supports candidate question search, category filter, detail hint and weak-question marks", async () => {
     render(<App />);
@@ -83,12 +85,13 @@ describe("React Job Sprint interview workspace", () => {
   it("records a local oral answer that feeds the today Evidence Gate", async () => {
     render(<App />);
 
-    fireEvent.change(screen.getByLabelText("我的口述回答"), {
-      target: {
-        value: "结论先说，Mock 服务边界要讲清请求入口、异常分支和接口证据。我的项目里会用失败样例、质量指标和复盘记录证明边界，不夸大线上所有权，下一步补恢复验证。"
-      }
-    });
-    fireEvent.click(screen.getByRole("button", { name: "AI评分并生成复盘" }));
+	    fireEvent.change(screen.getByLabelText("我的口述回答"), {
+	      target: {
+	        value: "结论先说，Mock 服务边界要讲清请求入口、异常分支和接口证据。我的项目里会用失败样例、质量指标和复盘记录证明边界，不夸大线上所有权，下一步补恢复验证。"
+	      }
+	    });
+	    expect(screen.getByText("保存会写入当前面试任务的 Evidence Gate；AI 评分会一起进入复盘证据。")).toBeInTheDocument();
+	    fireEvent.click(screen.getByRole("button", { name: "AI评分并生成复盘" }));
 
     expect(await screen.findByLabelText("AI评分结果")).toHaveTextContent("自检评分");
     expect(screen.getByText("AI 不可用，已按本地 rubric 给出自检结果。")).toBeInTheDocument();

@@ -49,10 +49,13 @@ export function InterviewPage() {
       }),
     [dashboard.candidateQuestions, questionCategory, questionQuery, weakOnly, weakQuestionIds]
   );
-  const activeQuestionId = filteredQuestions.some((question) => question.id === selectedQuestionId)
-    ? selectedQuestionId
-    : filteredQuestions[0]?.id ?? dashboard.candidateQuestions[0]?.id;
-  const activeQuestion = findInterviewQuestion(dashboard.candidateQuestions, activeQuestionId);
+	  const activeQuestionId = filteredQuestions.some((question) => question.id === selectedQuestionId)
+	    ? selectedQuestionId
+	    : filteredQuestions[0]?.id ?? dashboard.candidateQuestions[0]?.id;
+	  const activeQuestion = findInterviewQuestion(dashboard.candidateQuestions, activeQuestionId);
+	  const answerActionHint = !dashboard.targetTask ? "当前没有可绑定的面试任务，请先回到今日页生成口述行动。"
+	    : !activeQuestion ? "当前没有可保存的候选题，请先选择或重置题目筛选。"
+	      : !answer.trim() ? "先写一段口述回答，才能评分或保存到 Evidence Gate。" : "保存会写入当前面试任务的 Evidence Gate；AI 评分会一起进入复盘证据。";
 
   const handleAnswerChange = useCallback((value: string) => {
     setAnswer(value);
@@ -124,23 +127,17 @@ export function InterviewPage() {
     <main className="app-main">
       <section className="app-page">
         <header className="command-card p-4 md:p-5">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">口述训练 · 证据优先</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <MessageCircleQuestion size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">面试训练</h1>
-              </div>
-              <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                先写一版 60 秒回答，再标记薄弱题；今日追问、题库和本地记录都服务于 Evidence Gate。
-              </p>
+          <div className="max-w-3xl">
+            <p className="text-sm font-black text-brand-700">口述训练 · 证据优先</p>
+            <div className="mt-2 flex items-center gap-3">
+              <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
+                <MessageCircleQuestion size={22} aria-hidden="true" />
+              </span>
+              <h1 className="text-3xl font-black leading-tight md:text-4xl">面试训练</h1>
             </div>
-            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
-              <span className="text-xs font-black text-ink-500">集中统计</span>
-              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看口述任务、候选题目和本地记录</span>
-            </Link>
+            <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
+              先写一版 60 秒回答，再标记薄弱题；今日追问、题库和本地记录都服务于 Evidence Gate。
+            </p>
           </div>
         </header>
 
@@ -156,13 +153,14 @@ export function InterviewPage() {
               question={activeQuestion}
               answer={answer}
               onAnswerChange={handleAnswerChange}
-              onRecord={handleRecord}
-              onScore={handleScore}
-              disabled={!dashboard.targetTask || !activeQuestion || !answer.trim()}
-              analysis={scoreAnalysis}
-              scoreFeedback={scoreFeedback}
-              rubricDimensions={dashboard.rubricDimensions}
-              weak={Boolean(activeQuestion && weakQuestionIds.has(activeQuestion.id))}
+	              onRecord={handleRecord}
+	              onScore={handleScore}
+	              disabled={!dashboard.targetTask || !activeQuestion || !answer.trim()}
+	              actionHint={answerActionHint}
+	              analysis={scoreAnalysis}
+	              scoreFeedback={scoreFeedback}
+	              rubricDimensions={dashboard.rubricDimensions}
+	              weak={Boolean(activeQuestion && weakQuestionIds.has(activeQuestion.id))}
               onToggleWeak={toggleWeakQuestion}
             />
             <QuestionPicker
@@ -392,29 +390,33 @@ function AnswerPanel({
   question,
   answer,
   onAnswerChange,
-  onRecord,
-  onScore,
-  disabled,
-  analysis,
-  scoreFeedback,
-  rubricDimensions,
-  weak,
+	  onRecord,
+	  onScore,
+	  disabled,
+	  actionHint,
+	  analysis,
+	  scoreFeedback,
+	  rubricDimensions,
+	  weak,
   onToggleWeak
 }: {
   question?: InterviewQuestionOption;
   answer: string;
   onAnswerChange: (value: string) => void;
-  onRecord: () => void;
-  onScore: () => void;
-  disabled: boolean;
-  analysis?: OralScoreAnalysis;
-  scoreFeedback: string;
-  rubricDimensions: string[];
-  weak: boolean;
-  onToggleWeak: (questionId: string) => void;
-}) {
-  return (
-    <section className="command-panel border-l-4 border-l-brand-700" aria-labelledby="answer-panel-title">
+	  onRecord: () => void;
+	  onScore: () => void;
+	  disabled: boolean;
+	  actionHint: string;
+	  analysis?: OralScoreAnalysis;
+	  scoreFeedback: string;
+	  rubricDimensions: string[];
+	  weak: boolean;
+	  onToggleWeak: (questionId: string) => void;
+	}) {
+	  const actionHintId = "interview-answer-action-hint";
+
+	  return (
+	    <section className="command-panel border-l-4 border-l-brand-700" aria-labelledby="answer-panel-title">
       <div className="flex items-center gap-2 text-brand-700">
         <PenLine size={18} aria-hidden="true" />
         <h2 id="answer-panel-title" className="text-base font-black text-ink-900">
@@ -434,25 +436,30 @@ function AnswerPanel({
           value={answer}
           onChange={(event) => onAnswerChange(event.target.value)}
           placeholder="先写一版 60 秒口述稿：背景、职责、链路、异常分支、边界和证据。"
-        />
-      </label>
+	        />
+	      </label>
+	      <p id={actionHintId} className="mt-3 rounded-control bg-surface-0 px-3 py-2 text-sm font-bold leading-6 text-ink-500" role="status" aria-live="polite">
+	        {actionHint}
+	      </p>
 
-      <div className="mt-4 flex flex-wrap gap-2">
-        <button
-          type="button"
-          className="primary-button disabled:bg-ink-400"
-          disabled={disabled}
-          onClick={onRecord}
-        >
+	      <div className="mt-4 flex flex-wrap gap-2">
+	        <button
+	          type="button"
+	          className="primary-button disabled:bg-ink-400"
+	          disabled={disabled}
+	          aria-describedby={actionHintId}
+	          onClick={onRecord}
+	        >
           <CheckCircle2 size={16} aria-hidden="true" />
           保存口述与AI分析
         </button>
         <button
-          type="button"
-          className="secondary-button disabled:cursor-not-allowed disabled:opacity-45"
-          disabled={disabled}
-          onClick={onScore}
-        >
+	          type="button"
+	          className="secondary-button disabled:cursor-not-allowed disabled:opacity-45"
+	          disabled={disabled}
+	          aria-describedby={actionHintId}
+	          onClick={onScore}
+	        >
           <RefreshCw size={16} aria-hidden="true" />
           AI评分并生成复盘
         </button>

@@ -1,4 +1,4 @@
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardList, Download, Edit3, FileText, Filter, Send, Target, Trash2 } from "lucide-react";
+import { ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardList, Download, Edit3, FileText, Filter, RotateCcw, Send, Target, Trash2, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -26,6 +26,7 @@ export function ApplicationsPage() {
   const addEvidence = useSprintStore((state) => state.addEvidence);
   const updateEvidence = useSprintStore((state) => state.updateEvidence);
   const deleteEvidence = useSprintStore((state) => state.deleteEvidence);
+  const restoreEvidence = useSprintStore((state) => state.restoreEvidence);
   const [draft, setDraft] = useState<ApplicationFormDraft>(() => createApplicationDraft());
   const [editingRecordId, setEditingRecordId] = useState<string | undefined>();
   const [formOpen, setFormOpen] = useState(false);
@@ -33,6 +34,7 @@ export function ApplicationsPage() {
   const [exportSummary, setExportSummary] = useState("");
   const [formFeedback, setFormFeedback] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
+  const [recentlyDeletedRecord, setRecentlyDeletedRecord] = useState<ApplicationEvidenceRecord | null>(null);
   const dashboard = useMemo(() => buildApplicationsDashboard(sprint, evidenceByTaskId), [sprint, evidenceByTaskId]);
   const visibleRecords = useMemo(() => filterApplicationRecords(dashboard.recentRecords, statusFilter), [dashboard.recentRecords, statusFilter]);
   const editingRecord = useMemo(
@@ -85,6 +87,7 @@ export function ApplicationsPage() {
       addEvidence(targetTask.id, "delivery_record", "机会反馈证据", content);
       setFormFeedback("已新增机会验证记录。");
     }
+    setRecentlyDeletedRecord(null);
     resetDraft(draft);
     setFormOpen(false);
     setValidationMessage("");
@@ -100,7 +103,9 @@ export function ApplicationsPage() {
 
   const handleDeleteRecord = useCallback(
     (record: ApplicationEvidenceRecord) => {
+      setRecentlyDeletedRecord(record);
       deleteEvidence(record.taskId, record.id);
+      setFormFeedback("已删除机会记录，可在机会反馈顶部撤销。");
       if (record.id === editingRecordId) {
         resetDraft(draft);
         setFormOpen(false);
@@ -108,6 +113,22 @@ export function ApplicationsPage() {
     },
     [deleteEvidence, draft, editingRecordId, resetDraft]
   );
+
+  const handleUndoDeleteRecord = useCallback(() => {
+    if (!recentlyDeletedRecord) return;
+
+    restoreEvidence({
+      id: recentlyDeletedRecord.id,
+      taskId: recentlyDeletedRecord.taskId,
+      type: "delivery_record",
+      title: recentlyDeletedRecord.title,
+      content: recentlyDeletedRecord.content,
+      createdAt: recentlyDeletedRecord.createdAt,
+      verified: true
+    });
+    setRecentlyDeletedRecord(null);
+    setFormFeedback("已恢复刚删除的机会记录。");
+  }, [recentlyDeletedRecord, restoreEvidence]);
 
   const handleExport = useCallback(() => {
     const payload = buildApplicationsExportPayload(dashboard.recentRecords, sprint.date);
@@ -146,23 +167,17 @@ export function ApplicationsPage() {
     <main className="app-main">
       <section className="app-page">
         <header className="command-card p-4 md:p-5">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">机会验证 · 本地优先记录</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <BriefcaseBusiness size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">机会验证</h1>
-              </div>
-              <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                这里只记录公司、岗位、JD 命中、沟通反馈和下一步动作；不做自动投递，学习和面试仍回到主线推进。
-              </p>
+          <div className="max-w-3xl">
+            <p className="text-sm font-black text-brand-700">机会验证 · 本地优先记录</p>
+            <div className="mt-2 flex items-center gap-3">
+              <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
+                <BriefcaseBusiness size={22} aria-hidden="true" />
+              </span>
+              <h1 className="text-3xl font-black leading-tight md:text-4xl">机会验证</h1>
             </div>
-            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
-              <span className="text-xs font-black text-ink-500">集中统计</span>
-              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看机会记录、状态分布和关联任务</span>
-            </Link>
+            <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
+              这里只记录公司、岗位、JD 命中、沟通反馈和下一步动作；不做自动投递，学习和面试仍回到主线推进。
+            </p>
           </div>
         </header>
 
@@ -179,9 +194,12 @@ export function ApplicationsPage() {
               allRecordCount={dashboard.recentRecords.length}
               statusFilter={statusFilter}
               exportSummary={exportSummary}
+              recentlyDeletedRecord={recentlyDeletedRecord}
               onStatusFilterChange={setStatusFilter}
               onEdit={handleEditRecord}
               onDelete={handleDeleteRecord}
+              onUndoDelete={handleUndoDeleteRecord}
+              onDismissDeletedRecord={() => setRecentlyDeletedRecord(null)}
               onExport={handleExport}
             />
             {formOpen || editingRecord ? (
@@ -296,27 +314,36 @@ function RecentRecords({
   allRecordCount,
   statusFilter,
   exportSummary,
+  recentlyDeletedRecord,
   onStatusFilterChange,
   onEdit,
   onDelete,
+  onUndoDelete,
+  onDismissDeletedRecord,
   onExport
 }: {
   records: ApplicationEvidenceRecord[];
   allRecordCount: number;
   statusFilter: ApplicationStatusFilter;
   exportSummary: string;
+  recentlyDeletedRecord: ApplicationEvidenceRecord | null;
   onStatusFilterChange: (status: ApplicationStatusFilter) => void;
   onEdit: (record: ApplicationEvidenceRecord) => void;
   onDelete: (record: ApplicationEvidenceRecord) => void;
+  onUndoDelete: () => void;
+  onDismissDeletedRecord: () => void;
   onExport: () => void;
 }) {
+  const [confirmingRecordId, setConfirmingRecordId] = useState<string | null>(null);
+  const deletedRecordLabel = recentlyDeletedRecord ? `${recentlyDeletedRecord.company || "未命名公司"} · ${recentlyDeletedRecord.role || "未命名岗位"}` : "";
+
   return (
     <article className="command-panel">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <div className="flex items-center gap-2 text-brand-700">
             <FileText size={18} aria-hidden="true" />
-              <h2 className="text-base font-black text-ink-900">本地机会反馈</h2>
+            <h2 className="text-base font-black text-ink-900">本地机会反馈</h2>
           </div>
           <p className="mt-2 text-sm font-semibold text-ink-500">共 {allRecordCount} 条，当前显示 {records.length} 条。</p>
         </div>
@@ -351,57 +378,123 @@ function RecentRecords({
         </div>
       </div>
       {exportSummary ? <p className="mt-3 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600">{exportSummary}</p> : null}
+      {recentlyDeletedRecord ? (
+        <div className="mt-3 rounded-card border border-success-600/30 bg-success-100 p-3" role="status" aria-live="polite">
+          <p className="text-sm font-black leading-6 text-success-600">
+            已删除「{deletedRecordLabel}」，可立即撤销并恢复到今日 Evidence Gate 和 AI 机会信号。
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control bg-success-600 px-3 text-sm font-black text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-success-600 focus:ring-offset-2"
+              onClick={() => {
+                setConfirmingRecordId(null);
+                onUndoDelete();
+              }}
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+              撤销删除
+            </button>
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-line bg-white px-3 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2"
+              onClick={onDismissDeletedRecord}
+            >
+              <XCircle size={16} aria-hidden="true" />
+              不撤销
+            </button>
+          </div>
+        </div>
+      ) : null}
       {records.length ? (
         <div className="mt-4 space-y-3">
-          {records.map((record) => (
-            <div key={record.id} className="rounded-card bg-surface-0 p-3">
-              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-control bg-brand-100 px-2 py-1 text-xs font-black text-brand-700">{record.status}</span>
-                    {record.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="rounded-control bg-white px-2 py-1 text-xs font-bold text-ink-500">
-                        {tag}
-                      </span>
-                    ))}
+          {records.map((record) => {
+            const recordLabel = `${record.company || "未命名公司"} · ${record.role || "未命名岗位"}`;
+            const isConfirming = confirmingRecordId === record.id;
+
+            return (
+              <div key={record.id} className="rounded-card bg-surface-0 p-3">
+                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="rounded-control bg-brand-100 px-2 py-1 text-xs font-black text-brand-700">{record.status}</span>
+                      {record.tags.slice(0, 3).map((tag) => (
+                        <span key={tag} className="rounded-control bg-white px-2 py-1 text-xs font-bold text-ink-500">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="mt-2 text-sm font-extrabold leading-6 text-ink-900">
+                      {record.company || "未命名公司"} · {record.role || "未命名岗位"}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold leading-6 text-ink-500">
+                      {[record.city, record.source, record.salaryRange].filter(Boolean).join(" / ") || "暂无城市、来源或薪资范围"}
+                    </p>
+                    <p className="mt-1 text-sm font-semibold leading-6 text-ink-500">
+                      {[record.keywords, record.resumeVersion].filter(Boolean).join(" / ") || "暂无关键词或简历版本"}
+                    </p>
+                    {record.hrFeedback ? (
+                      <p className="mt-1 line-clamp-2 text-sm font-bold leading-6 text-ink-700">沟通反馈：{record.hrFeedback}</p>
+                    ) : null}
+                    <p className="mt-1 line-clamp-3 text-sm font-semibold leading-6 text-ink-500">{record.notes || record.content}</p>
                   </div>
-                  <p className="mt-2 text-sm font-extrabold leading-6 text-ink-900">
-                    {record.company || "未命名公司"} · {record.role || "未命名岗位"}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-ink-500">
-                    {[record.city, record.source, record.salaryRange].filter(Boolean).join(" / ") || "暂无城市、来源或薪资范围"}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-ink-500">
-                    {[record.keywords, record.resumeVersion].filter(Boolean).join(" / ") || "暂无关键词或简历版本"}
-                  </p>
-                  {record.hrFeedback ? (
-                    <p className="mt-1 line-clamp-2 text-sm font-bold leading-6 text-ink-700">沟通反馈：{record.hrFeedback}</p>
-                  ) : null}
-                  <p className="mt-1 line-clamp-3 text-sm font-semibold leading-6 text-ink-500">{record.notes || record.content}</p>
+                  <div className="flex shrink-0 flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-control border border-line bg-white px-3 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600"
+                      aria-label={`编辑机会记录：${record.company || record.title}`}
+                      onClick={() => {
+                        setConfirmingRecordId(null);
+                        onEdit(record);
+                      }}
+                    >
+                      <Edit3 size={15} aria-hidden="true" />
+                      编辑
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex min-h-10 items-center justify-center gap-2 rounded-control border border-line bg-white px-3 text-sm font-black text-risk-600 transition hover:bg-risk-100 focus:outline-none focus:ring-2 focus:ring-risk-600"
+                      aria-label={`删除机会记录：${record.company || record.title}`}
+                      aria-expanded={isConfirming}
+                      aria-controls={`application-delete-confirm-${record.id}`}
+                      onClick={() => setConfirmingRecordId(record.id)}
+                    >
+                      <Trash2 size={15} aria-hidden="true" />
+                      删除
+                    </button>
+                  </div>
                 </div>
-                <div className="flex shrink-0 flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-control border border-line bg-white px-3 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600"
-                    aria-label={`编辑机会记录：${record.company || record.title}`}
-                    onClick={() => onEdit(record)}
-                  >
-                    <Edit3 size={15} aria-hidden="true" />
-                    编辑
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-control border border-line bg-white px-3 text-sm font-black text-risk-600 transition hover:bg-risk-100 focus:outline-none focus:ring-2 focus:ring-risk-600"
-                    aria-label={`删除机会记录：${record.company || record.title}`}
-                    onClick={() => onDelete(record)}
-                  >
-                    <Trash2 size={15} aria-hidden="true" />
-                    删除
-                  </button>
-                </div>
+                {isConfirming ? (
+                  <div id={`application-delete-confirm-${record.id}`} className="mt-3 rounded-card border border-risk-200 bg-risk-100 p-3" role="status" aria-live="polite">
+                    <p className="text-sm font-black leading-6 text-risk-600">
+                      确认删除「{recordLabel}」机会记录？删除后会从今日 Evidence Gate 移除，并且后续 AI 教练不会再引用这条 JD/沟通信号。
+                    </p>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        className="inline-flex min-h-11 items-center justify-center rounded-control bg-risk-600 px-3 text-sm font-black text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-risk-600 focus:ring-offset-2"
+                        aria-label={`确认删除机会记录 ${recordLabel}`}
+                        onClick={() => {
+                          onDelete(record);
+                          setConfirmingRecordId(null);
+                        }}
+                      >
+                        确认删除
+                      </button>
+                      <button
+                        type="button"
+                        className="inline-flex min-h-11 items-center justify-center rounded-control border border-line bg-white px-3 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2"
+                        aria-label={`取消删除机会记录 ${recordLabel}`}
+                        onClick={() => setConfirmingRecordId(null)}
+                      >
+                        取消
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       ) : (
         <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">

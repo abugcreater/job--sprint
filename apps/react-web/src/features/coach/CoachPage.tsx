@@ -11,7 +11,6 @@ import { submitBoundarySuggestionFeedback } from "../../api/boundaryFeedbackClie
 import {
   buildCoachDashboard,
   canSaveBoundary,
-  canSaveProfile,
   canSaveScheduleEvent,
   createBoundaryDraft,
   createProfileDraft,
@@ -27,7 +26,7 @@ import { summarizeBoundarySuggestionFeedback, type BoundarySuggestionFeedbackDra
 import { createLlmRun } from "../../data/llmRunAdapter";
 import { buildOpportunitySignals } from "../../data/opportunitySignalsAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
-import type { AiArtifact } from "../../types/sprint";
+import type { AiArtifact, CoachScheduleEvent, KnowledgeBoundary } from "../../types/sprint";
 import { AiFeedbackPanel } from "./components/AiFeedbackPanel";
 import { ArtifactPanel } from "./components/ArtifactPanel";
 import { BoundaryPanel } from "./components/BoundaryPanel";
@@ -37,6 +36,7 @@ import { InitializationWizardPanel } from "./components/InitializationWizardPane
 import { LlmRunPanel } from "./components/LlmRunPanel";
 import { ProfilePanel } from "./components/ProfilePanel";
 import { SchedulePanel } from "./components/SchedulePanel";
+import { useProfileRecovery } from "./useProfileRecovery";
 
 export function CoachPage() {
   const sprint = useSprintStore((state) => state.sprint);
@@ -51,11 +51,14 @@ export function CoachPage() {
   const saveUserProfile = useSprintStore((state) => state.saveUserProfile);
   const activateUserProfile = useSprintStore((state) => state.activateUserProfile);
   const deleteUserProfile = useSprintStore((state) => state.deleteUserProfile);
+  const restoreUserProfileBundle = useSprintStore((state) => state.restoreUserProfileBundle);
   const saveKnowledgeBoundary = useSprintStore((state) => state.saveKnowledgeBoundary);
   const recordBoundarySuggestionFeedback = useSprintStore((state) => state.recordBoundarySuggestionFeedback);
   const deleteKnowledgeBoundary = useSprintStore((state) => state.deleteKnowledgeBoundary);
+  const restoreKnowledgeBoundary = useSprintStore((state) => state.restoreKnowledgeBoundary);
   const saveCoachScheduleEvent = useSprintStore((state) => state.saveCoachScheduleEvent);
   const deleteCoachScheduleEvent = useSprintStore((state) => state.deleteCoachScheduleEvent);
+  const restoreCoachScheduleEvent = useSprintStore((state) => state.restoreCoachScheduleEvent);
   const generateAiArtifacts = useSprintStore((state) => state.generateAiArtifacts);
   const addAiArtifacts = useSprintStore((state) => state.addAiArtifacts);
   const addLlmRun = useSprintStore((state) => state.addLlmRun);
@@ -98,37 +101,45 @@ export function CoachPage() {
   const [isRecordingFirstLogin, setIsRecordingFirstLogin] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [profileFeedback, setProfileFeedback] = useState("");
-
+  const [recentlyDeletedBoundary, setRecentlyDeletedBoundary] = useState<KnowledgeBoundary | null>(null);
+  const [recentlyDeletedScheduleEvent, setRecentlyDeletedScheduleEvent] = useState<CoachScheduleEvent | null>(null);
+  const {
+    recentlyDeletedProfileBundle,
+    handleSaveProfile,
+    handleDeleteProfile,
+    handleUndoDeleteProfile,
+    handleNewProfile,
+    handleActivateProfile,
+    handleEditProfile,
+    dismissDeletedProfile
+  } = useProfileRecovery({
+    profiles: dashboard.profiles,
+    knowledgeBoundaries,
+    boundarySuggestionFeedback,
+    coachScheduleEvents,
+    aiArtifacts,
+    llmRuns,
+    saveUserProfile,
+    activateUserProfile,
+    deleteUserProfile,
+    restoreUserProfileBundle,
+    setProfileDraft,
+    setFeedback,
+    setProfileFeedback,
+    clearRelatedUndo: () => {
+      setRecentlyDeletedBoundary(null);
+      setRecentlyDeletedScheduleEvent(null);
+    }
+  });
   useEffect(() => {
     setProfileDraft(createProfileDraft(dashboard.activeProfile));
     setBoundaryDraft(createBoundaryDraft());
     setBoundarySuggestions([]);
     setBoundarySuggestionReasons({});
     setScheduleDraft(createScheduleDraft(sprint.date));
+    setRecentlyDeletedBoundary(null);
+    setRecentlyDeletedScheduleEvent(null);
   }, [dashboard.activeProfile?.id, sprint.date]);
-
-  const handleSaveProfile = () => {
-    if (!canSaveProfile(profileDraft)) {
-      setFeedback("请至少填写目标岗位、经验摘要和每日可投入时间。");
-      setProfileFeedback("保存失败：请补齐目标岗位、经验摘要和每日可投入时间。");
-      return;
-    }
-    saveUserProfile(profileDraft);
-    setFeedback("求职画像已保存，后续 AI 建议会引用这份画像。");
-    setProfileFeedback("画像已保存。");
-  };
-
-  const handleDeleteProfile = (profileId: string) => {
-    const profile = dashboard.profiles.find((item) => item.id === profileId);
-    if (!profile) return;
-    const confirmed = window.confirm(`删除「${profile.name}」画像？关联知识边界、个人日程和 AI 建议也会一起移除。`);
-    if (!confirmed) return;
-    deleteUserProfile(profileId);
-    setProfileDraft(createProfileDraft());
-    setFeedback(`已删除「${profile.name}」画像。`);
-    setProfileFeedback(`已删除「${profile.name}」，关联边界、日程和 AI 建议已同步清理。`);
-  };
-
   const handleSaveBoundary = () => {
     if (!dashboard.activeProfile) {
       setFeedback("请先保存一份求职画像。");
@@ -139,8 +150,27 @@ export function CoachPage() {
       return;
     }
     saveKnowledgeBoundary(boundaryDraft);
+    setRecentlyDeletedBoundary(null);
     setBoundaryDraft(createBoundaryDraft());
     setFeedback("知识边界已保存。");
+  };
+
+  const handleDeleteBoundary = (boundaryId: string) => {
+    const boundary = dashboard.boundaries.find((item) => item.id === boundaryId);
+    if (!boundary) return;
+    deleteKnowledgeBoundary(boundaryId);
+    setRecentlyDeletedBoundary(boundary);
+    if (boundaryDraft.id === boundaryId) {
+      setBoundaryDraft(createBoundaryDraft());
+    }
+    setFeedback(`已删除「${boundary.topic}」知识边界，可在知识边界顶部撤销。`);
+  };
+
+  const handleUndoDeleteBoundary = () => {
+    if (!recentlyDeletedBoundary) return;
+    restoreKnowledgeBoundary(recentlyDeletedBoundary);
+    setRecentlyDeletedBoundary(null);
+    setFeedback("已恢复刚删除的知识边界。");
   };
 
   const handleGenerateBoundarySuggestions = async () => {
@@ -193,6 +223,7 @@ export function CoachPage() {
     }
     recordBoundarySuggestionDecision(suggestion, "accepted");
     saveKnowledgeBoundary(suggestion);
+    setRecentlyDeletedBoundary(null);
     setBoundarySuggestions((current) => current.filter((item) => item.id !== suggestion.id));
     setBoundarySuggestionReasons((current) => removeKey(current, suggestion.id));
     setFeedback(`已采纳「${suggestion.topic}」知识边界。`);
@@ -244,8 +275,27 @@ export function CoachPage() {
       return;
     }
     saveCoachScheduleEvent(scheduleDraft);
+    setRecentlyDeletedScheduleEvent(null);
     setScheduleDraft(createScheduleDraft(sprint.date));
     setFeedback("自定义日程已加入今日 AI 教练。");
+  };
+
+  const handleDeleteScheduleEvent = (eventId: string) => {
+    const event = dashboard.scheduleEvents.find((item) => item.id === eventId);
+    if (!event) return;
+    deleteCoachScheduleEvent(eventId);
+    setRecentlyDeletedScheduleEvent(event);
+    if (scheduleDraft.id === eventId) {
+      setScheduleDraft(createScheduleDraft(sprint.date));
+    }
+    setFeedback(`已删除「${event.title}」个人日程，可在个人日程顶部撤销。`);
+  };
+
+  const handleUndoDeleteScheduleEvent = () => {
+    if (!recentlyDeletedScheduleEvent) return;
+    restoreCoachScheduleEvent(recentlyDeletedScheduleEvent);
+    setRecentlyDeletedScheduleEvent(null);
+    setFeedback("已恢复刚删除的个人日程。");
   };
 
   const handleGenerate = async () => {
@@ -378,23 +428,17 @@ export function CoachPage() {
     <main className="app-main">
       <section className="app-page">
         <header className="command-card p-4 md:p-5">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">求职画像 · 知识边界 · AI 建议</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <Bot size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">AI 求职教练</h1>
-              </div>
-              <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                先确认求职画像和知识边界，再让 AI 生成建议；建议必须经你接受后才会写入日程或知识边界。
-              </p>
+          <div className="max-w-3xl">
+            <p className="text-sm font-black text-brand-700">求职画像 · 知识边界 · AI 建议</p>
+            <div className="mt-2 flex items-center gap-3">
+              <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
+                <Bot size={22} aria-hidden="true" />
+              </span>
+              <h1 className="text-3xl font-black leading-tight md:text-4xl">AI 求职教练</h1>
             </div>
-	            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
-	              <span className="text-xs font-black text-ink-500">集中统计</span>
-	              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看画像、边界、AI 建议和本周推进</span>
-	            </Link>
+            <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
+              先确认求职画像和知识边界，再让 AI 生成建议；建议必须经你接受后才会写入日程或知识边界。
+            </p>
           </div>
           {feedback ? (
             <p className="mt-4 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" role="status">
@@ -420,14 +464,14 @@ export function CoachPage() {
                 activeProfileId={dashboard.activeProfile?.id}
                 draft={profileDraft}
                 onChange={(patch) => setProfileDraft((current) => ({ ...current, ...patch }))}
-                onNew={() => setProfileDraft(createProfileDraft())}
-                onActivate={(profile) => {
-                  activateUserProfile(profile.id);
-                  setFeedback(`已切换到「${profile.name}」。`);
-                }}
-	                onEdit={(profile) => setProfileDraft(createProfileDraft(profile))}
+                recentlyDeletedProfileBundle={recentlyDeletedProfileBundle}
+                onNew={handleNewProfile}
+                onActivate={handleActivateProfile}
+	                onEdit={handleEditProfile}
 	                onDelete={handleDeleteProfile}
-	                onSave={handleSaveProfile}
+                onUndoDelete={handleUndoDeleteProfile}
+                onDismissDeletedProfile={dismissDeletedProfile}
+	                onSave={() => handleSaveProfile(profileDraft)}
 	                feedback={profileFeedback}
 	              />
             </div>
@@ -435,10 +479,14 @@ export function CoachPage() {
               <SchedulePanel
                 events={dashboard.scheduleEvents}
                 draft={scheduleDraft}
+                recentlyDeletedEvent={recentlyDeletedScheduleEvent}
                 onChange={(patch) => setScheduleDraft((current) => ({ ...current, ...patch }))}
                 onEdit={(event) => setScheduleDraft(createScheduleDraft(sprint.date, event))}
-                onDelete={deleteCoachScheduleEvent}
+                onDelete={handleDeleteScheduleEvent}
+                onUndoDelete={handleUndoDeleteScheduleEvent}
+                onDismissDeletedEvent={() => setRecentlyDeletedScheduleEvent(null)}
                 onSave={handleSaveSchedule}
+                onCancelEdit={() => setScheduleDraft(createScheduleDraft(sprint.date))}
                 showAll={showAllSchedules}
                 onToggleShowAll={() => setShowAllSchedules((current) => !current)}
               />
@@ -465,9 +513,12 @@ export function CoachPage() {
                 boundaries={dashboard.boundaries}
                 draft={boundaryDraft}
                 activeProfileReady={Boolean(dashboard.activeProfile)}
+                recentlyDeletedBoundary={recentlyDeletedBoundary}
                 onChange={(patch) => setBoundaryDraft((current) => ({ ...current, ...patch }))}
                 onEdit={(boundary) => setBoundaryDraft(createBoundaryDraft(boundary))}
-                onDelete={deleteKnowledgeBoundary}
+                onDelete={handleDeleteBoundary}
+                onUndoDelete={handleUndoDeleteBoundary}
+                onDismissDeletedBoundary={() => setRecentlyDeletedBoundary(null)}
                 onSave={handleSaveBoundary}
                 onCancelEdit={() => setBoundaryDraft(createBoundaryDraft())}
               />

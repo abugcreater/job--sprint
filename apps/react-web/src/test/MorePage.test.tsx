@@ -48,7 +48,13 @@ describe("React Job Sprint more workspace", () => {
     expect(screen.queryByRole("heading", { name: "旧版回滚说明" })).not.toBeInTheDocument();
     expect(screen.queryByText("旧版每日复盘")).not.toBeInTheDocument();
     expect(screen.queryByText("apps/android/app/src/main/assets/web/schedule.html")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "查看统计" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "统计快照" })).toBeInTheDocument();
+    expect(screen.getByText("完成 0 项 · 证据 0 条 · 延期 0 条")).toBeInTheDocument();
+    expect(screen.getByText("画像 1 个 · 知识边界 0 条 · AI 建议 0 条")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "查看集中统计" })).toBeInTheDocument();
+    expect(screen.queryByRole("link", { name: "查看统计" })).not.toBeInTheDocument();
+    expect(screen.queryByText("本地证据")).not.toBeInTheDocument();
+    expect(screen.queryByText("完成记录")).not.toBeInTheDocument();
   });
 
   it("exports React local state and keeps navigation links working", async () => {

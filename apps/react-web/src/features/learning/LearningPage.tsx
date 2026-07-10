@@ -147,23 +147,17 @@ export function LearningPage() {
     <main className="app-main">
       <section className="app-page">
         <header className="command-card p-4 md:p-5">
-          <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-            <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">知识边界 · 证据沉淀</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <BookOpen size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">知识边界</h1>
-              </div>
-              <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                今日知识任务、资料入口和知识卡只保留能转成岗位表达的内容；学习笔记直接进入 Evidence Gate。
-              </p>
+          <div className="max-w-3xl">
+            <p className="text-sm font-black text-brand-700">知识边界 · 证据沉淀</p>
+            <div className="mt-2 flex items-center gap-3">
+              <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
+                <BookOpen size={22} aria-hidden="true" />
+              </span>
+              <h1 className="text-3xl font-black leading-tight md:text-4xl">知识边界</h1>
             </div>
-            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
-              <span className="text-xs font-black text-ink-500">集中统计</span>
-              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看知识任务、学习笔记和资料入口</span>
-            </Link>
+            <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
+              今日知识任务、资料入口和知识卡只保留能转成岗位表达的内容；学习笔记直接进入 Evidence Gate。
+            </p>
           </div>
         </header>
 

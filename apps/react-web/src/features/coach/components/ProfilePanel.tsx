@@ -1,6 +1,7 @@
-import { Edit3, Save, Trash2, UserRound } from "lucide-react";
-import type { ReactNode } from "react";
+import { CheckCircle2, Edit3, RotateCcw, Save, Trash2, UserRound, XCircle } from "lucide-react";
+import { useState, type ReactNode } from "react";
 import { buildCoachDashboard, profileRoleFamilies, type ProfileDraft } from "../../../data/coachAdapter";
+import type { DeletedUserProfileBundle } from "../../../stores/sprintStoreTypes";
 import type { ProfileRoleFamily } from "../../../types/sprint";
 import { Field, PanelTitle, Textarea } from "./CoachPrimitives";
 
@@ -11,26 +12,35 @@ export function ProfilePanel({
   activeProfileId,
   draft,
   feedback,
+  recentlyDeletedProfileBundle,
   onChange,
   onNew,
   onActivate,
   onEdit,
   onDelete,
+  onUndoDelete,
+  onDismissDeletedProfile,
   onSave
 }: {
   profiles: CoachProfile[];
   activeProfileId?: string;
   draft: ProfileDraft;
   feedback?: string;
+  recentlyDeletedProfileBundle: DeletedUserProfileBundle | null;
   onChange: (patch: Partial<ProfileDraft>) => void;
   onNew: () => void;
   onActivate: (profile: CoachProfile) => void;
   onEdit: (profile: CoachProfile) => void;
   onDelete: (profileId: string) => void;
+  onUndoDelete: () => void;
+  onDismissDeletedProfile: () => void;
   onSave: () => void;
 }) {
   const activeProfile = profiles.find((profile) => profile.id === activeProfileId) ?? profiles[0];
   const editingExisting = Boolean(draft.id);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const showDeleteConfirm = Boolean(draft.id && confirmDeleteId === draft.id);
+  const deleteLabel = draft.name || activeProfile?.name || "当前画像";
 
   return (
     <article className="command-panel">
@@ -41,7 +51,10 @@ export function ProfilePanel({
             记录你的目标岗位、经验主线和不可夸大的边界，后续知识、面试和今日行动都会引用这份画像。
           </p>
         </div>
-        <button type="button" className="secondary-button min-h-11 px-3" onClick={onNew}>
+        <button type="button" className="secondary-button min-h-11 px-3" onClick={() => {
+          setConfirmDeleteId(null);
+          onNew();
+        }}>
           新建画像
         </button>
       </div>
@@ -60,7 +73,10 @@ export function ProfilePanel({
               key={profile.id}
               type="button"
               className={`touch-button px-3 ${profile.id === activeProfileId ? "bg-brand-700 text-white" : "border border-line bg-white text-ink-700"}`}
-              onClick={() => onActivate(profile)}
+              onClick={() => {
+                setConfirmDeleteId(null);
+                onActivate(profile);
+              }}
               aria-current={profile.id === activeProfileId ? "true" : undefined}
             >
               {profile.name}
@@ -73,6 +89,38 @@ export function ProfilePanel({
         <p className="mt-4 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" role="status" aria-live="polite">
           {feedback}
         </p>
+      ) : null}
+
+      {recentlyDeletedProfileBundle ? (
+        <div className="mt-4 rounded-card border border-success-600/30 bg-success-100 p-3" role="status" aria-live="polite">
+          <p className="text-sm font-black leading-6 text-success-600">
+            已删除「{recentlyDeletedProfileBundle.profile.name}」画像，可立即撤销并恢复{profileBundleSummary(recentlyDeletedProfileBundle)}到 AI 教练上下文。
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control bg-success-600 px-3 text-sm font-black text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-success-600 focus:ring-offset-2"
+              onClick={() => {
+                setConfirmDeleteId(null);
+                onUndoDelete();
+              }}
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+              撤销删除
+            </button>
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-line bg-white px-3 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2"
+              onClick={() => {
+                setConfirmDeleteId(null);
+                onDismissDeletedProfile();
+              }}
+            >
+              <XCircle size={16} aria-hidden="true" />
+              不撤销
+            </button>
+          </div>
+        </div>
       ) : null}
 
       <section className="mt-5 space-y-5">
@@ -112,18 +160,57 @@ export function ProfilePanel({
           {editingExisting ? "保存画像修改" : "保存画像"}
         </button>
         {activeProfile ? (
-          <button type="button" className="secondary-button min-h-11 px-3" onClick={() => onEdit(activeProfile)}>
+          <button type="button" className="secondary-button min-h-11 px-3" onClick={() => {
+            setConfirmDeleteId(null);
+            onEdit(activeProfile);
+          }}>
             <Edit3 size={15} aria-hidden="true" />
             编辑当前画像
           </button>
         ) : null}
         {draft.id ? (
-          <button type="button" className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-risk-600 bg-white px-4 text-sm font-black text-risk-600 transition hover:bg-risk-100 focus:outline-none focus:ring-2 focus:ring-risk-600 focus:ring-offset-2" onClick={() => onDelete(draft.id!)}>
+          <button
+            type="button"
+            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-risk-600 bg-white px-4 text-sm font-black text-risk-600 transition hover:bg-risk-100 focus:outline-none focus:ring-2 focus:ring-risk-600 focus:ring-offset-2"
+            aria-expanded={showDeleteConfirm}
+            aria-controls="profile-delete-confirm"
+            onClick={() => setConfirmDeleteId(draft.id!)}
+          >
             <Trash2 size={15} aria-hidden="true" />
             删除此画像
           </button>
         ) : null}
       </div>
+      {showDeleteConfirm && draft.id ? (
+        <div id="profile-delete-confirm" className="mt-4 rounded-card border border-risk-200 bg-risk-100 p-4" role="status" aria-live="polite">
+          <p className="text-sm font-black leading-6 text-risk-600">
+            确认删除「{deleteLabel}」画像？关联知识边界、个人日程、AI 建议、AI 运行记录和候选反馈会一起移除；删除后可在本面板短时撤销整包恢复。
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center gap-2 rounded-control bg-risk-600 px-4 text-sm font-black text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-risk-600 focus:ring-offset-2"
+              aria-label={`确认删除画像 ${deleteLabel}`}
+              onClick={() => {
+                setConfirmDeleteId(null);
+                onDelete(draft.id!);
+              }}
+            >
+              <CheckCircle2 size={16} aria-hidden="true" />
+              确认删除
+            </button>
+            <button
+              type="button"
+              className="inline-flex min-h-11 items-center gap-2 rounded-control border border-line bg-white px-4 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600"
+              aria-label={`取消删除画像 ${deleteLabel}`}
+              onClick={() => setConfirmDeleteId(null)}
+            >
+              <XCircle size={16} aria-hidden="true" />
+              取消
+            </button>
+          </div>
+        </div>
+      ) : null}
     </article>
   );
 }
@@ -135,4 +222,20 @@ function FormGroup({ title, children }: { title: string; children: ReactNode }) 
       <div className="mt-1">{children}</div>
     </fieldset>
   );
+}
+
+function profileBundleSummary(bundle: DeletedUserProfileBundle): string {
+  const parts = [
+    "画像本身",
+    countLabel(bundle.knowledgeBoundaries.length, "条知识边界"),
+    countLabel(bundle.coachScheduleEvents.length, "条个人日程"),
+    countLabel(bundle.aiArtifacts.length, "条 AI 建议"),
+    countLabel(bundle.llmRuns.length, "条 AI 运行记录"),
+    countLabel(bundle.boundarySuggestionFeedback.length, "条候选反馈")
+  ].filter(Boolean);
+  return parts.join("、");
+}
+
+function countLabel(count: number, label: string): string | null {
+  return count > 0 ? `${count} ${label}` : null;
 }
