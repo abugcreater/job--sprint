@@ -1,0 +1,129 @@
+apps/react-web/src/features/coach/components/SchedulePanel.tsx
+  s_8f6b4df0c955b0::t_7c2c27552c2cfc 17,30,36,38,42-44,64-69,74-78
+  s_8f6b4df0c955b0::t_48b7335b3d61bf 1,10,14-15,23,27-28,79-109
+  s_8f6b4df0c955b0::t_80f3dc5a7ad565 2,37,70-73,120-123,126-133,138-167,175-178
+apps/react-web/src/test/ApplicationsPage.test.tsx
+  s_8f6b4df0c955b0::t_eeab5e9c6efb19 138
+  s_8f6b4df0c955b0::t_b78aef67336498 136-137,139-146
+  s_8f6b4df0c955b0::t_0f10928337c6c8 58,125
+  s_8f6b4df0c955b0::t_283b2064442674 148-156,160-161
+apps/react-web/src/test/navigationRoutes.test.tsx
+  s_8f6b4df0c955b0::t_7179fad4eb26c4 76-95
+apps/react-web/src/features/review/components/WeeklyReviewPanel.tsx
+  s_8f6b4df0c955b0::t_ac322b7e108d38 19-22,67-68,75-77,88-96
+  s_8f6b4df0c955b0::t_603ad1126251d3 97-98
+apps/react-web/src/test/StatsPage.test.tsx
+  s_8f6b4df0c955b0::t_1cadee8bf1f666 1-34,36-69,71-76,78-142
+  s_8f6b4df0c955b0::t_71f58675a6ad85 35,70,77
+apps/react-web/src/features/applications/components/ApplicationForm.tsx
+  s_8f6b4df0c955b0::t_5387be25e27826 24-44,46-57
+apps/react-web/src/features/learning/components/LearningTaskCard.tsx
+  s_8f6b4df0c955b0::t_768ad31f1b575d 27-30,84,91-93,95
+apps/react-web/src/features/coach/components/ProfilePanel.tsx
+  s_8f6b4df0c955b0::t_c03f9295e13b4d 2,41-43,54-57,76-79,163-166,172-178,184-186,188-213
+  s_8f6b4df0c955b0::t_89bbd0c2b32327 1,4,15,21-22,29,35-36,94-125,187,226-241
+apps/react-web/src/test/InterviewPage.test.tsx
+  s_8f6b4df0c955b0::t_adf59e7debeaf4 51-57,88-94
+apps/react-web/src/stores/sprintStore.ts
+  s_8f6b4df0c955b0::t_89bbd0c2b32327 17,251-252
+  s_8f6b4df0c955b0::t_63bac944e8d37d 193,195-205
+  s_8f6b4df0c955b0::t_48b7335b3d61bf 15,259
+  s_8f6b4df0c955b0::t_1f4b57e69fa000 16,256
+  s_8f6b4df0c955b0::t_7486eff32b9c43 190-192
+  s_8f6b4df0c955b0::t_6d32c9e33e0db4 194
+  s_8f6b4df0c955b0::t_055b91a273ecfa 189
+apps/react-web/src/features/review/ReviewPage.tsx
+  s_8f6b4df0c955b0::t_d7b2acfb2f87c8 1,23
+  s_8f6b4df0c955b0::t_7d2939550754fd 42,46,96,102,107-121,188-190
+  s_8f6b4df0c955b0::t_7a23f913b2fa00 382-384,412,417-418
+  s_8f6b4df0c955b0::t_6fc279567396c4 139-145,147-149
+apps/react-web/src/features/more/MorePage.tsx
+  s_8f6b4df0c955b0::t_f79d3d0e135796 17,103,140-163,165-184
+  s_8f6b4df0c955b0::t_edb8b45cbf2930 108-111,118-122
+apps/react-web/src/features/coach/CoachPage.tsx
+  s_8f6b4df0c955b0::t_48b7335b3d61bf 29,61,105,141,278,283-300,482,485-487
+  s_8f6b4df0c955b0::t_ca246157790782 39,106-133,468-470,473-474
+  s_8f6b4df0c955b0::t_89bbd0c2b32327 54,467,472
+  s_8f6b4df0c955b0::t_eeb044db79508a 489
+  s_8f6b4df0c955b0::t_c1f67321694c1f 58,104,140,153,158-175,226,516,519-521
+  s_8f6b4df0c955b0::t_100596871551a9 431-437,439-441
+apps/react-web/src/stores/sprintCoachActions.ts
+  s_8f6b4df0c955b0::t_48b7335b3d61bf 150-161,246
+  s_8f6b4df0c955b0::t_89bbd0c2b32327 17,69-93,242-245
+  s_8f6b4df0c955b0::t_aebad805639532 119-128
+apps/react-web/src/stores/sprintStoreTypes.ts
+  s_8f6b4df0c955b0::t_7cd300d491b59a 53
+  s_8f6b4df0c955b0::t_48b7335b3d61bf 56
+  s_8f6b4df0c955b0::t_89bbd0c2b32327 6-14,49
+  s_8f6b4df0c955b0::t_6220c7276c7079 44
+apps/react-web/src/features/stats/StatsPage.tsx
+  s_8f6b4df0c955b0::t_dd62d91fafe9cb 1,33,42-43,49-52,74-87,91-110,219-243
+apps/react-web/src/features/applications/ApplicationsPage.tsx
+  s_8f6b4df0c955b0::t_6cbdceebf28341 337,339,414,442-443,446-447,449-450,453-455,461,464
+  s_8f6b4df0c955b0::t_c797897aa9296c 346
+  s_8f6b4df0c955b0::t_bd520a5038e7a1 411-413,415-416,496-497
+  s_8f6b4df0c955b0::t_0c77a798ef37b0 1,29,37,90,106,108,117-132,197,201-202,317,321-322,329,333-334,338,381-408
+  s_8f6b4df0c955b0::t_7912de5216f121 417-441,444-445,448,451-452,456-460,462-463,467-494
+  s_8f6b4df0c955b0::t_43f9765d12a17f 170-176,178-180
+apps/react-web/src/features/learning/LearningPage.tsx
+  s_8f6b4df0c955b0::t_965b22079f2e6d 150-156,158-160
+apps/react-web/src/test/CoachDestructiveActions.test.tsx
+  s_8f6b4df0c955b0::t_bbbd96bda61244 1-4,6-68,78-93,245-246
+  s_8f6b4df0c955b0::t_48b7335b3d61bf 94-102
+  s_8f6b4df0c955b0::t_35ac9c6e62c54a 5,103-244
+  s_8f6b4df0c955b0::t_a4f8712f79bfd8 69-77
+apps/react-web/src/test/LearningPage.test.tsx
+  s_8f6b4df0c955b0::t_e1fec1a386bf1e 105-107,111-112
+apps/react-web/src/test/ReviewPage.test.tsx
+  s_8f6b4df0c955b0::t_84666192cadf1a 125-130
+  s_8f6b4df0c955b0::t_39dac20d3ca64b 50-51,67,115
+  s_8f6b4df0c955b0::t_acfee0ab088e2e 132-134,136-137,144-146
+  s_8f6b4df0c955b0::t_3a2b3db15af339 131,135
+  s_8f6b4df0c955b0::t_951fbf8c146659 47-48
+apps/react-web/src/features/coach/useProfileRecovery.ts
+  s_8f6b4df0c955b0::t_ca246157790782 1-123
+apps/react-web/src/features/coach/components/BoundaryPanel.tsx
+  s_8f6b4df0c955b0::t_80f3dc5a7ad565 2,36,64-67,117-120,123-130,135-164
+  s_8f6b4df0c955b0::t_ac8a328733e7e7 35,37,41-43,61,63
+  s_8f6b4df0c955b0::t_7b97cda7039b10 1,14,18-19,26,30-31,73-100
+tests/goal_acceptance_test.js
+  s_8f6b4df0c955b0::t_4eb33348995060 252
+apps/react-web/src/features/interview/InterviewPage.tsx
+  s_8f6b4df0c955b0::t_dd31804815b34f 130-136,138-140
+  s_8f6b4df0c955b0::t_2ec9c400a2e5d2 52-55,156-163,393-400,406-419,439-443,445-452,457-462
+  s_8f6b4df0c955b0::t_95e20979185963 56-58
+apps/react-web/src/test/MorePage.test.tsx
+  s_8f6b4df0c955b0::t_43d18e1da692e7 51-57
+apps/react-web/src/features/coach/components/LlmRunPanel.tsx
+  s_8f6b4df0c955b0::t_892c0d4ce51423 1,7-10,40-49
+  s_8f6b4df0c955b0::t_29e054994364af 15-34,36-37,54-98
+  s_8f6b4df0c955b0::t_0f950279639011 99
+apps/react-web/src/test/CoachPage.test.tsx
+  s_8f6b4df0c955b0::t_f967409369c8c8 49-50
+  s_8f6b4df0c955b0::t_c03f9295e13b4d 216-218,220,222-223
+  s_8f6b4df0c955b0::t_65f1699a30f1b3 87-98,102-125
+  s_8f6b4df0c955b0::t_48813623c2ce24 136-137
+  s_8f6b4df0c955b0::t_5c2a0c05234c8b 6,274-286,293,308-313
+  s_8f6b4df0c955b0::t_35ac9c6e62c54a 215,219,224
+apps/react-web/src/features/review/components/LocalReviewRecords.tsx
+  s_8f6b4df0c955b0::t_16adeefd0dd663 1,18-20,31-34,37,79,81,83-108
+  s_8f6b4df0c955b0::t_84666192cadf1a 158
+  s_8f6b4df0c955b0::t_d7b2acfb2f87c8 2-17,21-30,35-36,38-78,109-157,159-195
+  s_8f6b4df0c955b0::t_c4e6425944ae73 80,82
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "39ca79b3c9b96f9bfcab1e1a7cb0730bb78edc62",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
