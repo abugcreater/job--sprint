@@ -1,9 +1,6 @@
 use axum::{Router, extract::DefaultBodyLimit};
 use chrono::Utc;
-use sqlx::{
-    SqlitePool,
-    sqlite::{SqliteConnectOptions, SqlitePoolOptions},
-};
+use sqlx_sqlite::{SqliteConnectOptions, SqlitePool, SqlitePoolOptions};
 use std::{env, fs, path::PathBuf, str::FromStr, sync::Arc};
 use tokio::net::TcpListener;
 use tower_http::trace::TraceLayer;
@@ -74,7 +71,7 @@ fn find_project_root() -> Result<PathBuf, Box<dyn std::error::Error + Send + Syn
 
 async fn sync_configured_users(db: &SqlitePool, users: &[UserConfig]) -> sqlx::Result<()> {
     for user in users {
-        sqlx::query(
+        sqlx::query::query(
             r#"
             INSERT INTO users (
                 username, display_name, role, data_scope,

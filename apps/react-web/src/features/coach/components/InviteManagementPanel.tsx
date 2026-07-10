@@ -1,5 +1,5 @@
-import { Copy, Download, KeyRound, Layers, Mail, RefreshCcw, Save, Trash2, Upload, UserCheck, UserPlus, UserX } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Download, Layers, Mail, RefreshCcw, Save, Trash2, Upload, UserCheck, UserPlus, UserX } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import {
   buildCoachLoginEntry,
   buildCoachInvitationExport,
@@ -12,29 +12,42 @@ import {
   updateCoachInvitationAccountStatus,
   updateCoachInvitationBatchStatus,
   type CoachConfiguredUser,
+  type CoachAccountAction,
   type CoachInvitationDraft,
+  type CoachInvitationRecord,
   type CoachInvitationNotificationChannel,
   type CoachInvitationResponse,
   type CoachInvitationStatus
 } from "../../../api/coachInvitationClient";
+import type { CoachOnboardingReportResponse } from "../../../api/coachOnboardingReportClient";
 import {
   importCoachInvitations,
   parseCoachInvitationImport
 } from "../../../api/coachInvitationImportClient";
+import { InviteManagementDetailPanel, type InviteManagementDetail } from "./InviteManagementDetailPanel";
+import { InviteManagementFilters, filterInviteManagementRecords } from "./InviteManagementFilters";
+import { InviteManagementLedger } from "./InviteManagementLedger";
 import { Field, MetricTile, PanelTitle, Textarea } from "./CoachPrimitives";
+import { buildBatchAccountActionConfirmation, buildBatchActionHint } from "./inviteManagementBatchActions";
 import { accountProvisioningText, roleFamilyOptions, statusLabel, statusOptions, templateVersionOptions } from "./inviteManagementConfig";
+import { accountProvisioningReadyMessage, draftFromConfiguredUser, draftFromInvitation } from "./inviteManagementDraft";
+import { findInviteManagementOnboardingUser } from "./inviteManagementOnboarding";
 
-export function InviteManagementPanel() {
+export function InviteManagementPanel({ onboardingReport = null }: { onboardingReport?: CoachOnboardingReportResponse | null }) {
   const [draft, setDraft] = useState<CoachInvitationDraft>(() => createCoachInvitationDraft());
   const [response, setResponse] = useState<CoachInvitationResponse | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "ready" | "local" | "saving" | "saved" | "error">("idle");
   const [message, setMessage] = useState("");
   const [selectedBatch, setSelectedBatch] = useState("all");
   const [batchStatus, setBatchStatus] = useState<CoachInvitationStatus>("invited");
-  const [batchAccountAction, setBatchAccountAction] = useState<"disable" | "enable" | "delete">("disable");
+  const [batchAccountAction, setBatchAccountAction] = useState<CoachAccountAction>("disable");
   const [notificationChannel, setNotificationChannel] = useState<CoachInvitationNotificationChannel>("im");
   const [exportPreview, setExportPreview] = useState("");
   const [importText, setImportText] = useState("");
+  const [confirmingBatchAccountAction, setConfirmingBatchAccountAction] = useState(false);
+  const [ledgerSearch, setLedgerSearch] = useState("");
+  const [selectedDetail, setSelectedDetail] = useState<InviteManagementDetail | null>(null);
+  const detailReturnFocusRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     void loadInvitations();
@@ -138,6 +151,7 @@ export function InviteManagementPanel() {
   };
 
   const runBatchAccountAction = async () => {
+    setConfirmingBatchAccountAction(false);
     if (selectedBatch === "all") {
       setMessage("请先选择一个具体批次，再批量更新登录账号。");
       return;
@@ -193,6 +207,31 @@ export function InviteManagementPanel() {
     }
   };
 
+  const closeDetail = () => {
+    const target = detailReturnFocusRef.current;
+    setSelectedDetail(null);
+    if (target?.isConnected) target.focus();
+  };
+
+  const pickConfiguredUser = (user: CoachConfiguredUser, trigger?: HTMLElement) => {
+    detailReturnFocusRef.current = trigger ?? null;
+    setSelectedDetail({ kind: "user", user });
+    setDraft((current) => draftFromConfiguredUser(current, user));
+  };
+
+  const prepareAccountProvisioning = (user: CoachConfiguredUser) => {
+    setSelectedDetail({ kind: "user", user });
+    setDraft((current) => draftFromConfiguredUser(current, user, { provisionAccount: true }));
+    setStatus("ready");
+    setMessage(accountProvisioningReadyMessage(user));
+  };
+
+  const pickInvitation = (invitation: CoachInvitationRecord, trigger?: HTMLElement) => {
+    detailReturnFocusRef.current = trigger ?? null;
+    setSelectedDetail({ kind: "invitation", invitation });
+    setDraft(draftFromInvitation(invitation));
+  };
+
   const generateLoginEntry = (user: CoachConfiguredUser) => {
     setExportPreview(buildCoachLoginEntry(user));
     setStatus("ready");
@@ -246,8 +285,16 @@ export function InviteManagementPanel() {
 
   const summary = response?.summary;
   const batchOptions = Array.from(new Set(response?.invitations.map((invitation) => invitation.inviteBatch).filter(Boolean) ?? [])).sort();
-  const filteredInvitations = response?.invitations.filter((invitation) => selectedBatch === "all" || invitation.inviteBatch === selectedBatch) ?? [];
-  const filteredUsers = response?.configuredUsers.filter((user) => selectedBatch === "all" || user.inviteBatch === selectedBatch) ?? [];
+  const { filteredInvitations, filteredUsers } = filterInviteManagementRecords(response, selectedBatch, ledgerSearch);
+  const saving = status === "saving";
+  const batchStatusDisabled = saving || selectedBatch === "all";
+  const batchAccountDisabled = saving || selectedBatch === "all" || filteredUsers.length === 0;
+  const notificationDisabled = batchAccountDisabled;
+  const batchActionHint = buildBatchActionHint({ selectedBatch, filteredUserCount: filteredUsers.length, saving });
+  const batchAccountConfirmation = confirmingBatchAccountAction && !batchAccountDisabled
+    ? buildBatchAccountActionConfirmation({ action: batchAccountAction, filteredUserCount: filteredUsers.length, selectedBatch })
+    : null;
+  const selectedOnboardingUser = findInviteManagementOnboardingUser(onboardingReport, selectedDetail);
   return (
     <article className="command-panel">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -273,65 +320,96 @@ export function InviteManagementPanel() {
       </div>
 
       <div className="mt-4 rounded-card border border-line bg-surface-0 p-4">
-        <div className="flex flex-col gap-3 xl:flex-row xl:items-end xl:justify-between">
-          <div className="grid flex-1 gap-3 md:grid-cols-3">
-            <label className="block">
-              <span className="text-sm font-black text-ink-700">批次筛选</span>
-              <select className="field-control mt-2" value={selectedBatch} onChange={(event) => setSelectedBatch(event.target.value)} aria-label="批次筛选">
-                <option value="all">全部批次</option>
-                {batchOptions.map((batch) => (
-                  <option key={batch} value={batch}>{batch}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-sm font-black text-ink-700">批量状态</span>
-              <select className="field-control mt-2" value={batchStatus} onChange={(event) => setBatchStatus(event.target.value as CoachInvitationStatus)} aria-label="批量状态">
-                {statusOptions.map((option) => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-sm font-black text-ink-700">批量账号动作</span>
-              <select className="field-control mt-2" value={batchAccountAction} onChange={(event) => setBatchAccountAction(event.target.value as "disable" | "enable" | "delete")} aria-label="批量账号动作">
-                <option value="disable">禁用账号</option>
-                <option value="enable">恢复账号</option>
-                <option value="delete">删除账号</option>
-              </select>
-            </label>
-            <label className="block">
-              <span className="text-sm font-black text-ink-700">邀请通知渠道</span>
-              <select className="field-control mt-2" value={notificationChannel} onChange={(event) => setNotificationChannel(event.target.value as CoachInvitationNotificationChannel)} aria-label="邀请通知渠道">
-                <option value="im">IM 文案</option>
-                <option value="email">邮件文案</option>
-                <option value="manual">手动发送文案</option>
-              </select>
-            </label>
-            <div className="rounded-card border border-line bg-surface-100 p-3">
-              <p className="text-xs font-black text-ink-500">当前筛选</p>
-              <p className="mt-1 text-sm font-black text-ink-900">{filteredInvitations.length} 条邀请 · {filteredUsers.length} 个账号</p>
+        <div className="flex flex-col gap-3">
+          <InviteManagementFilters
+            batchAccountAction={batchAccountAction}
+            batchOptions={batchOptions}
+            batchStatus={batchStatus}
+            filteredInvitationCount={filteredInvitations.length}
+            filteredUserCount={filteredUsers.length}
+            ledgerSearch={ledgerSearch}
+            notificationChannel={notificationChannel}
+            selectedBatch={selectedBatch}
+            onBatchAccountActionChange={(action) => {
+              setBatchAccountAction(action);
+              setConfirmingBatchAccountAction(false);
+            }}
+            onBatchStatusChange={setBatchStatus}
+            onClearLedgerSearch={() => {
+              setLedgerSearch("");
+              setConfirmingBatchAccountAction(false);
+            }}
+            onLedgerSearchChange={(value) => {
+              setLedgerSearch(value);
+              setConfirmingBatchAccountAction(false);
+            }}
+            onNotificationChannelChange={setNotificationChannel}
+            onSelectedBatchChange={(batch) => {
+              setSelectedBatch(batch);
+              setConfirmingBatchAccountAction(false);
+            }}
+          />
+          <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
+            <p id="invite-batch-action-hint" className="rounded-card border border-line bg-white p-3 text-sm font-bold leading-6 text-ink-500" role="note">{batchActionHint}</p>
+            <div className="flex flex-wrap gap-2">
+              <button type="button" className="secondary-button min-h-11 px-3" onClick={runBatchStatusUpdate} disabled={batchStatusDisabled} aria-describedby="invite-batch-action-hint">
+                <Layers size={16} aria-hidden="true" />
+                批量更新批次状态
+              </button>
+              <button type="button" className="secondary-button min-h-11 px-3" onClick={generateExport}>
+                <Download size={16} aria-hidden="true" />
+                生成导出 JSON
+              </button>
+              <button
+                type="button"
+                className="secondary-button min-h-11 px-3"
+                onClick={() => setConfirmingBatchAccountAction(true)}
+                disabled={batchAccountDisabled}
+                aria-controls="invite-batch-account-confirm"
+                aria-describedby="invite-batch-action-hint"
+                aria-expanded={Boolean(batchAccountConfirmation)}
+              >
+                {batchAccountAction === "enable" ? <UserCheck size={16} aria-hidden="true" /> : batchAccountAction === "disable" ? <UserX size={16} aria-hidden="true" /> : <Trash2 size={16} aria-hidden="true" />}
+                批量更新账号状态
+              </button>
+              <button type="button" className="secondary-button min-h-11 px-3" onClick={generateNotificationDrafts} disabled={notificationDisabled} aria-describedby="invite-batch-action-hint">
+                <Mail size={16} aria-hidden="true" />
+                生成邀请通知
+              </button>
             </div>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <button type="button" className="secondary-button min-h-11 px-3" onClick={runBatchStatusUpdate} disabled={status === "saving" || selectedBatch === "all"}>
-              <Layers size={16} aria-hidden="true" />
-              批量更新批次状态
-            </button>
-            <button type="button" className="secondary-button min-h-11 px-3" onClick={generateExport}>
-              <Download size={16} aria-hidden="true" />
-              生成导出 JSON
-            </button>
-            <button type="button" className="secondary-button min-h-11 px-3" onClick={runBatchAccountAction} disabled={status === "saving" || selectedBatch === "all" || filteredUsers.length === 0}>
-              {batchAccountAction === "enable" ? <UserCheck size={16} aria-hidden="true" /> : batchAccountAction === "disable" ? <UserX size={16} aria-hidden="true" /> : <Trash2 size={16} aria-hidden="true" />}
-              批量更新账号状态
-            </button>
-            <button type="button" className="secondary-button min-h-11 px-3" onClick={generateNotificationDrafts} disabled={status === "saving" || selectedBatch === "all" || filteredUsers.length === 0}>
-              <Mail size={16} aria-hidden="true" />
-              生成邀请通知
-            </button>
-          </div>
         </div>
+        {batchAccountConfirmation ? (
+          <div
+            id="invite-batch-account-confirm"
+            className="mt-4 rounded-card border border-risk-200 bg-risk-100 p-3"
+            role="group"
+            aria-label={`批量账号动作确认 ${selectedBatch}`}
+          >
+            <p className="text-sm font-black leading-6 text-risk-600">{batchAccountConfirmation.message}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                type="button"
+                className="inline-flex min-h-11 items-center gap-2 rounded-control bg-risk-600 px-3 text-sm font-black text-white transition hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-risk-600 focus:ring-offset-2"
+                onClick={runBatchAccountAction}
+                aria-label={batchAccountConfirmation.title}
+                disabled={saving}
+              >
+                {batchAccountAction === "enable" ? <UserCheck size={15} aria-hidden="true" /> : batchAccountAction === "disable" ? <UserX size={15} aria-hidden="true" /> : <Trash2 size={15} aria-hidden="true" />}
+                {batchAccountConfirmation.confirmLabel}
+              </button>
+              <button
+                type="button"
+                className="secondary-button min-h-11 px-3"
+                onClick={() => setConfirmingBatchAccountAction(false)}
+                aria-label={`取消批量账号动作 ${selectedBatch}`}
+                disabled={saving}
+              >
+                取消
+              </button>
+            </div>
+          </div>
+        ) : null}
         {exportPreview ? (
           <div className="mt-4">
             <Textarea label="导出与通知预览" value={exportPreview} onChange={setExportPreview} />
@@ -429,118 +507,47 @@ export function InviteManagementPanel() {
               <Save size={16} aria-hidden="true" />
               {status === "saving" ? "保存中" : "保存邀请记录"}
             </button>
-            <button type="button" className="secondary-button min-h-11 px-3" onClick={() => setDraft(createCoachInvitationDraft())}>
+            <button
+              type="button"
+              className="secondary-button min-h-11 px-3"
+              onClick={() => {
+                setDraft(createCoachInvitationDraft());
+                setSelectedDetail(null);
+              }}
+            >
               新建草稿
             </button>
           </div>
         </div>
 
-        <div className="rounded-card border border-line bg-surface-0 p-4">
-          <p className="text-sm font-black text-ink-900">服务端账号与邀请台账</p>
-          <p className="mt-2 text-sm font-semibold leading-6 text-ink-500">
-            {summary?.nextActionLabel ?? "连接服务端后可查看已配置账号和邀请记录。"}
-          </p>
-          {response?.accountProvisioning?.status === "PASS" ? (
-            <p className="mt-3 inline-flex items-center gap-2 rounded-control bg-success-100 px-3 py-2 text-xs font-black text-success-600" role="status">
-              <KeyRound size={14} aria-hidden="true" />
-              {response.accountProvisioning.message}
-            </p>
-          ) : null}
-          <div className="mt-4 space-y-3">
-            {filteredUsers.slice(0, 6).map((user) => (
-              <div
-                key={`${user.dataScope}-${user.username}`}
-                className="w-full rounded-card border border-line bg-surface-100 p-3 text-left"
-              >
-                <button
-                  type="button"
-                  className="w-full text-left"
-                  onClick={() => setDraft((current) => ({
-                    ...current,
-                    username: user.username,
-                    displayName: user.displayName,
-                    dataScope: user.dataScope,
-                    inviteBatch: user.inviteBatch,
-                    accountRole: user.role === "viewer" ? "viewer" : "coach",
-                    password: "",
-                    provisionAccount: false
-                  }))}
-                >
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-black text-ink-900">{user.displayName}</span>
-                    <span className={`status-chip border border-line bg-white ${user.disabled ? "text-risk-600" : "text-success-600"}`}>
-                      {user.disabled ? "已禁用" : "可登录"}
-                    </span>
-                  </span>
-                  <span className="mt-1 block text-xs font-bold text-ink-500">{user.role} · {user.inviteBatch} · {user.dataScope}</span>
-                </button>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <button type="button" className="secondary-button min-h-9 px-3 text-xs" onClick={() => generateLoginEntry(user)}>
-                    <Copy size={14} aria-hidden="true" />
-                    登录入口
-                  </button>
-                  <button
-                    type="button"
-                    className="secondary-button min-h-9 px-3 text-xs"
-                    onClick={() => runAccountAction(user.username, user.disabled ? "enable" : "disable")}
-                    disabled={user.role === "owner" || status === "saving"}
-                  >
-                    {user.disabled ? <UserCheck size={14} aria-hidden="true" /> : <UserX size={14} aria-hidden="true" />}
-                    {user.disabled ? "恢复账号" : "禁用账号"}
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex min-h-9 items-center gap-2 rounded-control border border-risk-200 px-3 text-xs font-black text-risk-600 hover:bg-risk-100"
-                    onClick={() => runAccountAction(user.username, "delete")}
-                    disabled={user.role === "owner" || status === "saving"}
-                  >
-                    <Trash2 size={14} aria-hidden="true" />
-                    删除登录账号
-                  </button>
-                </div>
-              </div>
-            ))}
-            {filteredInvitations.slice(0, 8).map((invitation) => (
-              <div key={invitation.id} className="rounded-card border border-line bg-white p-3">
-                <button
-                  type="button"
-                  className="w-full text-left"
-                  onClick={() => setDraft({
-                    username: invitation.username,
-                    displayName: invitation.displayName,
-                    dataScope: invitation.dataScope,
-                    inviteBatch: invitation.inviteBatch,
-                    templateVersion: invitation.templateVersion || "role-family-v1",
-                    roleFamily: invitation.roleFamily,
-                    targetRole: invitation.targetRole,
-                    status: invitation.status,
-                    note: invitation.note,
-                    accountRole: "coach",
-                    password: "",
-                    provisionAccount: false
-                  })}
-                >
-                  <span className="flex flex-wrap items-center gap-2">
-                    <span className="text-sm font-black text-ink-900">{invitation.displayName}</span>
-                    <span className="status-chip border border-line bg-white text-ink-700">{statusLabel(invitation.status)}</span>
-                  </span>
-                  <span className="mt-1 block text-xs font-bold text-ink-500">
-                    {invitation.inviteBatch} · {invitation.templateVersion || "role-family-v1"} · {invitation.targetRole || "未填岗位"}
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className="mt-3 inline-flex min-h-9 items-center gap-2 rounded-control border border-risk-200 px-3 text-xs font-black text-risk-600 hover:bg-risk-100"
-                  onClick={() => removeInvitation(invitation.username, invitation.displayName)}
-                >
-                  <Trash2 size={14} aria-hidden="true" />
-                  删除邀请记录：{invitation.displayName}
-                </button>
-              </div>
-            ))}
-          </div>
+        <div>
+          <InviteManagementLedger
+            accountProvisioning={response?.accountProvisioning}
+            invitations={filteredInvitations}
+            saving={saving}
+            summary={summary}
+            users={filteredUsers}
+            onGenerateLoginEntry={generateLoginEntry}
+            onPickInvitation={pickInvitation}
+            onPickUser={pickConfiguredUser}
+            onRemoveInvitation={removeInvitation}
+            onRunAccountAction={runAccountAction}
+            selectedInvitationId={selectedDetail?.kind === "invitation" ? selectedDetail.invitation.id : ""}
+            selectedUsername={selectedDetail?.kind === "user" ? selectedDetail.user.username : ""}
+          />
         </div>
       </div>
+
+      <InviteManagementDetailPanel
+        accountAuditEvents={response?.accountAuditEvents}
+        accountProvisioningEnabled={response?.accountProvisioning?.enabled !== false}
+        detail={selectedDetail}
+        onboardingUser={selectedOnboardingUser}
+        saving={saving}
+        onClose={closeDetail}
+        onPrepareAccountProvisioning={prepareAccountProvisioning}
+        onRunAccountAction={runAccountAction}
+      />
 
       {message ? (
         <p className={`mt-4 rounded-control px-3 py-2 text-sm font-bold ${status === "error" ? "bg-risk-100 text-risk-600" : "bg-success-100 text-success-600"}`} role="status">

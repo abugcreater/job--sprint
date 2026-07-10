@@ -12,6 +12,9 @@ import {
   generateAiArtifactsPatch,
   rejectAiArtifactPatch,
   recordBoundarySuggestionFeedbackPatch,
+  restoreCoachScheduleEventPatch,
+  restoreKnowledgeBoundaryPatch,
+  restoreUserProfileBundlePatch,
   saveCoachScheduleEventPatch,
   saveKnowledgeBoundaryPatch,
   saveUserProfilePatch
@@ -189,6 +192,23 @@ export const useSprintStore = create<SprintState>()(
               sprint: createSprint(state.completed, evidenceByTaskId, state.syncState, state.coachScheduleEvents, currentSprintTime(state.sprint), state.userProfiles)
             };
           }),
+        restoreEvidence: (record) =>
+          set((state) => {
+            const records = state.evidenceByTaskId[record.taskId] ?? [];
+            if (records.some((item) => item.id === record.id)) return state;
+
+            const savedAt = new Date().toISOString();
+            const evidenceByTaskId = {
+              ...state.evidenceByTaskId,
+              [record.taskId]: [...records, record]
+            };
+
+            return {
+              evidenceByTaskId,
+              lastSavedAt: savedAt,
+              sprint: createSprint(state.completed, evidenceByTaskId, state.syncState, state.coachScheduleEvents, currentSprintTime(state.sprint), state.userProfiles)
+            };
+          }),
         addDelayRecord: (record) =>
           set((state) => {
             const savedAt = new Date().toISOString();
@@ -228,11 +248,15 @@ export const useSprintStore = create<SprintState>()(
           }),
         deleteUserProfile: (profileId) =>
           set((state) => deleteUserProfilePatch(state, profileId, (events, profiles = state.userProfiles.filter((profile) => profile.id !== profileId)) => createSprint(state.completed, state.evidenceByTaskId, state.syncState, events, currentSprintTime(state.sprint), profiles))),
+        restoreUserProfileBundle: (bundle) =>
+          set((state) => restoreUserProfileBundlePatch(state, bundle, (events, profiles = state.userProfiles) => createSprint(state.completed, state.evidenceByTaskId, state.syncState, events, currentSprintTime(state.sprint), profiles))),
         saveKnowledgeBoundary: (draft) => set((state) => saveKnowledgeBoundaryPatch(state, draft)),
         recordBoundarySuggestionFeedback: (draft) => set((state) => recordBoundarySuggestionFeedbackPatch(state, draft)),
         deleteKnowledgeBoundary: (boundaryId) => set((state) => deleteKnowledgeBoundaryPatch(state, boundaryId)),
+        restoreKnowledgeBoundary: (boundary) => set((state) => restoreKnowledgeBoundaryPatch(state, boundary)),
         saveCoachScheduleEvent: (draft) => set((state) => saveCoachScheduleEventPatch(state, draft, (events, profiles = state.userProfiles) => createSprint(state.completed, state.evidenceByTaskId, state.syncState, events, currentSprintTime(state.sprint), profiles))),
         deleteCoachScheduleEvent: (eventId) => set((state) => deleteCoachScheduleEventPatch(state, eventId, (events, profiles = state.userProfiles) => createSprint(state.completed, state.evidenceByTaskId, state.syncState, events, currentSprintTime(state.sprint), profiles))),
+        restoreCoachScheduleEvent: (event) => set((state) => restoreCoachScheduleEventPatch(state, event, (events, profiles = state.userProfiles) => createSprint(state.completed, state.evidenceByTaskId, state.syncState, events, currentSprintTime(state.sprint), profiles))),
         generateAiArtifacts: () => set((state) => generateAiArtifactsPatch(state)),
         addAiArtifacts: (artifacts) => set((state) => addAiArtifactsPatch(state, artifacts)),
         addLlmRun: (run) => set((state) => addLlmRunPatch(state, run)),

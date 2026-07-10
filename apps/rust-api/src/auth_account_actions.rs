@@ -3,7 +3,10 @@ use serde_json::{Value, json};
 use std::{env, path::PathBuf};
 
 use crate::auth_account_store::account_provisioning_capability;
-use crate::auth_account_users_file::{read_users_config, write_users_config};
+use crate::auth_account_audit::{
+    account_audit_events_from_config, append_account_audit_event, write_users_config_with_audit,
+};
+use crate::auth_account_users_file::read_users_config;
 
 const USERNAME_CHARS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-";
 
@@ -38,7 +41,24 @@ pub(crate) fn user_accounts_for_management() -> Option<Vec<Value>> {
     )
 }
 
-pub(crate) fn update_user_account_status(payload: &Value) -> Result<Value, (StatusCode, Value)> {
+pub(crate) fn account_audit_events_for_management() -> Vec<Value> {
+    let capability = account_provisioning_capability();
+    if capability.get("enabled").and_then(Value::as_bool) != Some(true) {
+        return vec![];
+    }
+    let Ok(users_file) = env::var("JOB_SPRINT_USERS_FILE") else {
+        return vec![];
+    };
+    let Ok((raw_config, _, _)) = read_users_config(&PathBuf::from(users_file)) else {
+        return vec![];
+    };
+    account_audit_events_from_config(&raw_config)
+}
+
+pub(crate) fn update_user_account_status(
+    payload: &Value,
+    current_username: &str,
+) -> Result<Value, (StatusCode, Value)> {
     let capability = account_provisioning_capability();
     if capability.get("enabled").and_then(Value::as_bool) != Some(true) {
         return Err((
@@ -64,12 +84,16 @@ pub(crate) fn update_user_account_status(payload: &Value) -> Result<Value, (Stat
             }),
         ));
     }
-    update_user_in_file(&username, &action)
+    update_user_in_file(&username, &action, current_username)
 }
 
-fn update_user_in_file(username: &str, action: &str) -> Result<Value, (StatusCode, Value)> {
+fn update_user_in_file(
+    username: &str,
+    action: &str,
+    current_username: &str,
+) -> Result<Value, (StatusCode, Value)> {
     let users_file = PathBuf::from(env::var("JOB_SPRINT_USERS_FILE").unwrap_or_default());
-    let (raw_config, mut users, was_array) = read_users_config(&users_file).map_err(|message| {
+    let (raw_config, mut users, _was_array) = read_users_config(&users_file).map_err(|message| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             json!({"status": "FAIL", "error": "users_file_unreadable", "message": message}),
@@ -89,7 +113,8 @@ fn update_user_in_file(username: &str, action: &str) -> Result<Value, (StatusCod
             }),
         ));
     };
-    if text(&users[index], "role") == "owner" {
+    let target = users[index].clone();
+    if text(&target, "role") == "owner" || username == current_username {
         return Err((
             StatusCode::BAD_REQUEST,
             json!({
@@ -105,7 +130,21 @@ fn update_user_in_file(username: &str, action: &str) -> Result<Value, (StatusCod
     } else if let Some(object) = users[index].as_object_mut() {
         object.insert("disabled".to_string(), Value::Bool(action == "disable"));
     }
-    write_users_config(&users_file, raw_config, users, was_array).map_err(|message| {
+    let audit_events = append_account_audit_event(
+        &account_audit_events_from_config(&raw_config),
+        json!({
+            "actorUsername": current_username,
+            "action": action,
+            "username": username,
+            "role": text(&target, "role"),
+            "dataScope": text_or(&target, "dataScope", username),
+            "inviteBatch": text_or(&target, "inviteBatch", "default"),
+            "affectedUsernames": [username],
+            "affectedCount": 1,
+            "message": action_message(action, username)
+        }),
+    );
+    write_users_config_with_audit(&users_file, raw_config, users, audit_events).map_err(|message| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             json!({"status": "FAIL", "error": "users_file_unwritable", "message": message}),

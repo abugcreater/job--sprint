@@ -20,7 +20,7 @@
 |---|---|
 | `product/README.md` | 产品文档入口，说明当前主产品包和 product-ops 维护规则。 |
 | `product/it-job-coach-v1/` | 泛 IT AI 求职教练 v1 产品包，包含多版本 PRD、推荐版 PRD、团队评审裁决和可复用开发工作流。 |
-| `product/product-ops/` | 跨版本产品账本、文档治理、已知问题和可复用迭代工作流。 |
+| `product/product-ops/` | 跨版本产品账本、文档治理、每日主动迭代、已知问题、可复用迭代工作流和需求开发模板。 |
 
 ## 支撑文档
 

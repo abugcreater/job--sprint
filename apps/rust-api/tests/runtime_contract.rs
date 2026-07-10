@@ -5,7 +5,8 @@ use axum::{
 use job_sprint_rust_api::build_app_from_env;
 use serde_json::{Value, json};
 use sha2::{Digest, Sha256};
-use sqlx::Row;
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 use std::{env, fs};
 use tempfile::tempdir;
 use tower::ServiceExt;
@@ -66,10 +67,10 @@ async fn runtime_contract_matches_node_core_api() {
     .unwrap();
 
     let app = build_app_from_env().await.unwrap();
-    let db = sqlx::SqlitePool::connect(&format!("sqlite://{}", db_path.display()))
+    let db = SqlitePool::connect(&format!("sqlite://{}", db_path.display()))
         .await
         .unwrap();
-    let user_row = sqlx::query("SELECT username, role, data_scope FROM users WHERE username = ?")
+    let user_row = sqlx::query::query("SELECT username, role, data_scope FROM users WHERE username = ?")
         .bind("test-user")
         .fetch_one(&db)
         .await
@@ -359,7 +360,7 @@ async fn runtime_contract_matches_node_core_api() {
         res.json["data"]["interviewMistakes"][0]["id"],
         "runtime-mistake"
     );
-    let runtime_db_rows = sqlx::query("SELECT item_key, value FROM runtime_items WHERE scope = ?")
+    let runtime_db_rows = sqlx::query::query("SELECT item_key, value FROM runtime_items WHERE scope = ?")
         .bind("test-user")
         .fetch_all(&db)
         .await
@@ -496,7 +497,7 @@ async fn runtime_contract_matches_node_core_api() {
     assert_eq!(res.json["summary"]["reviewedCount"], 1);
     assert_eq!(res.json["summary"]["qualityLabel"], "建议贴合");
 
-    let feedback_row = sqlx::query(
+    let feedback_row = sqlx::query::query(
         "SELECT scope, profile_id, artifact_id, llm_run_id, artifact_type, decision FROM llm_feedback WHERE scope = ?",
     )
     .bind("test-user")
@@ -542,7 +543,7 @@ async fn runtime_contract_matches_node_core_api() {
     );
     assert_eq!(res.json["runs"][0]["status"], "fallback");
 
-    let llm_run_row = sqlx::query(
+    let llm_run_row = sqlx::query::query(
         "SELECT scope, profile_id, provider, status, artifact_count FROM llm_runs WHERE scope = ?",
     )
     .bind("test-user")
@@ -598,7 +599,7 @@ async fn runtime_contract_matches_node_core_api() {
             && run["latencyMs"].as_i64().unwrap_or(0) >= 0
     }));
 
-    let provider_run_row = sqlx::query(
+    let provider_run_row = sqlx::query::query(
         "SELECT provider, status, input_tokens, output_tokens, latency_ms, estimated_cost_usd FROM llm_runs WHERE id = ?",
     )
     .bind(&provider_llm_run_id)

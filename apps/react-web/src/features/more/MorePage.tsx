@@ -14,7 +14,7 @@ import {
   WifiOff,
   type LucideIcon
 } from "lucide-react";
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, useState } from "react";
 import { Link } from "react-router-dom";
 import { isOwnerSession } from "../../api/authClient";
 import { useAuthSessionContext } from "../../app/authSessionContext";
@@ -100,34 +100,26 @@ export function MorePage() {
                 查看保存状态、备份个人数据，并进入低频功能。
               </p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[420px]">
-              <MetricTile label="同步状态" value={dashboard.sync.label} icon={<WifiOff size={15} aria-hidden="true" />} />
-              <MetricTile label="本地证据" value={`${dashboard.storage.evidenceCount} 条`} />
-              <MetricTile label="完成记录" value={`${dashboard.storage.completedCount} 项`} />
-              <MetricTile label="延期记录" value={`${dashboard.storage.delayCount} 条`} />
-              <MetricTile label="画像/边界" value={`${dashboard.storage.profileCount}/${dashboard.storage.boundaryCount}`} />
-              <MetricTile label="AI 建议" value={`${dashboard.storage.aiArtifactCount} 条`} />
-              {owner ? <MetricTile label="后台记录" value={`${dashboard.storage.legacyDetectedCount} 类`} /> : null}
-            </div>
+            <DataSnapshot dashboard={dashboard} owner={owner} />
           </div>
         </header>
 
         <section className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-	          <aside className="min-w-0 space-y-4">
-	            <StatusPanel dashboard={dashboard} />
-	            {owner ? <FallbackPanel dashboard={dashboard} /> : <AccountPanel />}
-	          </aside>
+          <aside className="min-w-0 space-y-4">
+            <StatusPanel dashboard={dashboard} />
+            {owner ? <FallbackPanel dashboard={dashboard} /> : <AccountPanel />}
+          </aside>
 
           <section className="min-w-0 space-y-4">
             <ExportPanel
               items={owner ? dashboard.exportItems : dashboard.exportItems.filter((item) => item.id === "react-state")}
               exportMessage={exportMessage}
               onExportReactState={handleExportReactState}
-	              onImportReactState={handleImportReactState}
-	            />
-	            {owner ? <RollbackPanel dashboard={dashboard} /> : null}
-	            <NextEntries entries={owner ? [...dashboard.nextEntries, { label: "管理员中心", path: "/admin", description: "管理账号邀请和使用状态。" }] : [{ label: "查看统计", path: "/stats", description: "集中查看个人进展和数据完整度。" }, ...dashboard.nextEntries]} />
-	          </section>
+              onImportReactState={handleImportReactState}
+            />
+            {owner ? <RollbackPanel dashboard={dashboard} /> : null}
+            <NextEntries entries={owner ? [...dashboard.nextEntries, { label: "管理员中心", path: "/admin", description: "管理账号邀请和使用状态。" }] : dashboard.nextEntries} />
+          </section>
         </section>
       </section>
     </main>
@@ -141,23 +133,55 @@ function AccountPanel() {
       <p className="mt-4 break-words text-sm font-semibold leading-6 text-ink-500">
         当前账号可维护自己的求职画像、执行记录、机会、面试和复盘。需要换设备时，先导出个人数据备份。
       </p>
-      <Link to="/stats" className="secondary-button mt-4">
-        <ArrowRight size={16} aria-hidden="true" />
-        查看统计
-      </Link>
     </article>
   );
 }
 
-function MetricTile({ label, value, icon }: { label: string; value: string; icon?: ReactNode }) {
+function DataSnapshot({ dashboard, owner }: { dashboard: ReturnType<typeof buildMoreDashboard>; owner: boolean }) {
+  const rows = [
+    {
+      label: "执行闭环",
+      value: `完成 ${dashboard.storage.completedCount} 项 · 证据 ${dashboard.storage.evidenceCount} 条 · 延期 ${dashboard.storage.delayCount} 条`
+    },
+    {
+      label: "画像资产",
+      value: `画像 ${dashboard.storage.profileCount} 个 · 知识边界 ${dashboard.storage.boundaryCount} 条 · AI 建议 ${dashboard.storage.aiArtifactCount} 条`
+    },
+    {
+      label: "同步",
+      value: `${dashboard.sync.label} · ${dashboard.sync.lastSavedLabel}`
+    },
+    ...(owner
+      ? [
+          {
+            label: "后台检测",
+            value: `旧版记录 ${dashboard.storage.legacyDetectedCount} 类`
+          }
+        ]
+      : [])
+  ];
+
   return (
-    <div className="min-w-0 rounded-card border border-line bg-surface-0 p-3">
-      <p className="text-[11px] font-black text-ink-500">{label}</p>
-      <p className="mt-1 flex min-w-0 items-center gap-1.5 break-words text-sm font-extrabold leading-5 text-ink-900">
-        {icon}
-        <span className="min-w-0 break-words">{value}</span>
-      </p>
-    </div>
+    <aside className="min-w-0 border-t border-line pt-4 xl:min-w-[430px] xl:border-l xl:border-t-0 xl:pl-5 xl:pt-0" aria-labelledby="more-stat-snapshot-title">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h2 id="more-stat-snapshot-title" className="break-words text-base font-black text-ink-900">统计快照</h2>
+          <p className="mt-1 break-words text-sm font-semibold leading-6 text-ink-500">这里只保留摘要，详细趋势进入统计模块。</p>
+        </div>
+        <Link to="/stats" className="secondary-button min-h-10 shrink-0 px-3">
+          查看集中统计
+          <ArrowRight size={16} aria-hidden="true" />
+        </Link>
+      </div>
+      <dl className="mt-4 grid gap-3">
+        {rows.map((row) => (
+          <div key={row.label} className="min-w-0 border-t border-line pt-3 first:border-t-0 first:pt-0">
+            <dt className="text-xs font-black text-ink-500">{row.label}</dt>
+            <dd className="mt-1 break-words text-sm font-extrabold leading-6 text-ink-900">{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </aside>
   );
 }
 

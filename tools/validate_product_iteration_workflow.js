@@ -41,6 +41,11 @@ const docChecks = [
     tokens: ["current_thread_quarantine=true", "TEAM_ROOM_PARTIAL", "不能标 `TEAM_ROOM_PASS`"]
   },
   {
+    id: "requirement_development_template_reusable",
+    file: "docs/product/product-ops/requirement-development-template.md",
+    tokens: ["# 需求开发复用模板", "复制入口", "标准需求卡", "数据隔离清单", "UI/UX 实现约束", "分层验收命令", "最终报告模板"]
+  },
+  {
     id: "completion_audit_scope",
     file: "docs/product/it-job-coach-v1/completion-audit.md",
     tokens: ["PASS_WITH_LIMITS", "当前团队工作是 `TEAM_ROOM_PARTIAL`", "远端真实 LLM provider evidence", "Android 远端 HTTPS evidence"]
@@ -211,6 +216,12 @@ function validateProductIterationWorkflow(root = repoRoot) {
   ]);
   requireScriptContains(root, findings, "validate:product-iteration", [
     "node tools/validate_product_iteration_workflow.js"
+  ]);
+  requireScriptContains(root, findings, "diagnose:coach-runtime", [
+    "node tools/diagnose_coach_artifacts_runtime.js"
+  ]);
+  requireScriptContains(root, findings, "test:coach-runtime-diagnostic", [
+    "node tests/coach_artifacts_runtime_diagnostic_test.js"
   ]);
   validateCoachEvidence(root, findings, warnings);
 

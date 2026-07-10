@@ -1,5 +1,6 @@
 const { getAuthConfig, hasPermission } = require("./auth");
 const {
+  accountAuditEventsForManagement,
   accountProvisioningCapability,
   provisionUserAccountFromInvitation,
   updateUserAccountStatus,
@@ -114,7 +115,7 @@ async function handleCoachInvitations(req, res, authState) {
     const shouldProvisionAccount = Boolean(payload && (payload.provisionAccount || payload.password));
     let accountProvisioning = accountProvisioningCapability();
     if (shouldProvisionAccount) {
-      const result = provisionUserAccountFromInvitation({ ...payload, ...invitation });
+      const result = provisionUserAccountFromInvitation({ ...payload, ...invitation }, process.env, authState.userProfile?.username || "");
       if (!result.ok) {
         sendJson(res, result.statusCode || 400, {
           ok: false,
@@ -316,6 +317,7 @@ function responsePayload(authState, invitations) {
     storage: "server-json",
     invitations,
     configuredUsers: configuredUsers(authState),
+    accountAuditEvents: accountAuditEventsForManagement(),
     summary: summarizeInvitations(invitations),
     accountProvisioning: accountProvisioningCapability()
   };

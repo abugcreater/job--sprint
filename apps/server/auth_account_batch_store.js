@@ -4,6 +4,10 @@ const {
   resolveUsersFile,
   writeUsersConfig
 } = require("./auth_account_store");
+const {
+  appendAccountAuditEvent,
+  usersConfigWithAudit
+} = require("./auth_account_audit_store");
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{2,64}$/;
 
@@ -52,7 +56,22 @@ function updateUserAccountBatchStatus(payload, currentUsername, env = process.en
     : existingConfig.users.map((user) => affected.has(text(user, "username")) ? { ...user, disabled: action === "disable" } : user);
 
   if (affected.size > 0) {
-    writeUsersConfig(usersFile, existingConfig.wasArray ? nextUsers : { ...existingConfig.raw, users: nextUsers });
+    const affectedUsers = existingConfig.users.filter((user) => affected.has(text(user, "username")));
+    const auditEvents = appendAccountAuditEvent(existingConfig.accountAuditEvents, {
+      actorUsername: currentUsername,
+      action: `batch_${action}`,
+      username: "",
+      role: "",
+      dataScope: "",
+      inviteBatch: commonInviteBatch(affectedUsers),
+      affectedUsernames: Array.from(affected),
+      affectedCount: affected.size,
+      requestedCount: requested.length,
+      skippedCount: skippedUsers.length,
+      skippedUsers,
+      message: batchActionMessage(action, affected.size, skippedUsers.length)
+    });
+    writeUsersConfig(usersFile, usersConfigWithAudit(existingConfig, nextUsers, auditEvents));
   }
   const accountBatchAction = {
     status: affected.size > 0 ? "PASS" : "USER_ACTION_REQUIRED",
@@ -68,6 +87,11 @@ function updateUserAccountBatchStatus(payload, currentUsername, env = process.en
     statusCode: affected.size > 0 ? 200 : 400,
     accountBatchAction
   };
+}
+
+function commonInviteBatch(users) {
+  const batches = [...new Set(users.map((user) => text(user, "inviteBatch") || "default"))];
+  return batches.length === 1 ? batches[0] : "mixed";
 }
 
 function requestedUsernames(payload, users) {

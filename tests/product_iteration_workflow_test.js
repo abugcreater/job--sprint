@@ -24,7 +24,9 @@ function makeFixture(overrides = {}) {
         "npm --prefix apps/react-web test"
       ].join(" && "),
       "test:release": "npm test && npm run test:local-functional && npm run build:rust:linux && npm run build:server-delivery",
-      "validate:product-iteration": "node tools/validate_product_iteration_workflow.js"
+      "validate:product-iteration": "node tools/validate_product_iteration_workflow.js",
+      "diagnose:coach-runtime": "node tools/diagnose_coach_artifacts_runtime.js",
+      "test:coach-runtime-diagnostic": "node tests/coach_artifacts_runtime_diagnostic_test.js"
     }
   }, null, 2));
   writeFile(root, "docs/product/it-job-coach-v1/prd-options.md", [
@@ -65,6 +67,15 @@ function makeFixture(overrides = {}) {
     "current_thread_quarantine=true",
     "TEAM_ROOM_PARTIAL",
     "不能标 `TEAM_ROOM_PASS`"
+  ].join("\n"));
+  writeFile(root, "docs/product/product-ops/requirement-development-template.md", [
+    "# 需求开发复用模板",
+    "复制入口",
+    "标准需求卡",
+    "数据隔离清单",
+    "UI/UX 实现约束",
+    "分层验收命令",
+    "最终报告模板"
   ].join("\n"));
   writeFile(root, "docs/product/it-job-coach-v1/completion-audit.md", [
     "PASS_WITH_LIMITS",
@@ -133,12 +144,22 @@ function testMissingReactGateInNpmTestFails() {
       scripts: {
         test: "node tests/product_iteration_workflow_test.js",
         "test:release": "npm test && npm run test:local-functional && npm run build:rust:linux && npm run build:server-delivery",
-        "validate:product-iteration": "node tools/validate_product_iteration_workflow.js"
+        "validate:product-iteration": "node tools/validate_product_iteration_workflow.js",
+        "diagnose:coach-runtime": "node tools/diagnose_coach_artifacts_runtime.js",
+        "test:coach-runtime-diagnostic": "node tests/coach_artifacts_runtime_diagnostic_test.js"
       }
     }, null, 2)
   }));
   assert.strictEqual(report.ok, false);
   assert(report.findings.some((item) => item.script === "test" && item.missing.includes("npm --prefix apps/react-web test")));
+}
+
+function testMissingRequirementDevelopmentTemplateFails() {
+  const report = validateProductIterationWorkflow(makeFixture({
+    "docs/product/product-ops/requirement-development-template.md": "缺少可复用需求开发模板"
+  }));
+  assert.strictEqual(report.ok, false);
+  assert(report.findings.some((item) => item.id === "requirement_development_template_reusable"));
 }
 
 function testRemoteCoachEvidenceMustIncludeRoleQuestionBank() {
@@ -174,8 +195,9 @@ testFixturePassesWithRealProviderEvidence();
 testFixtureWarnsWhenProviderIsFallbackOnly();
 testMissingPrdVersionFails();
 testMissingReactGateInNpmTestFails();
+testMissingRequirementDevelopmentTemplateFails();
 testRemoteCoachEvidenceMustIncludeRoleQuestionBank();
 testMissingRemoteCoachEvidenceWarnsOnly();
 testCurrentRepoPassesProductIterationGate();
 
-console.log("产品迭代工作流门禁测试：7 项通过。");
+console.log("产品迭代工作流门禁测试：8 项通过。");

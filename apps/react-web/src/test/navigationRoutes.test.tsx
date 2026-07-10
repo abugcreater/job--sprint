@@ -73,6 +73,26 @@ describe("React Job Sprint module routing", () => {
     expect(within(nav).getByRole("link", { name: "更多" })).toHaveAttribute("aria-current", "page");
   });
 
+  it("keeps centralized stats out of business module headers", async () => {
+    const routes = [
+      { hash: "#/coach", heading: "AI 求职教练" },
+      { hash: "#/learn", heading: "知识边界" },
+      { hash: "#/interview", heading: "面试训练" },
+      { hash: "#/applications", heading: "机会验证" },
+      { hash: "#/review", heading: "今日复盘" }
+    ];
+
+    for (const route of routes) {
+      resetSprint(route.hash);
+      const view = render(<App />);
+
+      expect(await screen.findByRole("heading", { name: route.heading })).toBeInTheDocument();
+      expect(screen.queryByText("集中统计")).not.toBeInTheDocument();
+
+      view.unmount();
+    }
+  });
+
   it("redirects non-owner direct admin access to the ordinary more workspace", async () => {
     resetSprint("#/admin");
 

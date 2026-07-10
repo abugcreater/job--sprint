@@ -102,9 +102,14 @@ describe("React Job Sprint learning workspace", () => {
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "为 补 缺陷归因 面试表达补学习笔记" }));
+    expect(screen.getByText("先写一段学习笔记，才能保存到当前知识任务的 Evidence Gate。")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "保存学习笔记" })).toBeDisabled();
+
     fireEvent.change(screen.getByLabelText("学习笔记内容"), {
       target: { value: "手动补充：缺陷归因、失败样例、质量指标和项目证据。" }
     });
+    expect(screen.getByText("保存后会写入「补 缺陷归因 面试表达」的 Evidence Gate，并出现在学习笔记列表。")).toBeInTheDocument();
+
     fireEvent.click(screen.getByRole("button", { name: "保存学习笔记" }));
 
     expect(await screen.findByText("已补 1 条学习笔记")).toBeInTheDocument();

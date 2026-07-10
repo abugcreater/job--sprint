@@ -1,5 +1,6 @@
 use crate::app_schema_boundary_feedback::create_coach_boundary_feedback;
-use sqlx::{Row, SqlitePool};
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 
 pub(crate) async fn init_db(db: &SqlitePool) -> sqlx::Result<()> {
     create_users(db).await?;
@@ -13,7 +14,7 @@ pub(crate) async fn init_db(db: &SqlitePool) -> sqlx::Result<()> {
 }
 
 async fn create_users(db: &SqlitePool) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE TABLE IF NOT EXISTS users (
             username TEXT PRIMARY KEY,
@@ -32,7 +33,7 @@ async fn create_users(db: &SqlitePool) -> sqlx::Result<()> {
 }
 
 async fn create_runtime_items(db: &SqlitePool) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE TABLE IF NOT EXISTS runtime_items (
             scope TEXT NOT NULL,
@@ -49,7 +50,7 @@ async fn create_runtime_items(db: &SqlitePool) -> sqlx::Result<()> {
 }
 
 async fn create_llm_runs(db: &SqlitePool) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE TABLE IF NOT EXISTS llm_runs (
             id TEXT PRIMARY KEY,
@@ -76,7 +77,7 @@ async fn create_llm_runs(db: &SqlitePool) -> sqlx::Result<()> {
     .execute(db)
     .await?;
     ensure_llm_run_metric_columns(db).await?;
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE INDEX IF NOT EXISTS idx_llm_runs_scope_created_at
         ON llm_runs(scope, created_at DESC)
@@ -88,7 +89,7 @@ async fn create_llm_runs(db: &SqlitePool) -> sqlx::Result<()> {
 }
 
 async fn create_llm_feedback(db: &SqlitePool) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE TABLE IF NOT EXISTS llm_feedback (
             id TEXT PRIMARY KEY,
@@ -102,7 +103,7 @@ async fn create_llm_feedback(db: &SqlitePool) -> sqlx::Result<()> {
     )
     .execute(db)
     .await?;
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE INDEX IF NOT EXISTS idx_llm_feedback_scope_created_at
         ON llm_feedback(scope, created_at DESC)
@@ -114,7 +115,7 @@ async fn create_llm_feedback(db: &SqlitePool) -> sqlx::Result<()> {
 }
 
 async fn create_coach_onboarding_events(db: &SqlitePool) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE TABLE IF NOT EXISTS coach_onboarding_events (
             id TEXT PRIMARY KEY,
@@ -135,7 +136,7 @@ async fn create_coach_onboarding_events(db: &SqlitePool) -> sqlx::Result<()> {
     )
     .execute(db)
     .await?;
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE INDEX IF NOT EXISTS idx_coach_onboarding_events_scope_created_at
         ON coach_onboarding_events(scope, created_at DESC)
@@ -147,7 +148,7 @@ async fn create_coach_onboarding_events(db: &SqlitePool) -> sqlx::Result<()> {
 }
 
 async fn create_coach_invitations(db: &SqlitePool) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE TABLE IF NOT EXISTS coach_invitations (
             id TEXT PRIMARY KEY,
@@ -168,7 +169,7 @@ async fn create_coach_invitations(db: &SqlitePool) -> sqlx::Result<()> {
     .execute(db)
     .await?;
     ensure_coach_invitation_template_column(db).await?;
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE INDEX IF NOT EXISTS idx_coach_invitations_batch_status
         ON coach_invitations(invite_batch, status)
@@ -181,7 +182,7 @@ async fn create_coach_invitations(db: &SqlitePool) -> sqlx::Result<()> {
 
 async fn ensure_coach_invitation_template_column(db: &SqlitePool) -> sqlx::Result<()> {
     if !table_has_column(db, "coach_invitations", "template_version").await? {
-        sqlx::query(
+        sqlx::query::query(
             "ALTER TABLE coach_invitations ADD COLUMN template_version TEXT NOT NULL DEFAULT 'role-family-v1'",
         )
         .execute(db)
@@ -199,14 +200,14 @@ async fn ensure_llm_run_metric_columns(db: &SqlitePool) -> sqlx::Result<()> {
         ("estimated_cost_usd", "ALTER TABLE llm_runs ADD COLUMN estimated_cost_usd REAL"),
     ] {
         if !table_has_column(db, "llm_runs", name).await? {
-            sqlx::query(sql).execute(db).await?;
+            sqlx::query::query(sql).execute(db).await?;
         }
     }
     Ok(())
 }
 
 async fn table_has_column(db: &SqlitePool, table: &str, column: &str) -> sqlx::Result<bool> {
-    let rows = sqlx::query(&format!("PRAGMA table_info({table})"))
+    let rows = sqlx::query::query(&format!("PRAGMA table_info({table})"))
         .fetch_all(db)
         .await?;
     Ok(rows

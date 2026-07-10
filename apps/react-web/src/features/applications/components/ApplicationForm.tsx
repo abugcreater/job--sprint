@@ -21,30 +21,40 @@ export function ApplicationForm({
   onChange: (patch: Partial<ApplicationFormDraft>) => void;
   onToggleTag: (tag: string) => void;
   onRecord: () => void;
-  onCancelEdit: () => void;
-}) {
-  return (
-    <section className="command-panel" aria-labelledby="application-form-title">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-2 text-brand-700">
-          {isEditing ? <Edit3 size={18} aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}
-          <h2 id="application-form-title" className="text-base font-black text-ink-900">
-            {isEditing ? "编辑机会记录" : "本地机会记录"}
-          </h2>
-        </div>
-        {isEditing ? (
-          <button type="button" className="secondary-button min-h-10 px-3" onClick={onCancelEdit}>
-            <XCircle size={16} aria-hidden="true" />
+	  onCancelEdit: () => void;
+	}) {
+	  const subject = [draft.company, draft.role].filter(Boolean).join(" · ") || "未命名机会";
+	  const modeMessage = disabled
+	    ? "当前没有可绑定的机会任务，请先回到今日页生成机会行动后再保存。"
+	    : isEditing
+	      ? `正在编辑「${subject}」，保存后会更新这条机会记录和 Evidence Gate 证据。`
+	      : "新增机会记录会写入当前机会任务的 Evidence Gate，并成为 AI 教练的机会/JD 信号。";
+
+	  return (
+	    <section className="command-panel" aria-labelledby="application-form-title">
+	      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+	        <div className="flex items-center gap-2 text-brand-700">
+	          {isEditing ? <Edit3 size={18} aria-hidden="true" /> : <Send size={18} aria-hidden="true" />}
+	          <h2 id="application-form-title" className="text-base font-black text-ink-900">
+	            {isEditing ? "编辑机会记录" : "新增机会记录"}
+	          </h2>
+	        </div>
+	        {isEditing ? (
+	          <button type="button" className="secondary-button min-h-10 px-3" onClick={onCancelEdit}>
+	            <XCircle size={16} aria-hidden="true" />
             取消编辑
-          </button>
-        ) : null}
-      </div>
-      {validationMessage ? (
-        <p className="mt-3 rounded-control bg-risk-100 px-3 py-2 text-sm font-bold text-risk-600" aria-live="polite">
-          {validationMessage}
-        </p>
-      ) : (
-        <p className="mt-3 rounded-control bg-surface-0 px-3 py-2 text-sm font-bold text-ink-500">最少填写公司和岗位；其它字段可在沟通反馈后再补。</p>
+	          </button>
+	        ) : null}
+	      </div>
+	      <p className="mt-3 rounded-control bg-surface-0 px-3 py-2 text-sm font-bold leading-6 text-ink-500" role="status" aria-live="polite">
+	        {modeMessage}
+	      </p>
+	      {validationMessage ? (
+	        <p className="mt-3 rounded-control bg-risk-100 px-3 py-2 text-sm font-bold text-risk-600" role="alert">
+	          {validationMessage}
+	        </p>
+	      ) : (
+	        <p className="mt-3 rounded-control bg-surface-0 px-3 py-2 text-sm font-bold text-ink-500">最少填写公司和岗位；其它字段可在沟通反馈后再补。</p>
       )}
       {feedback ? (
         <p className="mt-3 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" aria-live="polite">

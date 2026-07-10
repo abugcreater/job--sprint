@@ -1,6 +1,7 @@
 use chrono::Utc;
 use serde_json::{Value, json};
-use sqlx::{Row, SqlitePool};
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 
 pub(crate) fn coach_llm_run_from_response(
     id: String,
@@ -45,7 +46,7 @@ pub(crate) fn coach_llm_run_from_response(
 }
 
 pub(crate) async fn insert_llm_run(db: &SqlitePool, scope: &str, run: &Value) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         INSERT INTO llm_runs (
             id, scope, profile_id, provider, model, prompt_version, schema_version,
@@ -105,7 +106,7 @@ pub(crate) async fn list_llm_runs(
     scope: &str,
     limit: i64,
 ) -> sqlx::Result<Vec<Value>> {
-    let rows = sqlx::query(
+    let rows = sqlx::query::query(
         r#"
         SELECT id, profile_id, provider, model, prompt_version, schema_version,
                input_summary_hash, artifact_count, schema_status, status, warning, error,

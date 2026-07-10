@@ -44,7 +44,11 @@ describe("React Job Sprint review workspace", () => {
     expect(screen.getByRole("heading", { name: "本周复盘" })).toBeInTheDocument();
     expect(screen.getByText("结果归因")).toBeInTheDocument();
     expect(await screen.findByText("当前可继续记录，稍后可同步结果快照。")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "保存结果快照" })).toBeDisabled();
+    expect(screen.getByText("本地模式不会写服务端快照；恢复服务端后再同步本周结果。")).toBeInTheDocument();
     expect(screen.getByLabelText("今天完成了什么可证明的结果？")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "保存复盘" })).toBeDisabled();
+    expect(screen.getByText("先填写至少一项复盘内容，才能保存到今日 Evidence Gate。")).toBeInTheDocument();
     expect(screen.getAllByText("本地模式，可继续记录").length).toBeGreaterThan(0);
   });
 
@@ -60,6 +64,7 @@ describe("React Job Sprint review workspace", () => {
     fireEvent.change(screen.getByLabelText("哪个回答还容易被追问？"), {
       target: { value: "Mock 服务边界和线上所有权还要说清楚。" }
     });
+    expect(screen.getByText("保存会写入当前复盘任务的 Evidence Gate，并更新今日复盘建议。")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "保存复盘" }));
 
     expect(await screen.findByText("已写 1")).toBeInTheDocument();
@@ -107,6 +112,7 @@ describe("React Job Sprint review workspace", () => {
 
     fireEvent.click(screen.getByRole("button", { name: /编辑复盘记录 Step14 KeepMe 项目点/ }));
     expect(screen.getByRole("heading", { name: "编辑今日复盘" })).toBeInTheDocument();
+    expect(screen.getByText("更新会覆盖这条本机复盘证据，并刷新 Evidence Gate 内容。")).toBeInTheDocument();
     fireEvent.change(screen.getByLabelText("今天完成了什么可证明的结果？"), {
       target: { value: "Step14 KeepMe Edited" }
     });
@@ -116,14 +122,27 @@ describe("React Job Sprint review workspace", () => {
 
     fireEvent.change(screen.getByLabelText("复盘记录筛选"), { target: { value: "all" } });
     fireEvent.click(screen.getByRole("button", { name: /删除复盘记录 Step14 DeleteMe 项目点/ }));
-    expect(within(localRecords()).queryAllByText(/Step14 DeleteMe 项目点/)).toHaveLength(0);
+    expect(within(localRecords()).getByText("确认删除这条本机复盘证据？删除后会从今日 Evidence Gate 移除。")).toBeInTheDocument();
+    expect(within(localRecords()).getAllByText(/Step14 DeleteMe 项目点/).length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: /取消删除复盘记录 Step14 DeleteMe 项目点/ }));
+    expect(within(localRecords()).queryByText("确认删除这条本机复盘证据？删除后会从今日 Evidence Gate 移除。")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /删除复盘记录 Step14 DeleteMe 项目点/ }));
+    fireEvent.click(screen.getByRole("button", { name: /确认删除复盘记录 Step14 DeleteMe 项目点/ }));
+    expect(within(localRecords()).queryByRole("button", { name: /删除复盘记录 Step14 DeleteMe 项目点/ })).not.toBeInTheDocument();
+    expect(within(localRecords()).getByText("已删除「Step14 DeleteMe 项目点」，可立即撤销并恢复到今日 Evidence Gate。")).toBeInTheDocument();
+    fireEvent.click(within(localRecords()).getByRole("button", { name: "撤销删除" }));
+    expect(screen.getByText("已恢复刚删除的复盘记录。")).toBeInTheDocument();
+    expect(within(localRecords()).getByRole("button", { name: /删除复盘记录 Step14 DeleteMe 项目点/ })).toBeInTheDocument();
+    expect(within(localRecords()).getAllByText(/Step14 DeleteMe 项目点/).length).toBeGreaterThan(0);
+    expect(within(localRecords()).queryByText("已删除「Step14 DeleteMe 项目点」，可立即撤销并恢复到今日 Evidence Gate。")).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "导出当前筛选" }));
     expect(screen.getByText(/react-review-export-v1/)).toBeInTheDocument();
     expect(screen.getAllByText(/Step14 KeepMe Edited/).length).toBeGreaterThan(0);
 
     const evidence = useSprintStore.getState().evidenceByTaskId[qaTaskIds.interview] ?? [];
-    expect(evidence).toHaveLength(1);
-    expect(evidence[0]?.content).toContain("Step14 KeepMe Edited");
+    expect(evidence).toHaveLength(2);
+    expect(evidence.some((item) => item.content.includes("Step14 KeepMe Edited"))).toBe(true);
+    expect(evidence.some((item) => item.content.includes("Step14 DeleteMe 项目点"))).toBe(true);
   });
 });
