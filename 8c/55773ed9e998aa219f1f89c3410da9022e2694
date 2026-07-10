@@ -1,0 +1,63 @@
+apps/rust-api/src/app_schema.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 2-3
+  s_8f6b4df0c955b0::t_0be97a4afea2e6 17,36,53,80,92,106,118,139,151,172,185,203,210
+apps/rust-api/src/coach_onboarding_events.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 3-4
+  s_8f6b4df0c955b0::t_86fa2ef07b654d 59,105
+apps/rust-api/tests/runtime_contract.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 9,70
+  s_8f6b4df0c955b0::t_05acc2cdc1baa2 8,73,363,500,546,602
+apps/rust-api/tests/runtime_contract/multi_user.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 6,291
+  s_8f6b4df0c955b0::t_120e1f0c4ae0c1 5,294,300,385,517
+apps/rust-api/tests/runtime_contract/boundary_feedback.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 4-5
+  s_8f6b4df0c955b0::t_f713d0624cfd9b 56
+apps/rust-api/Cargo.toml
+  s_8f6b4df0c955b0::t_8b88206b011981 21
+  s_8f6b4df0c955b0::t_caf181edf48e91 22
+apps/rust-api/src/app_bootstrap.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 3
+  s_8f6b4df0c955b0::t_a52f5b7d8e24da 74
+apps/rust-api/tests/runtime_contract/coach_onboarding.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 4-5
+  s_8f6b4df0c955b0::t_16f56c66f0f63d 90
+apps/rust-api/src/app_schema_boundary_feedback.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 1
+  s_8f6b4df0c955b0::t_02b5910a03752e 4,25
+apps/rust-api/src/llm_runs.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 3-4
+  s_8f6b4df0c955b0::t_dba80dd05cfde0 49,109
+apps/rust-api/src/coach_onboarding_report.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 2
+apps/rust-api/src/coach_boundary_feedback.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 3-4
+  s_8f6b4df0c955b0::t_4a735570dff246 38,84
+apps/rust-api/src/runtime_store.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 3-4
+  s_8f6b4df0c955b0::t_6aaa189051dfeb 19,73,104,134
+apps/rust-api/src/coach_invitations.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 3-4
+  s_8f6b4df0c955b0::t_39e2895c18524e 39,82,98,111
+apps/rust-api/src/llm_feedback.rs
+  s_8f6b4df0c955b0::t_caf181edf48e91 3-4
+  s_8f6b4df0c955b0::t_21e7de523253b1 34,73
+apps/rust-api/Cargo.lock
+  s_8f6b4df0c955b0::t_80adb9ada78534 165,441,565,754-755,937,1013,1063,1078,1142,1964,1982-1984,1986-1989
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "8c55773ed9e998aa219f1f89c3410da9022e2694",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
