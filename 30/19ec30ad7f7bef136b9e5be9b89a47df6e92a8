@@ -1,0 +1,73 @@
+apps/react-web/src/features/coach/components/LlmRunPanel.tsx
+  s_8f6b4df0c955b0::t_892c0d4ce51423 21,24
+apps/react-web/src/features/coach/components/InviteManagementPanel.tsx
+  s_8f6b4df0c955b0::t_a481491e9b6320 333
+docs/product/README.md
+  s_8f6b4df0c955b0::t_1035b718171078 23-26
+  s_8f6b4df0c955b0::t_7c263271900f22 16,22
+tests/product_iteration_workflow_test.js
+  s_8f6b4df0c955b0::t_57f30c4c7d5a24 28
+  s_8f6b4df0c955b0::t_4a8b1dcb508b3c 72-75,78-82,189-196,249
+  s_8f6b4df0c955b0::t_417291a9a67507 27,180
+  s_8f6b4df0c955b0::t_92513d82095d0f 29-30,76-77,83-113,197-215,250-251,256
+  s_8f6b4df0c955b0::t_5b84175011cb78 22
+docs/product/product-ops/requirement-development-template.md
+  s_8f6b4df0c955b0::t_6bfbb90f8d73b4 54-63,65-84,88-101,131-166
+  s_8f6b4df0c955b0::t_5541a70628204f 102-103,105-108,120-125,127-130,167
+  s_8f6b4df0c955b0::t_245060cb848051 1-2,4-32,36-49,52-53,168-181,183-191,195-200,212-285,287-302,304-340,343-344,346-372,389-498,500,503,509-514,517-519,521-532,534,536-567,570-580
+  s_8f6b4df0c955b0::t_dfd81446ebfa16 201-211,286,303,373-388
+  s_8f6b4df0c955b0::t_0bf6396e8b1810 341-342,345
+  s_8f6b4df0c955b0::t_179968bb97d14d 126
+  s_8f6b4df0c955b0::t_7c263271900f22 3,33-35,50-51,64,85-87,104,109-119,182,192-194,499,501-502,504-508,515-516,520,533,535,568-569,581-582
+docs/product/product-ops/README.md
+  s_8f6b4df0c955b0::t_245060cb848051 1-2,4-9,12,14-19
+  s_8f6b4df0c955b0::t_1035b718171078 10-11,21-23
+  s_8f6b4df0c955b0::t_7c263271900f22 3,13,20,24
+tools/validate_product_iteration_workflow.js
+  s_8f6b4df0c955b0::t_4a8b1dcb508b3c 44-45,67
+  s_8f6b4df0c955b0::t_ff1f9bcb3df67c 244,247
+  s_8f6b4df0c955b0::t_0d91c9575d49b9 43
+  s_8f6b4df0c955b0::t_5b84175011cb78 229
+  s_8f6b4df0c955b0::t_92513d82095d0f 46-66,234,242-247
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_1035b718171078 1-2,4,6
+docs/product/product-ops/daily-product-iteration.md
+  s_8f6b4df0c955b0::t_1035b718171078 1-2,4-21,23-31,38-65,68-72,74-89,91-94,96-102,105,107-123,125-139
+  s_8f6b4df0c955b0::t_a49b7cac457b8a 90
+  s_8f6b4df0c955b0::t_7c263271900f22 3,22,32-37,66-67,73,95,103-104,106,124
+docs/product/product-ops/gitflow-development-governance.md
+  s_8f6b4df0c955b0::t_2174e2bf8d81c3 1-175
+.github/workflows/gitflow-policy.yml
+  s_8f6b4df0c955b0::t_2174e2bf8d81c3 1-32
+CONTRIBUTING.md
+  s_8f6b4df0c955b0::t_2174e2bf8d81c3 1,3,5,7-25,28-29,33,35,37-43,45
+package.json
+  s_8f6b4df0c955b0::t_92513d82095d0f 53-56
+  s_8f6b4df0c955b0::t_26162b8d274a9f 52
+.github/pull_request_template.md
+  s_8f6b4df0c955b0::t_2174e2bf8d81c3 1-34
+tests/gitflow_policy_test.js
+  s_8f6b4df0c955b0::t_4c0f64ecf234cd 1-125
+tools/validate_gitflow_policy.js
+  s_8f6b4df0c955b0::t_28d0f1687fe541 1-175
+AGENTS.md
+  s_8f6b4df0c955b0::t_7c263271900f22 55-69
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_417291a9a67507 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "3019ec30ad7f7bef136b9e5be9b89a47df6e92a8",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.5"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
