@@ -1,7 +1,8 @@
 use super::request;
 use axum::http::{Method, StatusCode};
 use serde_json::json;
-use sqlx::{Row, SqlitePool};
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 
 pub async fn verify_boundary_feedback(app: &axum::Router, db: &SqlitePool, session_cookie: &str) {
     let mut res = request(
@@ -52,7 +53,7 @@ pub async fn verify_boundary_feedback(app: &axum::Router, db: &SqlitePool, sessi
             .contains("候选边界需要校准")
     );
 
-    let boundary_feedback_row = sqlx::query(
+    let boundary_feedback_row = sqlx::query::query(
         "SELECT scope, profile_id, suggestion_id, topic, decision, source_prompt_version FROM coach_boundary_feedback WHERE scope = ?",
     )
     .bind("test-user")

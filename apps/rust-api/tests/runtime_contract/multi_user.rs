@@ -2,7 +2,8 @@ use super::{clear_job_sprint_env, raw_request, request, response_cookie, set_env
 use axum::http::{Method, StatusCode};
 use job_sprint_rust_api::build_app_from_env;
 use serde_json::{Value, json};
-use sqlx::Row;
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 use tempfile::tempdir;
 
 struct CoachRuntimeSeed<'a> {
@@ -287,16 +288,16 @@ pub async fn verify_multi_user_permissions() {
     assert!(!res.raw.contains("Kai 后端画像"));
     assert!(!res.raw.contains("Kai 讲 MQ 幂等"));
 
-    let db = sqlx::SqlitePool::connect(&format!("sqlite://{}", db_path.display()))
+    let db = SqlitePool::connect(&format!("sqlite://{}", db_path.display()))
         .await
         .unwrap();
-    let kai_row = sqlx::query("SELECT value FROM runtime_items WHERE scope = ? AND item_key = ?")
+    let kai_row = sqlx::query::query("SELECT value FROM runtime_items WHERE scope = ? AND item_key = ?")
         .bind("kai")
         .bind("progress")
         .fetch_one(&db)
         .await
         .unwrap();
-    let alex_row = sqlx::query("SELECT value FROM runtime_items WHERE scope = ? AND item_key = ?")
+    let alex_row = sqlx::query::query("SELECT value FROM runtime_items WHERE scope = ? AND item_key = ?")
         .bind("alex")
         .bind("progress")
         .fetch_one(&db)
@@ -381,7 +382,7 @@ pub async fn verify_multi_user_permissions() {
         "2026-07-alpha"
     );
 
-    let invitation_row = sqlx::query(
+    let invitation_row = sqlx::query::query(
         "SELECT invite_batch, template_version, role_family, status FROM coach_invitations WHERE username = ?",
     )
     .bind("mia")
@@ -513,7 +514,7 @@ pub async fn verify_multi_user_permissions() {
     .await;
     assert_eq!(res.status, StatusCode::OK);
     assert_eq!(res.json["progress"]["bearer-block"], true);
-    let row = sqlx::query("SELECT value FROM runtime_items WHERE scope = ? AND item_key = ?")
+    let row = sqlx::query::query("SELECT value FROM runtime_items WHERE scope = ? AND item_key = ?")
         .bind("kai")
         .bind("progress")
         .fetch_one(&db)

@@ -1,6 +1,7 @@
 use chrono::Utc;
 use serde_json::{Value, json};
-use sqlx::{Row, SqlitePool};
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 
 pub(crate) fn coach_feedback_from_payload(id: String, payload: &Value) -> Result<Value, Value> {
     let artifact_id = required_text(payload, "artifactId")?;
@@ -30,7 +31,7 @@ pub(crate) async fn insert_llm_feedback(
     scope: &str,
     feedback: &Value,
 ) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         INSERT INTO llm_feedback (
             id, scope, profile_id, artifact_id, llm_run_id,
@@ -69,7 +70,7 @@ pub(crate) async fn list_llm_feedback(
     scope: &str,
     limit: i64,
 ) -> sqlx::Result<Vec<Value>> {
-    let rows = sqlx::query(
+    let rows = sqlx::query::query(
         r#"
         SELECT id, profile_id, artifact_id, llm_run_id, artifact_type, decision, reason, title, created_at
         FROM llm_feedback
