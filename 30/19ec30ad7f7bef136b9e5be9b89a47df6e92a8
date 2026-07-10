@@ -31,6 +31,7 @@ tools/validate_product_iteration_workflow.js
   s_8f6b4df0c955b0::t_92513d82095d0f 46-66,234,242-247
 docs/product/product-ops/daily-product-iteration-log.md
   s_8f6b4df0c955b0::t_1035b718171078 1-2,4,6
+  s_8f6b4df0c955b0::t_a90e697be47f3e 3,5,7-10
 docs/product/product-ops/daily-product-iteration.md
   s_8f6b4df0c955b0::t_1035b718171078 1-2,4-21,23-31,38-65,68-72,74-89,91-94,96-102,105,107-123,125-139
   s_8f6b4df0c955b0::t_a49b7cac457b8a 90
@@ -54,6 +55,10 @@ AGENTS.md
   s_8f6b4df0c955b0::t_7c263271900f22 55-69
 docs/product/product-ops/known-issues.md
   s_8f6b4df0c955b0::t_417291a9a67507 28
+docs/README.md
+  s_8f6b4df0c955b0::t_711574dbd59364 23
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_711574dbd59364 24
 ---
 {
   "schema_version": "authorship/3.0.0",
