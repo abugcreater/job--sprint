@@ -43,14 +43,14 @@ export function ProgressDashboard({ sprint, syncState, detectedLegacyKeys, lastS
       value: sprint.progress.evidenceMissing ? `缺 ${sprint.progress.evidenceMissing}` : "已就绪",
       detail: sprint.progress.evidenceMissing ? "完成前先补证据" : "今日证据可支撑完成",
       tone: sprint.progress.evidenceMissing ? "warn" as const : "success" as const,
-      progress: sprint.progress.evidenceMissing ? 45 : 100
+      progress: sprint.progress.evidenceMissing ? undefined : 100
     },
     {
       label: "同步状态",
       value: syncLabels[syncState],
       detail: lastSavedAt ? `本地保存 ${formatSavedAt(lastSavedAt)}` : legacyDetail(detectedLegacyKeys),
       tone: syncState === "failed" || syncState === "conflict" ? "risk" as const : "info" as const,
-      progress: syncState === "online" ? 100 : 55
+      progress: syncState === "online" ? 100 : undefined
     },
     {
       label: "计划日程",
@@ -62,7 +62,7 @@ export function ProgressDashboard({ sprint, syncState, detectedLegacyKeys, lastS
   ];
 
   return (
-    <section className="grid grid-cols-2 gap-3 md:grid-cols-4" aria-label="今日 AI 教练仪表盘">
+    <section className="status-strip" aria-label="今日 AI 教练状态带">
       {rows.map((row) => (
         <MetricCard key={row.label} icon={iconForMetric(row.label, syncState)} {...row} />
       ))}
@@ -94,15 +94,15 @@ function MetricCard({
   }[tone];
 
   return (
-    <article className="command-card p-3 md:p-4">
+    <article>
       <div className="flex items-center justify-between gap-3">
-        <p className="text-xs font-extrabold text-ink-500">{label}</p>
-        <span className={`grid size-8 place-items-center rounded-control ${toneClass}`}>{icon}</span>
+        <p className="text-[11px] font-black uppercase tracking-[0.12em] text-ink-500">{label}</p>
+        <span className={`grid size-7 place-items-center rounded-control ${toneClass}`}>{icon}</span>
       </div>
-      <p className="mt-2 text-xl font-black text-ink-900 md:mt-3 md:text-2xl">{value}</p>
-      <p className="mt-1 text-sm font-semibold text-ink-500">{detail}</p>
+      <p className="mt-3 text-xl font-black tracking-[-0.025em] text-ink-950 md:text-2xl">{value}</p>
+      <p className="mt-1 text-xs font-semibold leading-5 text-ink-500">{detail}</p>
       {typeof progress === "number" ? (
-        <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-0" aria-hidden="true">
+        <div className="mt-3 h-1 overflow-hidden rounded-full bg-surface-0" aria-hidden="true">
           <div className={`h-full rounded-full ${progressTone(tone)}`} style={{ width: `${Math.max(0, Math.min(progress, 100))}%` }} />
         </div>
       ) : null}

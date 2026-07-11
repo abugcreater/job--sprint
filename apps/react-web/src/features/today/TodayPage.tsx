@@ -1,5 +1,5 @@
-import { AlertTriangle, ArrowRight, CalendarPlus, CircleDot, Clock3, CloudOff, FileText, RefreshCw, Route, ShieldCheck, Sparkles, Upload, UserRound } from "lucide-react";
-import { useMemo, useState, type ReactNode } from "react";
+import { ArrowRight, CalendarPlus, CheckCircle2, CircleDot, Clock3, FileText, Route, ShieldCheck, Sparkles, Upload, UserRound } from "lucide-react";
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { buildCoachDashboard } from "../../data/coachAdapter";
 import { getLegacySnapshot, getLegacyStorageStatus } from "../../data/legacyAdapters";
@@ -38,9 +38,9 @@ export function TodayPage() {
     ? getEvidenceSummary(currentTask.id, sprint.date, evidenceByTaskId, legacySnapshot)
     : { evidence: [], hasEvidence: false, summary: "今日暂无任务，进入复盘即可。" };
   const completionRate = sprint.progress.total ? Math.round((sprint.progress.done / sprint.progress.total) * 100) : 0;
-  const requiredEvidenceCount = Math.max(currentTask?.evidenceRequired.length ?? 0, 4);
-  const readyEvidenceCount = Math.min(evidenceSummary.evidence.length, requiredEvidenceCount);
-  const currentTaskProgress = currentTask?.status === "done" ? 100 : evidenceSummary.hasEvidence ? 60 : 35;
+  const requiredEvidenceCount = currentTask?.evidenceRequired.length ?? 0;
+  const availableEvidenceTypes = new Set(evidenceSummary.evidence.map((item) => item.type));
+  const readyEvidenceCount = currentTask?.evidenceRequired.filter((type) => availableEvidenceTypes.has(type)).length ?? 0;
 
   const handleAddEvidence = (type: EvidenceType, title: string, content: string) => {
     if (!currentTask) return;
@@ -50,16 +50,15 @@ export function TodayPage() {
   return (
     <main className="app-main">
       <section className="app-page">
-        <header className="command-card p-4 md:p-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <header className="page-intro motion-enter">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
-              <p className="text-sm font-black text-brand-700">{sprint.date} {sprint.weekday}</p>
-              <h1 className="mt-1 text-3xl font-black leading-tight text-ink-900 md:text-4xl">今日 AI 教练</h1>
-              <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                {sprint.theme}。先确认下一步建议，再完成任务并补齐 Evidence Gate。
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">{sprint.date} {sprint.weekday} · Today</p>
+              <h1 className="mt-2 text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">今日 AI 教练</h1>
+              <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500 md:text-base">
+                {needsSetup ? "先建立你的求职基线，再让每一天只推进一个可验证动作。" : `${sprint.theme}。先完成当前任务，再用 Evidence Gate 留下可复盘证据。`}
               </p>
             </div>
-            <SyncRecoveryPill syncState={syncState} lastSavedAt={lastSavedAt} />
           </div>
         </header>
 
@@ -70,8 +69,8 @@ export function TodayPage() {
             profileName={coachDashboard.activeProfile?.targetRole}
           />
         ) : (
-          <>
-        <div className="order-2 md:order-none">
+          <div className="grid gap-5 motion-enter-delayed">
+        <div className="hidden md:block">
           <ProgressDashboard
             sprint={sprint}
             syncState={syncState}
@@ -79,78 +78,38 @@ export function TodayPage() {
             lastSavedAt={lastSavedAt}
             metrics={[
               { label: "今日目标", value: `${sprint.progress.done}/${sprint.progress.total}`, detail: `${completionRate}% 已完成`, tone: "brand", progress: completionRate },
-              { label: "Evidence Gate", value: `${readyEvidenceCount}/${requiredEvidenceCount}`, detail: sprint.progress.evidenceMissing ? "仍需补证据" : "今日证据就绪", tone: sprint.progress.evidenceMissing ? "warn" : "success", progress: Math.round((readyEvidenceCount / requiredEvidenceCount) * 100) },
-              { label: "专注时长", value: focusDurationLabel(currentTask), detail: currentTask?.durationLabel ?? "等待任务", tone: "info", progress: currentTaskProgress },
-              { label: "已完成", value: `${sprint.progress.done} 个`, detail: `待完成 ${sprint.progress.pending} 个`, tone: "success", progress: completionRate }
+              { label: "当前证据", value: `${evidenceSummary.evidence.length} 条`, detail: requiredEvidenceCount ? `覆盖 ${readyEvidenceCount}/${requiredEvidenceCount} 类要求` : "当前任务未配置证据类型", tone: evidenceSummary.hasEvidence ? "success" : "warn" },
+              { label: "计划投入", value: focusDurationLabel(currentTask), detail: currentTask?.durationLabel ?? "等待任务", tone: "info" },
+              { label: "计划周期", value: `Day ${sprint.day}`, detail: `共 ${sprint.totalDays} 天`, tone: "brand", progress: Math.round((sprint.day / sprint.totalDays) * 100) }
             ]}
           />
         </div>
 
-        <section className="order-1 grid gap-4 md:order-none xl:grid-cols-[minmax(0,1.45fr)_minmax(340px,0.85fr)]">
-          <div className="space-y-4">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.68fr)]">
+          <div className="space-y-5">
             <CurrentTaskCard
               task={currentTask}
               hasEvidence={evidenceSummary.hasEvidence}
-              progressPercent={currentTaskProgress}
               evidenceCount={evidenceSummary.evidence.length}
               onToggleComplete={() => currentTask && toggleTaskCompletion(currentTask.id)}
             />
             <EvidenceGate task={currentTask} evidence={evidenceSummary.evidence} summary={evidenceSummary.summary} onAddEvidence={handleAddEvidence} />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1">
-            <RiskPanel risks={sprint.risks} />
-            <DelayPanel task={currentTask} date={sprint.date} records={delayRecords} onAddDelay={addDelayRecord} />
-            <OralPracticeCard task={currentTask} onAddEvidence={handleAddEvidence} />
+          <TodayContextRail
+            advice={buildCoachAdvice(currentTask, evidenceSummary.hasEvidence, sprint.progress.evidenceMissing, coachDashboard)}
+            currentTask={currentTask}
+            nextTask={nextTask}
+            mustAnswer={sprint.mustAnswer}
+          />
+        </section>
+
+        <section className="grid gap-4 lg:grid-cols-3" aria-label="今日支持工具">
+          <RiskPanel risks={sprint.risks} />
+          <OralPracticeCard task={currentTask} onAddEvidence={handleAddEvidence} />
+          <DelayPanel task={currentTask} date={sprint.date} records={delayRecords} onAddDelay={addDelayRecord} />
+        </section>
           </div>
-        </section>
-
-        <section className="order-3 grid gap-4 md:order-none lg:grid-cols-2 xl:grid-cols-4" aria-label="今日辅助信息">
-          <InfoPanel title="AI 教练建议" icon={<Sparkles size={18} aria-hidden="true" />}>
-            <p className="text-sm font-bold leading-6 text-ink-700">
-              {buildCoachAdvice(currentTask, evidenceSummary.hasEvidence, sprint.progress.evidenceMissing, coachDashboard)}
-            </p>
-            <Link to="/coach" className="secondary-button mt-3 min-h-10 px-3 text-sm">
-              <ArrowRight size={15} aria-hidden="true" />
-              进入画像
-            </Link>
-          </InfoPanel>
-
-          <InfoPanel title="下一任务" icon={<ArrowRight size={18} aria-hidden="true" />}>
-            {nextTask ? (
-              <>
-                <p className="text-base font-black text-ink-900">{nextTask.title}</p>
-                <p className="mt-2 text-sm font-semibold leading-6 text-ink-500">
-                  {nextTask.durationLabel} · {nextTask.tags[0] ?? nextTask.type}
-                </p>
-              </>
-            ) : (
-              <p className="text-sm font-semibold leading-6 text-ink-500">没有后续任务，优先完成复盘。</p>
-            )}
-          </InfoPanel>
-
-          <InfoPanel title="今日必须回答" icon={<CircleDot size={18} aria-hidden="true" />}>
-            <ul className="space-y-2">
-              {sprint.mustAnswer.slice(0, 3).map((item) => (
-                <li key={item} className="text-sm font-bold leading-6 text-ink-700">
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </InfoPanel>
-
-          <InfoPanel title="资料入口" icon={<Route size={18} aria-hidden="true" />}>
-            <ul className="space-y-2">
-              {(currentTask?.sourceLabels ?? []).slice(0, 3).map((item) => (
-                <li key={item} className="flex gap-2 text-sm font-semibold leading-6 text-ink-700">
-                  <FileText className="mt-0.5 shrink-0 text-brand-700" size={15} aria-hidden="true" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </InfoPanel>
-        </section>
-          </>
         )}
       </section>
     </main>
@@ -180,36 +139,45 @@ function TodaySetupPanel({ hasProfile, boundaryCount, profileName }: { hasProfil
   ];
 
   return (
-    <section className="grid gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <article className="command-card p-5 md:p-6">
-        <p className="text-sm font-black text-brand-700">{hasProfile ? "画像已就绪" : "还没有求职画像"}</p>
-        <h2 className="mt-2 text-2xl font-black leading-tight text-ink-900 md:text-3xl">
-          {hasProfile ? "先生成今天的个人日历" : "先导入简历建档，再开始今日任务"}
+    <section className="overflow-hidden rounded-workbench border border-line bg-white shadow-panel motion-enter-delayed xl:grid xl:grid-cols-[minmax(0,1.1fr)_minmax(360px,0.7fr)]">
+      <article className="relative overflow-hidden bg-ink-950 p-6 text-white md:p-9 xl:min-h-[430px]">
+        <div className="absolute inset-y-0 right-0 w-1 bg-brand-600" aria-hidden="true" />
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-brand-100">01 / 建立个人基线</p>
+        <h2 className="mt-5 max-w-2xl text-3xl font-black leading-[1.15] tracking-[-0.035em] md:text-5xl">
+          {hasProfile ? "画像已经就绪，现在生成今天的唯一行动。" : "先导入真实经历，再开始今天的求职推进。"}
         </h2>
-        <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-600">
-          今日页只展示你自己画像生成的行动。没有画像或没有今日日历时，系统不会加载任何示例任务、旧日程或历史数据。
+        <p className="mt-5 max-w-2xl text-sm font-semibold leading-7 text-ink-200 md:text-base">
+          今日页只使用你自己的画像和日历，不加载示例任务、旧日程或其他账号的数据。系统先理解目标岗位与经历边界，再安排可验证动作。
         </p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          <Link to="/coach" className="primary-button">
+        <div className="mt-7 flex flex-wrap gap-3">
+          <Link to={hasProfile ? "/coach" : "/coach?entry=resume-import"} className="primary-button bg-brand-600 shadow-none hover:bg-brand-700">
             <Upload size={17} aria-hidden="true" />
-            {hasProfile ? "生成今日日历" : "导入简历建档"}
+            {hasProfile ? "生成今日日历" : "导入简历或 JD"}
           </Link>
-          <Link to="/stats" className="secondary-button">
-            查看统计
+          <Link to="/coach" className="secondary-button border-white/20 bg-white/5 text-white hover:bg-white/10">
+            查看画像设置
           </Link>
+        </div>
+        <div className="mt-8 flex items-start gap-3 border-t border-white/10 pt-5 text-xs font-bold leading-5 text-ink-300">
+          <ShieldCheck className="mt-0.5 shrink-0 text-brand-100" size={17} aria-hidden="true" />
+          <p>未建立画像前不展示任何演示数据；本地模式仍可继续记录。</p>
         </div>
       </article>
 
-      <aside className="command-panel">
-        <h2 className="text-lg font-black text-ink-900">开始顺序</h2>
-        <div className="mt-4 space-y-3">
+      <aside className="p-6 md:p-8" aria-label="开始顺序">
+        <p className="text-xs font-black uppercase tracking-[0.16em] text-ink-500">Setup path</p>
+        <h2 className="mt-2 text-2xl font-black tracking-[-0.025em] text-ink-950">三步进入今天的行动</h2>
+        <div className="mt-6 divide-y divide-line border-y border-line">
           {steps.map((step, index) => (
-            <div key={step.title} className="flex gap-3 rounded-card bg-surface-0 p-3">
-              <span className={`grid size-9 shrink-0 place-items-center rounded-control ${step.done ? "bg-success-100 text-success-600" : index === 0 || hasProfile ? "bg-brand-100 text-brand-700" : "bg-white text-ink-500"}`}>
-                {step.icon}
+            <div key={step.title} className="flex gap-4 py-5" aria-current={!step.done && (index === 0 || hasProfile) ? "step" : undefined}>
+              <span className={`grid size-10 shrink-0 place-items-center rounded-full border text-sm font-black ${step.done ? "border-success-600 bg-success-100 text-success-600" : index === 0 || hasProfile ? "border-brand-600 bg-brand-100 text-brand-700" : "border-line bg-surface-0 text-ink-400"}`}>
+                {step.done ? <CheckCircle2 size={18} aria-hidden="true" /> : String(index + 1).padStart(2, "0")}
               </span>
-              <div>
-                <p className="text-sm font-black text-ink-900">{step.title}</p>
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <p className="text-sm font-black text-ink-950">{step.title}</p>
+                  {index === 0 && !hasProfile ? <span className="text-[10px] font-black uppercase tracking-wide text-brand-700">当前</span> : null}
+                </div>
                 <p className="mt-1 text-xs font-semibold leading-5 text-ink-500">{step.detail}</p>
               </div>
             </div>
@@ -230,35 +198,69 @@ function buildCoachAdvice(task: Task | undefined, hasEvidence: boolean, evidence
   return `「${task.title}」证据已就绪，可以标记完成并进入复盘。`;
 }
 
-function SyncRecoveryPill({ syncState, lastSavedAt }: { syncState: string; lastSavedAt?: string }) {
-  const isOffline = syncState === "local_fallback" || syncState === "failed" || syncState === "conflict";
-  const tone = syncState === "failed" || syncState === "conflict" ? "bg-risk-100 text-risk-600" : isOffline ? "bg-warn-100 text-warn-600" : "bg-success-100 text-success-600";
-  const label = syncState === "online" ? "服务端在线" : syncState === "syncing" ? "同步中" : syncState === "failed" ? "同步失败" : syncState === "conflict" ? "待合并" : "本地模式";
-  const [message, setMessage] = useState("");
-
+function TodayContextRail({
+  advice,
+  currentTask,
+  nextTask,
+  mustAnswer
+}: {
+  advice: string;
+  currentTask?: Task;
+  nextTask?: Task;
+  mustAnswer: string[];
+}) {
   return (
-    <div className="flex flex-col items-start gap-2 rounded-card border border-line bg-surface-0 p-3 lg:items-end">
-      <span className={`status-chip ${tone}`}>
-        {isOffline ? <CloudOff size={14} aria-hidden="true" /> : <ShieldCheck size={14} aria-hidden="true" />}
-        {label}
-      </span>
-      <p className="text-xs font-semibold text-ink-500">
-        {lastSavedAt ? `本地保存 ${formatTime(lastSavedAt)}` : isOffline ? "可继续本地记录，数据不会丢失" : "同步状态正常"}
-      </p>
-      {isOffline ? (
-        <div className="flex flex-wrap gap-2">
-          <button type="button" className="secondary-button min-h-9 px-3 text-xs" onClick={() => setMessage("当前可继续本地记录；恢复服务端后会按本地数据继续同步。")}>
-            <AlertTriangle size={14} aria-hidden="true" />
-            查看原因
-          </button>
-          <button type="button" className="secondary-button min-h-9 px-3 text-xs" onClick={() => setMessage("已请求重试同步；若仍显示本地模式，请继续记录，稍后刷新页面复查。")}>
-            <RefreshCw size={14} aria-hidden="true" />
-            重试同步
-          </button>
+    <aside className="context-rail" aria-label="今日任务上下文">
+      <div className="flex items-center gap-2 text-brand-700">
+        <Sparkles size={18} aria-hidden="true" />
+        <h2 className="text-xs font-black uppercase tracking-[0.14em] text-ink-500">教练判断</h2>
+      </div>
+      <p className="mt-4 text-base font-black leading-7 text-ink-950">{advice}</p>
+      <Link to="/coach" className="mt-4 inline-flex min-h-11 items-center gap-2 text-sm font-black text-brand-700 transition hover:text-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-600">
+        查看画像与建议 <ArrowRight size={15} aria-hidden="true" />
+      </Link>
+
+      <div className="mt-6 border-t border-line pt-5">
+        <div className="flex items-center gap-2 text-ink-500">
+          <ArrowRight size={16} aria-hidden="true" />
+          <h2 className="text-xs font-black uppercase tracking-[0.14em]">下一动作</h2>
         </div>
-      ) : null}
-      {message ? <p className="max-w-xs text-xs font-bold leading-5 text-ink-700" aria-live="polite">{message}</p> : null}
-    </div>
+        <p className="mt-3 text-sm font-black leading-6 text-ink-950">{nextTask?.title ?? "完成当前任务后进入今日复盘"}</p>
+        {nextTask ? <p className="mt-1 text-xs font-semibold leading-5 text-ink-500">{nextTask.durationLabel} · {nextTask.tags[0] ?? nextTask.type}</p> : null}
+      </div>
+
+      <div className="mt-6 border-t border-line pt-5">
+        <div className="flex items-center gap-2 text-ink-500">
+          <CircleDot size={16} aria-hidden="true" />
+          <h2 className="text-xs font-black uppercase tracking-[0.14em]">必须回答</h2>
+        </div>
+        <ol className="mt-3 space-y-3">
+          {mustAnswer.slice(0, 3).map((item, index) => (
+            <li key={item} className="flex gap-3 text-sm font-bold leading-6 text-ink-700">
+              <span className="shrink-0 text-xs font-black text-brand-700">0{index + 1}</span>
+              <span>{item}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div className="mt-6 border-t border-line pt-5">
+        <div className="flex items-center gap-2 text-ink-500">
+          <Route size={16} aria-hidden="true" />
+          <h2 className="text-xs font-black uppercase tracking-[0.14em]">资料入口</h2>
+        </div>
+        {(currentTask?.sourceLabels ?? []).length ? (
+          <ul className="mt-3 space-y-2">
+            {(currentTask?.sourceLabels ?? []).slice(0, 3).map((item) => (
+              <li key={item} className="flex gap-2 text-xs font-semibold leading-5 text-ink-600">
+                <FileText className="mt-0.5 shrink-0 text-brand-700" size={14} aria-hidden="true" />
+                <span>{item}</span>
+              </li>
+            ))}
+          </ul>
+        ) : <p className="mt-3 text-xs font-semibold leading-5 text-ink-500">当前任务没有额外资料，先完成可验证产出。</p>}
+      </div>
+    </aside>
   );
 }
 
@@ -382,18 +384,6 @@ function DelayPanel({
   );
 }
 
-function HeaderChip({ label, value, icon }: { label: string; value: string; icon?: ReactNode }) {
-  return (
-    <div className="rounded-card border border-white/10 bg-white/[0.08] p-3">
-      <p className="text-[11px] uppercase text-white/45">{label}</p>
-      <p className="mt-1 flex items-center gap-1.5 text-sm leading-5 text-white">
-        {icon}
-        <span className="line-clamp-2">{value}</span>
-      </p>
-    </div>
-  );
-}
-
 function focusDurationLabel(task?: Task): string {
   if (!task) return "0 分钟";
   const minutes = durationMinutes(task.startAt, task.endAt);
@@ -411,23 +401,4 @@ function parseTime(value: string): number {
   const match = value.match(/(\d{1,2}):(\d{2})$/);
   if (!match) return 0;
   return Number(match[1]) * 60 + Number(match[2]);
-}
-
-function formatTime(value: string): string {
-  return new Intl.DateTimeFormat("zh-CN", {
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(new Date(value));
-}
-
-function InfoPanel({ title, icon, children }: { title: string; icon: ReactNode; children: ReactNode }) {
-  return (
-    <article className="command-panel transition-shadow duration-200">
-      <div className="mb-3 flex items-center gap-2 text-brand-700">
-        {icon}
-        <h2 className="text-sm font-black uppercase text-ink-500">{title}</h2>
-      </div>
-      {children}
-    </article>
-  );
 }

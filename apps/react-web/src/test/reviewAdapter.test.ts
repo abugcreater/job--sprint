@@ -206,7 +206,7 @@ describe("reviewAdapter", () => {
     });
 
     expect(analysis.dateRangeLabel).toBe("2026-06-26 至 2026-07-02");
-    expect(analysis.summary).toContain("本周闭环");
+    expect(analysis.summary).toContain("本周记录");
     expect(analysis.metrics).toContainEqual({ label: "证据", value: "3 条" });
     expect(analysis.signals.join(" ")).toContain("机会反馈 1 条");
     expect(analysis.risks.join(" ")).toContain("延期记录");

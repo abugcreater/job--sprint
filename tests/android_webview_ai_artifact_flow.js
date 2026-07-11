@@ -1,6 +1,6 @@
 async function exerciseAiArtifactDrafts({ page, clickWebView, prefix, assert }) {
   await clickWebView(page.getByRole("button", { name: "生成 AI 建议" }));
-  const artifactsPanel = page.locator("#coach-artifacts");
+  const artifactsPanel = page.locator("#coach-stage-advice");
   const artifactTitles = artifactsPanel.locator('input[aria-label^="AI 建议标题："]');
   const artifactBodies = artifactsPanel.locator('textarea[aria-label^="AI 建议内容："]');
   const artifactRejectReasons = artifactsPanel.locator('input[aria-label^="拒绝原因："]');
@@ -28,6 +28,9 @@ async function exerciseAiArtifactDrafts({ page, clickWebView, prefix, assert }) 
 }
 
 async function addCoachSchedule(page, clickWebView, draft) {
+  if (!await page.getByLabel("日程标题").count()) {
+    await clickWebView(page.getByRole("button", { name: "今日计划阶段" }));
+  }
   await page.getByLabel("日程标题").fill(draft.title);
   await page.getByLabel("日期").fill(draft.date);
   await page.getByLabel("开始").fill(draft.start);
@@ -35,12 +38,12 @@ async function addCoachSchedule(page, clickWebView, draft) {
   await page.getByLabel("日程类型").selectOption(draft.type);
   await page.getByLabel("安排原因").fill(draft.reason);
   await clickWebView(page.getByRole("button", { name: "新增日程" }));
-  await page.getByText(draft.title).waitFor();
+  await page.getByText("自定义日程已加入今日 AI 教练。", { exact: true }).waitFor();
 }
 
 function waitForArtifactCount(page, minCount) {
   return page.waitForFunction(
-    (count) => document.querySelectorAll('#coach-artifacts input[aria-label^="AI 建议标题："]').length >= count,
+    (count) => document.querySelectorAll('#coach-stage-advice input[aria-label^="AI 建议标题："]').length >= count,
     minCount,
     { timeout: 30000 }
   );
@@ -49,7 +52,7 @@ function waitForArtifactCount(page, minCount) {
 function artifactTypes(artifactTitles) {
   return artifactTitles.evaluateAll((inputs) => inputs.map((input) => {
     let node = input.parentElement;
-    while (node && node.id !== "coach-artifacts") {
+    while (node && node.id !== "coach-stage-advice") {
       const text = node.textContent || "";
       const type = ["knowledge_card", "interview_question", "daily_next_step"].find((candidate) => text.includes(candidate));
       if (type) return type;

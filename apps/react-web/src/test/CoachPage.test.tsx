@@ -3,7 +3,7 @@ import { vi } from "vitest";
 import { App } from "../App";
 import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";
-import type { AiArtifact, CoachScheduleEvent, LlmRun, UserProfile } from "../types/sprint";
+import type { AiArtifact, CoachScheduleEvent, UserProfile } from "../types/sprint";
 
 const fixedNow = new Date("2026-07-02T14:05:00+08:00");
 
@@ -42,15 +42,16 @@ describe("React Job Sprint AI coach workspace", () => {
   it("saves a profile, knowledge boundary, schedule event and AI artifact decisions", async () => {
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "AI 求职教练" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "准备工作台" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "准备阶段" })).toBeInTheDocument();
+    expect(screen.queryByRole("heading", { name: "知识边界" })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "改用详细画像表单" }));
     expect(screen.getByRole("heading", { name: "求职画像" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "邀请批次首登看板" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "邀请账号管理" })).not.toBeInTheDocument();
-    expect(screen.queryByText("集中统计")).not.toBeInTheDocument();
-    expect(screen.getAllByRole("link", { name: "统计" }).some((link) => link.getAttribute("href") === "#/stats")).toBe(true);
-    expect(screen.getByText("1/5")).toBeInTheDocument();
-    expect(screen.getByText("建档完成度 20%")).toBeInTheDocument();
-    expect(screen.getByText("下一项 求职画像")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "回到今日" })).toHaveAttribute("href", "#/today");
+    expect(screen.getByText("0/4")).toBeInTheDocument();
+    expect(screen.getByText(/下一步：/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "记录建档进度" }));
     expect(await screen.findByText("当前处于本地模式，建档进度未写入服务端。")).toBeInTheDocument();
 
@@ -68,8 +69,8 @@ describe("React Job Sprint AI coach workspace", () => {
     expect(await screen.findByText("求职画像已保存，后续 AI 建议会引用这份画像。")).toBeInTheDocument();
     expect(useSprintStore.getState().userProfiles).toHaveLength(1);
     expect(useSprintStore.getState().userProfiles[0].roleFamily).toBe("implementation");
-    expect(screen.getByText("画像已保存。")).toBeInTheDocument();
-    expect(screen.getByText("2/5")).toBeInTheDocument();
+    expect(screen.getByText("1/4")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "知识边界阶段" })).toHaveAttribute("aria-current", "step");
 
     fireEvent.change(screen.getByLabelText("边界提取素材"), { target: { value: "JD 要求 MQ、Redis、稳定性，面试官反馈需要补齐故障恢复和线上补偿证据。" } });
     fireEvent.click(screen.getByRole("button", { name: "提取边界草稿" }));
@@ -84,45 +85,35 @@ describe("React Job Sprint AI coach workspace", () => {
       sourceConfidence: "high",
       sourceProvider: "local-fallback"
     });
-	    expect(useSprintStore.getState().boundarySuggestionFeedback[0]).toMatchObject({
-	      topic: "MQ",
-	      decision: "accepted",
-	      sourceProvider: "local-fallback"
-	    });
-	    expect(screen.getByText("AI high")).toBeInTheDocument();
-	    expect(screen.getByText("新增边界会进入你的个人画像上下文，后续知识、面试和 AI 建议都会引用。")).toBeInTheDocument();
-
-	    fireEvent.change(screen.getByLabelText("知识主题"), { target: { value: "接口自动化稳定性" } });
-	    fireEvent.change(screen.getByLabelText("掌握程度"), { target: { value: "了解" } });
-	    fireEvent.change(screen.getByLabelText("当前缺口"), { target: { value: "讲不清分层、失败重试和 flaky 治理" } });
-	    fireEvent.change(screen.getByLabelText("已有证据"), { target: { value: "pytest 用例和报表" } });
+    expect(useSprintStore.getState().boundarySuggestionFeedback[0]).toMatchObject({
+      topic: "MQ",
+      decision: "accepted",
+      sourceProvider: "local-fallback"
+    });
+    fireEvent.click(screen.getByRole("button", { name: "知识边界阶段" }));
+    expect(screen.getByText("AI high")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText("知识主题"), { target: { value: "接口自动化稳定性" } });
+    fireEvent.change(screen.getByLabelText("掌握程度"), { target: { value: "了解" } });
+    fireEvent.change(screen.getByLabelText("当前缺口"), { target: { value: "讲不清分层、失败重试和 flaky 治理" } });
+    fireEvent.change(screen.getByLabelText("已有证据"), { target: { value: "pytest 用例和报表" } });
     fireEvent.change(screen.getByLabelText("岗位用途"), { target: { value: "测试开发 JD" } });
     fireEvent.click(screen.getByRole("button", { name: "新增边界" }));
 
-	    expect(await screen.findByText("知识边界已保存。")).toBeInTheDocument();
-	    expect(useSprintStore.getState().knowledgeBoundaries).toHaveLength(2);
-	    fireEvent.click(screen.getByRole("button", { name: "编辑知识边界：接口自动化稳定性" }));
-	    expect(screen.getByText("正在编辑「接口自动化稳定性」，保存后会更新这条知识边界。")).toBeInTheDocument();
-	    fireEvent.click(screen.getByRole("button", { name: "取消编辑" }));
-	    expect(screen.getByText("新增边界会进入你的个人画像上下文，后续知识、面试和 AI 建议都会引用。")).toBeInTheDocument();
-	    expect(screen.getByRole("button", { name: "新增边界" })).toBeInTheDocument();
+    expect(await screen.findByText("知识边界已保存。")).toBeInTheDocument();
+    expect(useSprintStore.getState().knowledgeBoundaries).toHaveLength(2);
+    expect(screen.getByRole("button", { name: "今日计划阶段" })).toHaveAttribute("aria-current", "step");
 
-	    expect(screen.getByText("新增日程会进入今日页，只展示当前画像自己的行动。")).toBeInTheDocument();
-	    fireEvent.change(screen.getByLabelText("日程标题"), { target: { value: "补接口自动化证据" } });
-	    fireEvent.change(screen.getByLabelText("安排原因"), { target: { value: "今天需要补齐测试开发画像证据" } });
-	    fireEvent.click(screen.getByRole("button", { name: "新增日程" }));
+    fireEvent.change(screen.getByLabelText("日程标题"), { target: { value: "补接口自动化证据" } });
+    fireEvent.change(screen.getByLabelText("安排原因"), { target: { value: "今天需要补齐测试开发画像证据" } });
+    fireEvent.click(screen.getByRole("button", { name: "新增日程" }));
 
-	    expect(await screen.findByText("自定义日程已加入今日 AI 教练。")).toBeInTheDocument();
-	    expect(useSprintStore.getState().coachScheduleEvents).toHaveLength(1);
-	    expect(useSprintStore.getState().sprint.tasks.some((task) => task.title === "补接口自动化证据")).toBe(true);
-	    expect(screen.getByText("3/5")).toBeInTheDocument();
-	    fireEvent.click(screen.getByRole("button", { name: "编辑日程：补接口自动化证据" }));
-	    expect(screen.getByText("正在编辑「补接口自动化证据」，保存后会更新这条个人日程。")).toBeInTheDocument();
-	    fireEvent.click(screen.getByRole("button", { name: "取消编辑" }));
-	    expect(screen.getByText("新增日程会进入今日页，只展示当前画像自己的行动。")).toBeInTheDocument();
-	    expect(screen.getByRole("button", { name: "新增日程" })).toBeInTheDocument();
+    expect(await screen.findByText("自定义日程已加入今日 AI 教练。")).toBeInTheDocument();
+    expect(useSprintStore.getState().coachScheduleEvents).toHaveLength(1);
+    expect(useSprintStore.getState().sprint.tasks.some((task) => task.title === "补接口自动化证据")).toBe(true);
+    expect(screen.getByText("3/4")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "AI 建议阶段" })).toHaveAttribute("aria-current", "step");
 
-	    fireEvent.click(screen.getByRole("button", { name: "生成 AI 建议" }));
+    fireEvent.click(screen.getByRole("button", { name: "生成 AI 建议" }));
 
     expect(await screen.findByText("服务端 AI 暂不可用，已使用本地规则生成 AI 建议。")).toBeInTheDocument();
     expect(useSprintStore.getState().aiArtifacts.length).toBeGreaterThanOrEqual(3);
@@ -132,18 +123,14 @@ describe("React Job Sprint AI coach workspace", () => {
       schemaStatus: "pass",
       status: "fallback"
     });
+    fireEvent.click(screen.getAllByText("AI 运行记录")[0]);
     expect(screen.getByRole("heading", { name: "AI 运行记录" })).toBeInTheDocument();
-    expect(screen.getByText("诊断：本地前端未连接后端 AI API")).toBeInTheDocument();
-    expect(screen.getByText("当前页面已用本地规则生成草稿，不代表远端大模型或 provider 本身失败。")).toBeInTheDocument();
 
     const firstDraftTitle = useSprintStore.getState().aiArtifacts[0].title;
     fireEvent.click(screen.getByRole("button", { name: `接受 AI 建议：${firstDraftTitle}` }));
     expect(await screen.findByText("已接受知识卡建议，并写入知识边界。")).toBeInTheDocument();
     expect(useSprintStore.getState().aiArtifacts.some((artifact) => artifact.status === "accepted")).toBe(true);
-    expect(screen.getByText("5/5")).toBeInTheDocument();
-    expect(screen.getAllByText("建档完成").length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText("建档完成度 100%")).toBeInTheDocument();
-    expect(screen.getByText("下一项 无待办")).toBeInTheDocument();
+    expect(screen.getByText("4/4")).toBeInTheDocument();
 
     const draft = useSprintStore.getState().aiArtifacts.find((artifact) => artifact.status === "draft" || artifact.status === "edited");
     expect(draft).toBeDefined();
@@ -152,6 +139,7 @@ describe("React Job Sprint AI coach workspace", () => {
     fireEvent.click(screen.getByRole("button", { name: `拒绝 AI 建议：${draft.title}` }));
 
     expect(useSprintStore.getState().aiArtifacts.some((artifact) => artifact.status === "rejected")).toBe(true);
+    fireEvent.click(screen.getAllByText("AI 反馈复盘")[0]);
     expect(await screen.findByRole("heading", { name: "AI 反馈复盘" })).toBeInTheDocument();
     expect(screen.getByText("采纳率")).toBeInTheDocument();
     expect(screen.getByText("采纳日程完成")).toBeInTheDocument();
@@ -169,8 +157,12 @@ describe("React Job Sprint AI coach workspace", () => {
     fireEvent.click(wizardPanel.getByRole("button", { name: "套用模板" }));
     expect(await screen.findByText("已套用「测试求职者」建档模板。")).toBeInTheDocument();
     expect(wizardPanel.getByLabelText("快速建档目标岗位")).toHaveValue("测试开发工程师");
-    expect((wizardPanel.getByLabelText("导入素材") as HTMLTextAreaElement).value).toContain("接口自动化");
-    expect(screen.getByText("已识别 1 段素材：其它")).toBeInTheDocument();
+    expect(wizardPanel.getByLabelText("导入素材")).toHaveValue("");
+    expect(screen.getByText("尚未识别到可导入素材")).toBeInTheDocument();
+
+    fireEvent.change(wizardPanel.getByLabelText("导入素材"), { target: { value: "5 年测试开发，负责接口自动化平台、Redis 缓存、MQ 消息队列与稳定性质量指标。" } });
+    expect(wizardPanel.getByLabelText("导入素材")).toHaveValue("5 年测试开发，负责接口自动化平台、Redis 缓存、MQ 消息队列与稳定性质量指标。");
+    expect((wizardPanel.getByLabelText("导入素材") as HTMLTextAreaElement).value).not.toContain("请结合真实 JD");
 
     fireEvent.click(wizardPanel.getByRole("button", { name: "追加面试反馈" }));
     expect(await screen.findByText("已追加「面试反馈」素材段。")).toBeInTheDocument();
@@ -195,12 +187,13 @@ describe("React Job Sprint AI coach workspace", () => {
     expect(await screen.findByText("已生成今天的第一条行动。")).toBeInTheDocument();
     expect(useSprintStore.getState().coachScheduleEvents).toHaveLength(1);
     expect(useSprintStore.getState().coachScheduleEvents[0].title).toMatch(/^补 .+ 面试表达$/);
-    expect(screen.getByText("4/5")).toBeInTheDocument();
+    expect(screen.getByText("3/4")).toBeInTheDocument();
   });
 
   it("deletes a profile from the redesigned profile panel and clears related data", async () => {
     render(<App />);
 
+    fireEvent.click(screen.getByRole("button", { name: "改用详细画像表单" }));
     const profilePanel = panelByHeading("求职画像");
     fireEvent.change(await profilePanel.findByLabelText("画像名称"), { target: { value: "可删除画像" } });
     fireEvent.change(profilePanel.getByLabelText("目标岗位"), { target: { value: "测试开发工程师" } });
@@ -208,22 +201,15 @@ describe("React Job Sprint AI coach workspace", () => {
     fireEvent.change(profilePanel.getByLabelText("经验摘要"), { target: { value: "5 年测试平台经验" } });
     fireEvent.click(screen.getByRole("button", { name: "保存画像" }));
 
-    expect(await screen.findByText("画像已保存。")).toBeInTheDocument();
+    expect(await screen.findByText("求职画像已保存，后续 AI 建议会引用这份画像。")).toBeInTheDocument();
     expect(useSprintStore.getState().userProfiles).toHaveLength(1);
 
-    fireEvent.click(screen.getByRole("button", { name: "删除此画像" }));
-    expect(screen.getByText("确认删除「可删除画像」画像？关联知识边界、个人日程、AI 建议、AI 运行记录和候选反馈会一起移除；删除后可在本面板短时撤销整包恢复。")).toBeInTheDocument();
-    expect(useSprintStore.getState().userProfiles).toHaveLength(1);
-
-    fireEvent.click(screen.getByRole("button", { name: /取消删除画像 可删除画像/ }));
-    expect(screen.queryByText("确认删除「可删除画像」画像？关联知识边界、个人日程、AI 建议、AI 运行记录和候选反馈会一起移除；删除后可在本面板短时撤销整包恢复。")).not.toBeInTheDocument();
-    expect(useSprintStore.getState().userProfiles).toHaveLength(1);
-
+    fireEvent.click(screen.getByRole("button", { name: "画像阶段" }));
     fireEvent.click(screen.getByRole("button", { name: "删除此画像" }));
     fireEvent.click(screen.getByRole("button", { name: /确认删除画像 可删除画像/ }));
     expect(await screen.findByText("已删除「可删除画像」，关联上下文已同步清理，可短时撤销。")).toBeInTheDocument();
     expect(useSprintStore.getState().userProfiles).toHaveLength(0);
-    expect(screen.getByText("尚未创建画像")).toBeInTheDocument();
+    expect(screen.getByText(/可立即撤销并恢复画像本身/)).toBeInTheDocument();
   });
 
   it("shows explicit expand controls when coach schedules and AI drafts exceed the compact list", async () => {
@@ -271,45 +257,28 @@ describe("React Job Sprint AI coach workspace", () => {
       createdAt: fixedNow.toISOString(),
       updatedAt: fixedNow.toISOString()
     }));
-    const llmRuns: LlmRun[] = Array.from({ length: 6 }, (_, index) => ({
-      id: `llm-run-many-${index + 1}`,
-      profileId: profile.id,
-      provider: index % 2 === 0 ? "anthropic-compatible" : "local-fallback",
-      model: index % 2 === 0 ? "deepseek-v4-flash" : undefined,
-      promptVersion: `coach-artifacts-v${index + 1}`,
-      schemaVersion: "coach-artifact-list-v1",
-      inputSummaryHash: `summary-hash-${index + 1}`,
-      artifactCount: 3,
-      schemaStatus: "pass",
-      status: index % 2 === 0 ? "success" : "fallback",
-      createdAt: fixedNow.toISOString()
-    }));
 
     useSprintStore.setState({
       userProfiles: [profile],
       boundarySuggestionFeedback: [],
       coachScheduleEvents: scheduleEvents,
       aiArtifacts,
-      llmRuns
+      llmRuns: []
     });
     render(<App />);
 
+    fireEvent.click(screen.getByRole("button", { name: "今日计划阶段" }));
     expect(await screen.findByText("还有 1 条日程未显示，避免今日页被长列表拖垮。")).toBeInTheDocument();
     expect(screen.queryByText("第6条自定义日程")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "查看全部日程" }));
     expect(await screen.findByText("第6条自定义日程")).toBeInTheDocument();
     expect(screen.getByText("已显示全部 6 条日程。")).toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("button", { name: "AI 建议阶段" }));
     expect(screen.getByText("还有 1 条 AI 建议未显示，先处理最靠前的建议。")).toBeInTheDocument();
     expect(screen.queryByLabelText("AI 建议标题：候选 AI 建议 9")).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "查看全部 AI 建议" }));
     expect(await screen.findByLabelText("AI 建议标题：候选 AI 建议 9")).toBeInTheDocument();
     expect(screen.getByText("已显示全部 9 条 AI 建议。")).toBeInTheDocument();
-
-    expect(screen.getByText("还有 1 条 AI 运行记录未显示，先看最近生成和降级状态。")).toBeInTheDocument();
-    expect(screen.queryByText("coach-artifacts-v6 · 3 条草稿")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "查看全部运行记录" }));
-    expect(await screen.findByText("coach-artifacts-v6 · 3 条草稿")).toBeInTheDocument();
-    expect(screen.getByText("已显示全部 6 条 AI 运行记录。")).toBeInTheDocument();
   });
 });

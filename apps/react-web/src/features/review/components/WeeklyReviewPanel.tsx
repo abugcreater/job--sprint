@@ -22,7 +22,7 @@ export function WeeklyReviewPanel({
 
   return (
     <article className="rounded-card border border-line bg-white p-5 shadow-soft" aria-labelledby="weekly-review-title">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+      <div>
         <div>
           <div className="flex items-center gap-2 text-brand-700">
             <CalendarDays size={18} aria-hidden="true" />
@@ -30,11 +30,6 @@ export function WeeklyReviewPanel({
           </div>
           <p className="mt-2 text-xs font-bold text-ink-500">{analysis.dateRangeLabel}</p>
           <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">{analysis.summary}</p>
-        </div>
-        <div className="rounded-card bg-brand-100 px-4 py-3 text-right">
-          <p className="text-xs font-black text-brand-700">闭环分</p>
-          <p className="mt-1 text-3xl font-black text-ink-900">{analysis.score}</p>
-          <p className="text-xs font-bold text-ink-500">{analysis.scoreLabel}</p>
         </div>
       </div>
 

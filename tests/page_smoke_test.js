@@ -96,7 +96,7 @@ async function getJson(server, requestPath, cookie) {
 
     res = await request(server, "GET", "/react/index.html", undefined, { cookie });
     assert.strictEqual(res.status, 200);
-    assert.match(res.raw, /React 版 Job Sprint/);
+    assert.match(res.raw, /Job Sprint \| 个人求职作战台/);
     assert.match(res.raw, /id="root"/);
     assert.match(res.raw, /src="\.\/assets\/index-[^"]+\.js"/);
 

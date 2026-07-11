@@ -1,5 +1,6 @@
 package com.kai.jobsprint;
 
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.webkit.WebView;
 
@@ -7,18 +8,25 @@ final class AndroidActivityLifecycleController {
     private final WebView webView;
     private final AndroidSpeechBridge speechBridge;
     private final AndroidRecorderBridge recorderBridge;
+    private final AndroidFileChooserController fileChooserController;
     private final int audioPermissionRequest;
 
     AndroidActivityLifecycleController(
         WebView webView,
         AndroidSpeechBridge speechBridge,
         AndroidRecorderBridge recorderBridge,
+        AndroidFileChooserController fileChooserController,
         int audioPermissionRequest
     ) {
         this.webView = webView;
         this.speechBridge = speechBridge;
         this.recorderBridge = recorderBridge;
+        this.fileChooserController = fileChooserController;
         this.audioPermissionRequest = audioPermissionRequest;
+    }
+
+    boolean onActivityResult(int requestCode, int resultCode, Intent data) {
+        return fileChooserController != null && fileChooserController.onActivityResult(requestCode, resultCode, data);
     }
 
     void onAudioPermissionResult(int requestCode, int[] grantResults) {
@@ -47,6 +55,9 @@ final class AndroidActivityLifecycleController {
         }
         if (recorderBridge != null) {
             recorderBridge.destroy();
+        }
+        if (fileChooserController != null) {
+            fileChooserController.cancelPendingRequest();
         }
         if (webView != null) {
             webView.destroy();

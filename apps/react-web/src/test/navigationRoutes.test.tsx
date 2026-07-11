@@ -1,4 +1,5 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react";
+import { StrictMode } from "react";
 import { App } from "../App";
 import { useSprintStore } from "../stores/sprintStore";
 import { buildQaSprint, qaProfile, qaScheduleEvents } from "./fixtures/coachFlow";
@@ -31,54 +32,89 @@ describe("React Job Sprint module routing", () => {
     resetSprint();
   });
 
-  it("navigates from the mobile bottom nav to coach, stats and more workspaces", async () => {
+  it("navigates through the five primary job-loop workspaces", async () => {
     render(<App />);
 
     const nav = screen.getByRole("navigation", { name: "移动端底部导航" });
-    const coachLink = within(nav).getByRole("link", { name: "画像" });
+    const coachLink = within(nav).getByRole("link", { name: "准备" });
 
     fireEvent.click(coachLink);
 
-    expect(await screen.findByRole("heading", { name: "AI 求职教练" })).toBeInTheDocument();
-    expect(screen.getByText(/建议必须经你接受后才会写入日程或知识边界/)).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "准备工作台" })).toBeInTheDocument();
+    expect(screen.getByRole("navigation", { name: "准备阶段" })).toBeInTheDocument();
     expect(coachLink).toHaveAttribute("aria-current", "page");
     expect(window.location.hash).toBe("#/coach");
 
-    const statsLink = within(nav).getByRole("link", { name: "统计" });
+    const opportunitiesLink = within(nav).getByRole("link", { name: "机会" });
+    fireEvent.click(opportunitiesLink);
 
-    fireEvent.click(statsLink);
+    expect(await screen.findByRole("heading", { name: "机会工作台" })).toBeInTheDocument();
+    expect(opportunitiesLink).toHaveAttribute("aria-current", "page");
+    expect(window.location.hash).toBe("#/applications");
 
-    expect(await screen.findByRole("heading", { name: "进展统计" })).toBeInTheDocument();
-    expect(screen.getByText(/这里集中查看个人执行/)).toBeInTheDocument();
-    expect(statsLink).toHaveAttribute("aria-current", "page");
-    expect(window.location.hash).toBe("#/stats");
+    const interviewLink = within(nav).getByRole("link", { name: "面试" });
+    fireEvent.click(interviewLink);
 
-    const moreLink = within(nav).getByRole("link", { name: "更多" });
-    fireEvent.click(moreLink);
+    expect(await screen.findByText("面试作战台")).toBeInTheDocument();
+    expect(interviewLink).toHaveAttribute("aria-current", "page");
+    expect(window.location.hash).toBe("#/interview");
 
-    expect(await screen.findByRole("heading", { name: "我的数据" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "进入复盘 记录今日事实、卡点和明日行动。" })).toBeInTheDocument();
-    expect(moreLink).toHaveAttribute("aria-current", "page");
-    expect(window.location.hash).toBe("#/more");
+    const reviewLink = within(nav).getByRole("link", { name: "复盘" });
+    fireEvent.click(reviewLink);
+
+    expect(await screen.findByRole("heading", { name: "今日复盘" })).toBeInTheDocument();
+    expect(reviewLink).toHaveAttribute("aria-current", "page");
+    expect(window.location.hash).toBe("#/review");
+
+    expect(within(nav).queryByRole("link", { name: "统计" })).not.toBeInTheDocument();
+    expect(within(nav).queryByRole("link", { name: "更多" })).not.toBeInTheDocument();
   });
 
-  it("keeps the more nav item active for the review route", async () => {
+  it("lands the resume import entry directly on the import workspace", async () => {
+    resetSprint("#/today");
+    useSprintStore.setState({ userProfiles: [] });
+
+    render(<StrictMode><App /></StrictMode>);
+
+    fireEvent.click(screen.getByRole("link", { name: /导入简历或 JD/ }));
+
+    expect(window.location.hash).toBe("#/coach?entry=resume-import");
+    expect(await screen.findByRole("heading", { name: "导入简历建档" })).toBeInTheDocument();
+    await waitFor(() => expect(document.getElementById("coach-quick-init")).toHaveFocus());
+  });
+
+  it("keeps the direct review nav item active for the review route", async () => {
     resetSprint("#/review");
 
     render(<App />);
 
     expect(await screen.findByRole("heading", { name: "今日复盘" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "历史" }));
     expect(screen.getByRole("heading", { name: "复盘历史" })).toBeInTheDocument();
     const nav = screen.getByRole("navigation", { name: "移动端底部导航" });
-    expect(within(nav).getByRole("link", { name: "更多" })).toHaveAttribute("aria-current", "page");
+    expect(within(nav).getByRole("link", { name: "复盘" })).toHaveAttribute("aria-current", "page");
+  });
+
+  it("moves focus to the main content without changing the current hash route", async () => {
+    resetSprint("#/interview");
+
+    render(<App />);
+
+    expect(screen.getByText("面试作战台")).toBeInTheDocument();
+    const skipLink = screen.getByRole("link", { name: "跳到主要内容" });
+    skipLink.focus();
+    fireEvent.keyDown(skipLink, { key: "Enter" });
+
+    expect(window.location.hash).toBe("#/interview");
+    await waitFor(() => expect(document.getElementById("app-content")).toHaveFocus());
   });
 
   it("keeps centralized stats out of business module headers", async () => {
     const routes = [
-      { hash: "#/coach", heading: "AI 求职教练" },
-      { hash: "#/learn", heading: "知识边界" },
+      { hash: "#/coach", heading: "准备工作台" },
+      { hash: "#/learn", heading: "学习工作台" },
       { hash: "#/interview", heading: "面试训练" },
-      { hash: "#/applications", heading: "机会验证" },
+      { hash: "#/applications", heading: "机会工作台" },
       { hash: "#/review", heading: "今日复盘" }
     ];
 

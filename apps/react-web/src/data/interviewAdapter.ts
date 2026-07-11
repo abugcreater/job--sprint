@@ -107,7 +107,7 @@ export function buildOralEvidenceContent(task: Task, question: InterviewQuestion
   const normalizedAnswer = answer.trim().replace(/\s+/g, " ");
   const clippedAnswer = normalizedAnswer.length > 220 ? `${normalizedAnswer.slice(0, 220)}...` : normalizedAnswer;
   const keywords = question.expectedKeywords.length ? `；关键词：${question.expectedKeywords.slice(0, 5).join("、")}` : "";
-  const score = analysis ? `；AI评分：${analysis.score}分（${analysis.level}，自检评分）；薄弱点：${analysis.gaps.join("、") || "暂无明显缺口"}；建议追问：${analysis.nextQuestions.join("、")}` : "";
+  const score = analysis ? `；规则覆盖：${analysis.score}分（${analysis.level}，本地 rubric）；薄弱点：${analysis.gaps.join("、") || "暂无明显缺口"}；建议追问：${analysis.nextQuestions.join("、")}` : "";
   return `React 面试页本地记录：围绕「${task.title}」完成一轮口述。题目：${question.question}；回答摘要：${clippedAnswer}${keywords}${score}`;
 }
 
@@ -149,7 +149,7 @@ export function scoreOralAnswer(task: Task, question: InterviewQuestionOption, a
     provider: "local_rubric",
     score,
     level,
-    summary: `本地规则评分 ${score} 分，${level}。${gaps.length ? `优先补：${gaps.slice(0, 2).join("；")}` : "结构和证据基本可用。"}`,
+    summary: `本地规则自检：${level}。${gaps.length ? `优先补：${gaps.slice(0, 2).join("；")}` : "结构和证据基本可用。"}`,
     keywordHits,
     keywordMisses,
     strengths: strengths.length ? strengths : ["已完成一轮可复盘口述"],
@@ -292,8 +292,10 @@ function buildRecentRecords(tasks: Task[], evidenceByTaskId: Record<string, Revi
 }
 
 function readScoreSummary(content: string): string {
-  const score = readContentField(content, "AI评分");
-  return score ? `AI评分：${score}` : "";
+  const ruleCoverage = readContentField(content, "规则覆盖");
+  if (ruleCoverage) return `规则自检：${ruleCoverage}`;
+  const legacyScore = readContentField(content, "AI评分");
+  return legacyScore ? `历史评分：${legacyScore}` : "";
 }
 
 function readDelimitedField(content: string, label: string): string[] {

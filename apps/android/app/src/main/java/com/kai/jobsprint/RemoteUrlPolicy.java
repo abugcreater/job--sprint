@@ -11,11 +11,6 @@ final class RemoteUrlPolicy {
         "job-sprint.example.com",
         "203.0.113.10"
     ));
-    private static final Set<String> ALLOWED_HTTP_REMOTE_HOSTS = new HashSet<>(Arrays.asList(
-        "job-sprint.example.com",
-        "203.0.113.10"
-    ));
-
     private RemoteUrlPolicy() {
     }
 
@@ -90,20 +85,16 @@ final class RemoteUrlPolicy {
         if (parsed == null || parsed.getHost() == null || parsed.getHost().trim().isEmpty()) {
             return false;
         }
-        String scheme = parsed.getScheme();
-        return "https".equalsIgnoreCase(scheme) || "http".equalsIgnoreCase(scheme);
+        return "https".equalsIgnoreCase(parsed.getScheme());
     }
 
     private static boolean isAllowedConfiguredRemoteSchemeAndHost(Uri parsed, String configuredRemoteUrl) {
         if (parsed == null) {
             return false;
         }
-        String scheme = parsed.getScheme();
         String host = parsed.getHost();
-        boolean allowedScheme = "https".equalsIgnoreCase(scheme)
-            || ("http".equalsIgnoreCase(scheme) && ALLOWED_HTTP_REMOTE_HOSTS.contains(host));
-        return (allowedScheme && isAllowedRemoteHost(host))
-            || (isUsableRemoteSchemeAndHost(parsed) && hostMatchesConfiguredUrl(host, configuredRemoteUrl));
+        return isUsableRemoteSchemeAndHost(parsed)
+            && (isAllowedRemoteHost(host) || hostMatchesConfiguredUrl(host, configuredRemoteUrl));
     }
 
     private static boolean hostMatchesConfiguredUrl(String host, String configuredRemoteUrl) {

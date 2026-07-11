@@ -10,7 +10,7 @@
 | Web 旧前端 | `schedule.html` + `assets/schedule.js` + `assets/schedule.css` | fallback 和历史兼容入口，后续冻结维护。 |
 | 服务端兼容入口 | Node.js CommonJS 自研 HTTP server | 认证、静态资源、`/api/runtime` JSON 兼容 API、AI proxy、public-safe 支持。 |
 | 服务端目标入口 | Rust + Axum + SQLx + SQLite | 覆盖核心 runtime 合同、session/bearer 权限、多用户 `dataScope`、legacy JSON 首次迁移和 AI 运行审计。 |
-| Android | Java Activity + WebView | 远端 HTTPS 优先；仅允许 `job-sprint.example.com` 远端 host；远端不可用时 fallback 到本地 React assets / 旧 public-safe。 |
+| Android | Java Activity + WebView | 正式构建从仓库外私有交付 env 注入生产 HTTPS React URL；远端地址必须为 HTTPS，Manifest 关闭 cleartext；公开仓库仅保留安全占位 host，远端不可用时才 fallback 到本地 React assets / 旧 public-safe。 |
 | 存储 | localStorage + `/api/runtime` + SQLite | React 本地优先启动后与服务端同步；Rust 侧使用 SQLite 持久化 users、runtime items、`llm_runs` 和 `llm_feedback`。 |
 | AI | Anthropic-compatible provider + local fallback + LLM run/feedback audit | provider 未配置或失败时退回本地评分/生成；Rust 生成 AI 教练草稿时会尝试 Anthropic-compatible provider，并把 provider、model、token、延迟、可选成本和 schema 状态写入 `llm_runs`，采纳/拒绝反馈写入 `llm_feedback`。 |
 | 验证 | Node tests、Playwright、Vitest、public-safe scan、Android release signing gate、workspace-boundaries validator、architecture-quality validator、functional-coverage validator、feature-parity validator、goal-acceptance validator | 根 `npm test` 应保持只读；release 构建另跑；架构质量门禁用于防止入口文件、兼容层和旧 JS 继续膨胀，并补充 Rust `mod`、Node `require`、Java `new Class` 的入口语义边界检查；功能覆盖门禁用于防止 Web/Android/Rust UI 验收脚本缺失关键业务流；功能对齐门禁用于防止 Web/Android 本地功能矩阵漂移；目标验收门禁用于防止把局部 PASS 冒充 7 项目标全部完成。 |
@@ -76,7 +76,7 @@ docs/archive/                      旧文档归档、边界盘点和删除处置
 6. provider 配置存在时，AI 评分、知识库生成和录音转写经服务端代理；否则本地 fallback；Node 兼容层 AI HTTP handler、权限校验和请求解析已集中到 `ai_routes.js`，AI 评分 fallback、知识库生成 fallback、provider timeout、JSON 抽取和 AI 结果规范化已集中到 `ai_tools.js`，AI 教练机会/JD 信号规范化和规则版 JD 解析在 `coach_opportunity_signals.js`，`/api/coach/feedback` 已集中到 `coach_feedback_routes.js` 并按 `dataScope` 写入 `progress.coachFeedback`；Rust AI HTTP handler 已集中到 `ai_routes.rs`，AI 评分与知识库 payload/fallback 判定在 `ai_tools.rs`，AI 教练草稿 provider 调用与降级在 `coach_ai_provider.rs`，请求/响应 schema 标准化在 `coach_ai_provider_format.rs`，机会/JD 信号规范化在 `coach_opportunity_signals.rs`，规则版 JD 解析在 `coach_jd_insights.rs`，生成会通过 `llm_runs.rs` 写入当前账号 scope 下的独立 `llm_runs` 审计行，并可由 `/api/coach/llm-runs` 读回；React 接受/拒绝 AI 草稿会调用 `/api/coach/feedback`，Rust 通过 `llm_feedback.rs` 写入当前账号 scope 下的独立 `llm_feedback` 行并可读回；ASR 上传校验与 multipart 音频解析在 `ai_transcribe.rs`。
 7. Rust 静态资源 fallback 的 HTTP 分支已集中到 `static_routes.rs`，路径归一化、public-safe 映射、content-type 和 no-store 判定保留在 `static_files.rs`。
 8. Rust 启动、SQLite connect/init、用户同步、legacy JSON 迁移、body limit 和监听入口已集中到 `app_bootstrap.rs`，`lib.rs` 保留薄路由表、health 和 JSON body 解析。
-9. Android 默认加载 allowlist 内的远端 HTTPS React；远端不可用时加载本地 React assets，再退到旧 public-safe fallback。
+9. Android 正式构建从私有交付 env 注入 allowlist 内的远端 HTTPS React，`RemoteUrlPolicy` 拒绝 HTTP 且 Manifest 关闭 cleartext；远端不可用时加载本地 React assets，再退到旧 public-safe fallback。正式远端验收会拒绝任何 `file:///android_asset/...` 回退证据。
 
 ## 安全边界
 

@@ -114,7 +114,11 @@ function startRustServer(port) {
     }),
     JOB_SPRINT_AUTH_USER: "",
     JOB_SPRINT_AUTH_PASSWORD: "",
-    JOB_SPRINT_AUTH_PASSWORD_SHA256: ""
+    JOB_SPRINT_AUTH_PASSWORD_SHA256: "",
+    ANTHROPIC_BASE_URL: "",
+    ANTHROPIC_AUTH_TOKEN: "",
+    ANTHROPIC_MODEL: "",
+    AI_PROVIDER_TIMEOUT_MS: ""
   };
   return spawn("cargo", ["run", "--quiet", "--manifest-path", "apps/rust-api/Cargo.toml"], {
     cwd: ROOT,
@@ -142,12 +146,15 @@ async function fillApplication(page, draft) {
   const form = page.locator("section[aria-labelledby='application-form-title']");
   await form.getByLabel("公司").fill(draft.company);
   await form.getByLabel("岗位").fill(draft.role);
+  await form.getByLabel("状态").selectOption(draft.status);
+  for (const details of [form.locator("details").nth(0), form.locator("details").nth(1)]) {
+    if (!await details.evaluate((element) => element.open)) await details.locator("summary").click();
+  }
   await form.getByLabel("来源").fill(draft.source);
   await form.getByLabel("薪资范围").fill(draft.salaryRange);
   await form.getByLabel("城市").fill(draft.city);
   await form.getByLabel("简历版本").fill(draft.resumeVersion);
   await form.getByLabel("JD 关键词").fill(draft.keywords);
-  await form.getByLabel("状态").selectOption(draft.status);
   await form.getByLabel("沟通反馈").fill(draft.hrFeedback);
   await form.getByLabel("反馈摘要").fill(draft.notes);
 }
@@ -155,23 +162,27 @@ async function fillApplication(page, draft) {
 async function fillReview(page, draft) {
   const form = page.locator("section[aria-labelledby='review-form-title']");
   await form.getByLabel("今天完成了什么可证明的结果？").fill(draft.projectPoint);
+  await form.getByLabel("今天最大的卡点是什么？").fill(draft.pathIssues);
+  await form.getByLabel("明天第一件事是什么？").fill(draft.tomorrowPriority);
+  const optionalDetails = form.locator("details");
+  if (!await optionalDetails.evaluate((element) => element.open)) {
+    await optionalDetails.locator("summary").click();
+  }
   await form.getByLabel("哪些面试题或表达已经能回答？").fill(draft.interviewQuestions);
   await form.getByLabel("今天补强了哪个知识边界？").fill(draft.javaPoint);
-  await form.getByLabel("今天卡在哪里？").fill(draft.pathIssues);
   await form.getByLabel("哪个回答还容易被追问？").fill(draft.fragileAnswers);
-  await form.getByLabel("明天第一件事是什么？").fill(draft.tomorrowPriority);
 }
 
 function waitForArtifactCount(page, minCount) {
   return page.waitForFunction(
-    (count) => document.querySelectorAll('#coach-artifacts input[aria-label^="AI 建议标题："]').length >= count,
+    (count) => document.querySelectorAll('#coach-stage-advice input[aria-label^="AI 建议标题："]').length >= count,
     minCount,
     { timeout: 30000 }
   );
 }
 
 async function ensureArtifactCount(page, minCount) {
-  const artifactInputs = page.locator('#coach-artifacts input[aria-label^="AI 建议标题："]');
+  const artifactInputs = page.locator('#coach-stage-advice input[aria-label^="AI 建议标题："]');
   if (await artifactInputs.count() >= minCount) return;
   await page.getByRole("button", { name: "生成 AI 建议" }).click();
   await waitForArtifactCount(page, minCount);
@@ -194,7 +205,7 @@ function waitForAcceptedArtifact(page, title) {
   return page.waitForFunction(
     (artifactTitle) => {
       const label = `接受 AI 建议：${artifactTitle}`;
-      return [...document.querySelectorAll("#coach-artifacts button[aria-label]")]
+      return [...document.querySelectorAll("#coach-stage-advice button[aria-label]")]
         .some((button) => button.getAttribute("aria-label") === label && button.disabled);
     },
     title,
@@ -204,7 +215,7 @@ function waitForAcceptedArtifact(page, title) {
 
 async function exerciseCoachAiDrafts(page, prefix) {
   await page.getByRole("button", { name: "生成 AI 建议" }).click();
-  const artifactsPanel = page.locator("#coach-artifacts");
+  const artifactsPanel = page.locator("#coach-stage-advice");
   const artifactTitles = artifactsPanel.locator('input[aria-label^="AI 建议标题："]');
   const artifactBodies = artifactsPanel.locator('textarea[aria-label^="AI 建议内容："]');
   await waitForArtifactCount(page, 2);
@@ -221,13 +232,14 @@ async function exerciseCoachAiDrafts(page, prefix) {
   await artifactBodies.nth(actionIndex).fill(`${prefix}AI 日程草稿内容：先补机制，再补项目证据。`);
   await artifactsPanel.getByRole("button", { name: "保存编辑" }).nth(actionIndex).click();
   await artifactsPanel.getByRole("button", { name: `接受 AI 建议：${prefix}AI 日程草稿 已编辑` }).click();
-  await page.getByText(`${prefix}AI 日程草稿 已编辑`).waitFor();
+  await waitForAcceptedArtifact(page, `${prefix}AI 日程草稿 已编辑`);
   await ensureArtifactCount(page, 3);
 }
 
 async function exerciseCoachWorkspace(page, baseUrl, prefix) {
-    await gotoRoute(page, baseUrl, "/coach", "AI 求职教练");
-  const profilePanel = page.locator("#coach-profile");
+    await gotoRoute(page, baseUrl, "/coach", "准备工作台");
+  await page.getByRole("button", { name: "改用详细画像表单" }).click();
+  const profilePanel = page.getByLabel("当前准备阶段：确认求职画像");
   await profilePanel.getByLabel("画像名称").fill(`${prefix}画像`);
   await profilePanel.getByLabel("角色族", { exact: true }).selectOption("backend");
   await profilePanel.getByLabel("目标岗位", { exact: true }).fill(`${prefix}Java 后端教练`);
@@ -240,7 +252,7 @@ async function exerciseCoachWorkspace(page, baseUrl, prefix) {
   await profilePanel.getByLabel("项目证据").fill(`${prefix}项目证据：搜索链路和 MQ 幂等。`);
   await profilePanel.getByLabel("不可夸大边界").fill(`${prefix}不可夸大边界：不编造大模型训练经历。`);
   await profilePanel.getByRole("button", { name: "保存画像" }).click();
-  await page.getByText("画像已保存。", { exact: true }).waitFor();
+  await page.getByText("求职画像已保存，后续 AI 建议会引用这份画像。", { exact: true }).waitFor();
 
   await page.getByLabel("知识主题").fill(`${prefix}MQ 幂等边界`);
   await page.getByLabel("掌握程度").selectOption("了解");
@@ -248,7 +260,7 @@ async function exerciseCoachWorkspace(page, baseUrl, prefix) {
   await page.getByLabel("已有证据").fill(`${prefix}已有证据：项目里做过消息去重。`);
   await page.getByLabel("岗位用途").fill(`${prefix}岗位用途：后端稳定性追问。`);
   await page.getByRole("button", { name: "新增边界" }).click();
-  await page.getByText(`${prefix}MQ 幂等边界`).waitFor();
+  await page.getByText("知识边界已保存。", { exact: true }).waitFor();
 
   await page.getByLabel("日程标题").fill(`${prefix}自定义日程`);
   await page.getByLabel("日期").fill(todayDateInShanghai());
@@ -257,7 +269,7 @@ async function exerciseCoachWorkspace(page, baseUrl, prefix) {
   await page.getByLabel("日程类型").selectOption("interview");
   await page.getByLabel("安排原因").fill(`${prefix}安排原因：今晚用口述验证知识边界。`);
   await page.getByRole("button", { name: "新增日程" }).click();
-  await page.getByText(`${prefix}自定义日程`).waitFor();
+  await page.getByText("自定义日程已加入今日 AI 教练。", { exact: true }).waitFor();
 
   await exerciseCoachAiDrafts(page, prefix);
 }
@@ -297,7 +309,7 @@ async function runUiFlow(baseUrl) {
     await page.evaluate(() => window.localStorage.clear());
 
     await gotoRoute(page, baseUrl, "/today", "今日 AI 教练");
-    await page.getByRole("heading", { name: /先导入简历建档/ }).waitFor();
+    await page.getByRole("heading", { name: /先导入真实经历/ }).waitFor();
     await exerciseCoachWorkspace(page, baseUrl, "RustSQLite");
     await gotoRoute(page, baseUrl, "/today", "今日 AI 教练");
     const lockedButton = page.getByRole("button", { name: "先补证据" });
@@ -317,13 +329,13 @@ async function runUiFlow(baseUrl) {
 
     await gotoRoute(page, baseUrl, "/interview", "面试训练");
     await page.getByLabel("我的口述回答").fill("Rust SQLite UI 测试口述证据。");
-    await page.getByRole("button", { name: "AI评分并生成复盘" }).click();
-    await page.getByLabel("AI评分结果").waitFor();
-    await page.getByRole("button", { name: "保存口述与AI分析" }).click();
-    await page.getByText("口述训练证据").first().waitFor();
+    await page.getByRole("button", { name: "按规则自检" }).click();
+    await page.getByLabel("规则自检结果").waitFor();
+    await page.getByRole("button", { name: "保存口述证据" }).click();
+    await page.getByText("已保存口述证据，并写入 Evidence Gate。", { exact: true }).waitFor();
 
-    await gotoRoute(page, baseUrl, "/applications", "机会验证");
-    await page.getByRole("button", { name: "新增机会记录" }).click();
+    await gotoRoute(page, baseUrl, "/applications", "机会工作台");
+    await page.getByRole("button", { name: "新增机会", exact: true }).click();
     await fillApplication(page, {
       company: "RustSQLite功能测试公司",
       role: "Rust SQLite Java 后端",
@@ -337,7 +349,7 @@ async function runUiFlow(baseUrl) {
       notes: "Rust SQLite 摘要"
     });
     await page.getByRole("button", { name: "记录机会反馈" }).click();
-    await page.getByText("RustSQLite功能测试公司").waitFor();
+    await page.getByText("RustSQLite功能测试公司").first().waitFor();
 
     await gotoRoute(page, baseUrl, "/review", "今日复盘");
     await fillReview(page, {
@@ -349,6 +361,7 @@ async function runUiFlow(baseUrl) {
       tomorrowPriority: "继续补远端域名验收"
     });
     await page.getByRole("button", { name: "保存复盘" }).click();
+    await page.getByRole("button", { name: "历史" }).click();
     await page.getByText("项目点：Rust SQLite UI 入库项目点", { exact: true }).waitFor();
 
     const cookies = await context.cookies(baseUrl);
@@ -361,6 +374,7 @@ async function runUiFlow(baseUrl) {
     await waitForRuntimeText(baseUrl, cookieHeader, "RustSQLiteAI 日程草稿 已编辑");
 
     await gotoRoute(page, baseUrl, "/more", "我的数据");
+    await page.getByRole("button", { name: "备份" }).click();
     const currentReactState = await page.evaluate(() => {
       const raw = window.localStorage.getItem("jobSprint.react.v1");
       return raw ? JSON.parse(raw).state || {} : {};

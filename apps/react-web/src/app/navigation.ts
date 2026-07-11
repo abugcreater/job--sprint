@@ -51,9 +51,9 @@ export const appRoutes: AppRoute[] = [
 	    primaryFocus: "全局统计、进展摘要、数据完整度",
 	    migrationScope: "汇总个人执行指标；管理员批次指标保留在管理员中心"
 	  },
-	  {
+  {
     id: "coach",
-    label: "画像",
+    label: "准备",
     path: "/coach",
     icon: UserRound,
     eyebrow: "Coach",
@@ -139,7 +139,7 @@ export const appRoutes: AppRoute[] = [
 
 export const routeById = Object.fromEntries(appRoutes.map((route) => [route.id, route])) as Record<AppRouteId, AppRoute>;
 
-export const bottomNavRouteIds: AppRouteId[] = ["today", "stats", "coach", "interview", "more"];
+export const bottomNavRouteIds: AppRouteId[] = ["today", "coach", "applications", "interview", "review"];
 
 export const desktopNavRouteIds: AppRouteId[] = ["today", "stats", "coach", "learn", "interview", "applications", "review", "admin", "more"];
 
@@ -147,13 +147,12 @@ export function visibleRouteIds(routeIds: AppRouteId[], options: { owner?: boole
   return routeIds.filter((id) => id !== "admin" || options.owner);
 }
 
-export function getBottomNavActiveId(pathname: string): AppRouteId {
-  if (pathname.startsWith("/stats")) return "stats";
+export function getBottomNavActiveId(pathname: string): AppRouteId | undefined {
   if (pathname.startsWith("/coach")) return "coach";
-  if (pathname.startsWith("/learn")) return "learn";
+  if (pathname.startsWith("/learn")) return "coach";
   if (pathname.startsWith("/interview")) return "interview";
-  if (pathname.startsWith("/applications")) return "more";
-  if (pathname.startsWith("/review") || pathname.startsWith("/more")) return "more";
-  if (pathname.startsWith("/admin")) return "more";
-  return "today";
+  if (pathname.startsWith("/applications")) return "applications";
+  if (pathname.startsWith("/review")) return "review";
+  if (pathname.startsWith("/today") || pathname === "/") return "today";
+  return undefined;
 }

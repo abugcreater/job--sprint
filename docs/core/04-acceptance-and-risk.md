@@ -1,6 +1,10 @@
 # 验收与风险
 
-日期：2026-07-08
+日期：2026-07-10
+
+## 2026-07-11 HTTPS 生产交付更新
+
+备案与正式证书生效后，公网 HTTPS 阻塞已解除。仓库外私有 env 注入的正式域名已通过 HTTP 308、HTTPS 登录/session、`/api/progress` 写入读回、最新 React/Rust 部署与服务重启；正式 APK 已关闭 cleartext、注入同一 HTTPS React URL并通过 v2/v3 验签，OnePlus 8 Pro 已完成远端 HTTPS 登录、完整业务流和杀进程重启读回。最终 runner 为 `PASS_WITH_LIMITS`，限制来自未提交工作树和 P8 理论性架构门禁，不是 HTTPS 或生产数据链路缺口。完整证据见 `docs/product/product-flow-redesign/p5-https-production-delivery.md`。下文 2026-07-06/07 的 `PUBLIC_443`、HTTP 和占位域名结论只保留为历史诊断记录，不得覆盖本节最新事实。
 
 ## 推荐验证命令
 
@@ -62,12 +66,12 @@
 
 2026-07-07 远端 UI 登录切换补证：新增 `tools/write_remote_login_switch_evidence.js` 与 `npm run write:remote-login-switch-evidence`。脚本先用 owner API 临时开通 `codex-ui-switch-smoke`，再用 Playwright 打开远端真实登录页，完成 owner UI 登录、点击页面“退出”、回到登录页、切换 smoke 用户登录，并通过页面内 `/api/auth/session` 读回 `username=codex-ui-switch-smoke`、`dataScope=codex-ui-switch-smoke`；最后用 owner API 删除临时账号并验证删除后登录 401。远端 `docs/evidence/server-remote/login-switch.json` 状态为 `PASS`，截图位于 `docs/evidence/server-remote/login-switch-screenshots/`，脚本不输出生成密码或 hash。
 
-当前交付口径必须分层：本地 Web、Android 本地、Rust/SQLite 本地合同、HTTP 服务器远端验收和正式签名 APK 可以按当前证据说通过；完整远端 HTTPS 生产交付仍为 `FAIL`，以 `npm run validate:delivery -- --allow-dirty` 的最新结果为准。当前失败项包括：`delivery_external_inputs` 中 Android remote URL 仍为 HTTP，`android_remote_acceptance` 缺 HTTPS 真机 evidence，`final_delivery_report` 已刷新但因 Android remote 和最终 readiness 未通过仍为 FAIL，`goal_acceptance` 因完整交付证据缺口仍失败。公网 HTTPS 复测已进一步收窄：`https://job-sprint.example.com/job-sprint/react/index.html` 可完成 TLS 并返回 302，HTTP 域名可到 Nginx 并 308 跳 HTTPS，但 `https://job-sprint.example.com/job-sprint/react/index.html` 在域名 SNI ClientHello 后 reset；服务器侧 tcpdump 显示 ClientHello 到达网卡后收到客户端方向 RST，Nginx 没有机会返回证书。证据见 `docs/evidence/server-remote/https-diagnostic-2026-07-06.md`，下一步需要云厂商安全组、边界防火墙、四层转发、运营商路径、WAF/CDN 或域名合规侧继续处理；不能用 IP HTTPS 绕过，因为证书不匹配且 Android WebView 禁止忽略 SSL 错误。
+当前交付口径仍需分层：本地功能、HTTPS 生产链路、Git 提交/合并状态分别陈述。仓库外私有 env 注入的正式 HTTPS 入口已通过；最终 runner 为 `PASS_WITH_LIMITS`，限制来自 `--allow-dirty` 与 P8 理论性架构门禁。2026-07-06/07 的公网 443 reset 结论属于备案完成前的历史诊断，不再代表现网状态。
 
 | 能力 | 结论 | 边界 |
 |---|---|---|
-| 代码完成口径 | `PASS_WITH_LIMITS` | Web、Android 本地、Rust/SQLite、本地常规门禁、public-safe、Linux ELF、server delivery package、服务器同步、HTTP 远端 evidence 和正式签名 APK 已通过；Android 远端 HTTPS 和最终统一交付报告未通过，不能扩大为完整 HTTPS 生产交付完成。 |
-| UI/UX 改造 | `PASS_WITH_LIMITS` | 新增 AI 教练长列表“查看全部/收起”、AI 反馈复盘、采纳日程完成率归因、复盘页本地规则版 AI 分析和本地 7 日周复盘归因交互并用 Vitest 覆盖；仍需远端 HTTPS 真机验收。 |
+| 代码完成口径 | `PASS_WITH_LIMITS` | Web、Android、Rust/SQLite、本地常规门禁、public-safe、Linux ELF、server delivery、服务器同步、HTTPS 远端 evidence、正式签名 APK 和 Android 真机远端 evidence 已通过；限制为未提交工作树和 P8 理论性架构门禁。 |
+| UI/UX 改造 | `PASS_WITH_LIMITS` | 全流程产品重构已通过 Web/Android 回归，并在正式 APK 上完成 HTTPS 远端真机验收；限制为单 chunk 告警和未提交状态。 |
 | React Web 主流程 | `PASS` | `npm --prefix apps/react-web run typecheck`、`npm --prefix apps/react-web test -- --run src/test/runtimeClient.test.ts src/test/runtimeSyncBridge.test.ts src/test/CoachPage.test.tsx src/test/MorePage.test.tsx src/test/navigationRoutes.test.tsx src/test/LearningPage.test.tsx src/test/InterviewPage.test.tsx src/test/ApplicationsPage.test.tsx src/test/ReviewPage.test.tsx src/test/sprintStoreCoachIsolation.test.ts src/test/moreAdapter.test.ts src/test/applicationsAdapter.test.ts src/test/interviewAdapter.test.ts src/test/reviewAdapter.test.ts src/test/authClient.test.ts`、`npm --prefix apps/react-web run build` 通过；Playwright 已验证 `/stats`、画像保存反馈、普通用户更多页和移动端新用户空态。 |
 | React 当前账号可见性 | `PASS` | React 工作台已补齐 `/api/auth/session` 读取、当前账号/角色/数据域/只读状态展示、未登录跳转登录和已登录退出入口；`apps/react-web/src/test/authClient.test.ts` 覆盖登录跳转、角色和数据域摘要。 |
 | Android WebView 本地入口 | `PASS` | 已重新同步 React assets、构建并安装 debug APK，`npm run test:android:functional` 通过，报告显示 local WebView 画像、知识边界、日程和 AI 草稿状态可重启读回。 |
@@ -84,24 +88,24 @@
 | server delivery package | `PASS` | 当前 `apps/rust-api/target/release/job-sprint-api` 为 Linux x86_64 ELF，SHA-256 为 `a785bef602c15959f77bdc08957e1de378d132d20ce55dc6a1d9ca5e21d0a89f`；`npm run build:server-delivery` 已生成匹配该 ELF 的同步包。 |
 | server sync evidence | `PASS` | `npm run write:server-sync-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/server-sync/sync.json` 已通过，远端 manifest SHA-256 与本地一致：`e5a1d8195791d988b5e50a0c9badc310771d303dfe34a63167629f5919ae53f2`；`npm run restart:remote-service -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/server-remote/service-restart.json` 已证明远端服务重启并读取同一 manifest，远端 DeepSeek coach artifact smoke 已通过。 |
 | server remote evidence | `PASS` | `npm run write:remote-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/server-remote/acceptance.json` 已证明远端页面、登录、session、health、`/api/progress remote save` 和 `remote readback` 均通过；`npm run write:remote-invitation-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/server-remote/coach-invitations.json` 进一步证明 `/job-sprint/react/index.html`、React JS marker、`templateVersion=jd-focus-v1`、批量导入、批量状态更新和 `/api/coach/invitations` 新增/读回/删除通过；`npm run write:remote-invitation-account-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/server-remote/coach-invitation-account.json --allow-create-account` 已证明远端 users-file 账号开通、smoke 用户登录、禁用/恢复/删除、批量账号动作、通知草稿生成和 runtime 隔离；`npm run write:remote-login-switch-evidence -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/server-remote/login-switch.json --allow-create-account` 已证明远端 UI 登录、退出和换账号链路；这些 evidence 避免了旧进程和“按钮只在本地可用”的误判。 |
-| final delivery runner | `PASS_WITH_LIMITS` | `npm run final:delivery -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/final-delivery/final-delivery.json` 已刷新统一报告；release gate、server sync、server remote、formal APK 均通过，Android remote 因 HTTP URL 被正确拦截，最终 readiness 仍为 FAIL。 |
+| final delivery runner | `PASS_WITH_LIMITS` | `npm run final:delivery -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env --report docs/evidence/final-delivery/final-delivery.json --allow-create-account --allow-dirty` 已通过；release gate、server sync、server remote、Android remote、formal APK 和 post validation 均 PASS，限制为 dirty worktree 与 P8 理论性架构门禁。 |
 | Android release-local APK | `PASS_WITH_LIMITS` | `app-release-signed-local.apk` 已通过 v2/v3 验签；这是本地临时签名，不等于生产签名或可无损覆盖已安装 debug 包。 |
 | Android formal release gate | `PASS_WITH_LIMITS` | 最新 readiness 读取 `docs/evidence/android-release/formal-release.json` 并通过验签；APK 为 `apps/android/app/build/outputs/apk/release/app-release.apk`，APK SHA-256 为 `221c7483d288c5642304d51786fe6f8a664046c2079d3f8ad2df1dcc281d8343`。这证明正式 APK 候选可验签，不替代 Android 远端 HTTPS 真机 evidence。远端验收脚本和 readiness 现在会拒绝 flow/restart 快照或 auth session 状态落在 `file:///android_asset/...` 的报告，避免本地 fallback 冒充远端通过。 |
-| 目标验收门禁 | `FAIL` | 最新 `validate:delivery` 内部 `goal_acceptance` 仍失败，原因是 Android remote HTTPS evidence 和最终统一交付报告缺口；不能标完整目标验收完成。 |
-| 最终交付 readiness | `FAIL` | 最新 `npm run validate:delivery -- --allow-dirty` 失败；server delivery、server sync、server remote 和 formal APK 已 PASS，仍缺 Android remote HTTPS evidence 和 PASS 最终报告。 |
-| 正式域名公网首访 | `BLOCKED_BY_PUBLIC_443` | DNS 已指向当前服务器；服务器本机 `openssl s_client -connect 127.0.0.1:443 -servername job-sprint.example.com` 验证 OK，Nginx/cert 正常；从外部访问 `https://job-sprint.example.com` 仍 TLS EOF，需继续处理云厂商安全组/边界防火墙或公网 443 转发。 |
+| 目标验收门禁 | `PASS_WITH_LIMITS` | HTTPS、服务器和 Android 生产链路目标已完成；P8 架构目标按门禁定义保留理论性限制。 |
+| 最终交付 readiness | `PASS_WITH_LIMITS` | server delivery、server sync、server remote、Android remote、formal APK 和 final report 均通过；工作树未提交。 |
+| 正式域名公网首访 | `PASS` | 私有交付 env 中的正式域名公网 TLS、证书 SAN、登录跳转和 HTTP 308 均通过。 |
 | Codex AI 团队 | `PASS_WITH_LIMITS` | 作为全局对话层能力使用；不由 Job Sprint 项目脚本验收。 |
 
 ## P1 风险
 
 | ID | 风险 | 影响 | 下一步 |
 |---|---|---|---|
-| R-001 | 正式域名公网 HTTPS/SNI 新连接 reset | HTTP 域名可到 Nginx，IP HTTPS 可握手，但正式 HTTPS 域名 SNI 在 ClientHello 后被 reset；Android 远端生产验收仍要求域名 HTTPS + 证书匹配 | 域名/HTTPS 条件完成后再运行 Android 远端 evidence；当前按 HTTP 公网演示和代码完成口径收口，不能用 IP HTTPS 绕过证书校验。 |
-| R-002 | Android remote 真机首访和登录态仍缺少通过证据 | 当前能证明本地 React asset、debug 真机显示、新版正式 APK 和公共 IP 服务；远端 WebView HTTPS 首访、登录态、保存后重启读回仍缺真机报告 | HTTPS 入口就绪后运行 `npm run test:android:remote:functional -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env`，生成包含 `authEvidence` 的远端 evidence，并把报告路径写入 `JOB_SPRINT_ANDROID_REMOTE_ACCEPTANCE_EVIDENCE` 或 `--android-remote-evidence`。 |
+| R-001 | 正式域名证书续期或 SNI 回退 | 证书过期、DNS 漂移或 Nginx 配置回退会再次阻断 Web/Android | 续期后复测证书 SAN、HTTP 308、HTTPS 登录和 Android remote evidence。 |
+| R-002 | Android remote evidence 随 APK 变化失效 | 旧报告不能证明新 APK 仍使用正式 HTTPS URL | 每次正式 APK 改动都复跑 Android 远端功能与杀进程读回，并绑定 APK hash。 |
 | R-003 | public-safe 脱敏规则需持续维护 | 漏扫会暴露敏感部署线索 | 扩充云厂商、token、私钥、公司名扫描规则。 |
 | R-004 | AI provider 运行保护仍不完整 | 已避免外部接口长期挂住请求，Rust/Node artifact 与 boundary suggestions 均有 fallback，boundary suggestions 已有 mock provider 成功和 timeout fallback；远端 DeepSeek provider 已配置并通过真实 smoke；仍缺真实 provider 错误分类、重试、熔断、成本监控和用户提示 | 基于当前 DeepSeek 证据继续补专项监控、错误分类和体验提示，并把真实 LLM 周复盘、机会状态和面试结果长期归因接入 `/api/coach/outcomes`。 |
 | R-005 | 项目定位易被误读 | 新定位是泛 IT AI 求职教练，机会/JD 信号和规则版 JD 解析已影响建议，但当前仍不是公开 SaaS、企业 ATS、自动投递平台或高级 Java 后端主项目 | 对外统一使用 `docs/product/it-job-coach-v1/prd-recommended.md` 的定位：AI 原生求职教练叙事 + 邀请制收敛 MVP 工程边界。 |
-| R-011 | 公网 HTTPS 域名 SNI 握手失败 | Android remote 必须使用 HTTPS `/job-sprint/` URL；`docs/evidence/server-remote/https-diagnostic-2026-07-06.md` 证明 DNS 指向当前服务器、HTTP 域名可到 Nginx、IP HTTPS 可握手、服务器本机域名 HTTPS 正常，但外部域名 SNI 在 ClientHello 后 reset；tcpdump 显示服务器收到 ClientHello 后收到客户端方向 RST；Android remote 无法验收 | 在云厂商安全组/边界防火墙、负载均衡、WAF、CDN、运营商路径或域名合规侧排查并验证域名 HTTPS；成功后把 `JOB_SPRINT_ANDROID_WEBVIEW_URL` 改为 HTTPS，并运行 Android 远端真机 evidence。 |
+| R-011 | 公网 HTTPS 依赖备案、DNS、证书和边界链路 | 任一环节回退都会同时影响 Web 与 Android | 当前已通过；把 2026-07-06 诊断报告保留为历史基线，证书续期或 DNS 变更后复跑正式域名与 Android remote evidence。 |
 | R-012 | users file 账号开通配置边界被误用 | 如果把 `JOB_SPRINT_USERS_FILE` 放进仓库、复用内联 `JOB_SPRINT_USERS_JSON`，或在报告/API 中回显密码/hash，会把私人工具的邀请开通能力变成安全风险 | `JOB_SPRINT_USERS_FILE` 必须位于仓库外并尽量保持 `0600`；`JOB_SPRINT_USERS_JSON` 存在时页面开通必须禁用；API 响应、日志和 evidence 不得包含密码或 password hash；远端开通必须单独做脱敏 smoke。 |
 
 ## P2 风险
@@ -112,7 +116,7 @@
 | R-007 | 大文件维护成本高 | 改动容易回归 | 已从 Android Activity 抽出 `RemoteUrlPolicy`、`AuthCredentialStore`、`AndroidKeystoreStringCipher`、`RemoteWebViewController`、`AndroidRemoteSettingsBridge`、`AndroidAuthSettingsBridge`、`AndroidSessionCookieBridge`、`AndroidRecorderBridge`、`AndroidRecorderUploader`、`AndroidTranscribeEndpointResolver`、`AndroidSpeechServiceResolver`、`AndroidSpeechErrorPolicy`、`AndroidSpeechErrorCoordinator`、`AndroidSpeechSessionState`、`AndroidSpeechCallbackEmitter`、`AndroidSpeechStartCoordinator`、`AndroidSpeechRecognizerController`、`AndroidSpeechBridge`、`AndroidBasicAuthController`、`AndroidWebChromePermissionController`、`AndroidRemoteWebViewClient`、`AndroidActivityLifecycleController`、`AndroidWindowLayoutController`、`AndroidWebViewInitializer`、`AndroidAppStartupController`，从 Rust `lib.rs` 抽出 `app_bootstrap`、`runtime_store`、`runtime_records`、`runtime_routes`、`data_routes`、`application_routes`、`interview_mistake_routes`、`ai_routes`、`static_routes`、`static_files`、`http_responses`、`login_rate`、`session_token`、`auth_config`、`auth_bearer`、`auth_tokens`、`auth_users`、`auth_values`、`auth_hash`、`auth_permissions`、`auth_state`、`auth_http`、`auth_routes`、`ai_tools`、`ai_transcribe`，从 Node 兼容服务抽出 `auth.js`、`auth_routes.js`、`runtime_store.js`、`runtime_routes.js`、`static_files.js`、`ai_routes.js`、`ai_tools.js` 和 `http_utils.js`；新增 `npm run validate:architecture-quality` 自动校验拆分模块、关键入口行数预算和 legacy JS/fallback hash 一致性，已接入 `npm test`；Node 兼容入口已接近薄路由层，后续转向远端 session/token 产品化和剩余 JS bridge 最小化，冻结 legacy JS。 |
 | R-008 | 更多页导入/恢复只覆盖 React 主状态 | 学习重点和面试薄弱题仍由独立 localStorage key 管理，不属于 `jobSprint.react.v1` 导入范围 | 若要做完整设备迁移，再设计 `jobSprint.backup.v1` 聚合备份格式。 |
 | R-009 | Android 正式签名材料需要长期保管 | release-local APK 不能冒充正式包；更换签名会导致已安装正式包无法无损升级；仓库内 keystore 会被构建和 readiness 拒绝 | 当前仓库外 keystore 位于 `~/.job-sprint/android-release/job-sprint-release.p12`，私有 env 位于 `~/.job-sprint/job-sprint-delivery.env`，已产出 `FORMAL_SIGNED` 报告；后续必须保管该 keystore 和密码，不要提交到仓库。 |
-| R-010 | 最终交付输入或证据缺失导致误报 | 没有 fresh Rust release binary、Linux x86_64 ELF、public-safe 待发布包扫描、server delivery package、服务器同步 evidence、最终交付统一报告、Web/服务器远端 URL/账号或 evidence、Android 远端验收报告、Android authenticated session evidence 和 `FORMAL_SIGNED` 验签报告时容易把历史服务器状态、macOS Mach-O、旧 binary、未扫描 dist、未绑定同步包、未同步证据、本地 WebView 或本地临时 APK 写成完成；当前已补齐服务器同步 evidence、服务器远端读回 evidence 和正式签名 APK，仍缺 Android 远端 HTTPS evidence 和 PASS 最终统一交付报告 | 每次收口先跑 `npm run validate:delivery`；只有 Rust release binary freshness PASS、Linux x86_64 ELF PASS、public-safe 包 PASS、server delivery package PASS、服务器同步 evidence PASS、最终交付统一报告 PASS、Web/服务器远端 evidence PASS、Android 远端 evidence PASS 且包含 authenticated session 状态、Android release evidence 为 `FORMAL_SIGNED`，并且证书 SHA-256 与 APK SHA-256 均匹配，才能标完整 HTTPS 生产交付。 |
+| R-010 | 最终交付输入或证据缺失导致误报 | 当前证据已齐备，但后续源码、Rust ELF、React assets、APK 或证书变化都会使旧报告失效 | 每次收口先跑 `npm run validate:delivery` 与最终 runner；必须同时绑定 server manifest、APK hash、authenticated Android remote evidence 和 `FORMAL_SIGNED` 报告。 |
 
 ## 删除旧文档后的验收口径
 
@@ -120,3 +124,11 @@
 - 旧文档路径不得作为 PASS 证据。
 - 若命令、测试或数据仍引用旧文档，必须改到 `docs/core/` 或保留必要运行文档。
 - 删除截图或报告前，必须保留最新验收摘要、关键命令和剩余风险。
+
+## 2026-07-10 产品级 UI 基线
+
+- 已验证范围：全局产品壳、Today 新用户/任务态、React→Android 同源 assets、Android 状态栏与 WebView 顶部 inset。
+- Web evidence：28 个测试文件、95 条测试通过，类型检查与生产构建通过；1440px/390px 新用户与任务态已截图复核。
+- Android evidence：正式签名 release v2/v3 通过并覆盖安装；本地 WebView 全功能流、杀进程读回、384 CSS px 无横向溢出、44px 触控门和键盘态通过。
+- P0 追加：准备页已拆为 4 阶段，Android `384 × 792` 下从 11171px 降为 2680px；阶段焦点、3 次物理上滑到底和 IME 隐藏底栏通过。
+- 边界：P5 已补远端部署、全项目 UI 回归和正式签名 APK；仍需用真实冷启动指标决定 bundle 拆分，并在提交后重跑同一门禁。

@@ -47,11 +47,12 @@ describe("React Job Sprint learning workspace", () => {
   it("renders real learning tasks, resources and knowledge card summaries", async () => {
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "知识边界" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "学习工作台" })).toBeInTheDocument();
     expect(screen.getAllByText("补 缺陷归因 面试表达").length).toBeGreaterThan(0);
     expect(screen.getAllByText("用户自定义").length).toBeGreaterThan(0);
     expect(screen.getAllByText("补一条 Evidence Gate 证据").length).toBeGreaterThan(0);
     expect(screen.getAllByText("本地模式，可继续记录").length).toBeGreaterThan(0);
+    fireEvent.click(screen.getByRole("button", { name: "任务知识摘要" }));
     expect(screen.getByLabelText("搜索知识卡")).toBeInTheDocument();
     expect(screen.getByLabelText("知识卡分类")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "只看重点" })).toBeInTheDocument();
@@ -60,17 +61,19 @@ describe("React Job Sprint learning workspace", () => {
   it("opens resource details instead of rendering inert resource names", async () => {
     render(<App />);
 
+    fireEvent.click(screen.getByText("查看任务资料与最近笔记"));
     fireEvent.click(await screen.findByRole("button", { name: /用户自定义/ }));
 
     expect(screen.getByLabelText("资料详情")).toHaveTextContent("用户自定义");
     expect(screen.getByLabelText("资料详情")).toHaveTextContent("缺少路径");
     expect(screen.getByLabelText("资料详情")).toHaveTextContent("补 缺陷归因 面试表达");
-    expect(screen.getByText("已打开「用户自定义」资料摘要；当前缺少可打开路径。")).toBeInTheDocument();
+    expect(screen.getByText("已查看「用户自定义」任务资料摘要；当前缺少可打开路径。")).toBeInTheDocument();
   });
 
   it("filters knowledge cards and opens a safe detail summary", async () => {
     render(<App />);
 
+    fireEvent.click(screen.getByRole("button", { name: "任务知识摘要" }));
     fireEvent.change(await screen.findByLabelText("搜索知识卡"), { target: { value: "缺陷" } });
     expect(screen.getAllByText("补 缺陷归因 面试表达").length).toBeGreaterThan(0);
     expect(screen.queryByText("记录测试开发岗位机会反馈")).not.toBeInTheDocument();
@@ -86,6 +89,7 @@ describe("React Job Sprint learning workspace", () => {
   it("marks knowledge cards in React localStorage and filters marked cards only", async () => {
     render(<App />);
 
+    fireEvent.click(screen.getByRole("button", { name: "任务知识摘要" }));
     fireEvent.change(await screen.findByLabelText("搜索知识卡"), { target: { value: "缺陷" } });
     fireEvent.click(screen.getByRole("button", { name: "标记重点：补 缺陷归因 面试表达" }));
 
@@ -114,6 +118,8 @@ describe("React Job Sprint learning workspace", () => {
 
     expect(await screen.findByText("已补 1 条学习笔记")).toBeInTheDocument();
     expect(screen.getByText("已保存到 学习 > 学习笔记，并同步到 Evidence Gate：补 缺陷归因 面试表达")).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "用这条笔记练一道题" })).toHaveAttribute("href", "#/interview");
+    fireEvent.click(screen.getByText("查看任务资料与最近笔记"));
     expect(screen.getByRole("heading", { name: "学习笔记" })).toBeInTheDocument();
     expect(screen.getByText(/缺陷归因、失败样例、质量指标和项目证据/)).toBeInTheDocument();
     expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.learning]).toHaveLength(1);

@@ -41,13 +41,14 @@ describe("React Job Sprint coach destructive actions", () => {
   it("requires confirmation before deleting knowledge boundaries and schedule events", async () => {
     render(<App />);
 
+    fireEvent.click(screen.getByRole("button", { name: "改用详细画像表单" }));
     const profilePanel = panelByHeading("求职画像");
     fireEvent.change(await profilePanel.findByLabelText("画像名称"), { target: { value: "删除确认画像" } });
     fireEvent.change(profilePanel.getByLabelText("目标岗位"), { target: { value: "测试开发工程师" } });
     fireEvent.change(profilePanel.getByLabelText("每日分钟"), { target: { value: "45" } });
     fireEvent.change(profilePanel.getByLabelText("经验摘要"), { target: { value: "5 年测试平台经验" } });
     fireEvent.click(screen.getByRole("button", { name: "保存画像" }));
-    expect(await screen.findByText("画像已保存。")).toBeInTheDocument();
+    expect(await screen.findByText("求职画像已保存，后续 AI 建议会引用这份画像。")).toBeInTheDocument();
 
     fireEvent.change(screen.getByLabelText("知识主题"), { target: { value: "可删除知识边界" } });
     fireEvent.change(screen.getByLabelText("当前缺口"), { target: { value: "需要补齐边界删除确认" } });
@@ -57,6 +58,7 @@ describe("React Job Sprint coach destructive actions", () => {
     expect(await screen.findByText("知识边界已保存。")).toBeInTheDocument();
     expect(useSprintStore.getState().knowledgeBoundaries).toHaveLength(1);
 
+    fireEvent.click(screen.getByRole("button", { name: "知识边界阶段" }));
     fireEvent.click(screen.getByRole("button", { name: /删除知识边界：可删除知识边界/ }));
     expect(screen.getByText("确认删除「可删除知识边界」知识边界？删除后 AI 建议、知识卡和面试训练不会再引用这条边界。")).toBeInTheDocument();
     expect(useSprintStore.getState().knowledgeBoundaries).toHaveLength(1);
@@ -76,12 +78,14 @@ describe("React Job Sprint coach destructive actions", () => {
     expect(screen.getByRole("button", { name: /删除知识边界：可删除知识边界/ })).toBeInTheDocument();
     expect(screen.queryByText("已删除「可删除知识边界」知识边界，可立即撤销并恢复到 AI 建议、知识卡和面试训练上下文。")).not.toBeInTheDocument();
 
+    fireEvent.click(screen.getByRole("button", { name: "今日计划阶段" }));
     fireEvent.change(screen.getByLabelText("日程标题"), { target: { value: "可删除个人日程" } });
     fireEvent.change(screen.getByLabelText("安排原因"), { target: { value: "验证日程删除确认" } });
     fireEvent.click(screen.getByRole("button", { name: "新增日程" }));
     expect(await screen.findByText("自定义日程已加入今日 AI 教练。")).toBeInTheDocument();
     expect(useSprintStore.getState().coachScheduleEvents).toHaveLength(1);
 
+    fireEvent.click(screen.getByRole("button", { name: "今日计划阶段" }));
     fireEvent.click(screen.getByRole("button", { name: /删除日程：可删除个人日程/ }));
     expect(screen.getByText("确认删除「可删除个人日程」日程？删除后今日页不再展示这条个人行动，相关 Evidence Gate 不会自动补回。")).toBeInTheDocument();
     expect(useSprintStore.getState().coachScheduleEvents).toHaveLength(1);
@@ -214,7 +218,8 @@ describe("React Job Sprint coach destructive actions", () => {
 
     render(<App />);
 
-    expect(await screen.findByText("补接口自动化证据")).toBeInTheDocument();
+    expect(useSprintStore.getState().coachScheduleEvents.some((event) => event.title === "补接口自动化证据")).toBe(true);
+    fireEvent.click(screen.getByRole("button", { name: "画像阶段" }));
     fireEvent.click(screen.getByRole("button", { name: "删除此画像" }));
     expect(screen.getByText("确认删除「可恢复画像」画像？关联知识边界、个人日程、AI 建议、AI 运行记录和候选反馈会一起移除；删除后可在本面板短时撤销整包恢复。")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /确认删除画像 可恢复画像/ }));

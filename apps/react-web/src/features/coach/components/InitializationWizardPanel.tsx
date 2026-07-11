@@ -44,7 +44,6 @@ export function InitializationWizardPanel() {
       targetRole: current.targetRole.trim() ? current.targetRole : template.targetRole,
       nonClaims: current.nonClaims.trim() ? current.nonClaims : template.nonClaims
     }));
-    setSourceText((current) => current.trim() ? current : template.sourceText);
     setMessage(`已套用「${template.label}」建档模板。`);
   };
 
@@ -137,7 +136,7 @@ export function InitializationWizardPanel() {
   };
 
   return (
-    <article id="coach-quick-init" className="command-panel scroll-mt-4">
+    <article id="coach-quick-init" className="command-panel workspace-anchor" tabIndex={-1}>
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <PanelTitle icon={<Sparkles size={18} aria-hidden="true" />} title="导入简历建档" />
@@ -208,7 +207,7 @@ export function InitializationWizardPanel() {
           </label>
         </div>
       </div>
-      <Textarea label="导入素材" value={sourceText} onChange={setSourceText} placeholder="粘贴简历、JD、面试反馈或学习笔记；多段素材可用 --- 分隔。" />
+      <Textarea label="导入素材" value={sourceText} onChange={setSourceText} placeholder="直接粘贴纯文本；输入框为空，不会自动加入模板文字。多段素材可用 --- 分隔。" />
       {resumePreview ? (
         <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,0.75fr)]">
           <div className="rounded-card bg-brand-100 p-4">

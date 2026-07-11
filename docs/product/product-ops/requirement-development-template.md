@@ -6,6 +6,8 @@
 
 本模板用于 Job Sprint 之后的产品级需求开发。它把本轮“需求澄清 -> 产品闭环 -> 数据隔离 -> UI/UX -> 开源安全 -> Web/Android/服务器交付 -> GitHub 合并”的完整路径抽象成可复用 SOP。
 
+启动前先阅读 `gitflow-development-governance.md`，确认当前需求应从 `develop`、`release/*` 或 `main` 的哪条基线派生；不得为了消除冲突整页覆盖另一分支的新业务能力。
+
 适用场景：
 
 - 新功能、模块重构、UI/UX 改版、AI 能力增强。

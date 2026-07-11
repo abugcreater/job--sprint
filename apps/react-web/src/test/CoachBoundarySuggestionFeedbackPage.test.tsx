@@ -34,6 +34,7 @@ describe("React coach boundary suggestion feedback", () => {
   it("records rejected and revised boundary suggestions before they become formal boundaries", async () => {
     render(<App />);
 
+    fireEvent.click(await screen.findByRole("button", { name: "改用详细画像表单" }));
     fireEvent.change(await screen.findByLabelText("画像名称"), { target: { value: "后端画像" } });
     fireEvent.change(screen.getByLabelText("目标岗位"), { target: { value: "后端工程师" } });
     fireEvent.change(screen.getByLabelText("经验摘要"), { target: { value: "7 年后端稳定性治理经验" } });

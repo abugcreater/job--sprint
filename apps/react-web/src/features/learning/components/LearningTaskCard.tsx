@@ -103,9 +103,10 @@ export function LearningTaskCard({
       ) : null}
 
       {feedback && feedback.includes(task.title) ? (
-        <p className="mt-3 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" aria-live="polite">
-          {feedback}
-        </p>
+        <div className="mt-3 rounded-control bg-success-100 p-3 text-sm font-bold text-success-600" aria-live="polite">
+          <p>{feedback}</p>
+          <Link to="/interview" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-control bg-ink-950 px-4 text-sm font-black text-white">用这条笔记练一道题<ArrowRight size={16} aria-hidden="true" /></Link>
+        </div>
       ) : null}
     </article>
   );

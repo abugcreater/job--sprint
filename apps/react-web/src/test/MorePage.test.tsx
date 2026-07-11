@@ -43,18 +43,14 @@ describe("React Job Sprint more workspace", () => {
     expect(await screen.findByRole("heading", { name: "我的数据" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "同步状态" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "我的账号" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "备份" }));
     expect(screen.getByRole("heading", { name: "个人数据备份" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "localStorage 状态" })).not.toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "旧版回滚说明" })).not.toBeInTheDocument();
     expect(screen.queryByText("旧版每日复盘")).not.toBeInTheDocument();
     expect(screen.queryByText("apps/android/app/src/main/assets/web/schedule.html")).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "统计快照" })).toBeInTheDocument();
-    expect(screen.getByText("完成 0 项 · 证据 0 条 · 延期 0 条")).toBeInTheDocument();
-    expect(screen.getByText("画像 1 个 · 知识边界 0 条 · AI 建议 0 条")).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: "查看集中统计" })).toBeInTheDocument();
-    expect(screen.queryByRole("link", { name: "查看统计" })).not.toBeInTheDocument();
-    expect(screen.queryByText("本地证据")).not.toBeInTheDocument();
-    expect(screen.queryByText("完成记录")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "更多入口" }));
+    expect(screen.getByRole("link", { name: "查看统计 集中查看个人进展和数据完整度。" })).toBeInTheDocument();
   });
 
   it("exports React local state and keeps navigation links working", async () => {
@@ -66,6 +62,7 @@ describe("React Job Sprint more workspace", () => {
 
     const firstRender = render(<App />);
 
+    fireEvent.click(screen.getByRole("button", { name: "备份" }));
     fireEvent.click(await screen.findByRole("button", { name: "导出 JSON" }));
 
     expect(createObjectURL).toHaveBeenCalledTimes(1);
@@ -73,6 +70,7 @@ describe("React Job Sprint more workspace", () => {
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:job-sprint");
     expect(screen.getByRole("status")).toHaveTextContent("个人数据备份已导出");
 
+    fireEvent.click(screen.getByRole("button", { name: "更多入口" }));
     fireEvent.click(screen.getByRole("link", { name: "进入复盘 记录今日事实、卡点和明日行动。" }));
     expect(await screen.findByRole("heading", { name: "今日复盘" })).toBeInTheDocument();
     expect(window.location.hash).toBe("#/review");
@@ -80,6 +78,7 @@ describe("React Job Sprint more workspace", () => {
     firstRender.unmount();
     resetSprint("#/more");
     render(<App />);
+    fireEvent.click(screen.getByRole("button", { name: "更多入口" }));
     fireEvent.click(await screen.findByRole("link", { name: "回到今日 回到当前任务和 Evidence Gate。" }));
     expect(await screen.findByRole("heading", { name: "今日 AI 教练" })).toBeInTheDocument();
     expect(window.location.hash).toBe("#/today");
@@ -144,6 +143,7 @@ describe("React Job Sprint more workspace", () => {
     };
     const file = new File([JSON.stringify(payload)], "job-sprint-react-state.json", { type: "application/json" });
 
+    fireEvent.click(screen.getByRole("button", { name: "备份" }));
     fireEvent.change(await screen.findByLabelText("导入个人数据备份"), { target: { files: [file] } });
 
     await waitFor(() => {

@@ -58,7 +58,7 @@ describe("interviewAdapter", () => {
 
     expect(analysis.provider).toBe("local_rubric");
     expect(analysis.score).toBeGreaterThanOrEqual(65);
-    expect(analysis.summary).toContain("本地规则评分");
+    expect(analysis.summary).toContain("本地规则自检");
     expect(analysis.nextQuestions).toHaveLength(3);
   });
 
