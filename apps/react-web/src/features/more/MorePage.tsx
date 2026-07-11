@@ -141,10 +141,6 @@ function AccountPanel() {
       <p className="mt-4 break-words text-sm font-semibold leading-6 text-ink-500">
         当前账号可维护自己的求职画像、执行记录、机会、面试和复盘。需要换设备时，先导出个人数据备份。
       </p>
-      <Link to="/stats" className="secondary-button mt-4">
-        <ArrowRight size={16} aria-hidden="true" />
-        查看统计
-      </Link>
     </article>
   );
 }

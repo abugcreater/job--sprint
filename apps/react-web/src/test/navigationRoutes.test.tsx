@@ -109,6 +109,26 @@ describe("React Job Sprint module routing", () => {
     await waitFor(() => expect(document.getElementById("app-content")).toHaveFocus());
   });
 
+  it("keeps centralized stats out of business module headers", async () => {
+    const routes = [
+      { hash: "#/coach", heading: "准备工作台" },
+      { hash: "#/learn", heading: "学习工作台" },
+      { hash: "#/interview", heading: "面试训练" },
+      { hash: "#/applications", heading: "机会工作台" },
+      { hash: "#/review", heading: "今日复盘" }
+    ];
+
+    for (const route of routes) {
+      resetSprint(route.hash);
+      const view = render(<App />);
+
+      expect(await screen.findByRole("heading", { name: route.heading })).toBeInTheDocument();
+      expect(screen.queryByText("集中统计")).not.toBeInTheDocument();
+
+      view.unmount();
+    }
+  });
+
   it("redirects non-owner direct admin access to the ordinary more workspace", async () => {
     resetSprint("#/admin");
 

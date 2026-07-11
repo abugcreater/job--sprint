@@ -114,6 +114,9 @@ pub(crate) async fn verify_invitation_account_provisioning() {
     assert_eq!(res.json["invitation"]["status"], "active");
     assert_eq!(res.json["accountProvisioning"]["status"], "PASS");
     assert_eq!(res.json["accountProvisioning"]["action"], "created");
+    assert_eq!(res.json["accountAuditEvents"][0]["action"], "created");
+    assert_eq!(res.json["accountAuditEvents"][0]["actorUsername"], "kai");
+    assert_eq!(res.json["accountAuditEvents"][0]["username"], "mia");
     assert!(
         res.json["configuredUsers"]
             .as_array()
@@ -211,6 +214,8 @@ pub(crate) async fn verify_invitation_account_provisioning() {
     .await;
     assert_eq!(res.status, StatusCode::OK);
     assert_eq!(res.json["accountProvisioning"]["action"], "password_reset");
+    assert_eq!(res.json["accountAuditEvents"][0]["action"], "password_reset");
+    assert_eq!(res.json["accountAuditEvents"][0]["username"], "mia");
 
     res = request(
         &app,
@@ -303,6 +308,9 @@ pub(crate) async fn verify_invitation_account_provisioning() {
     assert_eq!(res.status, StatusCode::OK);
     assert_eq!(res.json["accountBatchAction"]["affectedCount"], 2);
     assert_eq!(res.json["accountBatchAction"]["skippedCount"], 2);
+    assert_eq!(res.json["accountAuditEvents"][0]["action"], "batch_disable");
+    assert_eq!(res.json["accountAuditEvents"][0]["affectedCount"], 2);
+    assert_eq!(res.json["accountAuditEvents"][0]["skippedCount"], 2);
     assert_eq!(
         login_status(&app, "mia", reset_password).await,
         StatusCode::UNAUTHORIZED
@@ -389,6 +397,8 @@ pub(crate) async fn verify_invitation_account_provisioning() {
     .await;
     assert_eq!(res.status, StatusCode::OK);
     assert_eq!(res.json["accountAction"]["removedCount"], 1);
+    assert_eq!(res.json["accountAuditEvents"][0]["action"], "delete");
+    assert_eq!(res.json["accountAuditEvents"][0]["username"], "mia");
     assert_eq!(
         login_status(&app, "mia", reset_password).await,
         StatusCode::UNAUTHORIZED
@@ -406,6 +416,22 @@ pub(crate) async fn verify_invitation_account_provisioning() {
     .await;
     assert_eq!(res.status, StatusCode::OK);
     assert_eq!(res.json["accountBatchAction"]["affectedCount"], 1);
+    let users_config: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&users_file).unwrap()).unwrap();
+    let audit_events = users_config["accountAuditEvents"].as_array().unwrap();
+    assert!(audit_events.iter().any(|event| event["action"] == "created" && event["username"] == "mia"));
+    assert!(audit_events.iter().any(|event| {
+        event["action"] == "batch_delete"
+            && event["affectedUsernames"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|username| username == "leo")
+    }));
+    let audit_raw = serde_json::to_string(audit_events).unwrap();
+    assert!(!audit_raw.contains(first_password));
+    assert!(!audit_raw.contains(reset_password));
+    assert!(!audit_raw.contains(leo_password));
     assert_eq!(
         login_status(&app, "leo", leo_password).await,
         StatusCode::UNAUTHORIZED

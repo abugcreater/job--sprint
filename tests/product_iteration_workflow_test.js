@@ -19,15 +19,14 @@ function makeFixture(overrides = {}) {
     scripts: {
       test: [
         "node --check tools/validate_product_iteration_workflow.js",
-        "node tests/gitflow_policy_test.js",
         "node tests/product_iteration_workflow_test.js",
         "npm --prefix apps/react-web run typecheck",
         "npm --prefix apps/react-web test"
       ].join(" && "),
-      "test:release": "npm test && npm run test:gitflow && npm run test:local-functional && npm run build:rust:linux && npm run build:server-delivery",
+      "test:release": "npm test && npm run test:local-functional && npm run build:rust:linux && npm run build:server-delivery",
       "validate:product-iteration": "node tools/validate_product_iteration_workflow.js",
-      "validate:gitflow": "node tools/validate_gitflow_policy.js",
-      "test:gitflow": "node tests/gitflow_policy_test.js"
+      "diagnose:coach-runtime": "node tools/diagnose_coach_artifacts_runtime.js",
+      "test:coach-runtime-diagnostic": "node tests/coach_artifacts_runtime_diagnostic_test.js"
     }
   }, null, 2));
   writeFile(root, "docs/product/it-job-coach-v1/prd-options.md", [
@@ -61,7 +60,7 @@ function makeFixture(overrides = {}) {
   ].join("\n"));
   writeFile(root, "docs/product/product-ops/known-issues.md", [
     "远端真实 LLM provider evidence 已通过",
-    "Android 远端 HTTPS 真机 evidence 已通过",
+    "Android 远端 HTTPS 真机 evidence 缺失",
     "当前线程 AI 团队处于 quarantine"
   ].join("\n"));
   writeFile(root, "docs/product/product-ops/doc-rules.md", [
@@ -73,43 +72,10 @@ function makeFixture(overrides = {}) {
     "# 需求开发复用模板",
     "复制入口",
     "标准需求卡",
-    "GitFlow",
-    "工作分支",
     "数据隔离清单",
     "UI/UX 实现约束",
     "分层验收命令",
     "最终报告模板"
-  ].join("\n"));
-  writeFile(root, "docs/product/product-ops/gitflow-development-governance.md", [
-    "# GitFlow 开发与版本治理规范",
-    "main",
-    "develop",
-    "Conventional Commits",
-    "release/vX.Y.Z",
-    "hotfix/",
-    "npm run validate:gitflow",
-    "普通需求 PR 使用 squash merge"
-  ].join("\n"));
-  writeFile(root, "CONTRIBUTING.md", [
-    "轻量 GitFlow",
-    "main",
-    "develop",
-    "type(scope): description",
-    "npm run validate:gitflow"
-  ].join("\n"));
-  writeFile(root, ".github/pull_request_template.md", [
-    "需求/Issue",
-    "目标分支",
-    "GitFlow",
-    "npm run scan:sensitive",
-    "回滚方式"
-  ].join("\n"));
-  writeFile(root, ".github/workflows/gitflow-policy.yml", [
-    "name: GitFlow Policy",
-    "pull_request:",
-    "validate_gitflow_policy.js",
-    "GITFLOW_PR_TITLE",
-    "gitflow_policy_test.js"
   ].join("\n"));
   writeFile(root, "docs/product/it-job-coach-v1/completion-audit.md", [
     "PASS_WITH_LIMITS",
@@ -177,8 +143,10 @@ function testMissingReactGateInNpmTestFails() {
     "package.json": JSON.stringify({
       scripts: {
         test: "node tests/product_iteration_workflow_test.js",
-        "test:release": "npm test && npm run test:gitflow && npm run test:local-functional && npm run build:rust:linux && npm run build:server-delivery",
-        "validate:product-iteration": "node tools/validate_product_iteration_workflow.js"
+        "test:release": "npm test && npm run test:local-functional && npm run build:rust:linux && npm run build:server-delivery",
+        "validate:product-iteration": "node tools/validate_product_iteration_workflow.js",
+        "diagnose:coach-runtime": "node tools/diagnose_coach_artifacts_runtime.js",
+        "test:coach-runtime-diagnostic": "node tests/coach_artifacts_runtime_diagnostic_test.js"
       }
     }, null, 2)
   }));
@@ -192,25 +160,6 @@ function testMissingRequirementDevelopmentTemplateFails() {
   }));
   assert.strictEqual(report.ok, false);
   assert(report.findings.some((item) => item.id === "requirement_development_template_reusable"));
-}
-
-function testMissingGitflowGovernanceFails() {
-  const report = validateProductIterationWorkflow(makeFixture({
-    "docs/product/product-ops/gitflow-development-governance.md": "缺少 GitFlow 权威规范"
-  }));
-  assert.strictEqual(report.ok, false);
-  assert(report.findings.some((item) => item.id === "gitflow_development_governance"));
-}
-
-function testMissingGitflowScriptFails() {
-  const root = makeFixture();
-  const packageFile = path.join(root, "package.json");
-  const packageJson = JSON.parse(fs.readFileSync(packageFile, "utf8"));
-  delete packageJson.scripts["validate:gitflow"];
-  fs.writeFileSync(packageFile, JSON.stringify(packageJson, null, 2));
-  const report = validateProductIterationWorkflow(root);
-  assert.strictEqual(report.ok, false);
-  assert(report.findings.some((item) => item.script === "validate:gitflow"));
 }
 
 function testRemoteCoachEvidenceMustIncludeRoleQuestionBank() {
@@ -247,10 +196,8 @@ testFixtureWarnsWhenProviderIsFallbackOnly();
 testMissingPrdVersionFails();
 testMissingReactGateInNpmTestFails();
 testMissingRequirementDevelopmentTemplateFails();
-testMissingGitflowGovernanceFails();
-testMissingGitflowScriptFails();
 testRemoteCoachEvidenceMustIncludeRoleQuestionBank();
 testMissingRemoteCoachEvidenceWarnsOnly();
 testCurrentRepoPassesProductIterationGate();
 
-console.log("产品迭代工作流门禁测试：10 项通过。");
+console.log("产品迭代工作流门禁测试：8 项通过。");

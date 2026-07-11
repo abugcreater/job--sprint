@@ -1,4 +1,4 @@
-import { Check, Download, Filter, GitCompareArrows } from "lucide-react";
+import { Check, Download, Filter, GitCompareArrows, RotateCcw, XCircle } from "lucide-react";
 import {
   applicationStatuses,
   type ApplicationEvidenceRecord,
@@ -16,8 +16,11 @@ export function OpportunityRecordList({
   searchQuery,
   exportSummary,
   compareFeedback,
+  recentlyDeletedRecord,
   onSelect,
   onToggleCompare,
+  onUndoDelete,
+  onDismissDeletedRecord,
   onSearchChange,
   onClearFilters,
   onStatusFilterChange,
@@ -32,8 +35,11 @@ export function OpportunityRecordList({
   searchQuery: string;
   exportSummary: string;
   compareFeedback: string;
+  recentlyDeletedRecord: ApplicationEvidenceRecord | null;
   onSelect: (record: ApplicationEvidenceRecord) => void;
   onToggleCompare: (record: ApplicationEvidenceRecord) => void;
+  onUndoDelete: () => void;
+  onDismissDeletedRecord: () => void;
   onSearchChange: (query: string) => void;
   onClearFilters: () => void;
   onStatusFilterChange: (status: ApplicationStatusFilter) => void;
@@ -73,6 +79,15 @@ export function OpportunityRecordList({
 
       {exportSummary ? <p className="mx-4 mt-3 rounded-control bg-success-100 px-3 py-2 text-xs font-bold text-success-600" role="status">{exportSummary}</p> : null}
       {compareFeedback ? <p className="mx-4 mt-3 rounded-control bg-warn-100 px-3 py-2 text-xs font-bold text-warn-600" role="status">{compareFeedback}</p> : null}
+      {recentlyDeletedRecord ? (
+        <div className="mx-4 mt-3 rounded-card border border-success-600/30 bg-success-100 p-3" role="status" aria-live="polite">
+          <p className="text-xs font-black leading-5 text-success-600">已删除「{recentlyDeletedRecord.company || recentlyDeletedRecord.role || "未命名机会"}」，可立即恢复到 Evidence Gate。</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <button type="button" className="primary-button min-h-10 bg-success-600 px-3 text-xs" onClick={onUndoDelete}><RotateCcw size={14} aria-hidden="true" />撤销删除</button>
+            <button type="button" className="secondary-button min-h-10 px-3 text-xs" onClick={onDismissDeletedRecord}><XCircle size={14} aria-hidden="true" />不撤销</button>
+          </div>
+        </div>
+      ) : null}
 
       {records.length ? (
         <ol className="divide-y divide-line" aria-label="机会记录">

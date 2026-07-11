@@ -1,6 +1,7 @@
 use chrono::Utc;
 use serde_json::{Value, json};
-use sqlx::{Row, SqlitePool};
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 
 pub(crate) fn boundary_feedback_from_payload(id: String, payload: &Value) -> Result<Value, Value> {
     let suggestion_id = required_text(payload, "suggestionId")?;
@@ -34,7 +35,7 @@ pub(crate) async fn insert_boundary_feedback(
     scope: &str,
     feedback: &Value,
 ) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         INSERT INTO coach_boundary_feedback (
             id, scope, profile_id, suggestion_id, topic, decision, reason,
@@ -80,7 +81,7 @@ pub(crate) async fn list_boundary_feedback(
     scope: &str,
     limit: i64,
 ) -> sqlx::Result<Vec<Value>> {
-    let rows = sqlx::query(
+    let rows = sqlx::query::query(
         r#"
         SELECT id, profile_id, suggestion_id, topic, decision, reason,
                source_summary, source_confidence, source_provider,

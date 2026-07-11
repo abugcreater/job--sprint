@@ -191,7 +191,6 @@ describe("React Job Sprint AI coach workspace", () => {
   });
 
   it("deletes a profile from the redesigned profile panel and clears related data", async () => {
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
     render(<App />);
 
     fireEvent.click(screen.getByRole("button", { name: "改用详细画像表单" }));
@@ -207,12 +206,10 @@ describe("React Job Sprint AI coach workspace", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "画像阶段" }));
     fireEvent.click(screen.getByRole("button", { name: "删除此画像" }));
-
-    expect(confirmSpy).toHaveBeenCalled();
-    expect(await screen.findByText("已删除「可删除画像」画像。")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /确认删除画像 可删除画像/ }));
+    expect(await screen.findByText("已删除「可删除画像」，关联上下文已同步清理，可短时撤销。")).toBeInTheDocument();
     expect(useSprintStore.getState().userProfiles).toHaveLength(0);
-    expect(screen.getByRole("heading", { name: "导入简历建档" })).toBeInTheDocument();
-    confirmSpy.mockRestore();
+    expect(screen.getByText(/可立即撤销并恢复画像本身/)).toBeInTheDocument();
   });
 
   it("shows explicit expand controls when coach schedules and AI drafts exceed the compact list", async () => {

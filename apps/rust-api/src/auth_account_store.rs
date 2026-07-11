@@ -2,7 +2,10 @@ use axum::http::StatusCode;
 use serde_json::{Value, json};
 use std::{env, path::PathBuf};
 
-use crate::auth_account_users_file::{read_users_config, write_users_config};
+use crate::auth_account_audit::{
+    account_audit_events_from_config, append_account_audit_event, write_users_config_with_audit,
+};
+use crate::auth_account_users_file::read_users_config;
 use crate::auth_hash::sha256_hex;
 
 const USERNAME_CHARS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-";
@@ -35,6 +38,7 @@ pub(crate) fn account_provisioning_capability() -> Value {
 
 pub(crate) fn provision_user_account_from_invitation(
     payload: &Value,
+    operator_username: &str,
 ) -> Result<Value, (StatusCode, Value)> {
     let capability = account_provisioning_capability();
     if capability.get("enabled").and_then(Value::as_bool) != Some(true) {
@@ -94,7 +98,7 @@ pub(crate) fn provision_user_account_from_invitation(
     }
 
     let users_file = PathBuf::from(env::var("JOB_SPRINT_USERS_FILE").unwrap_or_default());
-    let (raw_config, mut users, was_array) = read_users_config(&users_file).map_err(|message| {
+    let (raw_config, mut users, _was_array) = read_users_config(&users_file).map_err(|message| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             json!({
@@ -115,7 +119,21 @@ pub(crate) fn provision_user_account_from_invitation(
         users.push(next_user);
         "created"
     };
-    write_users_config(&users_file, raw_config, users, was_array).map_err(|message| {
+    let audit_events = append_account_audit_event(
+        &account_audit_events_from_config(&raw_config),
+        json!({
+            "actorUsername": operator_username,
+            "action": action,
+            "username": username,
+            "role": role_from_payload(payload),
+            "dataScope": text_or(payload, "dataScope", &username),
+            "inviteBatch": text_or(payload, "inviteBatch", "default"),
+            "affectedUsernames": [username],
+            "affectedCount": 1,
+            "message": if action == "created" { "登录账号已开通。" } else { "登录密码已重置。" }
+        }),
+    );
+    write_users_config_with_audit(&users_file, raw_config, users, audit_events).map_err(|message| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             json!({

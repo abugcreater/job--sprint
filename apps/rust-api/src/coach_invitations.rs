@@ -1,6 +1,7 @@
 use chrono::Utc;
 use serde_json::{Value, json};
-use sqlx::{Row, SqlitePool};
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 
 const STATUSES: &[&str] = &["draft", "invited", "active", "paused"];
 
@@ -35,7 +36,7 @@ pub(crate) async fn upsert_coach_invitation(
     db: &SqlitePool,
     invitation: &Value,
 ) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         INSERT INTO coach_invitations (
             id, username, display_name, data_scope, invite_batch,
@@ -78,7 +79,7 @@ pub(crate) async fn update_coach_invitation_batch_status(
     status: &str,
 ) -> sqlx::Result<i64> {
     let updated_at = Utc::now().to_rfc3339();
-    let result = sqlx::query(
+    let result = sqlx::query::query(
         r#"
         UPDATE coach_invitations
         SET status = ?, updated_at = ?
@@ -94,7 +95,7 @@ pub(crate) async fn update_coach_invitation_batch_status(
 }
 
 pub(crate) async fn delete_coach_invitation(db: &SqlitePool, username: &str) -> sqlx::Result<i64> {
-    let result = sqlx::query(
+    let result = sqlx::query::query(
         r#"
         DELETE FROM coach_invitations
         WHERE username = ?
@@ -107,7 +108,7 @@ pub(crate) async fn delete_coach_invitation(db: &SqlitePool, username: &str) -> 
 }
 
 pub(crate) async fn list_coach_invitations(db: &SqlitePool) -> sqlx::Result<Vec<Value>> {
-    let rows = sqlx::query(
+    let rows = sqlx::query::query(
         r#"
         SELECT id, username, display_name, data_scope, invite_batch,
                template_version, role_family, target_role, status, note, created_at, updated_at

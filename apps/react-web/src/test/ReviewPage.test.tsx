@@ -108,7 +108,7 @@ describe("React Job Sprint review workspace", () => {
     fireEvent.click(screen.getByRole("button", { name: "历史" }));
     fireEvent.change(screen.getByLabelText("复盘记录筛选"), { target: { value: "has_path_issue" } });
     expect(within(localRecords()).getAllByText(/Step14 KeepMe 项目点/).length).toBeGreaterThan(0);
-    expect(within(localRecords()).queryAllByText(/Step14 DeleteMe 项目点/)).toHaveLength(0);
+    expect(within(localRecords()).queryByRole("button", { name: /编辑复盘记录 Step14 DeleteMe 项目点/ })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /编辑复盘记录 Step14 KeepMe 项目点/ }));
     expect(screen.getByRole("heading", { name: "编辑今日复盘" })).toBeInTheDocument();
@@ -120,9 +120,9 @@ describe("React Job Sprint review workspace", () => {
     expect(within(localRecords()).getAllByText(/Step14 KeepMe Edited/).length).toBeGreaterThan(0);
 
     fireEvent.change(screen.getByLabelText("复盘记录筛选"), { target: { value: "all" } });
-    vi.spyOn(window, "confirm").mockReturnValue(true);
     fireEvent.click(screen.getByRole("button", { name: /删除复盘记录 Step14 DeleteMe 项目点/ }));
-    expect(within(localRecords()).queryAllByText(/Step14 DeleteMe 项目点/)).toHaveLength(0);
+    fireEvent.click(screen.getByRole("button", { name: /确认删除复盘记录 Step14 DeleteMe 项目点/ }));
+    expect(within(localRecords()).queryByRole("button", { name: /编辑复盘记录 Step14 DeleteMe 项目点/ })).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: "导出当前筛选" }));
     expect(screen.getByText(/react-review-export-v1/)).toBeInTheDocument();

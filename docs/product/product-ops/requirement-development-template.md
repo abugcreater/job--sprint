@@ -1,10 +1,12 @@
 # 需求开发复用模板
 
-日期：2026-07-10
+日期：2026-07-08
 
 ## 用途
 
 本模板用于 Job Sprint 之后的产品级需求开发。它把本轮“需求澄清 -> 产品闭环 -> 数据隔离 -> UI/UX -> 开源安全 -> Web/Android/服务器交付 -> GitHub 合并”的完整路径抽象成可复用 SOP。
+
+启动前先阅读 `gitflow-development-governance.md`，确认当前需求应从 `develop`、`release/*` 或 `main` 的哪条基线派生；不得为了消除冲突整页覆盖另一分支的新业务能力。
 
 适用场景：
 
@@ -30,9 +32,6 @@ AI团队：按 Job Sprint 需求开发复用模板执行。
 原始问题：<用户原话或需求摘要>
 目标用户：<目标用户/角色>
 影响范围：<Web / Android / Server / Rust / Node / 数据 / 文档 / 发布>
-工作分支：<feature|fix|refactor|docs|chore|test|spike>/<ticket>-<slug>
-来源/目标分支：<develop -> develop；release/hotfix 才使用 main>
-提交计划：<按单一意图列出预期 Conventional Commits>
 必须解决：
 1. <条目 1>
 2. <条目 2>
@@ -47,8 +46,7 @@ AI团队：按 Job Sprint 需求开发复用模板执行。
 - 所有新增按钮必须有输入、反馈、保存/读回、导航或 disabled 原因。
 - Web、本地功能、Rust/SQLite、Android、服务器和 release 包按影响范围分层验证。
 - 开源仓库不得提交真实密钥、真实私密数据、个人路径或不可公开证据。
-- 完成后按 GitFlow 提交 PR；普通需求进入 develop，release/hotfix 才进入 main。
-- 按需要部署服务器和重新打包 APK，不能用代码合并替代真实交付 evidence。
+- 完成后提交 GitHub，并按需要部署服务器和重新打包 APK。
 ```
 
 ## 标准需求卡
@@ -61,7 +59,6 @@ AI团队：按 Job Sprint 需求开发复用模板执行。
 | 目标用户 | `<普通用户 / owner / 管理员 / 新用户 / 访客>` | 普通用户路径和管理员路径必须分开。 |
 | 用户路径 | `<从哪里进入 -> 做什么 -> 得到什么结果>` | 必须能描述成一次完整操作，而不是零散按钮。 |
 | 影响模块 | `<画像 / 知识 / 面试 / 机会 / 复盘 / 统计 / 更多 / 登录 / 服务端 / Android>` | 影响跨端或跨数据域时要升级验收。 |
-| GitFlow | `<工作分支 / 来源分支 / PR 目标 / 提交计划>` | 普通需求必须从 develop 到 develop；release/hotfix 才从或进入 main。 |
 | 当前问题类型 | `<数据隔离 / 权限误露 / UI 不闭环 / 统计分散 / 删除风险 / AI 质量 / 交付证据>` | P0 优先级高于视觉优化。 |
 | 数据对象 | `<profile / boundary / interview / opportunity / review / invitation / account / llm_run>` | 写清楚谁拥有、谁可读、谁可改、谁可删。 |
 | 权限边界 | `<guest / user / owner / admin>` | owner-only 入口不能出现在普通用户主路径。 |
@@ -82,9 +79,6 @@ AI团队：按 Job Sprint 需求开发复用模板执行。
 - 目标用户：
 - 用户路径：
 - 影响模块：
-- 工作分支：
-- 来源分支 / PR 目标：
-- 提交计划：
 - 当前问题类型：
 - 数据对象：
 - 权限边界：
@@ -101,22 +95,20 @@ AI团队：按 Job Sprint 需求开发复用模板执行。
 
 ## 一页速用版
 
-后续每个产品级需求先按这 12 步跑，细节再回到后面的阶段模板查：
+后续每个产品级需求先按这 10 步跑，细节再回到后面的阶段模板查：
 
 | 步骤 | 动作 | 产物或证据 |
 |---|---|---|
 | 1 | 读事实源，确认分支、脏工作树、运行入口和交付形态。 | `git status`、事实源清单、影响范围。 |
-| 2 | 从最新 develop 创建合法工作分支，记录 PR 目标和提交计划。 | GitFlow 需求卡、`validate:gitflow`。 |
-| 3 | 做 Manager Dispatch，确定 owner、必要角色和不派发理由。 | kickoff 记录，不能虚构全团队参与。 |
-| 4 | 把用户原话拆成用户路径、必须解决、明确不做和完成标准。 | 需求摘要或 feature capsule。 |
-| 5 | 定义数据对象、账号/画像/权限边界和旧数据清理规则。 | 数据隔离矩阵。 |
-| 6 | 先写空状态、无权限、保存反馈、删除确认、错误恢复。 | UI 状态清单。 |
-| 7 | 再实现最小业务闭环：输入、提交、持久化、刷新读回。 | 页面、接口或 store 改动。 |
-| 8 | 按影响范围补测试，不把局部 PASS 扩大成全量交付。 | React/Node/Rust/Android/远端证据。 |
-| 9 | 跑敏感扫描和 public-safe 检查，私有 env 留在仓库外。 | `scan:sensitive`、public-safe 报告。 |
-| 10 | 回填账本、已知问题、完成审计和必要的 core 文档。 | `product-ledger.md`、`known-issues.md`、`completion-audit.md`。 |
-| 11 | 按单一意图暂存和提交，PR 到正确目标分支。 | Conventional Commits、PR 模板、GitFlow CI。 |
-| 12 | 最终汇报只说证据能证明的事，明确限制和下一步。 | `PASS / PASS_WITH_LIMITS / PARTIAL`。 |
+| 2 | 做 Manager Dispatch，确定 owner、必要角色和不派发理由。 | kickoff 记录，不能虚构全团队参与。 |
+| 3 | 把用户原话拆成用户路径、必须解决、明确不做和完成标准。 | 需求摘要或 feature capsule。 |
+| 4 | 定义数据对象、账号/画像/权限边界和旧数据清理规则。 | 数据隔离矩阵。 |
+| 5 | 先写空状态、无权限、保存反馈、删除确认、错误恢复。 | UI 状态清单。 |
+| 6 | 再实现最小业务闭环：输入、提交、持久化、刷新读回。 | 页面、接口或 store 改动。 |
+| 7 | 按影响范围补测试，不把局部 PASS 扩大成全量交付。 | React/Node/Rust/Android/远端证据。 |
+| 8 | 跑敏感扫描和 public-safe 检查，私有 env 留在仓库外。 | `scan:sensitive`、public-safe 报告。 |
+| 9 | 回填账本、已知问题、完成审计和必要的 core 文档。 | `product-ledger.md`、`known-issues.md`、`completion-audit.md`。 |
+| 10 | 最终汇报只说证据能证明的事，明确限制和下一步。 | `PASS / PASS_WITH_LIMITS / PARTIAL`。 |
 
 最小闭环判断：
 
@@ -179,7 +171,6 @@ AI团队：按 Job Sprint 需求开发复用模板执行。
 - `docs/product/README.md`
 - 当前 feature capsule：`docs/product/<feature-slug>/`
 - `docs/product/product-ops/iteration-workflow.md`
-- `docs/product/product-ops/gitflow-development-governance.md`
 - `docs/product/product-ops/doc-rules.md`
 - `docs/product/product-ops/known-issues.md`
 - `docs/product/product-ops/product-ledger.md`
@@ -189,9 +180,7 @@ AI团队：按 Job Sprint 需求开发复用模板执行。
 | 项目 | 结论 |
 |---|---|
 | 当前分支 | `<branch>` |
-| 来源分支 | `<develop / main>` |
-| PR 目标分支 | `<develop / main>` |
-| 提交计划 | `<type(scope): description 列表>` |
+| 目标分支 | `main` |
 | 是否已有未提交改动 | `<clean / dirty>` |
 | 运行入口 | `<Web / Android / Server>` |
 | 数据源 | `<localStorage / runtime JSON / SQLite / users file>` |
@@ -496,28 +485,23 @@ npm run final:delivery -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.
 git status --short --branch
 git diff --check
 npm run scan:sensitive
-git add <本次单一意图涉及的明确文件>
+git add -A
 git diff --cached --check
-npm run validate:gitflow -- --phase commit --message "<type(scope): summary>"
-git commit -m "<type(scope): summary>"
+git commit -m "<summary>"
 git push -u origin <branch>
-git status --porcelain
-npm run validate:gitflow -- --phase pr --base <develop|main> --message "<type(scope): title>"
-gh pr create --base <develop|main> --head <branch> --title "<type(scope): title>" --body-file <pr-body.md>
-gh pr merge <number> --squash --delete-branch
-git fetch --prune origin
+gh pr create --base main --head <branch> --title "<title>" --body "<summary and verification>"
+gh pr merge <number> --merge
+git fetch origin main
 git branch -r --contains <commit>
 ```
 
 提交前确认：
 
 - 工作目录只包含本次需求相关改动。
-- 工作分支、来源分支和 PR 目标符合 `gitflow-development-governance.md`。
-- 混合工作树只按明确路径暂存，禁止直接 `git add -A`。
 - 没有提交私有 env、真实证据、keystore、token。
 - 大体量构建产物是项目要求的一部分才提交。
 - PR 描述包含验证命令和限制。
-- 普通需求合并到 `origin/develop`；release/hotfix 合并到 `origin/main` 并回同步 develop。
+- 合并后确认 `origin/main` 包含本次提交。
 
 ## 最终报告模板
 
@@ -530,9 +514,8 @@ Dispatch:
 
 交付结果：
 - 独立路径：<path>
-- 工作分支 / PR 目标：<branch -> develop|main>
 - PR：<url>
-- merge commit：<sha>
+- main merge commit：<sha>
 - 服务器：<URL 或说明>
 - Android APK：<path>
 - 最终验收：<PASS / PASS_WITH_LIMITS / PARTIAL>
@@ -565,8 +548,6 @@ Dispatch:
 - 只跑本地敏感扫描，不检查 public-safe 和 Android fallback。
 - 把 evidence 报告里的本机路径或服务器信息提交到开源源码。
 - 把 `PASS_WITH_LIMITS` 写成生产全量 `PASS`。
-- 在 `main` 或 `develop` 直接开发和提交。
-- 在混合工作树使用 `git add -A`，把多个需求塞进同一提交。
 
 ## 本轮沉淀的继承规则
 
@@ -578,5 +559,3 @@ Dispatch:
 6. Android 远端验收必须使用临时账号证明新用户不继承旧数据。
 7. release gate 不能依赖私有信息进入仓库；私有 env 必须留在 repo 外。
 8. 最终交付必须验证 Web、Android、服务器、APK、GitHub 合并。
-9. 普通需求必须从 develop 创建独立分支并回到 develop；release/hotfix 才进入 main。
-10. 每个提交必须是可测试、可独立回退的单一意图，PR 标题决定 squash 后的最终提交信息。

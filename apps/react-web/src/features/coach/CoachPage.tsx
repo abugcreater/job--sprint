@@ -2,12 +2,10 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
-  generateBoundarySuggestionsOnServer,
   generateCoachArtifactsOnServer,
   submitCoachFeedback,
   submitCoachOnboardingEvent
 } from "../../api/runtimeClient";
-import { submitBoundarySuggestionFeedback } from "../../api/boundaryFeedbackClient";
 import {
   buildCoachDashboard,
   canSaveBoundary,
@@ -22,12 +20,10 @@ import {
 } from "../../data/coachAdapter";
 import { buildApplicationsDashboard } from "../../data/applicationsAdapter";
 import { buildCoachFirstLoginFlow } from "../../data/coachFirstLoginFlowAdapter";
-import { generateBoundarySuggestionsFromText, type BoundarySuggestionDraft } from "../../data/boundarySuggestionAdapter";
-import { summarizeBoundarySuggestionFeedback, type BoundarySuggestionFeedbackDraft } from "../../data/boundarySuggestionFeedbackAdapter";
 import { createLlmRun } from "../../data/llmRunAdapter";
 import { buildOpportunitySignals } from "../../data/opportunitySignalsAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
-import type { AiArtifact } from "../../types/sprint";
+import type { AiArtifact, CoachScheduleEvent, KnowledgeBoundary } from "../../types/sprint";
 import { AiFeedbackPanel } from "./components/AiFeedbackPanel";
 import { ArtifactPanel } from "./components/ArtifactPanel";
 import { BoundaryPanel } from "./components/BoundaryPanel";
@@ -38,6 +34,8 @@ import { InitializationWizardPanel } from "./components/InitializationWizardPane
 import { LlmRunPanel } from "./components/LlmRunPanel";
 import { ProfilePanel } from "./components/ProfilePanel";
 import { SchedulePanel } from "./components/SchedulePanel";
+import { useProfileRecovery } from "./useProfileRecovery";
+import { useBoundarySuggestions } from "./useBoundarySuggestions";
 
 export function CoachPage() {
   const isResumeImportEntry = useSearchParams()[0].get("entry") === "resume-import";
@@ -53,11 +51,13 @@ export function CoachPage() {
   const saveUserProfile = useSprintStore((state) => state.saveUserProfile);
   const activateUserProfile = useSprintStore((state) => state.activateUserProfile);
   const deleteUserProfile = useSprintStore((state) => state.deleteUserProfile);
+  const restoreUserProfileBundle = useSprintStore((state) => state.restoreUserProfileBundle);
   const saveKnowledgeBoundary = useSprintStore((state) => state.saveKnowledgeBoundary);
-  const recordBoundarySuggestionFeedback = useSprintStore((state) => state.recordBoundarySuggestionFeedback);
   const deleteKnowledgeBoundary = useSprintStore((state) => state.deleteKnowledgeBoundary);
+  const restoreKnowledgeBoundary = useSprintStore((state) => state.restoreKnowledgeBoundary);
   const saveCoachScheduleEvent = useSprintStore((state) => state.saveCoachScheduleEvent);
   const deleteCoachScheduleEvent = useSprintStore((state) => state.deleteCoachScheduleEvent);
+  const restoreCoachScheduleEvent = useSprintStore((state) => state.restoreCoachScheduleEvent);
   const generateAiArtifacts = useSprintStore((state) => state.generateAiArtifacts);
   const addAiArtifacts = useSprintStore((state) => state.addAiArtifacts);
   const addLlmRun = useSprintStore((state) => state.addLlmRun);
@@ -82,21 +82,14 @@ export function CoachPage() {
     }),
     [dashboard.activeProfile, dashboard.artifacts, dashboard.boundaries, dashboard.scheduleEvents, syncState]
   );
-  const boundaryFeedbackSummary = useMemo(() => summarizeBoundarySuggestionFeedback(
-    dashboard.activeProfile ? boundarySuggestionFeedback.filter((item) => !item.profileId || item.profileId === dashboard.activeProfile?.id) : boundarySuggestionFeedback
-  ), [boundarySuggestionFeedback, dashboard.activeProfile?.id]);
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>(() => createProfileDraft(dashboard.activeProfile));
   const [boundaryDraft, setBoundaryDraft] = useState<KnowledgeBoundaryDraft>(() => createBoundaryDraft());
-  const [boundarySourceText, setBoundarySourceText] = useState("");
-  const [boundarySuggestions, setBoundarySuggestions] = useState<BoundarySuggestionDraft[]>([]);
-  const [boundarySuggestionReasons, setBoundarySuggestionReasons] = useState<Record<string, string>>({});
   const [scheduleDraft, setScheduleDraft] = useState<CoachScheduleDraft>(() => createScheduleDraft(sprint.date));
   const [artifactEdits, setArtifactEdits] = useState<Record<string, Pick<AiArtifact, "title" | "body">>>({});
   const [rejectionReasons, setRejectionReasons] = useState<Record<string, string>>({});
   const [showAllSchedules, setShowAllSchedules] = useState(false);
   const [showAllArtifacts, setShowAllArtifacts] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isExtractingBoundaries, setIsExtractingBoundaries] = useState(false);
   const [isRecordingFirstLogin, setIsRecordingFirstLogin] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [profileFeedback, setProfileFeedback] = useState("");
@@ -110,15 +103,52 @@ export function CoachPage() {
     advice: dashboard.artifacts.some((artifact) => artifact.status === "accepted" || artifact.status === "rejected")
   };
   const stageProgress = buildCoachStageProgress(completedStages);
-
+  const [recentlyDeletedBoundary, setRecentlyDeletedBoundary] = useState<KnowledgeBoundary | null>(null);
+  const [recentlyDeletedScheduleEvent, setRecentlyDeletedScheduleEvent] = useState<CoachScheduleEvent | null>(null);
+  const boundarySuggestionFlow = useBoundarySuggestions({
+    activeProfile: dashboard.activeProfile,
+    boundaries: dashboard.boundaries,
+    setBoundaryDraft,
+    setFeedback,
+    setRecentlyDeletedBoundary,
+    setActiveStage
+  });
+  const {
+    recentlyDeletedProfileBundle,
+    handleSaveProfile,
+    handleDeleteProfile,
+    handleUndoDeleteProfile,
+    handleNewProfile,
+    handleActivateProfile,
+    handleEditProfile,
+    dismissDeletedProfile
+  } = useProfileRecovery({
+    profiles: dashboard.profiles,
+    knowledgeBoundaries,
+    boundarySuggestionFeedback,
+    coachScheduleEvents,
+    aiArtifacts,
+    llmRuns,
+    saveUserProfile,
+    activateUserProfile,
+    deleteUserProfile,
+    restoreUserProfileBundle,
+    setProfileDraft,
+    setFeedback,
+    setProfileFeedback,
+    clearRelatedUndo: () => {
+      setRecentlyDeletedBoundary(null);
+      setRecentlyDeletedScheduleEvent(null);
+    }
+  });
   useEffect(() => {
     setProfileDraft(createProfileDraft(dashboard.activeProfile));
     setBoundaryDraft(createBoundaryDraft());
-    setBoundarySuggestions([]);
-    setBoundarySuggestionReasons({});
+    boundarySuggestionFlow.resetSuggestions();
     setScheduleDraft(createScheduleDraft(sprint.date));
+    setRecentlyDeletedBoundary(null);
+    setRecentlyDeletedScheduleEvent(null);
   }, [dashboard.activeProfile?.id, sprint.date]);
-
   useEffect(() => {
     if (!isResumeImportEntry || activeStage !== "profile" || !showOnboarding || didFocusResumeImport.current) return;
     const animationFrame = window.requestAnimationFrame(() => {
@@ -129,33 +159,6 @@ export function CoachPage() {
     });
     return () => window.cancelAnimationFrame(animationFrame);
   }, [activeStage, isResumeImportEntry, showOnboarding]);
-
-  const handleSaveProfile = () => {
-    if (!canSaveProfile(profileDraft)) {
-      setFeedback("请至少填写目标岗位、经验摘要和每日可投入时间。");
-      setProfileFeedback("保存失败：请补齐目标岗位、经验摘要和每日可投入时间。");
-      return;
-    }
-    saveUserProfile(profileDraft);
-    setFeedback("求职画像已保存，后续 AI 建议会引用这份画像。");
-    setProfileFeedback("画像已保存。");
-    setActiveStage("boundaries");
-    setShowOnboarding(false);
-  };
-
-  const handleDeleteProfile = (profileId: string) => {
-    const profile = dashboard.profiles.find((item) => item.id === profileId);
-    if (!profile) return;
-    const confirmed = window.confirm(`删除「${profile.name}」画像？关联知识边界、个人日程和 AI 建议也会一起移除。`);
-    if (!confirmed) return;
-    deleteUserProfile(profileId);
-    setProfileDraft(createProfileDraft());
-    setFeedback(`已删除「${profile.name}」画像。`);
-    setProfileFeedback(`已删除「${profile.name}」，关联边界、日程和 AI 建议已同步清理。`);
-    setActiveStage("profile");
-    setShowOnboarding(true);
-  };
-
   const handleSaveBoundary = () => {
     if (!dashboard.activeProfile) {
       setFeedback("请先保存一份求职画像。");
@@ -166,101 +169,28 @@ export function CoachPage() {
       return;
     }
     saveKnowledgeBoundary(boundaryDraft);
+    setRecentlyDeletedBoundary(null);
     setBoundaryDraft(createBoundaryDraft());
     setFeedback("知识边界已保存。");
     setActiveStage("plan");
   };
 
-  const handleGenerateBoundarySuggestions = async () => {
-    if (!dashboard.activeProfile) {
-      setFeedback("请先保存一份求职画像。");
-      return;
+  const handleDeleteBoundary = (boundaryId: string) => {
+    const boundary = dashboard.boundaries.find((item) => item.id === boundaryId);
+    if (!boundary) return;
+    deleteKnowledgeBoundary(boundaryId);
+    setRecentlyDeletedBoundary(boundary);
+    if (boundaryDraft.id === boundaryId) {
+      setBoundaryDraft(createBoundaryDraft());
     }
-    if (boundarySourceText.trim().length < 12) {
-      setFeedback("请粘贴一段 JD、简历或面试反馈，至少 12 个字符。");
-      return;
-    }
-    setIsExtractingBoundaries(true);
-    try {
-      const response = await generateBoundarySuggestionsOnServer({
-        profile: dashboard.activeProfile,
-        knowledgeBoundaries: dashboard.boundaries,
-        text: boundarySourceText
-      });
-      if (response?.suggestions.length) {
-        setBoundarySuggestions(response.suggestions.map((suggestion) => ({
-          ...suggestion,
-          sourceConfidence: suggestion.sourceConfidence ?? suggestion.confidence,
-          sourceProvider: response.provider,
-          sourcePromptVersion: response.promptVersion,
-          sourceInputHash: response.inputSummaryHash
-        })));
-        setFeedback("已生成知识边界候选，请确认后再写入正式边界。");
-        return;
-      }
-      setBoundarySuggestions(createLocalBoundarySuggestions());
-      setFeedback("服务端边界提取暂不可用，已用本地规则生成候选。");
-    } catch (_) {
-      setBoundarySuggestions(createLocalBoundarySuggestions());
-      setFeedback("服务端边界提取失败，已用本地规则生成候选。");
-    } finally {
-      setIsExtractingBoundaries(false);
-    }
+    setFeedback(`已删除「${boundary.topic}」知识边界，可在知识边界顶部撤销。`);
   };
 
-  const createLocalBoundarySuggestions = () => generateBoundarySuggestionsFromText({
-    text: boundarySourceText,
-    profile: dashboard.activeProfile,
-    existingTopics: dashboard.boundaries.map((boundary) => boundary.topic)
-  });
-
-  const handleAcceptBoundarySuggestion = (suggestion: BoundarySuggestionDraft) => {
-    if (!dashboard.activeProfile) {
-      setFeedback("请先保存一份求职画像。");
-      return;
-    }
-    recordBoundarySuggestionDecision(suggestion, "accepted");
-    saveKnowledgeBoundary(suggestion);
-    setBoundarySuggestions((current) => current.filter((item) => item.id !== suggestion.id));
-    setBoundarySuggestionReasons((current) => removeKey(current, suggestion.id));
-    setFeedback(`已采纳「${suggestion.topic}」知识边界。`);
-    setActiveStage("plan");
-  };
-
-  const handleReviseBoundarySuggestion = (suggestion: BoundarySuggestionDraft) => {
-    recordBoundarySuggestionDecision(suggestion, "needs_revision", boundarySuggestionReasons[suggestion.id]);
-    setBoundaryDraft({ ...suggestion, id: undefined });
-    setBoundarySuggestions((current) => current.filter((item) => item.id !== suggestion.id));
-    setBoundarySuggestionReasons((current) => removeKey(current, suggestion.id));
-    setFeedback(`已把「${suggestion.topic}」载入知识边界表单，请修订后保存。`);
-  };
-
-  const handleRejectBoundarySuggestion = (suggestion: BoundarySuggestionDraft) => {
-    recordBoundarySuggestionDecision(suggestion, "rejected", boundarySuggestionReasons[suggestion.id]);
-    setBoundarySuggestions((current) => current.filter((item) => item.id !== suggestion.id));
-    setBoundarySuggestionReasons((current) => removeKey(current, suggestion.id));
-    setFeedback(`已记录「${suggestion.topic}」不采纳原因。`);
-  };
-
-  const recordBoundarySuggestionDecision = (
-    suggestion: BoundarySuggestionDraft,
-    decision: BoundarySuggestionFeedbackDraft["decision"],
-    reason = ""
-  ) => {
-    const feedbackPayload = {
-      profileId: dashboard.activeProfile?.id,
-      suggestionId: suggestion.id,
-      topic: suggestion.topic,
-      decision,
-      reason,
-      sourceSummary: suggestion.sourceSummary,
-      sourceConfidence: suggestion.sourceConfidence ?? suggestion.confidence,
-      sourceProvider: suggestion.sourceProvider,
-      sourcePromptVersion: suggestion.sourcePromptVersion,
-      sourceInputHash: suggestion.sourceInputHash
-    };
-    recordBoundarySuggestionFeedback(feedbackPayload);
-    void submitBoundarySuggestionFeedback(feedbackPayload).catch(() => undefined);
+  const handleUndoDeleteBoundary = () => {
+    if (!recentlyDeletedBoundary) return;
+    restoreKnowledgeBoundary(recentlyDeletedBoundary);
+    setRecentlyDeletedBoundary(null);
+    setFeedback("已恢复刚删除的知识边界。");
   };
 
   const handleSaveSchedule = () => {
@@ -273,9 +203,28 @@ export function CoachPage() {
       return;
     }
     saveCoachScheduleEvent(scheduleDraft);
+    setRecentlyDeletedScheduleEvent(null);
     setScheduleDraft(createScheduleDraft(sprint.date));
     setFeedback("自定义日程已加入今日 AI 教练。");
     setActiveStage("advice");
+  };
+
+  const handleDeleteScheduleEvent = (eventId: string) => {
+    const event = dashboard.scheduleEvents.find((item) => item.id === eventId);
+    if (!event) return;
+    deleteCoachScheduleEvent(eventId);
+    setRecentlyDeletedScheduleEvent(event);
+    if (scheduleDraft.id === eventId) {
+      setScheduleDraft(createScheduleDraft(sprint.date));
+    }
+    setFeedback(`已删除「${event.title}」个人日程，可在个人日程顶部撤销。`);
+  };
+
+  const handleUndoDeleteScheduleEvent = () => {
+    if (!recentlyDeletedScheduleEvent) return;
+    restoreCoachScheduleEvent(recentlyDeletedScheduleEvent);
+    setRecentlyDeletedScheduleEvent(null);
+    setFeedback("已恢复刚删除的个人日程。");
   };
 
   const handleGenerate = async () => {
@@ -458,14 +407,21 @@ export function CoachPage() {
                   activeProfileId={dashboard.activeProfile?.id}
                   draft={profileDraft}
                   onChange={(patch) => setProfileDraft((current) => ({ ...current, ...patch }))}
-                  onNew={() => setProfileDraft(createProfileDraft())}
-                  onActivate={(profile) => {
-                    activateUserProfile(profile.id);
-                    setFeedback(`已切换到「${profile.name}」。`);
-                  }}
-                  onEdit={(profile) => setProfileDraft(createProfileDraft(profile))}
+                  recentlyDeletedProfileBundle={recentlyDeletedProfileBundle}
+                  onNew={handleNewProfile}
+                  onActivate={handleActivateProfile}
+                  onEdit={handleEditProfile}
                   onDelete={handleDeleteProfile}
-                  onSave={handleSaveProfile}
+                  onUndoDelete={handleUndoDeleteProfile}
+                  onDismissDeletedProfile={dismissDeletedProfile}
+                  onSave={() => {
+                    const ready = canSaveProfile(profileDraft);
+                    handleSaveProfile(profileDraft);
+                    if (ready) {
+                      setActiveStage("boundaries");
+                      setShowOnboarding(false);
+                    }
+                  }}
                   feedback={profileFeedback}
                 />
               )
@@ -474,26 +430,29 @@ export function CoachPage() {
             {activeStage === "boundaries" ? (
               <>
                 <BoundarySuggestionPanel
-                  sourceText={boundarySourceText}
-                  suggestions={boundarySuggestions}
-                  feedbackReasons={boundarySuggestionReasons}
-                  feedbackSummary={boundaryFeedbackSummary}
+                  sourceText={boundarySuggestionFlow.sourceText}
+                  suggestions={boundarySuggestionFlow.suggestions}
+                  feedbackReasons={boundarySuggestionFlow.reasons}
+                  feedbackSummary={boundarySuggestionFlow.feedbackSummary}
                   disabled={!dashboard.activeProfile}
-                  isGenerating={isExtractingBoundaries}
-                  onTextChange={setBoundarySourceText}
-                  onGenerate={handleGenerateBoundarySuggestions}
-                  onAccept={handleAcceptBoundarySuggestion}
-                  onRevise={handleReviseBoundarySuggestion}
-                  onReject={handleRejectBoundarySuggestion}
-                  onReasonChange={(suggestionId, reason) => setBoundarySuggestionReasons((current) => ({ ...current, [suggestionId]: reason }))}
+                  isGenerating={boundarySuggestionFlow.isGenerating}
+                  onTextChange={boundarySuggestionFlow.setSourceText}
+                  onGenerate={boundarySuggestionFlow.generateSuggestions}
+                  onAccept={boundarySuggestionFlow.acceptSuggestion}
+                  onRevise={boundarySuggestionFlow.reviseSuggestion}
+                  onReject={boundarySuggestionFlow.rejectSuggestion}
+                  onReasonChange={(suggestionId, reason) => boundarySuggestionFlow.setReasons((current) => ({ ...current, [suggestionId]: reason }))}
                 />
                 <BoundaryPanel
                   boundaries={dashboard.boundaries}
                   draft={boundaryDraft}
                   activeProfileReady={Boolean(dashboard.activeProfile)}
+                  recentlyDeletedBoundary={recentlyDeletedBoundary}
                   onChange={(patch) => setBoundaryDraft((current) => ({ ...current, ...patch }))}
                   onEdit={(boundary) => setBoundaryDraft(createBoundaryDraft(boundary))}
-                  onDelete={deleteKnowledgeBoundary}
+                  onDelete={handleDeleteBoundary}
+                  onUndoDelete={handleUndoDeleteBoundary}
+                  onDismissDeletedBoundary={() => setRecentlyDeletedBoundary(null)}
                   onSave={handleSaveBoundary}
                   onCancelEdit={() => setBoundaryDraft(createBoundaryDraft())}
                 />
@@ -504,10 +463,14 @@ export function CoachPage() {
               <SchedulePanel
                 events={dashboard.scheduleEvents}
                 draft={scheduleDraft}
+                recentlyDeletedEvent={recentlyDeletedScheduleEvent}
                 onChange={(patch) => setScheduleDraft((current) => ({ ...current, ...patch }))}
                 onEdit={(event) => setScheduleDraft(createScheduleDraft(sprint.date, event))}
-                onDelete={deleteCoachScheduleEvent}
+                onDelete={handleDeleteScheduleEvent}
+                onUndoDelete={handleUndoDeleteScheduleEvent}
+                onDismissDeletedEvent={() => setRecentlyDeletedScheduleEvent(null)}
                 onSave={handleSaveSchedule}
+                onCancelEdit={() => setScheduleDraft(createScheduleDraft(sprint.date))}
                 showAll={showAllSchedules}
                 onToggleShowAll={() => setShowAllSchedules((current) => !current)}
               />
@@ -551,10 +514,4 @@ function recommendedCoachStage(dashboard: ReturnType<typeof buildCoachDashboard>
   if (!dashboard.boundaries.length) return "boundaries";
   if (!dashboard.scheduleEvents.length) return "plan";
   return "advice";
-}
-
-function removeKey<T>(record: Record<string, T>, key: string): Record<string, T> {
-  const next = { ...record };
-  delete next[key];
-  return next;
 }

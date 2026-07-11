@@ -1,6 +1,6 @@
 # 每日主动产品迭代机制
 
-日期：2026-07-10
+日期：2026-07-08
 
 ## 目标
 
@@ -19,7 +19,6 @@
 - `docs/product/product-ops/product-ledger.md`
 - `docs/product/product-ops/known-issues.md`
 - `docs/product/product-ops/iteration-workflow.md`
-- `docs/product/product-ops/gitflow-development-governance.md`
 - `docs/product/product-ops/requirement-development-template.md`
 - `docs/product/product-ops/daily-product-iteration-log.md`
 
@@ -29,12 +28,11 @@
 2. 产品扫描：从用户路径、数据隔离、权限、空状态、创建/编辑/删除、AI 草稿、统计、Android、服务器交付中找不足。
 3. 候选排序：按用户价值、证据强度、风险、实现大小和可验证性评分。
 4. 选择任务：每天默认只选 1 个主任务，最多 1 个顺手小修；大需求必须先建 feature capsule。
-5. GitFlow：从最新 develop 创建独立工作分支，记录 PR 目标和提交计划；同一每日节点不混入其它需求。
-6. AI 团队路由：默认 Manager Dispatch；日常小步改进优先主线程，只有 UI/数据/安全/验收风险明确时才派 1 个专家。
-7. 实施：保持改动窄，尊重已有 worktree，不覆盖用户未提交内容。
-8. 验证：按影响面运行最小充分命令，不能把局部证据扩大成全量通过。
-9. 记录：更新日志、product ledger、known issues 或 completion audit。
-10. 汇报：给出分支、改了什么、为什么、证据、限制和明天优先级。
+5. AI 团队路由：默认 Manager Dispatch；日常小步改进优先主线程，只有 UI/数据/安全/验收风险明确时才派 1 个专家。
+6. 实施：保持改动窄，尊重已有 worktree，不覆盖用户未提交内容。
+7. 验证：按影响面运行最小充分命令，不能把局部证据扩大成全量通过。
+8. 记录：更新日志、product ledger、known issues 或 completion audit。
+9. 汇报：给出改了什么、为什么、证据、限制、明天优先级。
 
 ## 候选评分
 
@@ -63,14 +61,12 @@
 - 不把管理员入口放回普通用户主路径。
 - 不在没有证据时宣称问题已修复。
 - 不等待、关闭或清理 inherited/stale agent 作为交付步骤。
-- 不在 `main` 或 `develop` 直接开发，不把多个每日任务混进同一分支或提交。
-- 不在混合工作树直接 `git add -A`。
 
 ## 最小验证矩阵
 
 | 改动范围 | 最小验证 |
 |---|---|
-| 文档/流程 | `git diff --check`、`npm run test:gitflow`、`npm run validate:product-iteration`、`npm run scan:sensitive` |
+| 文档/流程 | `git diff --check`、`npm run validate:product-iteration`、`npm run scan:sensitive` |
 | React UI | `npm --prefix apps/react-web run typecheck`、`npm --prefix apps/react-web test` |
 | 业务流 | `npm run test:functional` 或对应功能脚本 |
 | Rust/SQLite | `cargo test --manifest-path apps/rust-api/Cargo.toml` |
@@ -92,7 +88,6 @@ AI团队：按 Job Sprint 每日主动产品迭代机制执行。
 必须先读：
 - docs/product/product-ops/daily-product-iteration.md
 - docs/product/product-ops/requirement-development-template.md
-- docs/product/product-ops/gitflow-development-governance.md
 - docs/product/product-ops/product-ledger.md
 - docs/product/product-ops/known-issues.md
 
@@ -100,10 +95,10 @@ AI团队：按 Job Sprint 每日主动产品迭代机制执行。
 1. 检查 git status 和当前事实源，不覆盖用户未提交改动。
 2. 从 known issues、product ledger、测试缺口、UI/UX 不顺、数据隔离、权限、Android/服务器交付边界中找候选。
 3. 按用户价值、风险、可验证性和实现大小选择 1 个当天主任务。
-4. 从最新 develop 创建独立工作分支；小任务直接实现，产品级大任务先建 feature capsule，不要裸改。
-5. 运行最小充分验证和 GitFlow 门禁，不能把局部 PASS 扩大解释。
+4. 小任务直接实现；产品级大任务先建 feature capsule，不要裸改。
+5. 运行最小充分验证，不能把局部 PASS 扩大解释。
 6. 更新 daily-product-iteration-log.md，并按需要更新 product-ledger.md 或 known-issues.md。
-7. 用中文汇报：分支、今日选择、改动、验证、限制、明日建议。
+7. 用中文汇报：今日选择、改动、验证、限制、明日建议。
 
 AI 团队规则：
 - 默认 manager-dispatch。
@@ -121,7 +116,6 @@ Dispatch:
 - agents: <none / role + id>
 
 今日选择：
-- 分支：<work branch -> develop|main>
 - 主任务：<task>
 - 选择原因：<score and evidence>
 

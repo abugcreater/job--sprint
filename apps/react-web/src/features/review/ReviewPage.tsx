@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, ClipboardCheck, Download, FileText, NotebookPen, Pencil, ShieldAlert, SlidersHorizontal, Sparkles, Trash2, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardCheck, FileText, NotebookPen, ShieldAlert, Sparkles, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { getLegacySnapshot } from "../../data/legacyAdapters";
@@ -12,7 +12,6 @@ import {
   createReviewDraft,
   filterReviewRecords,
   isReviewDraftReady,
-  reviewRecordFilters,
   reviewRecordToDraft,
   type ReviewEvidenceRecord,
   type ReviewFormDraft,
@@ -21,6 +20,7 @@ import {
 } from "../../data/reviewAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
 import { ReviewEmptyProfile } from "./components/ReviewEmptyProfile";
+import { LocalReviewRecords } from "./components/LocalReviewRecords";
 import { WeeklyReviewPanel } from "./components/WeeklyReviewPanel";
 import { useServerOutcome } from "./useServerOutcome";
 import type { RiskItem } from "../../types/sprint";
@@ -38,9 +38,11 @@ export function ReviewPage() {
   const addEvidence = useSprintStore((state) => state.addEvidence);
   const updateEvidence = useSprintStore((state) => state.updateEvidence);
   const deleteEvidence = useSprintStore((state) => state.deleteEvidence);
+  const restoreEvidence = useSprintStore((state) => state.restoreEvidence);
   const [draft, setDraft] = useState<ReviewFormDraft>(() => createReviewDraft());
   const [recordFilter, setRecordFilter] = useState<ReviewRecordFilter>("all");
   const [editingRecord, setEditingRecord] = useState<{ taskId: string; evidenceId: string } | null>(null);
+  const [recentlyDeletedReview, setRecentlyDeletedReview] = useState<ReviewEvidenceRecord | null>(null);
   const [exportPreview, setExportPreview] = useState("");
   const [formFeedback, setFormFeedback] = useState("");
   const [reviewView, setReviewView] = useState<"write" | "insights" | "history">("write");
@@ -93,16 +95,31 @@ export function ReviewPage() {
   const handleDeleteReview = useCallback(
     (record: ReviewEvidenceRecord) => {
       if (record.source !== "local") return;
-      if (!window.confirm(`删除「${record.projectPoint || record.title}」复盘记录？此操作不可撤销。`)) return;
+      setRecentlyDeletedReview(record);
       deleteEvidence(record.taskId, record.id);
       if (editingRecord?.evidenceId === record.id) {
         setEditingRecord(null);
         setDraft(createReviewDraft());
       }
-      setFormFeedback("复盘记录已删除。");
+      setFormFeedback("复盘记录已删除，可在复盘历史顶部撤销。");
     },
     [deleteEvidence, editingRecord]
   );
+
+  const handleUndoDeleteReview = useCallback(() => {
+    if (!recentlyDeletedReview) return;
+    restoreEvidence({
+      id: recentlyDeletedReview.id,
+      taskId: recentlyDeletedReview.taskId,
+      type: recentlyDeletedReview.type,
+      title: recentlyDeletedReview.title,
+      content: recentlyDeletedReview.content,
+      createdAt: recentlyDeletedReview.createdAt,
+      verified: true
+    });
+    setRecentlyDeletedReview(null);
+    setFormFeedback("已恢复刚删除的复盘记录。");
+  }, [recentlyDeletedReview, restoreEvidence]);
 
   const handleCancelEdit = useCallback(() => {
     setEditingRecord(null);
@@ -184,6 +201,9 @@ export function ReviewPage() {
               onExport={handleExportReviews}
               onEdit={handleEditReview}
               onDelete={handleDeleteReview}
+              recentlyDeletedRecord={recentlyDeletedReview}
+              onDismissDeletedRecord={() => setRecentlyDeletedReview(null)}
+              onUndoDelete={handleUndoDeleteReview}
             />
           </section>
         ) : null}
@@ -430,113 +450,6 @@ function ReviewField({ label, value, onChange }: { label: string; value: string;
         onChange={(event) => onChange(event.target.value)}
       />
     </label>
-  );
-}
-
-function LocalReviewRecords({
-  records,
-  totalCount,
-  filter,
-  exportPreview,
-  onFilterChange,
-  onExport,
-  onEdit,
-  onDelete
-}: {
-  records: ReviewEvidenceRecord[];
-  totalCount: number;
-  filter: ReviewRecordFilter;
-  exportPreview: string;
-  onFilterChange: (filter: ReviewRecordFilter) => void;
-  onExport: () => void;
-  onEdit: (record: ReviewEvidenceRecord) => void;
-  onDelete: (record: ReviewEvidenceRecord) => void;
-}) {
-  return (
-    <article className="rounded-card border border-line bg-white p-5 shadow-soft">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div className="flex items-center gap-2 text-brand-700">
-          <NotebookPen size={18} aria-hidden="true" />
-          <div>
-            <h2 className="text-base font-black text-ink-900">复盘历史</h2>
-            <p className="mt-1 text-xs font-bold text-ink-500">当前显示 {records.length}/{totalCount} 条</p>
-          </div>
-        </div>
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-          <label className="inline-flex min-h-11 items-center gap-2 rounded-control border border-line bg-surface-0 px-3 text-sm font-black text-ink-700">
-            <SlidersHorizontal size={16} aria-hidden="true" />
-            <span className="sr-only">复盘记录筛选</span>
-            <select
-              aria-label="复盘记录筛选"
-              className="bg-transparent text-sm font-black text-ink-700 outline-none"
-              value={filter}
-              onChange={(event) => onFilterChange(event.target.value as ReviewRecordFilter)}
-            >
-              {reviewRecordFilters.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-control border border-line bg-white px-4 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600"
-            onClick={onExport}
-          >
-            <Download size={16} aria-hidden="true" />
-            导出当前筛选
-          </button>
-        </div>
-      </div>
-      {records.length ? (
-        <div className="mt-4 space-y-3">
-          {records.map((record) => (
-            <div key={record.id} className="rounded-card bg-surface-0 p-3">
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-extrabold text-ink-900">{record.title}</p>
-                    <span className="rounded-control bg-white px-2 py-1 text-xs font-bold text-ink-500">{record.source === "local" ? "本机记录" : "历史记录"}</span>
-                  </div>
-                  {record.projectPoint ? <p className="mt-2 text-xs font-black text-brand-700">项目点：{record.projectPoint}</p> : null}
-                  {record.tomorrowPriority ? <p className="mt-1 text-xs font-black text-success-600">明日优先：{record.tomorrowPriority}</p> : null}
-                </div>
-                {record.source === "local" ? (
-                  <div className="flex shrink-0 gap-2">
-                    <button
-                      type="button"
-                      className="grid size-10 place-items-center rounded-control border border-line bg-white text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600"
-                      aria-label={`编辑复盘记录 ${record.projectPoint || record.title}`}
-                      onClick={() => onEdit(record)}
-                    >
-                      <Pencil size={16} aria-hidden="true" />
-                    </button>
-                    <button
-                      type="button"
-                      className="grid size-10 place-items-center rounded-control border border-line bg-white text-risk-600 transition hover:bg-risk-100 focus:outline-none focus:ring-2 focus:ring-risk-600"
-                      aria-label={`删除复盘记录 ${record.projectPoint || record.title}`}
-                      onClick={() => onDelete(record)}
-                    >
-                      <Trash2 size={16} aria-hidden="true" />
-                    </button>
-                  </div>
-                ) : null}
-              </div>
-              <p className="mt-1 line-clamp-3 text-sm font-semibold leading-6 text-ink-500">{record.content}</p>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">暂无符合筛选条件的复盘记录。写一条复盘后，今日 Evidence Gate 会立即更新。</p>
-      )}
-      {exportPreview ? (
-        <div className="mt-4 rounded-card border border-line bg-ink-900 p-4 text-white">
-          <p className="text-xs font-black uppercase text-brand-100">导出预览</p>
-          <pre className="mt-2 max-h-72 overflow-auto whitespace-pre-wrap break-words text-xs font-semibold leading-5">{exportPreview}</pre>
-        </div>
-      ) : null}
-    </article>
   );
 }
 

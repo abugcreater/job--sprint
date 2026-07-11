@@ -27,6 +27,7 @@ export function ApplicationsPage() {
   const addEvidence = useSprintStore((state) => state.addEvidence);
   const updateEvidence = useSprintStore((state) => state.updateEvidence);
   const deleteEvidence = useSprintStore((state) => state.deleteEvidence);
+  const restoreEvidence = useSprintStore((state) => state.restoreEvidence);
   const [searchParams, setSearchParams] = useSearchParams();
   const [draft, setDraft] = useState<ApplicationFormDraft>(() => createApplicationDraft());
   const [editingRecordId, setEditingRecordId] = useState<string | undefined>();
@@ -37,6 +38,7 @@ export function ApplicationsPage() {
   const [exportSummary, setExportSummary] = useState("");
   const [formFeedback, setFormFeedback] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
+  const [recentlyDeletedRecord, setRecentlyDeletedRecord] = useState<ApplicationEvidenceRecord | null>(null);
   const dashboard = useMemo(() => buildApplicationsDashboard(sprint, evidenceByTaskId), [sprint, evidenceByTaskId]);
   const visibleRecords = useMemo(() => {
     const statusRecords = filterApplicationRecords(dashboard.recentRecords, statusFilter);
@@ -139,6 +141,7 @@ export function ApplicationsPage() {
       setFormFeedback("已新增机会记录，并写入当前任务 Evidence Gate。");
       savedRecordId = useSprintStore.getState().evidenceByTaskId[targetTask.id]?.at(-1)?.id;
     }
+    setRecentlyDeletedRecord(null);
     resetDraft(draft);
     setValidationMessage("");
     updateViewParams({ record: savedRecordId, mode: savedRecordId ? "detail" : undefined });
@@ -155,18 +158,32 @@ export function ApplicationsPage() {
 
   const handleDeleteRecord = useCallback(
     (record: ApplicationEvidenceRecord) => {
-      const confirmed = window.confirm(`删除「${record.company || "未命名公司"} · ${record.role || "未命名岗位"}」机会记录？此操作不可撤销。`);
-      if (!confirmed) return;
+      setRecentlyDeletedRecord(record);
       deleteEvidence(record.taskId, record.id);
       setComparisonIds((current) => current.filter((recordId) => recordId !== record.id));
       if (record.id === editingRecordId) {
         resetDraft(draft);
       }
       if (record.id === selectedRecordId) updateViewParams({});
-      setFormFeedback(`已删除「${record.company || record.role || "未命名机会"}」记录。`);
+      setFormFeedback(`已删除「${record.company || record.role || "未命名机会"}」记录，可在机会清单顶部撤销。`);
     },
     [deleteEvidence, draft, editingRecordId, resetDraft, selectedRecordId, updateViewParams]
   );
+
+  const handleUndoDeleteRecord = useCallback(() => {
+    if (!recentlyDeletedRecord) return;
+    restoreEvidence({
+      id: recentlyDeletedRecord.id,
+      taskId: recentlyDeletedRecord.taskId,
+      type: "delivery_record",
+      title: recentlyDeletedRecord.title,
+      content: recentlyDeletedRecord.content,
+      createdAt: recentlyDeletedRecord.createdAt,
+      verified: true
+    });
+    setRecentlyDeletedRecord(null);
+    setFormFeedback("已恢复刚删除的机会记录。");
+  }, [recentlyDeletedRecord, restoreEvidence]);
 
   const handleExport = useCallback(() => {
     const payload = buildApplicationsExportPayload(dashboard.recentRecords, sprint.date);
@@ -266,11 +283,14 @@ export function ApplicationsPage() {
               searchQuery={searchQuery}
               exportSummary={exportSummary}
               compareFeedback={compareFeedback}
+              recentlyDeletedRecord={recentlyDeletedRecord}
               onSearchChange={setSearchQuery}
               onClearFilters={() => { setSearchQuery(""); setStatusFilter("all"); }}
               onStatusFilterChange={setStatusFilter}
               onSelect={handleSelectRecord}
               onToggleCompare={handleToggleCompare}
+              onUndoDelete={handleUndoDeleteRecord}
+              onDismissDeletedRecord={() => setRecentlyDeletedRecord(null)}
               onExport={handleExport}
             />
           </div>

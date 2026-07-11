@@ -133,16 +133,14 @@ describe("React Job Sprint applications workspace", () => {
 
     fireEvent.change(screen.getByLabelText("机会状态筛选"), { target: { value: "all" } });
     fireEvent.click(screen.getByRole("button", { name: "查看机会详情：Alpha Cloud" }));
-    const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
     fireEvent.click(screen.getByRole("button", { name: "删除机会记录：Alpha Cloud" }));
     expect(screen.getByText("共 2 条，当前显示 2 条")).toBeInTheDocument();
-
-    confirmSpy.mockReturnValue(true);
+    fireEvent.click(screen.getByRole("button", { name: /取消删除机会记录 Alpha Cloud/ }));
     fireEvent.click(screen.getByRole("button", { name: "删除机会记录：Alpha Cloud" }));
+    fireEvent.click(screen.getByRole("button", { name: /确认删除机会记录 Alpha Cloud/ }));
 
     expect(screen.getByText("共 1 条，当前显示 1 条")).toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "查看机会详情：Alpha Cloud" })).not.toBeInTheDocument();
-    confirmSpy.mockRestore();
 
     fireEvent.click(screen.getByRole("button", { name: "生成本地导出" }));
 

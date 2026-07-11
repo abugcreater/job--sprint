@@ -1,5 +1,5 @@
 import { ArrowRight, BriefcaseBusiness, Edit3, Plus, Trash2 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import type { ApplicationEvidenceRecord } from "../../../data/applicationsAdapter";
 
@@ -14,6 +14,7 @@ export function OpportunityDetailPanel({
   onEdit: (record: ApplicationEvidenceRecord) => void;
   onDelete: (record: ApplicationEvidenceRecord) => void;
 }) {
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   if (!record) {
     return (
       <section className="grid min-h-[420px] place-items-center rounded-workbench border border-line bg-white px-6 py-12 text-center shadow-soft" aria-labelledby="opportunity-empty-title">
@@ -64,11 +65,20 @@ export function OpportunityDetailPanel({
           <button type="button" className="secondary-button flex-1 sm:flex-none" aria-label={`编辑机会记录：${record.company || record.title}`} onClick={() => onEdit(record)}>
             <Edit3 size={15} aria-hidden="true" />编辑
           </button>
-          <button type="button" className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-control border border-risk-200 bg-white px-4 text-sm font-black text-risk-600 focus:outline-none focus:ring-2 focus:ring-risk-600 sm:flex-none" aria-label={`删除机会记录：${record.company || record.title}`} onClick={() => onDelete(record)}>
+          <button type="button" className="inline-flex min-h-11 flex-1 items-center justify-center gap-2 rounded-control border border-risk-200 bg-white px-4 text-sm font-black text-risk-600 focus:outline-none focus:ring-2 focus:ring-risk-600 sm:flex-none" aria-label={`删除机会记录：${record.company || record.title}`} aria-expanded={confirmingDelete} onClick={() => setConfirmingDelete(true)}>
             <Trash2 size={15} aria-hidden="true" />删除
           </button>
         </div>
       </footer>
+      {confirmingDelete ? (
+        <div className="border-t border-risk-200 bg-risk-100 px-5 py-4" role="status">
+          <p className="text-sm font-black leading-6 text-risk-600">确认删除这条机会记录？它会从 Evidence Gate 和后续 AI 机会信号中移除。</p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button type="button" className="primary-button bg-risk-600" aria-label={`确认删除机会记录 ${record.company || record.title}`} onClick={() => { setConfirmingDelete(false); onDelete(record); }}>确认删除</button>
+            <button type="button" className="secondary-button" aria-label={`取消删除机会记录 ${record.company || record.title}`} onClick={() => setConfirmingDelete(false)}>取消</button>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 }

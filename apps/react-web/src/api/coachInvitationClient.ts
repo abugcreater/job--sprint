@@ -1,4 +1,5 @@
 import { appPath, canUseServerRuntime } from "./runtimeClient";
+export { buildCoachInvitationExport } from "./coachInvitationExport";
 
 export type CoachInvitationStatus = "draft" | "invited" | "active" | "paused";
 
@@ -25,6 +26,23 @@ export interface CoachConfiguredUser {
   role: string;
   disabled?: boolean;
   canLogin?: boolean;
+}
+
+export interface CoachAccountAuditEvent {
+  id: string;
+  createdAt: string;
+  actorUsername: string;
+  action: "created" | "password_reset" | "disable" | "enable" | "delete" | "batch_disable" | "batch_enable" | "batch_delete" | string;
+  username?: string;
+  role?: string;
+  dataScope?: string;
+  inviteBatch?: string;
+  affectedUsernames?: string[];
+  affectedCount?: number;
+  requestedCount?: number;
+  skippedCount?: number;
+  skippedUsers?: Array<{ username: string; reason: string }>;
+  message?: string;
 }
 
 export interface CoachInvitationSummary {
@@ -75,6 +93,7 @@ export interface CoachInvitationResponse {
   storage?: string;
   invitations: CoachInvitationRecord[];
   configuredUsers: CoachConfiguredUser[];
+  accountAuditEvents?: CoachAccountAuditEvent[];
   summary: CoachInvitationSummary;
   accountProvisioning?: AccountProvisioningState;
   batchAction?: {
@@ -283,25 +302,6 @@ export async function deleteCoachInvitation(username: string): Promise<CoachInvi
   }
   const data = await response.json();
   return Array.isArray(data?.invitations) && data?.summary ? data as CoachInvitationResponse : null;
-}
-
-export function buildCoachInvitationExport(response: CoachInvitationResponse, inviteBatch = "all") {
-  const invitations = inviteBatch === "all"
-    ? response.invitations
-    : response.invitations.filter((invitation) => invitation.inviteBatch === inviteBatch);
-  const configuredUsers = inviteBatch === "all"
-    ? response.configuredUsers
-    : response.configuredUsers.filter((user) => user.inviteBatch === inviteBatch);
-  return JSON.stringify({
-    schemaVersion: "coach-invitations-export-v1",
-    generatedAt: new Date().toISOString(),
-    inviteBatch,
-    summary: response.summary,
-    invitationCount: invitations.length,
-    configuredUserCount: configuredUsers.length,
-    invitations,
-    configuredUsers
-  }, null, 2);
 }
 
 export function buildCoachLoginEntry(user: CoachConfiguredUser, origin = "") {
