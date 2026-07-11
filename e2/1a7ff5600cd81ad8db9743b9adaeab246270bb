@@ -1,0 +1,204 @@
+docs/README.md
+  s_8c4e51c148c3fc::t_9f37bd99b6c797 23
+apps/react-web/src/features/review/ReviewPage.tsx
+  s_8c4e51c148c3fc::t_7a8e01bedc481b 41,45,98,104,109-123,204-206
+  s_8c4e51c148c3fc::t_668eb9de2cb7a9 1,23
+docs/product/product-ops/product-ledger.md
+  s_8c4e51c148c3fc::t_1e0fbe931e8fdc 3,15-16,24-34,43-47,54,58-69
+apps/react-web/src/test/ApplicationsPage.test.tsx
+  s_8c4e51c148c3fc::t_ddbe207ec000d8 138,140
+docs/product/product-ops/known-issues.md
+  s_8c4e51c148c3fc::t_1e0fbe931e8fdc 9-15,21-22,24-25,34-37
+docs/product/product-ops/requirement-development-template.md
+  s_8c4e51c148c3fc::t_1e0fbe931e8fdc 3,9-10,49,98,103-111,183,488,490,492-494,504,518
+apps/react-web/src/features/applications/ApplicationsPage.tsx
+  s_8c4e51c148c3fc::t_0b1c12a2f998c4 30,41,144,161,168,173-187,286,292-293
+apps/react-web/src/features/coach/CoachPage.tsx
+  s_8c4e51c148c3fc::t_97a7e9276b161a 108,128,147,433-436,438-444
+  s_8c4e51c148c3fc::t_573c86f83acba3 26,37,54,57,60,106-107,116-127,129-143,149-150,172,178-184,186,189-193,206,212-229,410-413,415-424,450,453-455,466,469-471,473
+  s_8c4e51c148c3fc::t_badf4d2ab600c1 38,109-115
+apps/react-web/src/test/CoachPage.test.tsx
+  s_8c4e51c148c3fc::t_ddbe207ec000d8 209-210,212
+docs/product/product-ops/README.md
+  s_8c4e51c148c3fc::t_1e0fbe931e8fdc 3,13,20,24
+apps/react-web/src/features/coach/useBoundarySuggestions.ts
+  s_8c4e51c148c3fc::t_badf4d2ab600c1 1-145
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8c4e51c148c3fc::t_1e0fbe931e8fdc 3,5,7-11,13,15,17,19-21,23,25-30,32,34-36,38,40-42,44,46,48,50-1877
+apps/react-web/src/test/navigationRoutes.test.tsx
+  s_8c4e51c148c3fc::t_ddbe207ec000d8 112-131
+apps/react-web/src/features/applications/components/OpportunityRecordList.tsx
+  s_8c4e51c148c3fc::t_0b1c12a2f998c4 1,19,22-23,38,41-42,82-90
+apps/react-web/src/features/stats/StatsPage.tsx
+  s_8c4e51c148c3fc::t_4d502615e3bb04 1,33,42-43,49-52,69-82,88-107,217-241
+apps/react-web/src/features/applications/components/ApplicationForm.tsx
+  s_8c4e51c148c3fc::t_b1ff370f2b72bb 26-32,48,54-56
+apps/react-web/src/test/CoachDestructiveActions.test.tsx
+  s_8c4e51c148c3fc::t_c753523dc1f678 88
+  s_8c4e51c148c3fc::t_46f56379868361 221
+  s_8c4e51c148c3fc::t_608f4ce3bbef62 61,81
+  s_8c4e51c148c3fc::t_ddbe207ec000d8 1-50,52-60,62-80,82-87,89-220,222-251
+  s_8c4e51c148c3fc::t_55e6489687b628 51
+apps/react-web/src/features/interview/InterviewPage.tsx
+  s_8c4e51c148c3fc::t_ab1b878271500b 5-7
+  s_8c4e51c148c3fc::t_faed816d49be5b 9
+  s_8c4e51c148c3fc::t_4d502615e3bb04 45-51,141-148,392-399,405-418,438-442,444-451,456-461
+apps/react-web/src/features/applications/components/OpportunityDetailPanel.tsx
+  s_8c4e51c148c3fc::t_0b1c12a2f998c4 2,17,68,73-81
+apps/react-web/src/test/ReviewPage.test.tsx
+  s_8c4e51c148c3fc::t_c753523dc1f678 125
+  s_8c4e51c148c3fc::t_ddbe207ec000d8 124
+  s_8c4e51c148c3fc::t_55e6489687b628 111
+apps/react-web/src/api/coachInvitationClient.ts
+  s_8c4e51c148c3fc::t_262626467093a4 2,31-47,96
+apps/react-web/src/api/coachInvitationExport.ts
+  s_8c4e51c148c3fc::t_41ba51d7b20039 1-28
+apps/react-web/src/features/admin/AdminPage.tsx
+  s_8c4e51c148c3fc::t_23ad3ba327f042 1-2,11-12,18,56-67,69-88,92-110,115-152
+apps/react-web/src/features/coach/components/BoundaryPanel.tsx
+  s_8c4e51c148c3fc::t_c45b2205387c4c 1-2,14,18-19,26,30-31,35-37,41-43,61,63-67,73-100,117-120,123-130,135-164
+apps/react-web/src/features/coach/components/InviteManagementDetailPanel.tsx
+  s_8c4e51c148c3fc::t_cf99e457e63834 1-429
+apps/react-web/src/features/coach/components/InviteManagementFilters.tsx
+  s_8c4e51c148c3fc::t_bb711ff6b46709 1-147
+apps/react-web/src/features/coach/components/InviteManagementLedger.tsx
+  s_8c4e51c148c3fc::t_a89a1fdc91c590 1-295
+apps/react-web/src/features/coach/components/InviteManagementPanel.tsx
+  s_8c4e51c148c3fc::t_3b8e57f68251f3 1-2,15,17,22,27-29,31,33-34,36,43,47-50,154,210-234,288-297,323-378,382-412,510-517,523-537,541-551
+apps/react-web/src/features/coach/components/InviteOnboardingReportPanel.tsx
+  s_8c4e51c148c3fc::t_7a75a105590acd 2,6-8,18-22,24-43,73-103,105,109,119-126,128-131,134,136,149-156,158-161,166-177
+apps/react-web/src/features/coach/components/LlmRunPanel.tsx
+  s_8c4e51c148c3fc::t_dcfd90051b3b38 1,7-10,15-34,36-37,40-49,54-99
+apps/react-web/src/features/coach/components/ProfilePanel.tsx
+  s_8c4e51c148c3fc::t_6ead5b471a5043 1-2,4,15,21-22,29,35-36,41-43,54-57,76-79,94-125,163-166,172-178,184-213,226-241
+apps/react-web/src/features/coach/components/SchedulePanel.tsx
+  s_8c4e51c148c3fc::t_bcb79cbafa6e63 1-2,10,14-15,17,23,27-28,30,36-38,42-44,64-109,120-123,126-133,138-167,175-178
+apps/react-web/src/features/coach/components/inviteManagementBatchActions.ts
+  s_8c4e51c148c3fc::t_b7d27b16331fa7 1-46
+apps/react-web/src/features/coach/components/inviteManagementDraft.ts
+  s_8c4e51c148c3fc::t_d68bd796c51219 1-44
+apps/react-web/src/features/coach/components/inviteManagementOnboarding.ts
+  s_8c4e51c148c3fc::t_55c7de24908ef9 1-15
+apps/react-web/src/features/coach/components/inviteManagementTimeline.ts
+  s_8c4e51c148c3fc::t_b42179561e0023 1-210
+apps/react-web/src/features/coach/useProfileRecovery.ts
+  s_8c4e51c148c3fc::t_bc248bea1411af 1-123
+apps/react-web/src/features/learning/components/LearningTaskCard.tsx
+  s_8c4e51c148c3fc::t_caf040ab943bb7 27-30,84,91-93,95
+apps/react-web/src/features/review/components/LocalReviewRecords.tsx
+  s_8c4e51c148c3fc::t_bdd09910392acc 1-195
+apps/react-web/src/features/review/components/WeeklyReviewPanel.tsx
+  s_8c4e51c148c3fc::t_ab921474f5014b 19-22,62-63,70-72,83-93
+apps/react-web/src/stores/sprintCoachActions.ts
+  s_8c4e51c148c3fc::t_c9a01f6ba2d45b 17,69-93,119-128,150-161,242-246
+apps/react-web/src/stores/sprintStore.ts
+  s_8c4e51c148c3fc::t_1668858dfa922d 15-17,189-205,251-252,256,259
+apps/react-web/src/stores/sprintStoreTypes.ts
+  s_8c4e51c148c3fc::t_f0146429c9670b 6-14,44,49,53,56
+apps/react-web/src/test/AdminPage.test.tsx
+  s_8c4e51c148c3fc::t_895cc71aae252e 1-44
+apps/react-web/src/test/InviteManagementBatchAccountActions.test.tsx
+  s_8c4e51c148c3fc::t_dc0af805e2c219 1-112
+apps/react-web/src/test/InviteManagementDetailPanel.test.tsx
+  s_8c4e51c148c3fc::t_ec23fe2cb28596 1-340
+apps/react-web/src/test/InviteManagementPanel.test.tsx
+  s_8c4e51c148c3fc::t_e201fbf2bd3fe8 1-336
+apps/react-web/src/test/InviteOnboardingReportPanel.test.tsx
+  s_8c4e51c148c3fc::t_41791f451d47b4 1-107
+apps/react-web/src/test/LearningPage.test.tsx
+  s_8c4e51c148c3fc::t_5665f3a329d3a9 109-111,115-116
+apps/react-web/src/test/StatsPage.test.tsx
+  s_8c4e51c148c3fc::t_9a306995a98900 1-142
+apps/rust-api/Cargo.lock
+  s_8c4e51c148c3fc::t_c93cb12743738d 165,441,565,754-755,937,1013,1063,1078,1142,1964,1982-1984,1986-1989
+apps/rust-api/Cargo.toml
+  s_8c4e51c148c3fc::t_73fb5867de69d4 21-22
+apps/rust-api/src/app_bootstrap.rs
+  s_8c4e51c148c3fc::t_3d5bca888848e9 3,74
+apps/rust-api/src/app_schema.rs
+  s_8c4e51c148c3fc::t_0db73ce7780db5 2-3,17,36,53,80,92,106,118,139,151,172,185,203,210
+apps/rust-api/src/app_schema_boundary_feedback.rs
+  s_8c4e51c148c3fc::t_b12d8296a068c1 1,4,25
+apps/rust-api/src/auth_account_actions.rs
+  s_8c4e51c148c3fc::t_32ee72c18c72f2 6-9,44-61,87,90-94,96,116-117,133-147
+apps/rust-api/src/auth_account_audit.rs
+  s_8c4e51c148c3fc::t_e0b2b3097dd3f1 1-166
+apps/rust-api/src/auth_account_batch_actions.rs
+  s_8c4e51c148c3fc::t_33a046bc323488 6-9,15,34,54,66-70,82-99,113-121,198-206
+apps/rust-api/src/auth_account_store.rs
+  s_8c4e51c148c3fc::t_6464433d326d75 5-8,41,101,122-136
+apps/rust-api/src/auth_state.rs
+  s_8c4e51c148c3fc::t_95e686af483575 166-173
+apps/rust-api/src/coach_boundary_feedback.rs
+  s_8c4e51c148c3fc::t_b84fd948f812d0 3-4,38,84
+apps/rust-api/src/coach_invitation_action_routes.rs
+  s_8c4e51c148c3fc::t_cc139df58bf877 91,93,117,119
+apps/rust-api/src/coach_invitation_routes.rs
+  s_8c4e51c148c3fc::t_59e5ef5ec93d36 10-12,18,62-64,70-72,111-114,155
+apps/rust-api/src/coach_invitations.rs
+  s_8c4e51c148c3fc::t_68dca2a106136c 3-4,39,82,98,111
+apps/rust-api/src/coach_onboarding_events.rs
+  s_8c4e51c148c3fc::t_dd0ecb70b5bba3 3-4,59,105
+apps/rust-api/src/coach_onboarding_report.rs
+  s_8c4e51c148c3fc::t_f1448a23b97781 2
+apps/rust-api/src/lib.rs
+  s_8c4e51c148c3fc::t_f3028f6c2af26f 12
+apps/rust-api/src/llm_feedback.rs
+  s_8c4e51c148c3fc::t_193f7ce8f167f3 3-4,34,73
+apps/rust-api/src/llm_runs.rs
+  s_8c4e51c148c3fc::t_159df3a79b6c85 3-4,49,109
+apps/rust-api/src/runtime_store.rs
+  s_8c4e51c148c3fc::t_46d2344d0920d2 3-4,19,73,104,134
+apps/rust-api/tests/runtime_contract.rs
+  s_8c4e51c148c3fc::t_8d2fd8dd9146ed 8-9,70,73,363,500,546,602
+apps/rust-api/tests/runtime_contract/boundary_feedback.rs
+  s_8c4e51c148c3fc::t_689f869c272aa0 4-5,56
+apps/rust-api/tests/runtime_contract/coach_onboarding.rs
+  s_8c4e51c148c3fc::t_cf5b976a39d0b5 4-5,90
+apps/rust-api/tests/runtime_contract/invitation_account.rs
+  s_8c4e51c148c3fc::t_93356addcd4409 117-119,217-218,311-313,400-401,419-434
+apps/rust-api/tests/runtime_contract/multi_user.rs
+  s_8c4e51c148c3fc::t_aee617a6758183 5-6,291,294,300,385,517
+apps/server/auth_account_audit_store.js
+  s_8c4e51c148c3fc::t_f615a472d6550f 1-86
+apps/server/auth_account_batch_store.js
+  s_8c4e51c148c3fc::t_2ebda19b73e8ee 7-10,59-74,92-96
+apps/server/auth_account_store.js
+  s_8c4e51c148c3fc::t_9611e065e4ce1f 4-8,36-40,96-107,187-198,232-240,292-293,347
+apps/server/coach_invitations_routes.js
+  s_8c4e51c148c3fc::t_e4052dff950e88 3,118,320
+docs/core/04-acceptance-and-risk.md
+  s_8c4e51c148c3fc::t_316d7dafd1624e 31
+docs/product/product-ops/daily-product-iteration.md
+  s_8c4e51c148c3fc::t_dc8b44f5fbd74a 3,31-35,69,98-99,101
+package.json
+  s_8c4e51c148c3fc::t_76056daf84e2b6 31-32
+tests/coach_artifacts_runtime_diagnostic_test.js
+  s_8c4e51c148c3fc::t_d7e61723020fe3 1-124
+tests/goal_acceptance_test.js
+  s_8c4e51c148c3fc::t_a6071c60a81170 252,255
+tests/invitation_account_provisioning_test.js
+  s_8c4e51c148c3fc::t_31bfa85352ce35 166-168,216-217,232-233,288-290,323-324,337-345
+tests/product_iteration_workflow_test.js
+  s_8c4e51c148c3fc::t_b53abfc86a683b 26,28-29,63,146-149,203
+tools/diagnose_coach_artifacts_runtime.js
+  s_8c4e51c148c3fc::t_d740f7218e854d 1-304
+tools/validate_product_iteration_workflow.js
+  s_8c4e51c148c3fc::t_aee8d95f8b1eeb 36,46,220-221,223-224
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.10",
+  "base_commit_sha": "e21a7ff5600cd81ad8db9743b9adaeab246270bb",
+  "prompts": {},
+  "sessions": {
+    "s_8c4e51c148c3fc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4b9b-c8ac-75a2-8110-16a46302f174",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
