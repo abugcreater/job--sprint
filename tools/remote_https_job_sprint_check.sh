@@ -133,13 +133,13 @@ if (!input.progress || !input.progress.remoteAcceptance || input.progress.remote
 NODE
 echo "OK /api/progress remote readback"
 check "/" "200" -b "$COOKIE_FILE"
-if ! grep -q "React 版 Job Sprint" "$OUT_FILE"; then
+if ! grep -qF "Job Sprint | 个人求职作战台" "$OUT_FILE"; then
   echo "FAIL /: logged-in root did not return React shell" >&2
   exit 1
 fi
 echo "OK / React shell"
 check "/react/index.html" "200" -b "$COOKIE_FILE"
-if ! grep -q "React 版 Job Sprint" "$OUT_FILE"; then
+if ! grep -qF "Job Sprint | 个人求职作战台" "$OUT_FILE"; then
   echo "FAIL /react/index.html: React shell missing" >&2
   exit 1
 fi

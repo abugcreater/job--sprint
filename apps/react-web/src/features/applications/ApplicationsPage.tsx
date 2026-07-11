@@ -1,8 +1,7 @@
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardList, Download, Edit3, FileText, Filter, Send, Target, Trash2 } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardList, Plus, Target, X } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
-  applicationStatuses,
   applicationRecordToDraft,
   buildApplicationEvidenceContent,
   buildApplicationsExportPayload,
@@ -12,12 +11,14 @@ import {
   isApplicationDraftReady,
   type ApplicationEvidenceRecord,
   type ApplicationFormDraft,
-  type ApplicationStatus,
   type ApplicationStatusFilter,
   type ApplicationTaskSummary
 } from "../../data/applicationsAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
 import { ApplicationForm } from "./components/ApplicationForm";
+import { OpportunityComparisonPanel } from "./components/OpportunityComparisonPanel";
+import { OpportunityDetailPanel } from "./components/OpportunityDetailPanel";
+import { OpportunityRecordList } from "./components/OpportunityRecordList";
 
 export function ApplicationsPage() {
   const sprint = useSprintStore((state) => state.sprint);
@@ -26,20 +27,42 @@ export function ApplicationsPage() {
   const addEvidence = useSprintStore((state) => state.addEvidence);
   const updateEvidence = useSprintStore((state) => state.updateEvidence);
   const deleteEvidence = useSprintStore((state) => state.deleteEvidence);
+  const [searchParams, setSearchParams] = useSearchParams();
   const [draft, setDraft] = useState<ApplicationFormDraft>(() => createApplicationDraft());
   const [editingRecordId, setEditingRecordId] = useState<string | undefined>();
-  const [formOpen, setFormOpen] = useState(false);
   const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>("all");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [comparisonIds, setComparisonIds] = useState<string[]>([]);
+  const [compareFeedback, setCompareFeedback] = useState("");
   const [exportSummary, setExportSummary] = useState("");
   const [formFeedback, setFormFeedback] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
   const dashboard = useMemo(() => buildApplicationsDashboard(sprint, evidenceByTaskId), [sprint, evidenceByTaskId]);
-  const visibleRecords = useMemo(() => filterApplicationRecords(dashboard.recentRecords, statusFilter), [dashboard.recentRecords, statusFilter]);
+  const visibleRecords = useMemo(() => {
+    const statusRecords = filterApplicationRecords(dashboard.recentRecords, statusFilter);
+    const query = searchQuery.trim().toLocaleLowerCase("zh-CN");
+    if (!query) return statusRecords;
+    return statusRecords.filter((record) => [record.company, record.role, record.source, record.city, record.keywords, ...record.tags].join(" ").toLocaleLowerCase("zh-CN").includes(query));
+  }, [dashboard.recentRecords, searchQuery, statusFilter]);
   const editingRecord = useMemo(
     () => dashboard.recentRecords.find((record) => record.id === editingRecordId),
     [dashboard.recentRecords, editingRecordId]
   );
   const hasProfile = userProfiles.length > 0;
+  const selectedRecordId = searchParams.get("record") ?? undefined;
+  const explicitSelectedRecord = dashboard.recentRecords.find((record) => record.id === selectedRecordId);
+  const selectedRecord = explicitSelectedRecord ?? visibleRecords[0];
+  const formOpen = searchParams.get("mode") === "edit";
+  const comparisonRecords = comparisonIds.map((recordId) => dashboard.recentRecords.find((record) => record.id === recordId)).filter((record): record is ApplicationEvidenceRecord => Boolean(record));
+  const comparisonMode = searchParams.get("mode") === "compare" && comparisonRecords.length === 2;
+  const mobileSecondaryView = Boolean(explicitSelectedRecord) || comparisonMode || formOpen;
+  const createButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!formOpen || !explicitSelectedRecord || editingRecordId === explicitSelectedRecord.id) return;
+    setEditingRecordId(explicitSelectedRecord.id);
+    setDraft(applicationRecordToDraft(explicitSelectedRecord));
+  }, [editingRecordId, explicitSelectedRecord, formOpen]);
 
   const updateDraft = useCallback((patch: Partial<ApplicationFormDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
@@ -65,11 +88,40 @@ export function ApplicationsPage() {
     setEditingRecordId(undefined);
   }, []);
 
+  const updateViewParams = useCallback((patch: { record?: string; mode?: "detail" | "compare" | "edit" }) => {
+    const next = new URLSearchParams(searchParams);
+    patch.record ? next.set("record", patch.record) : next.delete("record");
+    patch.mode ? next.set("mode", patch.mode) : next.delete("mode");
+    setSearchParams(next);
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    if (searchParams.get("mode") !== "compare" || comparisonRecords.length === 2) return;
+    updateViewParams({ record: selectedRecordId, mode: selectedRecordId ? "detail" : undefined });
+  }, [comparisonRecords.length, searchParams, selectedRecordId, updateViewParams]);
+
+  const focusEditorTitle = () => window.requestAnimationFrame(() => document.getElementById("application-form-title")?.focus({ preventScroll: true }));
+
+  const openCreateForm = useCallback(() => {
+    resetDraft(draft);
+    setFormFeedback("");
+    setValidationMessage("");
+    updateViewParams({ mode: "edit" });
+    focusEditorTitle();
+  }, [draft, resetDraft, updateViewParams]);
+
+  const closeForm = useCallback(() => {
+    resetDraft(draft);
+    setValidationMessage("");
+    updateViewParams({ record: selectedRecord?.id, mode: selectedRecord ? "detail" : undefined });
+    window.requestAnimationFrame(() => createButtonRef.current?.focus({ preventScroll: true }));
+  }, [draft, resetDraft, selectedRecord, updateViewParams]);
+
   const handleRecord = useCallback(() => {
     if (!isApplicationDraftReady(draft)) {
       setValidationMessage("请至少填写公司和岗位。");
       setFormFeedback("");
-      setFormOpen(true);
+      updateViewParams({ record: editingRecord?.id, mode: "edit" });
       return;
     }
     const targetTask = editingRecord
@@ -78,42 +130,74 @@ export function ApplicationsPage() {
     if (!targetTask) return;
 
     const content = buildApplicationEvidenceContent(targetTask, draft);
+    let savedRecordId = editingRecord?.id;
     if (editingRecord) {
       updateEvidence(editingRecord.taskId, editingRecord.id, { title: "机会反馈证据", content, verified: true });
-      setFormFeedback("已保存机会验证记录。");
+      setFormFeedback("已保存机会记录修改。");
     } else {
       addEvidence(targetTask.id, "delivery_record", "机会反馈证据", content);
-      setFormFeedback("已新增机会验证记录。");
+      setFormFeedback("已新增机会记录，并写入当前任务 Evidence Gate。");
+      savedRecordId = useSprintStore.getState().evidenceByTaskId[targetTask.id]?.at(-1)?.id;
     }
     resetDraft(draft);
-    setFormOpen(false);
     setValidationMessage("");
-  }, [addEvidence, dashboard.targetTask, draft, editingRecord, resetDraft, sprint.tasks, updateEvidence]);
+    updateViewParams({ record: savedRecordId, mode: savedRecordId ? "detail" : undefined });
+  }, [addEvidence, dashboard.targetTask, draft, editingRecord, resetDraft, sprint.tasks, updateEvidence, updateViewParams]);
 
   const handleEditRecord = useCallback((record: ApplicationEvidenceRecord) => {
     setEditingRecordId(record.id);
     setDraft(applicationRecordToDraft(record));
-    setFormOpen(true);
     setFormFeedback("");
     setValidationMessage("");
-  }, []);
+    updateViewParams({ record: record.id, mode: "edit" });
+    focusEditorTitle();
+  }, [updateViewParams]);
 
   const handleDeleteRecord = useCallback(
     (record: ApplicationEvidenceRecord) => {
+      const confirmed = window.confirm(`删除「${record.company || "未命名公司"} · ${record.role || "未命名岗位"}」机会记录？此操作不可撤销。`);
+      if (!confirmed) return;
       deleteEvidence(record.taskId, record.id);
+      setComparisonIds((current) => current.filter((recordId) => recordId !== record.id));
       if (record.id === editingRecordId) {
         resetDraft(draft);
-        setFormOpen(false);
       }
+      if (record.id === selectedRecordId) updateViewParams({});
+      setFormFeedback(`已删除「${record.company || record.role || "未命名机会"}」记录。`);
     },
-    [deleteEvidence, draft, editingRecordId, resetDraft]
+    [deleteEvidence, draft, editingRecordId, resetDraft, selectedRecordId, updateViewParams]
   );
 
   const handleExport = useCallback(() => {
     const payload = buildApplicationsExportPayload(dashboard.recentRecords, sprint.date);
-    triggerJsonDownload("react-applications-export.json", payload);
-    setExportSummary(`已生成导出 ${payload.count} 条，本地 JSON 已准备。`);
+    const downloaded = triggerJsonDownload("react-applications-export.json", payload);
+    setExportSummary(downloaded ? `已生成导出 ${payload.count} 条，本地 JSON 已准备。` : "当前环境无法生成下载，请稍后重试。");
   }, [dashboard.recentRecords, sprint.date]);
+
+  const handleSelectRecord = useCallback((record: ApplicationEvidenceRecord) => {
+    updateViewParams({ record: record.id, mode: "detail" });
+  }, [updateViewParams]);
+
+  const handleToggleCompare = useCallback((record: ApplicationEvidenceRecord) => {
+    setCompareFeedback("");
+    if (comparisonIds.includes(record.id)) {
+      setComparisonIds(comparisonIds.filter((recordId) => recordId !== record.id));
+      return;
+    }
+    if (comparisonIds.length >= 2) {
+      setCompareFeedback("最多比较 2 条，请先移除一条。");
+      return;
+    }
+    const next = [...comparisonIds, record.id];
+    setComparisonIds(next);
+    if (next.length === 2) updateViewParams({ mode: "compare" });
+  }, [comparisonIds, updateViewParams]);
+
+  const handleRemoveCompare = useCallback((recordId: string) => {
+    setComparisonIds((current) => current.filter((id) => id !== recordId));
+    setCompareFeedback("");
+    if (comparisonMode) updateViewParams({ record: selectedRecord?.id, mode: selectedRecord ? "detail" : undefined });
+  }, [comparisonMode, selectedRecord, updateViewParams]);
 
   if (!hasProfile) {
     return (
@@ -145,76 +229,100 @@ export function ApplicationsPage() {
   return (
     <main className="app-main">
       <section className="app-page">
-        <header className="command-card p-4 md:p-5">
+        <header className={`${mobileSecondaryView ? "hidden lg:block" : "block"} page-intro motion-enter`}>
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">机会验证 · 本地优先记录</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <BriefcaseBusiness size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">机会验证</h1>
-              </div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">Opportunities · 当前冲刺最近记录</p>
+              <h1 className="mt-2 text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">机会工作台</h1>
               <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                这里只记录公司、岗位、JD 命中、沟通反馈和下一步动作；不做自动投递，学习和面试仍回到主线推进。
+                选择一条机会核对事实，最多选两条并排比较。这里只使用你记录的公司、岗位、JD 与沟通反馈，不生成匹配分或自动结论。
               </p>
             </div>
-            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
-              <span className="text-xs font-black text-ink-500">集中统计</span>
-              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看机会记录、状态分布和关联任务</span>
-            </Link>
+            <button ref={createButtonRef} type="button" className="primary-button shrink-0" onClick={openCreateForm}><Plus size={16} aria-hidden="true" />新增机会</button>
           </div>
         </header>
 
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <aside className="space-y-4">
-            <TargetPanel title={dashboard.targetTaskTitle} duration={dashboard.targetTask?.durationLabel} signals={dashboard.todaySignals} />
-            <ApplicationTaskPanel tasks={dashboard.deliveryTasks} />
-            <StatusSummary rows={dashboard.statusSummary} />
-          </aside>
+        <section className={`${mobileSecondaryView ? "hidden lg:grid" : "grid"} gap-3 border-y border-line py-4 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center`} aria-label="今日机会上下文">
+          <div>
+            <p className="text-xs font-black text-brand-700">今日机会目标</p>
+            <p className="mt-1 text-base font-black text-ink-950">{dashboard.targetTaskTitle}</p>
+            <p className="mt-1 line-clamp-1 text-xs font-semibold text-ink-500">{dashboard.todaySignals[0]}</p>
+          </div>
+          <p className="text-sm font-black text-ink-700"><span className="text-2xl text-ink-950">{dashboard.recordCount}</span> 条真实记录</p>
+          <Link to="/today" className="secondary-button">回到 Evidence Gate<ArrowRight size={16} aria-hidden="true" /></Link>
+        </section>
 
-          <section className="space-y-4">
-            <RecentRecords
+        {formFeedback && !formOpen ? <p className="rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" role="status">{formFeedback}</p> : null}
+
+        <section className="grid items-start gap-4 lg:grid-cols-[340px_minmax(0,1fr)]" aria-label="机会记录工作区">
+          <div className={mobileSecondaryView ? "hidden lg:block" : "block"}>
+            <OpportunityRecordList
               records={visibleRecords}
               allRecordCount={dashboard.recentRecords.length}
+              selectedRecordId={selectedRecord?.id}
+              comparisonIds={comparisonIds}
               statusFilter={statusFilter}
+              statusSummary={dashboard.statusSummary}
+              searchQuery={searchQuery}
               exportSummary={exportSummary}
+              compareFeedback={compareFeedback}
+              onSearchChange={setSearchQuery}
+              onClearFilters={() => { setSearchQuery(""); setStatusFilter("all"); }}
               onStatusFilterChange={setStatusFilter}
-              onEdit={handleEditRecord}
-              onDelete={handleDeleteRecord}
+              onSelect={handleSelectRecord}
+              onToggleCompare={handleToggleCompare}
               onExport={handleExport}
             />
-            {formOpen || editingRecord ? (
-              <ApplicationForm
-                draft={draft}
-                disabled={!dashboard.targetTask}
-                isEditing={Boolean(editingRecord)}
-                validationMessage={validationMessage}
-                feedback={formFeedback}
-                onChange={updateDraft}
-                onToggleTag={toggleTag}
-                onRecord={handleRecord}
-                onCancelEdit={() => {
-                  resetDraft(draft);
-                  setFormOpen(false);
-                  setValidationMessage("");
-                }}
-              />
+          </div>
+
+          <section className={`${mobileSecondaryView ? "block" : "hidden lg:block"} min-w-0 space-y-4`}>
+            {!formOpen && (explicitSelectedRecord || comparisonMode) ? (
+              <button type="button" className="secondary-button lg:hidden" onClick={() => updateViewParams({})}><ArrowLeft size={16} aria-hidden="true" />返回机会列表</button>
+            ) : null}
+            {!formOpen && comparisonRecords.length ? <OpportunityComparisonPanel records={comparisonRecords} onRemove={handleRemoveCompare} /> : null}
+            {formOpen ? (
+              <ApplicationEditorShell onClose={closeForm}>
+                <ApplicationForm
+                  draft={draft}
+                  disabled={!dashboard.targetTask}
+                  isEditing={Boolean(editingRecord)}
+                  validationMessage={validationMessage}
+                  feedback={formFeedback}
+                  onChange={updateDraft}
+                  onToggleTag={toggleTag}
+                  onRecord={handleRecord}
+                  onCancelEdit={closeForm}
+                />
+              </ApplicationEditorShell>
             ) : (
-              <ApplicationEntryPanel
-                feedback={formFeedback}
-                onCreate={() => {
-                  resetDraft(draft);
-                  setFormOpen(true);
-                  setFormFeedback("");
-                  setValidationMessage("");
-                }}
-              />
+              comparisonMode
+                ? null
+                : <OpportunityDetailPanel record={selectedRecord} onCreate={openCreateForm} onEdit={handleEditRecord} onDelete={handleDeleteRecord} />
             )}
           </section>
         </section>
+
+        <details className="rounded-workbench border border-line bg-white shadow-soft">
+          <summary className="flex min-h-12 cursor-pointer items-center px-5 text-sm font-black text-ink-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600">查看关联任务与机会记录范围</summary>
+          <div className="grid gap-4 border-t border-line p-4 lg:grid-cols-2">
+            <TargetPanel title={dashboard.targetTaskTitle} duration={dashboard.targetTask?.durationLabel} signals={dashboard.todaySignals} />
+            <ApplicationTaskPanel tasks={dashboard.deliveryTasks} />
+          </div>
+        </details>
       </section>
     </main>
+  );
+}
+
+function ApplicationEditorShell({ children, onClose }: { children: ReactNode; onClose: () => void }) {
+  return (
+    <section className="fixed inset-0 z-40 overflow-y-auto bg-surface-0 px-4 pb-[calc(24px+env(safe-area-inset-bottom))] pt-[calc(12px+env(safe-area-inset-top))] lg:static lg:bg-transparent lg:p-0" aria-label="机会记录编辑器">
+      <div className="sticky top-0 z-10 -mx-4 mb-3 flex items-center justify-between border-b border-line bg-surface-0 px-4 py-3 lg:hidden">
+        <p className="text-sm font-black text-ink-950">编辑机会事实</p>
+        <button type="button" className="grid size-11 place-items-center rounded-control border border-line bg-white text-ink-700" aria-label="关闭机会编辑器" onClick={onClose}><X size={17} aria-hidden="true" /></button>
+      </div>
+      {children}
+    </section>
   );
 }
 
@@ -263,167 +371,6 @@ function ApplicationTaskPanel({ tasks }: { tasks: ApplicationTaskSummary[] }) {
             </div>
             <p className="mt-2 text-sm font-extrabold leading-6 text-ink-900">{task.title}</p>
             <p className="mt-1 line-clamp-2 text-xs font-semibold leading-5 text-ink-500">{task.description}</p>
-          </div>
-        ))}
-      </div>
-    </article>
-  );
-}
-
-function ApplicationEntryPanel({ feedback, onCreate }: { feedback: string; onCreate: () => void }) {
-  return (
-    <article className="command-panel">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-brand-700">
-            <Send size={18} aria-hidden="true" />
-            <h2 className="text-base font-black text-ink-900">新增机会记录</h2>
-          </div>
-          <p className="mt-2 text-sm font-semibold leading-6 text-ink-500">默认先看已有记录；需要新增或编辑时再打开表单。</p>
-        </div>
-        <button type="button" className="primary-button" onClick={onCreate}>
-          <CheckCircle2 size={16} aria-hidden="true" />
-          新增机会记录
-        </button>
-      </div>
-      {feedback ? <p className="mt-3 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600">{feedback}</p> : null}
-    </article>
-  );
-}
-
-function RecentRecords({
-  records,
-  allRecordCount,
-  statusFilter,
-  exportSummary,
-  onStatusFilterChange,
-  onEdit,
-  onDelete,
-  onExport
-}: {
-  records: ApplicationEvidenceRecord[];
-  allRecordCount: number;
-  statusFilter: ApplicationStatusFilter;
-  exportSummary: string;
-  onStatusFilterChange: (status: ApplicationStatusFilter) => void;
-  onEdit: (record: ApplicationEvidenceRecord) => void;
-  onDelete: (record: ApplicationEvidenceRecord) => void;
-  onExport: () => void;
-}) {
-  return (
-    <article className="command-panel">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div>
-          <div className="flex items-center gap-2 text-brand-700">
-            <FileText size={18} aria-hidden="true" />
-              <h2 className="text-base font-black text-ink-900">本地机会反馈</h2>
-          </div>
-          <p className="mt-2 text-sm font-semibold text-ink-500">共 {allRecordCount} 条，当前显示 {records.length} 条。</p>
-        </div>
-        <div className="grid gap-2 sm:grid-cols-[minmax(180px,1fr)_auto]">
-          <label className="block">
-            <span className="mb-1.5 flex items-center gap-1.5 text-xs font-black uppercase text-ink-500">
-              <Filter size={14} aria-hidden="true" />
-              状态筛选
-            </span>
-            <select
-              value={statusFilter}
-              onChange={(event) => onStatusFilterChange(event.target.value as ApplicationStatusFilter)}
-              className="min-h-11 w-full rounded-control border border-line bg-surface-0 px-3 text-sm font-bold text-ink-900 outline-none transition focus:border-brand-600 focus:ring-2 focus:ring-brand-100"
-              aria-label="机会状态筛选"
-            >
-              <option value="all">全部状态</option>
-              {applicationStatuses.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button
-            type="button"
-            className="secondary-button self-end"
-            onClick={onExport}
-          >
-            <Download size={16} aria-hidden="true" />
-            生成本地导出
-          </button>
-        </div>
-      </div>
-      {exportSummary ? <p className="mt-3 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600">{exportSummary}</p> : null}
-      {records.length ? (
-        <div className="mt-4 space-y-3">
-          {records.map((record) => (
-            <div key={record.id} className="rounded-card bg-surface-0 p-3">
-              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-control bg-brand-100 px-2 py-1 text-xs font-black text-brand-700">{record.status}</span>
-                    {record.tags.slice(0, 3).map((tag) => (
-                      <span key={tag} className="rounded-control bg-white px-2 py-1 text-xs font-bold text-ink-500">
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                  <p className="mt-2 text-sm font-extrabold leading-6 text-ink-900">
-                    {record.company || "未命名公司"} · {record.role || "未命名岗位"}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-ink-500">
-                    {[record.city, record.source, record.salaryRange].filter(Boolean).join(" / ") || "暂无城市、来源或薪资范围"}
-                  </p>
-                  <p className="mt-1 text-sm font-semibold leading-6 text-ink-500">
-                    {[record.keywords, record.resumeVersion].filter(Boolean).join(" / ") || "暂无关键词或简历版本"}
-                  </p>
-                  {record.hrFeedback ? (
-                    <p className="mt-1 line-clamp-2 text-sm font-bold leading-6 text-ink-700">沟通反馈：{record.hrFeedback}</p>
-                  ) : null}
-                  <p className="mt-1 line-clamp-3 text-sm font-semibold leading-6 text-ink-500">{record.notes || record.content}</p>
-                </div>
-                <div className="flex shrink-0 flex-wrap gap-2">
-                  <button
-                    type="button"
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-control border border-line bg-white px-3 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600"
-                    aria-label={`编辑机会记录：${record.company || record.title}`}
-                    onClick={() => onEdit(record)}
-                  >
-                    <Edit3 size={15} aria-hidden="true" />
-                    编辑
-                  </button>
-                  <button
-                    type="button"
-                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-control border border-line bg-white px-3 text-sm font-black text-risk-600 transition hover:bg-risk-100 focus:outline-none focus:ring-2 focus:ring-risk-600"
-                    aria-label={`删除机会记录：${record.company || record.title}`}
-                    onClick={() => onDelete(record)}
-                  >
-                    <Trash2 size={15} aria-hidden="true" />
-                    删除
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">
-          {allRecordCount ? "当前筛选下没有机会反馈，请切换状态。" : "暂无机会反馈。先记录公司、岗位和状态。"}
-        </p>
-      )}
-    </article>
-  );
-}
-
-function StatusSummary({ rows }: { rows: Array<{ status: ApplicationStatus; count: number }> }) {
-  return (
-    <article className="command-panel">
-      <div className="flex items-center gap-2 text-brand-700">
-        <BriefcaseBusiness size={18} aria-hidden="true" />
-        <h2 className="text-base font-black text-ink-900">状态摘要</h2>
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {rows.map((row) => (
-          <div key={row.status} className="rounded-card bg-surface-0 p-3">
-            <p className="text-xs font-black text-ink-500">{row.status}</p>
-            <p className="mt-1 text-lg font-black text-ink-900">{row.count}</p>
           </div>
         ))}
       </div>

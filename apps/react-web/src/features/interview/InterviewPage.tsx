@@ -67,7 +67,7 @@ export function InterviewPage() {
     }
     const analysis = scoreOralAnswer(dashboard.targetTask, activeQuestion, answer);
     setScoreAnalysis(analysis);
-    setScoreFeedback("AI 不可用，已按本地 rubric 给出自检结果。");
+    setScoreFeedback("已按本地规则检查结构、证据与风险覆盖；这不是 AI 评分。");
   }, [activeQuestion, answer, dashboard.targetTask]);
 
   const handleRecord = useCallback(() => {
@@ -76,7 +76,7 @@ export function InterviewPage() {
     addEvidence(dashboard.targetTask.id, "oral_score", "口述训练证据", buildOralEvidenceContent(dashboard.targetTask, activeQuestion, answer, analysis));
     setAnswer("");
     setScoreAnalysis(undefined);
-    setScoreFeedback("已保存口述和评分复盘，并写入 Evidence Gate。");
+    setScoreFeedback("已保存口述证据，并写入 Evidence Gate。");
   }, [activeQuestion, addEvidence, answer, dashboard.targetTask, scoreAnalysis]);
 
   const toggleWeakQuestion = useCallback((questionId: string) => {
@@ -123,35 +123,21 @@ export function InterviewPage() {
   return (
     <main className="app-main">
       <section className="app-page">
-        <header className="command-card p-4 md:p-5">
+        <header className="page-intro motion-enter">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">口述训练 · 证据优先</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <MessageCircleQuestion size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">面试训练</h1>
-              </div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">Interview · 单题练习会话</p>
+              <h1 className="mt-2 text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">面试训练</h1>
               <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
                 先写一版 60 秒回答，再标记薄弱题；今日追问、题库和本地记录都服务于 Evidence Gate。
               </p>
             </div>
-            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
-              <span className="text-xs font-black text-ink-500">集中统计</span>
-              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看口述任务、候选题目和本地记录</span>
-            </Link>
+            <p className="text-sm font-black text-ink-700"><span className="text-3xl text-ink-950">{dashboard.recordCount}</span> 条口述证据</p>
           </div>
         </header>
 
         <section className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <aside className="space-y-4">
-            <TargetTaskPanel title={dashboard.targetTask?.title} duration={dashboard.targetTask?.durationLabel} />
-            <OralTaskPanel tasks={dashboard.oralTasks} />
-            <RecentRecords records={dashboard.recentRecords} />
-          </aside>
-
-          <section className="space-y-4">
+          <section className="space-y-4 xl:col-start-2 xl:row-start-1">
             <AnswerPanel
               question={activeQuestion}
               answer={answer}
@@ -165,33 +151,47 @@ export function InterviewPage() {
               weak={Boolean(activeQuestion && weakQuestionIds.has(activeQuestion.id))}
               onToggleWeak={toggleWeakQuestion}
             />
-            <QuestionPicker
-              mode={mode}
-              questions={filteredQuestions}
-              allQuestionCount={dashboard.candidateQuestions.length}
-              categories={questionCategories}
-              query={questionQuery}
-              category={questionCategory}
-              weakOnly={weakOnly}
-              weakQuestionIds={weakQuestionIds}
-              activeQuestionId={activeQuestionId}
-              onModeChange={(nextMode) => {
-                setMode(nextMode);
-                setQuestionCategory("all");
-                setWeakOnly(false);
-                setSelectedQuestionId(undefined);
-              }}
-              onQueryChange={setQuestionQuery}
-              onCategoryChange={setQuestionCategory}
-              onWeakOnlyChange={setWeakOnly}
-              onResetFilters={resetQuestionFilters}
-              onPickQuestion={(questionId) => {
-                setSelectedQuestionId(questionId);
-                setScoreAnalysis(undefined);
-                setScoreFeedback("");
-              }}
-            />
+            {scoreFeedback.includes("Evidence Gate") ? <Link to="/review" className="primary-button w-full justify-center">去复盘这次练习<ArrowRight size={16} aria-hidden="true" /></Link> : null}
+            <details className="rounded-workbench border border-line bg-white shadow-soft">
+              <summary className="flex min-h-12 cursor-pointer items-center px-5 text-sm font-black text-ink-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600">选择其他题目与筛选</summary>
+              <div className="border-t border-line p-4">
+                <QuestionPicker
+                  mode={mode}
+                  questions={filteredQuestions}
+                  allQuestionCount={dashboard.candidateQuestions.length}
+                  categories={questionCategories}
+                  query={questionQuery}
+                  category={questionCategory}
+                  weakOnly={weakOnly}
+                  weakQuestionIds={weakQuestionIds}
+                  activeQuestionId={activeQuestionId}
+                  onModeChange={(nextMode) => {
+                    setMode(nextMode);
+                    setQuestionCategory("all");
+                    setWeakOnly(false);
+                    setSelectedQuestionId(undefined);
+                  }}
+                  onQueryChange={setQuestionQuery}
+                  onCategoryChange={setQuestionCategory}
+                  onWeakOnlyChange={setWeakOnly}
+                  onResetFilters={resetQuestionFilters}
+                  onPickQuestion={(questionId) => {
+                    setSelectedQuestionId(questionId);
+                    setScoreAnalysis(undefined);
+                    setScoreFeedback("");
+                  }}
+                />
+              </div>
+            </details>
           </section>
+
+          <aside className="space-y-4 xl:col-start-1 xl:row-start-1">
+            <TargetTaskPanel title={dashboard.targetTask?.title} duration={dashboard.targetTask?.durationLabel} />
+            <details className="rounded-workbench border border-line bg-white shadow-soft">
+              <summary className="flex min-h-12 cursor-pointer items-center px-5 text-sm font-black text-ink-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600">查看今日任务与历史记录</summary>
+              <div className="space-y-4 border-t border-line p-4"><OralTaskPanel tasks={dashboard.oralTasks} /><RecentRecords records={dashboard.recentRecords} /></div>
+            </details>
+          </aside>
         </section>
       </section>
     </main>
@@ -445,7 +445,7 @@ function AnswerPanel({
           onClick={onRecord}
         >
           <CheckCircle2 size={16} aria-hidden="true" />
-          保存口述与AI分析
+          保存口述证据
         </button>
         <button
           type="button"
@@ -454,7 +454,7 @@ function AnswerPanel({
           onClick={onScore}
         >
           <RefreshCw size={16} aria-hidden="true" />
-          AI评分并生成复盘
+          按规则自检
         </button>
       </div>
       {scoreFeedback ? (
@@ -465,9 +465,9 @@ function AnswerPanel({
 
       {analysis ? <ScoreAnalysisPanel analysis={analysis} /> : null}
 
-      <div className="mt-5 rounded-card bg-surface-0 p-4">
-        <p className="text-xs font-black uppercase text-ink-500">本地自检维度</p>
-        <ul className="mt-2 space-y-2">
+      <details className="mt-5 rounded-card bg-surface-0">
+        <summary className="flex min-h-11 cursor-pointer items-center px-4 text-xs font-black uppercase text-ink-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600">查看本地自检维度</summary>
+        <ul className="space-y-2 border-t border-line p-4">
           {rubricDimensions.slice(0, 4).map((item) => (
             <li key={item} className="flex gap-2 text-sm font-bold leading-6 text-ink-700">
               <CheckCircle2 className="mt-0.5 shrink-0 text-brand-700" size={15} aria-hidden="true" />
@@ -475,7 +475,7 @@ function AnswerPanel({
             </li>
           ))}
         </ul>
-      </div>
+      </details>
     </section>
   );
 }
@@ -514,7 +514,9 @@ function QuestionDetail({
         </button>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-2">
+      <details className="rounded-card bg-surface-0">
+        <summary className="flex min-h-11 cursor-pointer items-center px-4 text-sm font-black text-ink-800 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600">查看回答提示、结构与关键词</summary>
+        <div className="grid gap-3 border-t border-line p-4 md:grid-cols-2">
         <section className="border-t border-line pt-3">
           <p className="text-xs font-black uppercase text-ink-500">详情提示</p>
           <p className="mt-2 text-sm font-semibold leading-6 text-ink-600">{question.hint}</p>
@@ -527,12 +529,12 @@ function QuestionDetail({
             <li>3. 最后落到指标、证据和复盘动作。</li>
           </ol>
         </section>
-      </div>
-
-      <section className="border-t border-line pt-3">
-        <p className="text-xs font-black uppercase text-ink-500">预期关键词</p>
-        <KeywordRow keywords={question.expectedKeywords} />
-      </section>
+          <section className="border-t border-line pt-3 md:col-span-2">
+            <p className="text-xs font-black uppercase text-ink-500">预期关键词</p>
+            <KeywordRow keywords={question.expectedKeywords} />
+          </section>
+        </div>
+      </details>
     </div>
   );
 }

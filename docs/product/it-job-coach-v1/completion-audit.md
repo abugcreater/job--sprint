@@ -2,6 +2,10 @@
 
 日期：2026-07-07
 
+## 2026-07-11 HTTPS 生产交付更新
+
+完整 HTTPS 生产链路现已通过：仓库外私有 env 注入的正式域名公网可用，最新 React/Rust 已部署并重启，Web 登录/session/写入读回、正式签名 APK、Android HTTPS 远端登录与杀进程读回均有 fresh evidence。最终 runner 为 `PASS_WITH_LIMITS`，限制来自未提交工作树和 P8 理论性架构门禁。下文“公网 443 reset、Android remote 缺失、final report FAIL”只保留为 2026-07-07 历史快照。
+
 ## 审计结论
 
 当前结论：`PASS_WITH_LIMITS`。

@@ -33,7 +33,7 @@ const docChecks = [
   {
     id: "known_issues_external_limits",
     file: "docs/product/product-ops/known-issues.md",
-    tokens: ["远端真实 LLM provider evidence 已通过", "Android 远端 HTTPS 真机 evidence 缺失", "当前线程 AI 团队处于 quarantine"]
+    tokens: ["远端真实 LLM provider evidence 已通过", "Android 远端 HTTPS 真机 evidence 已通过", "当前线程 AI 团队处于 quarantine"]
   },
   {
     id: "doc_rules_no_false_team_pass",

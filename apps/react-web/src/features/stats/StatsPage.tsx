@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, BriefcaseBusiness, ClipboardCheck, MessageCircleQuestion, ShieldCheck, UserRound, WifiOff, type LucideIcon } from "lucide-react";
+import { BookOpen, BriefcaseBusiness, ClipboardCheck, MessageCircleQuestion, ShieldCheck, UserRound, WifiOff, type LucideIcon } from "lucide-react";
 import { useMemo, type ReactNode } from "react";
 import { syncStateLabel } from "../../app/syncStatus";
 import { buildApplicationsDashboard } from "../../data/applicationsAdapter";
@@ -52,15 +52,10 @@ export function StatsPage() {
   return (
     <main className="app-main">
       <section className="app-page">
-        <header className="command-card p-4 md:p-5">
+        <header className="page-intro motion-enter">
           <div className="flex max-w-3xl flex-col gap-3">
-            <p className="text-sm font-black text-brand-700">集中统计 · 个人进展</p>
-            <div className="flex items-center gap-3">
-              <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                <BarChart3 size={22} aria-hidden="true" />
-              </span>
-              <h1 className="text-3xl font-black leading-tight md:text-4xl">进展统计</h1>
-            </div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">Stats · 事实进展</p>
+            <h1 className="text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">进展统计</h1>
             <p className="max-w-3xl text-sm font-semibold leading-6 text-ink-500">
               这里集中查看个人执行、画像、知识、面试、机会和复盘数据；模块页面只保留完成任务所需的信息。
             </p>
@@ -73,7 +68,9 @@ export function StatsPage() {
           ))}
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-2">
+        <details className="rounded-workbench border border-line bg-white shadow-soft">
+          <summary className="flex min-h-12 cursor-pointer items-center px-5 text-sm font-black text-ink-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600">查看画像、知识、面试、机会与复盘明细</summary>
+        <section className="grid gap-4 border-t border-line p-4 xl:grid-cols-2">
           <StatPanel
             icon={UserRound}
             title="画像与 AI 建议"
@@ -90,7 +87,7 @@ export function StatsPage() {
             rows={[
               ["今日知识任务", `${stats.learning.learningTasks.length} 个`],
               ["学习笔记", `${stats.learning.noteCount} 条`],
-              ["知识卡", `${stats.learning.knowledgeCards.length} 张`],
+              ["任务知识摘要", `${stats.learning.knowledgeCards.length} 张`],
               ["资料入口", `${stats.learning.resources.length} 个`]
             ]}
           />
@@ -101,7 +98,7 @@ export function StatsPage() {
               ["今日口述任务", `${stats.interview.oralTasks.length} 个`],
               ["候选题目", `${stats.interview.candidateQuestions.length} 题`],
               ["本地口述记录", `${stats.interview.recordCount} 条`],
-              ["评分维度", `${stats.interview.rubricDimensions.length} 项`]
+              ["规则自检维度", `${stats.interview.rubricDimensions.length} 项`]
             ]}
           />
           <StatPanel
@@ -135,6 +132,7 @@ export function StatsPage() {
             ]}
           />
         </section>
+        </details>
       </section>
     </main>
   );

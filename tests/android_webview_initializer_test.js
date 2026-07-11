@@ -38,7 +38,8 @@ assert.match(initializer, /new AndroidSessionCookieBridge\(activity, remoteWebVi
 assert.match(initializer, /webView\.addJavascriptInterface\([\s\S]*"AndroidRemoteSettings"/);
 assert.match(initializer, /webView\.addJavascriptInterface\([\s\S]*"AndroidAuthSettings"/);
 assert.match(initializer, /webView\.addJavascriptInterface\([\s\S]*"AndroidSessionCookies"/);
-assert.match(initializer, /webView\.setWebChromeClient\(new AndroidWebChromePermissionController\(activity, audioPermissionRequest\)\)/);
+assert.match(initializer, /AndroidFileChooserController fileChooserController = new AndroidFileChooserController\(activity\)/);
+assert.match(initializer, /new AndroidWebChromePermissionController\([\s\S]*activity,[\s\S]*audioPermissionRequest,[\s\S]*fileChooserController[\s\S]*\)/);
 assert.match(initializer, /webView\.setWebViewClient\(new AndroidRemoteWebViewClient\(basicAuthController, remoteWebViewController\)\)/);
 assert.match(initializer, /return new AndroidActivityLifecycleController\(/);
 

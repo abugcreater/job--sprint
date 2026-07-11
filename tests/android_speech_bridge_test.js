@@ -62,7 +62,7 @@ const manifest = fs.readFileSync("apps/android/app/src/main/AndroidManifest.xml"
 assert.match(manifest, /android\.permission\.RECORD_AUDIO/);
 assert.match(manifest, /android\.permission\.INTERNET/);
 assert.match(manifest, /android\.permission\.ACCESS_NETWORK_STATE/);
-assert.match(manifest, /android:usesCleartextTraffic="true"/);
+assert.match(manifest, /android:usesCleartextTraffic="false"/);
 
 assert.match(speechBridge, /final class AndroidSpeechBridge/);
 assert.doesNotMatch(activity, /private class AndroidSpeechBridge/);

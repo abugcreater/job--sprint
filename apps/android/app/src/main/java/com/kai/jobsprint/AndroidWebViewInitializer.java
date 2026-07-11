@@ -53,13 +53,19 @@ final class AndroidWebViewInitializer {
             "AndroidSessionCookies"
         );
 
-        webView.setWebChromeClient(new AndroidWebChromePermissionController(activity, audioPermissionRequest));
+        AndroidFileChooserController fileChooserController = new AndroidFileChooserController(activity);
+        webView.setWebChromeClient(new AndroidWebChromePermissionController(
+            activity,
+            audioPermissionRequest,
+            fileChooserController
+        ));
         webView.setWebViewClient(new AndroidRemoteWebViewClient(basicAuthController, remoteWebViewController));
 
         return new AndroidActivityLifecycleController(
             webView,
             speechBridge,
             recorderBridge,
+            fileChooserController,
             audioPermissionRequest
         );
     }

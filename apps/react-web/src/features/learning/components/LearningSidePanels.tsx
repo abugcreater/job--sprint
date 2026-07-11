@@ -59,7 +59,7 @@ export function LearningNotesPanel({ notes }: { notes: LearningNoteRecord[] }) {
         </h2>
       </div>
       {notes.length ? (
-        <div className="mt-4 max-h-[360px] space-y-3 overflow-y-auto pr-1">
+        <div className="mt-4 space-y-3">
           {notes.map((note) => (
             <article key={note.id} className="rounded-card bg-surface-0 p-3">
               <p className="text-xs font-black text-brand-700">{note.taskTitle}</p>

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { CloudOff, LogIn, LogOut, RefreshCw, ShieldCheck, UserRound } from "lucide-react";
+import { CloudOff, LogIn, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { AuthSessionContext } from "./authSessionContext";
 import { MobileBottomNav } from "./MobileBottomNav";
-import { desktopNavRouteIds, routeById, visibleRouteIds } from "./navigation";
+import { appRoutes, desktopNavRouteIds, routeById, visibleRouteIds, type AppRouteId } from "./navigation";
 import { syncStateLabel } from "./syncStatus";
 import {
   authSessionMeta,
@@ -18,12 +18,13 @@ import {
 import { useSprintStore } from "../stores/sprintStore";
 
 export function AppShell() {
+  const location = useLocation();
   const syncState = useSprintStore((state) => state.syncState);
   const sprint = useSprintStore((state) => state.sprint);
   const [authSession, setAuthSession] = useState<AuthSessionState>(() => initialAuthSession());
   const syncLabel = syncStateLabel(syncState);
-  const syncTone = syncState === "online" ? "bg-success-100 text-success-600" : syncState === "failed" ? "bg-risk-100 text-risk-600" : "bg-warn-100 text-warn-600";
   const visibleDesktopRouteIds = visibleRouteIds(desktopNavRouteIds, { owner: isOwnerSession(authSession) });
+  const currentRoute = appRoutes.find((route) => location.pathname.startsWith(route.path)) ?? routeById.today;
   const refreshAuth = useCallback(() => {
     let active = true;
     fetchAuthSession().then((session) => {
@@ -48,79 +49,120 @@ export function AppShell() {
 
   return (
     <AuthSessionContext.Provider value={authSession}>
+      <a
+        href="#app-content"
+        className="fixed left-3 top-3 z-50 -translate-y-24 rounded-control bg-white px-3 py-2 text-sm font-black text-ink-950 shadow-panel transition focus:translate-y-0"
+        onClick={(event) => {
+          event.preventDefault();
+          focusAppContent();
+        }}
+        onKeyDown={(event) => {
+          if (event.key !== "Enter") return;
+          event.preventDefault();
+          focusAppContent();
+        }}
+      >
+        跳到主要内容
+      </a>
       <ScrollToTop />
-      <header className="sticky top-0 z-30 border-b border-line bg-white/95 px-4 py-3 shadow-soft backdrop-blur md:hidden">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-ink-950 px-4 pb-3 pt-[calc(12px+env(safe-area-inset-top))] text-white shadow-panel md:hidden">
         <div className="flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <p className="text-[11px] font-black uppercase text-brand-700">Job Sprint</p>
-            <p className="truncate text-lg font-black text-ink-900">个人求职教练</p>
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="grid size-9 shrink-0 place-items-center rounded-control border border-white/15 bg-white/10 text-brand-100">
+              <ShieldCheck size={18} aria-hidden="true" />
+            </span>
+            <div className="min-w-0">
+              <p className="text-[10px] font-black uppercase tracking-[0.18em] text-brand-100">Job Sprint</p>
+              <p className="truncate text-base font-black">{currentRoute.label}作战台</p>
+            </div>
           </div>
-          <NavLink to="/more" className={`status-chip shrink-0 ${syncTone}`} aria-label={`${syncLabel}，打开更多页处理同步`}>
+          <NavLink to="/more" className="status-chip min-h-11 shrink-0 border border-white/15 bg-white/10 text-white" aria-label={`${syncLabel}，打开更多页处理同步`}>
             <CloudOff size={14} aria-hidden="true" />
             {syncState === "failed" ? "处理同步" : syncLabel}
           </NavLink>
         </div>
-        <AuthStatusBar session={authSession} onLogout={handleLogout} compact />
       </header>
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[248px] border-r border-line bg-white md:flex md:flex-col">
-        <div className="border-b border-line p-5">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-[256px] border-r border-white/10 bg-ink-950 text-white md:flex md:flex-col">
+        <div className="border-b border-white/10 p-5">
           <div className="flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-control bg-ink-900 text-white">
+            <span className="grid size-11 place-items-center rounded-control border border-white/15 bg-white/10 text-brand-100">
               <ShieldCheck size={22} aria-hidden="true" />
             </span>
             <div className="min-w-0">
-              <p className="text-[11px] font-black uppercase text-brand-700">Job Sprint</p>
-              <p className="truncate text-base font-black text-ink-900">执行与证据</p>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-brand-100">Job Sprint</p>
+              <p className="truncate text-base font-black text-white">个人求职作战台</p>
             </div>
           </div>
-          <div className="mt-4 rounded-card bg-surface-0 p-3">
-            <p className="text-xs font-black text-ink-500">今日</p>
-            <p className="mt-1 text-sm font-extrabold text-ink-900">{sprint.date} {sprint.weekday}</p>
-            <NavLink to="/more" className={`mt-3 status-chip ${syncTone}`} aria-label={`${syncLabel}，打开更多页处理同步`}>
-              <RefreshCw size={14} aria-hidden="true" />
-              {syncState === "failed" ? "处理同步" : syncLabel}
-            </NavLink>
-          </div>
-          <AuthStatusBar session={authSession} onLogout={handleLogout} />
+          <p className="mt-4 text-xs font-bold leading-5 text-ink-300">{sprint.date} {sprint.weekday} · 每次只推进一个可验证动作</p>
         </div>
-        <nav className="flex flex-1 flex-col gap-1 p-3" aria-label="桌面模块导航">
-          {visibleDesktopRouteIds.map((id) => {
-            const item = routeById[id];
-            const Icon = item.icon;
+        <nav className="flex flex-1 flex-col gap-5 overflow-y-auto p-3" aria-label="桌面模块导航">
+          {navGroups.map((group) => {
+            const routeIds = group.ids.filter((id) => visibleDesktopRouteIds.includes(id));
+            if (!routeIds.length) return null;
             return (
-              <NavLink
-                key={item.id}
-                to={item.path}
-                className={({ isActive }) =>
-                  `inline-flex min-h-12 items-center gap-3 rounded-control px-3 text-sm font-extrabold transition focus:outline-none focus:ring-2 focus:ring-brand-600 ${
-                    isActive ? "bg-brand-700 text-white shadow-soft" : "text-ink-500 hover:bg-surface-0 hover:text-ink-900"
-                  }`
-                }
-              >
-                <Icon size={18} aria-hidden="true" />
-                <span>{item.label}</span>
-              </NavLink>
+              <div key={group.label}>
+                <p className="px-3 pb-2 text-[10px] font-black uppercase tracking-[0.2em] text-ink-400">{group.label}</p>
+                <div className="grid gap-1">
+                  {routeIds.map((id) => {
+                    const item = routeById[id];
+                    const Icon = item.icon;
+                    return (
+                      <NavLink
+                        key={item.id}
+                        to={item.path}
+                        className={({ isActive }) =>
+                          `group relative inline-flex min-h-11 items-center gap-3 rounded-control px-3 text-sm font-extrabold transition focus:outline-none focus:ring-2 focus:ring-brand-100 ${
+                            isActive ? "bg-white/10 text-white" : "text-ink-300 hover:bg-white/5 hover:text-white"
+                          }`
+                        }
+                      >
+                        {({ isActive }) => (
+                          <>
+                            <span className={`absolute inset-y-2 left-0 w-0.5 rounded-full ${isActive ? "bg-brand-100" : "bg-transparent"}`} />
+                            <Icon size={18} aria-hidden="true" />
+                            <span>{item.label}</span>
+                          </>
+                        )}
+                      </NavLink>
+                    );
+                  })}
+                </div>
+              </div>
             );
           })}
         </nav>
-        <div className="border-t border-line p-4 text-xs font-semibold leading-5 text-ink-500">
-          个人求职教练 · Evidence Gate 优先
+        <div className="border-t border-white/10 p-4">
+          <NavLink to="/more" className="flex min-h-11 items-center justify-between gap-3 rounded-control border border-white/10 bg-white/5 px-3 text-xs font-bold text-ink-200 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-brand-100">
+            <span className="inline-flex items-center gap-2"><CloudOff size={15} aria-hidden="true" />{syncLabel}</span>
+            <span className="text-brand-100">管理</span>
+          </NavLink>
+          <AuthStatusBar session={authSession} onLogout={handleLogout} dark />
         </div>
       </aside>
-      <Outlet />
+      <div id="app-content" tabIndex={-1}>
+        <Outlet />
+      </div>
       <MobileBottomNav />
     </AuthSessionContext.Provider>
   );
 }
 
+function focusAppContent() {
+  window.requestAnimationFrame(() => {
+    document.getElementById("app-content")?.focus();
+  });
+}
+
 function AuthStatusBar({
   session,
   onLogout,
-  compact = false
+  compact = false,
+  dark = false
 }: {
   session: AuthSessionState;
   onLogout: () => void;
   compact?: boolean;
+  dark?: boolean;
 }) {
   const title = authSessionTitle(session);
   const meta = authSessionMeta(session);
@@ -129,21 +171,21 @@ function AuthStatusBar({
   const isAnonymous = session.status === "anonymous";
 
   return (
-    <div className={compact ? "mt-2 flex min-w-0 items-center justify-between gap-2 text-xs" : "mt-3 border-t border-line pt-3"}>
+    <div className={compact ? "mt-2 flex min-w-0 items-center justify-between gap-2 text-xs" : `mt-3 border-t pt-3 ${dark ? "border-white/10" : "border-line"}`}>
       <div className={compact ? "flex min-w-0 items-center gap-2" : "min-w-0"}>
-        <span className={compact ? "grid size-7 shrink-0 place-items-center rounded-control bg-surface-0 text-brand-700" : "mb-2 inline-grid size-8 place-items-center rounded-control bg-surface-0 text-brand-700"}>
+        <span className={`${compact ? "grid size-7 shrink-0" : "mb-2 inline-grid size-8"} place-items-center rounded-control ${dark ? "bg-white/10 text-brand-100" : "bg-surface-0 text-brand-700"}`}>
           <UserRound size={compact ? 14 : 16} aria-hidden="true" />
         </span>
         <div className="min-w-0">
-          <p className={compact ? "truncate font-black text-ink-900" : "text-xs font-black text-ink-500"}>{compact ? title : "当前账号"}</p>
-          <p className={compact ? "truncate font-semibold text-ink-500" : "truncate text-sm font-extrabold text-ink-900"}>{compact ? meta : title}</p>
-          {!compact ? <p className="mt-0.5 truncate text-xs font-semibold text-ink-500">{meta}</p> : null}
+          <p className={compact ? `truncate font-black ${dark ? "text-white" : "text-ink-900"}` : `text-xs font-black ${dark ? "text-ink-400" : "text-ink-500"}`}>{compact ? title : "当前账号"}</p>
+          <p className={compact ? `truncate font-semibold ${dark ? "text-ink-300" : "text-ink-500"}` : `truncate text-sm font-extrabold ${dark ? "text-white" : "text-ink-900"}`}>{compact ? meta : title}</p>
+          {!compact ? <p className={`mt-0.5 truncate text-xs font-semibold ${dark ? "text-ink-400" : "text-ink-500"}`}>{meta}</p> : null}
         </div>
       </div>
       {isAuthenticated ? (
         <button
           type="button"
-          className={compact ? "status-chip shrink-0 border border-line bg-white text-ink-700" : "mt-3 status-chip border border-line bg-white text-ink-700"}
+          className={`${compact ? "status-chip shrink-0" : "mt-3 status-chip"} border ${dark ? "border-white/15 bg-white/10 text-white" : "border-line bg-white text-ink-700"}`}
           onClick={onLogout}
         >
           <LogOut size={14} aria-hidden="true" />
@@ -151,7 +193,7 @@ function AuthStatusBar({
         </button>
       ) : isAnonymous ? (
         <a
-          className={compact ? "status-chip shrink-0 bg-brand-700 text-white" : "mt-3 status-chip bg-brand-700 text-white"}
+          className={compact ? "status-chip shrink-0 bg-brand-100 text-brand-800" : "mt-3 status-chip bg-brand-100 text-brand-800"}
           href={loginHref}
         >
           <LogIn size={14} aria-hidden="true" />
@@ -161,6 +203,13 @@ function AuthStatusBar({
     </div>
   );
 }
+
+const navGroups: Array<{ label: string; ids: AppRouteId[] }> = [
+  { label: "行动", ids: ["today", "applications", "review"] },
+  { label: "准备", ids: ["coach", "learn", "interview"] },
+  { label: "洞察", ids: ["stats"] },
+  { label: "系统", ids: ["admin", "more"] }
+];
 
 function ScrollToTop() {
   const { pathname } = useLocation();

@@ -34,6 +34,7 @@ export function LearningPage() {
   const [knowledgeFeedback, setKnowledgeFeedback] = useState("");
   const [selectedResourceId, setSelectedResourceId] = useState<string | undefined>();
   const [resourceFeedback, setResourceFeedback] = useState("");
+  const [workspaceView, setWorkspaceView] = useState<"today" | "cards">("today");
   const hasProfile = userProfiles.length > 0;
 
   const filteredKnowledgeCards = useMemo(
@@ -54,6 +55,7 @@ export function LearningPage() {
     () => dashboard.resources.find((resource) => resource.id === selectedResourceId) ?? dashboard.resources[0],
     [dashboard.resources, selectedResourceId]
   );
+  const primaryTask = dashboard.learningTasks.find((task) => task.isCurrent) ?? dashboard.focusTask ?? dashboard.learningTasks[0];
 
   const beginLearningNote = useCallback((task: LearningTaskSummary) => {
     setNoteTaskId(task.id);
@@ -113,7 +115,7 @@ export function LearningPage() {
 
   const selectResource = useCallback((resource: LearningResource) => {
     setSelectedResourceId(resource.id);
-    setResourceFeedback(resource.hasPath ? `已打开「${resource.label}」资料详情。` : `已打开「${resource.label}」资料摘要；当前缺少可打开路径。`);
+    setResourceFeedback(resource.hasPath ? `已查看「${resource.label}」资料详情。` : `已查看「${resource.label}」任务资料摘要；当前缺少可打开路径。`);
   }, []);
 
   if (!hasProfile) {
@@ -146,58 +148,63 @@ export function LearningPage() {
   return (
     <main className="app-main">
       <section className="app-page">
-        <header className="command-card p-4 md:p-5">
+        <header className="page-intro motion-enter">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">知识边界 · 证据沉淀</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <BookOpen size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">知识边界</h1>
-              </div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">Learning · 当前学习任务</p>
+              <h1 className="mt-2 text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">学习工作台</h1>
               <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                今日知识任务、资料入口和知识卡只保留能转成岗位表达的内容；学习笔记直接进入 Evidence Gate。
+                先为当前任务写一条可证明的学习笔记，再用同一证据练一道面试题。
               </p>
             </div>
-            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
-              <span className="text-xs font-black text-ink-500">集中统计</span>
-              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看知识任务、学习笔记和资料入口</span>
-            </Link>
+            <Link to="/today" className="secondary-button shrink-0">回到 Evidence Gate<ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
         </header>
 
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
-          <section className="space-y-3" aria-labelledby="learning-tasks-title">
+        <section className="grid gap-3 border-y border-line py-4 md:grid-cols-[minmax(0,1fr)_auto_auto] md:items-center" aria-label="当前学习上下文">
+          <div><p className="text-xs font-black text-brand-700">当前任务</p><p className="mt-1 text-base font-black text-ink-950">{primaryTask?.title ?? "今日暂无学习任务"}</p></div>
+          <p className="text-sm font-black text-ink-700"><span className="text-2xl text-ink-950">{dashboard.noteCount}</span> 条真实笔记</p>
+          <p className="text-sm font-black text-ink-700"><span className="text-2xl text-ink-950">{dashboard.knowledgeCards.length}</span> 张任务摘要</p>
+        </section>
+
+        <nav className="grid grid-cols-2 gap-1 rounded-workbench bg-surface-1 p-1" aria-label="学习工作区视图">
+          <LearningViewButton active={workspaceView === "today"} onClick={() => setWorkspaceView("today")}>当前任务</LearningViewButton>
+          <LearningViewButton active={workspaceView === "cards"} onClick={() => setWorkspaceView("cards")}>任务知识摘要</LearningViewButton>
+        </nav>
+
+        {workspaceView === "today" ? (
+          <section className="space-y-4">
+            <section className="space-y-3" aria-labelledby="learning-tasks-title">
             <SectionTitle id="learning-tasks-title" icon={<NotebookPen size={18} aria-hidden="true" />} title="今日知识任务" />
-            {dashboard.learningTasks.length ? (
-              dashboard.learningTasks.map((task) => (
-                <LearningTaskCard
-                  key={task.id}
-                  task={task}
-                  isNoteOpen={noteTaskId === task.id}
-                  noteDraft={noteTaskId === task.id ? noteDraft : ""}
-                  feedback={noteFeedback}
-                  onBeginNote={beginLearningNote}
-                  onNoteDraftChange={setNoteDraft}
-                  onSaveNote={saveLearningNote}
-                  onCancelNote={cancelLearningNote}
-                />
-              ))
+            {primaryTask ? (
+              <LearningTaskCard
+                key={primaryTask.id}
+                task={primaryTask}
+                isNoteOpen={noteTaskId === primaryTask.id}
+                noteDraft={noteTaskId === primaryTask.id ? noteDraft : ""}
+                feedback={noteFeedback}
+                onBeginNote={beginLearningNote}
+                onNoteDraftChange={setNoteDraft}
+                onSaveNote={saveLearningNote}
+                onCancelNote={cancelLearningNote}
+              />
             ) : (
             <EmptyPanel text="今日没有知识任务，先回到今日 AI 教练处理当前任务。" />
             )}
+            </section>
+            <details className="rounded-workbench border border-line bg-white shadow-soft">
+              <summary className="flex min-h-12 cursor-pointer items-center px-5 text-sm font-black text-ink-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600">查看任务资料与最近笔记</summary>
+              <div className="grid gap-4 border-t border-line p-4 xl:grid-cols-2">
+                <ResourcePanel resources={dashboard.resources} activeResource={activeResource} feedback={resourceFeedback} onSelectResource={selectResource} />
+                <LearningNotesPanel notes={dashboard.recentNotes} />
+              </div>
+            </details>
           </section>
+        ) : null}
 
-          <aside className="space-y-4">
-            <FocusPanel task={dashboard.focusTask} />
-            <ResourcePanel resources={dashboard.resources} activeResource={activeResource} feedback={resourceFeedback} onSelectResource={selectResource} />
-            <LearningNotesPanel notes={dashboard.recentNotes} />
-          </aside>
-        </section>
-
+        {workspaceView === "cards" ? (
         <section className="space-y-3" aria-labelledby="knowledge-cards-title">
-          <SectionTitle id="knowledge-cards-title" icon={<Layers3 size={18} aria-hidden="true" />} title="知识卡摘要" />
+          <SectionTitle id="knowledge-cards-title" icon={<Layers3 size={18} aria-hidden="true" />} title="任务知识摘要" />
           <KnowledgeBrowser
             cards={dashboard.knowledgeCards}
             filteredCards={filteredKnowledgeCards}
@@ -216,9 +223,14 @@ export function LearningPage() {
             onResetFilters={resetKnowledgeFilters}
           />
         </section>
+        ) : null}
       </section>
     </main>
   );
+}
+
+function LearningViewButton({ active, children, onClick }: { active: boolean; children: React.ReactNode; onClick: () => void }) {
+  return <button type="button" className={`min-h-11 rounded-control px-3 text-sm font-black transition focus:outline-none focus:ring-2 focus:ring-brand-600 ${active ? "bg-ink-950 text-white shadow-soft" : "text-ink-600 hover:bg-white"}`} aria-pressed={active} onClick={onClick}>{children}</button>;
 }
 
 function SectionTitle({ id, icon, title }: { id: string; icon: React.ReactNode; title: string }) {
@@ -229,24 +241,6 @@ function SectionTitle({ id, icon, title }: { id: string; icon: React.ReactNode; 
         {title}
       </h2>
     </div>
-  );
-}
-
-function FocusPanel({ task }: { task?: LearningTaskSummary }) {
-  return (
-    <article className="rounded-card border border-line bg-white p-5 shadow-soft">
-      <div className="flex items-center gap-2 text-brand-700">
-        <NotebookPen size={18} aria-hidden="true" />
-        <h2 className="text-base font-black text-ink-900">笔记入口</h2>
-      </div>
-      {task ? (
-        <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">
-          优先为「{task.title}」补一条知识边界笔记。它会写入 React localStorage，并立即作为今日 Evidence Gate 的学习证据。
-        </p>
-      ) : (
-        <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">当前没有待补学习笔记的任务。</p>
-      )}
-    </article>
   );
 }
 

@@ -249,10 +249,14 @@ function testReadinessAdapterReportsCurrentGoalState() {
   const check = goalAcceptanceCheck(repoRoot, {});
   assert.strictEqual(check.id, "goal_acceptance");
   assert(["PASS_WITH_LIMITS", "USER_ACTION_REQUIRED", "FAIL"].includes(check.status), `unexpected readiness status ${check.status}`);
-  assert(["goal_acceptance_passed_with_limits", "goal_acceptance_requires_external_evidence", "goal_acceptance_findings_present"].includes(check.reason));
+  assert(["goal_acceptance_has_limits", "goal_acceptance_requires_external_evidence", "goal_acceptance_findings_present"].includes(check.reason));
   assert.strictEqual(check.goalCount, 7);
   if (check.status === "FAIL") {
-    assert(check.failingGoals.includes("server_sync_and_formal_apk"));
+    assert(check.failingGoals.length > 0, "failed readiness should identify at least one failing goal");
+    assert(
+      check.failingGoals.every((goalId) => typeof goalId === "string" && goalId.length > 0),
+      "failing goal identifiers should be non-empty strings"
+    );
   }
 }
 

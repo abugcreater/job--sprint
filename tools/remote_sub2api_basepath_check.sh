@@ -102,22 +102,22 @@ if [[ "$js_code" != "200" ]]; then
   exit 1
 fi
 
-if grep -q 'Ze="/api/v1"' "$JS"; then
+if grep -Eq '=["'\'']/api/v1["'\'']' "$JS"; then
   echo "FAIL ${js_path}: JS still points API base to /api/v1" >&2
   exit 1
 fi
 
-if ! grep -q 'Ze="/sub2api/api/v1"' "$JS"; then
+if ! grep -Eq '=["'\'']/sub2api/api/v1["'\'']' "$JS"; then
   echo "FAIL ${js_path}: JS does not point API base to /sub2api/api/v1" >&2
   exit 1
 fi
 
-if grep -q 'Ht("/")' "$JS"; then
+if grep -Eq 'history:[A-Za-z_$][A-Za-z0-9_$]*\("/"\)' "$JS"; then
   echo "FAIL ${js_path}: JS still uses root Vue router base" >&2
   exit 1
 fi
 
-if ! grep -q 'Ht("/sub2api/")' "$JS"; then
+if ! grep -Eq 'history:[A-Za-z_$][A-Za-z0-9_$]*\("/sub2api/"\)' "$JS"; then
   echo "FAIL ${js_path}: JS does not use /sub2api/ Vue router base" >&2
   exit 1
 fi

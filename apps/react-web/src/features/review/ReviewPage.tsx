@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, ClipboardCheck, Download, FileText, ListChecks, NotebookPen, Pencil, ShieldAlert, SlidersHorizontal, Sparkles, Trash2, XCircle } from "lucide-react";
+import { ArrowRight, CheckCircle2, ClipboardCheck, Download, FileText, NotebookPen, Pencil, ShieldAlert, SlidersHorizontal, Sparkles, Trash2, XCircle } from "lucide-react";
 import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { getLegacySnapshot } from "../../data/legacyAdapters";
@@ -43,6 +43,7 @@ export function ReviewPage() {
   const [editingRecord, setEditingRecord] = useState<{ taskId: string; evidenceId: string } | null>(null);
   const [exportPreview, setExportPreview] = useState("");
   const [formFeedback, setFormFeedback] = useState("");
+  const [reviewView, setReviewView] = useState<"write" | "insights" | "history">("write");
   const { saveServerOutcome, serverOutcome, serverOutcomeStatus } = useServerOutcome(sprint.date);
   const legacySnapshot = getLegacySnapshot();
   const dashboard = useMemo(() => buildReviewDashboard(sprint, evidenceByTaskId, legacySnapshot), [sprint, evidenceByTaskId, legacySnapshot]);
@@ -73,6 +74,7 @@ export function ReviewPage() {
       updateEvidence(editingRecord.taskId, editingRecord.evidenceId, { title: "复盘证据", content, verified: true });
       setEditingRecord(null);
       setFormFeedback("复盘记录已更新。");
+      setReviewView("history");
     } else {
       addEvidence(targetTask.id, "review", "复盘证据", content);
       setFormFeedback("复盘记录已保存，并写入 Evidence Gate。");
@@ -85,11 +87,13 @@ export function ReviewPage() {
     setDraft(reviewRecordToDraft(record));
     setEditingRecord({ taskId: record.taskId, evidenceId: record.id });
     setFormFeedback(`正在编辑「${record.title}」。`);
+    setReviewView("write");
   }, []);
 
   const handleDeleteReview = useCallback(
     (record: ReviewEvidenceRecord) => {
       if (record.source !== "local") return;
+      if (!window.confirm(`删除「${record.projectPoint || record.title}」复盘记录？此操作不可撤销。`)) return;
       deleteEvidence(record.taskId, record.id);
       if (editingRecord?.evidenceId === record.id) {
         setEditingRecord(null);
@@ -116,36 +120,29 @@ export function ReviewPage() {
   return (
     <main className="app-main">
       <section className="app-page">
-        <header className="command-card p-4 md:p-5">
+        <header className="page-intro motion-enter">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">今日复盘 · 明日行动</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <ClipboardCheck size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">今日复盘</h1>
-              </div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">Review · 事实收束与明日第一步</p>
+              <h1 className="mt-2 text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">今日复盘</h1>
               <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
                 用一条记录收束今天的事实、卡点和明天第一步。先写清楚，再看分析。
               </p>
             </div>
-            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
-              <span className="text-xs font-black text-ink-500">集中统计</span>
-              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看完成、证据、复盘和风险统计</span>
-            </Link>
+            <Link to="/today" className="secondary-button shrink-0">回到 Evidence Gate<ArrowRight size={16} aria-hidden="true" /></Link>
           </div>
         </header>
 
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
-          <aside className="space-y-4">
-            <CompletionPanel completion={dashboard.completion} />
-            <ReviewTaskPanel tasks={dashboard.reviewTasks} />
-            <RiskSummary risks={dashboard.risks} />
-            <TomorrowAdvice advice={dashboard.tomorrowAdvice} />
-          </aside>
+        <ReviewJourneyStrip dashboard={dashboard} reviewCount={dashboard.reviewRecords.length} />
 
-          <section className="space-y-4">
+        <nav className="grid grid-cols-3 gap-1 rounded-workbench bg-surface-1 p-1" aria-label="复盘工作区视图">
+          <ReviewViewButton active={reviewView === "write"} onClick={() => setReviewView("write")}>写复盘</ReviewViewButton>
+          <ReviewViewButton active={reviewView === "insights"} onClick={() => setReviewView("insights")}>看整理</ReviewViewButton>
+          <ReviewViewButton active={reviewView === "history"} onClick={() => setReviewView("history")}>历史</ReviewViewButton>
+        </nav>
+
+        {reviewView === "write" ? (
+          <section className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.15fr)_minmax(300px,0.85fr)]">
             <ReviewForm
               draft={draft}
               disabled={!dashboard.targetTask}
@@ -155,14 +152,29 @@ export function ReviewPage() {
               onChange={updateDraft}
               onSave={handleSaveReview}
             />
-            <EvidenceList records={dashboard.evidenceRecords} />
+            <aside className="space-y-4">
+              <TomorrowAdvice advice={dashboard.tomorrowAdvice} />
+              <ReviewTaskPanel tasks={dashboard.reviewTasks} />
+            </aside>
+          </section>
+        ) : null}
+
+        {reviewView === "insights" ? (
+          <section className="grid items-start gap-4 xl:grid-cols-2">
             <AiAnalysisPanel analysis={aiAnalysis} />
+            <EvidenceList records={dashboard.evidenceRecords} />
+            <RiskSummary risks={dashboard.risks} />
             <WeeklyReviewPanel
               analysis={weeklyAnalysis}
               serverOutcome={serverOutcome}
               serverStatus={serverOutcomeStatus}
               onSaveServerSnapshot={saveServerOutcome}
             />
+          </section>
+        ) : null}
+
+        {reviewView === "history" ? (
+          <section>
             <LocalReviewRecords
               records={filteredReviewRecords}
               totalCount={dashboard.reviewRecords.length}
@@ -174,39 +186,32 @@ export function ReviewPage() {
               onDelete={handleDeleteReview}
             />
           </section>
-        </section>
+        ) : null}
       </section>
     </main>
   );
 }
 
-function CompletionPanel({ completion }: { completion: ReturnType<typeof buildReviewDashboard>["completion"] }) {
+function ReviewViewButton({ active, children, onClick }: { active: boolean; children: ReactNode; onClick: () => void }) {
   return (
-    <article className="rounded-card border border-line bg-white p-5 shadow-soft">
-      <div className="flex items-center gap-2 text-brand-700">
-        <ListChecks size={18} aria-hidden="true" />
-        <h2 className="text-base font-black text-ink-900">今日完成情况</h2>
-      </div>
-      <p className="mt-4 text-4xl font-black text-ink-900">{completion.donePercent}%</p>
-      <div className="mt-4 h-3 overflow-hidden rounded-control bg-surface-0">
-        <div className="h-full rounded-control bg-brand-700" style={{ width: `${completion.donePercent}%` }} />
-      </div>
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        <SmallStat label="已完成" value={completion.done} />
-        <SmallStat label="待完成" value={completion.pending} />
-        <SmallStat label="已超时" value={completion.overdue} />
-        <SmallStat label="缺证据" value={completion.evidenceMissing} />
-      </div>
-    </article>
+    <button type="button" className={`min-h-11 rounded-control px-3 text-sm font-black transition focus:outline-none focus:ring-2 focus:ring-brand-600 ${active ? "bg-ink-950 text-white shadow-soft" : "text-ink-600 hover:bg-white"}`} aria-pressed={active} onClick={onClick}>
+      {children}
+    </button>
   );
 }
 
-function SmallStat({ label, value }: { label: string; value: number }) {
+function ReviewJourneyStrip({ dashboard, reviewCount }: { dashboard: ReturnType<typeof buildReviewDashboard>; reviewCount: number }) {
+  const target = dashboard.reviewTasks.find((task) => task.isCurrent) ?? dashboard.reviewTasks[0];
   return (
-    <div className="rounded-card bg-surface-0 p-3">
-      <p className="text-xs font-black text-ink-500">{label}</p>
-      <p className="mt-1 text-lg font-black text-ink-900">{value}</p>
-    </div>
+    <section className="grid gap-3 border-y border-line py-4 md:grid-cols-[minmax(0,1fr)_repeat(3,auto)] md:items-center" aria-labelledby="review-completion-title">
+      <div>
+        <h2 id="review-completion-title" className="text-xs font-black text-brand-700">今日完成情况</h2>
+        <p className="mt-1 text-base font-black text-ink-950">{target?.title ?? "收束今天的事实与下一步"}</p>
+      </div>
+      <p className="text-sm font-black text-ink-700"><span className="text-2xl text-ink-950">{dashboard.completion.donePercent}%</span> 完成</p>
+      <p className="text-sm font-black text-ink-700"><span className="text-2xl text-ink-950">{dashboard.evidenceRecords.length}</span> 条证据</p>
+      <p className="text-sm font-black text-ink-700"><span className="text-2xl text-ink-950">{reviewCount}</span> 条复盘</p>
+    </section>
   );
 }
 
@@ -314,9 +319,10 @@ function AiAnalysisPanel({ analysis }: { analysis: ReturnType<typeof buildReview
       <div className="flex items-center gap-2 text-brand-700">
         <Sparkles size={18} aria-hidden="true" />
         <h2 id="ai-analysis-input-title" className="text-base font-black text-ink-900">
-          复盘建议
+          规则整理
         </h2>
       </div>
+      <p className="mt-2 text-xs font-bold text-ink-500">基于当前证据、复盘字段和完成状态的本地规则整理，不是 AI 诊断或结果预测。</p>
       <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">
         {analysis.summary}
       </p>
@@ -372,18 +378,17 @@ function ReviewForm({
         </h2>
       </div>
       <div className="mt-5 grid gap-4">
-        <ReviewGroup title="事实">
-          <ReviewField label="今天完成了什么可证明的结果？" value={draft.projectPoint} onChange={(value) => onChange({ projectPoint: value })} />
+        <ReviewField label="今天完成了什么可证明的结果？" value={draft.projectPoint} onChange={(value) => onChange({ projectPoint: value })} />
+        <ReviewField label="今天最大的卡点是什么？" value={draft.pathIssues} onChange={(value) => onChange({ pathIssues: value })} />
+        <ReviewField label="明天第一件事是什么？" value={draft.tomorrowPriority} onChange={(value) => onChange({ tomorrowPriority: value })} />
+        <details className="rounded-card border border-line bg-surface-0">
+          <summary className="flex min-h-12 cursor-pointer items-center px-4 text-sm font-black text-ink-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600">补充面试与知识细节（可选）</summary>
+          <div className="grid gap-4 border-t border-line p-4">
           <ReviewField label="哪些面试题或表达已经能回答？" value={draft.interviewQuestions} onChange={(value) => onChange({ interviewQuestions: value })} />
           <ReviewField label="今天补强了哪个知识边界？" value={draft.javaPoint} onChange={(value) => onChange({ javaPoint: value })} />
-        </ReviewGroup>
-        <ReviewGroup title="卡点">
-          <ReviewField label="今天卡在哪里？" value={draft.pathIssues} onChange={(value) => onChange({ pathIssues: value })} />
           <ReviewField label="哪个回答还容易被追问？" value={draft.fragileAnswers} onChange={(value) => onChange({ fragileAnswers: value })} />
-        </ReviewGroup>
-        <ReviewGroup title="下一步">
-          <ReviewField label="明天第一件事是什么？" value={draft.tomorrowPriority} onChange={(value) => onChange({ tomorrowPriority: value })} />
-        </ReviewGroup>
+          </div>
+        </details>
       </div>
       {feedback ? (
         <p className="mt-4 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" role="status" aria-live="polite">
@@ -425,15 +430,6 @@ function ReviewField({ label, value, onChange }: { label: string; value: string;
         onChange={(event) => onChange(event.target.value)}
       />
     </label>
-  );
-}
-
-function ReviewGroup({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <fieldset className="rounded-card border border-line bg-surface-0 p-4">
-      <legend className="px-1 text-sm font-black text-ink-900">{title}</legend>
-      <div className="mt-1 grid gap-3">{children}</div>
-    </fieldset>
   );
 }
 

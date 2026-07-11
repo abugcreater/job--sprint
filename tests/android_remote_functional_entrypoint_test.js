@@ -6,6 +6,8 @@ const path = require("path");
 const root = path.resolve(__dirname, "..");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 const androidTest = fs.readFileSync(path.join(root, "tests", "android_webview_functional_persistence_test.js"), "utf8");
+const androidUrlConfig = fs.readFileSync(path.join(root, "tests", "android_webview_url_config.js"), "utf8");
+const androidRuntime = `${androidTest}\n${androidUrlConfig}`;
 const androidWrapper = fs.readFileSync(path.join(root, "tools", "run_android_remote_functional_evidence.js"), "utf8");
 const deliveryGate = fs.readFileSync(path.join(root, "tools", "validate_final_delivery_readiness.js"), "utf8");
 const deliveryActionCommands = fs.readFileSync(path.join(root, "tools", "delivery_action_commands.js"), "utf8");
@@ -24,8 +26,8 @@ for (const required of [
   "JOB_SPRINT_REMOTE_BASE_URL",
   "USER_ACTION_REQUIRED: Android remote mode requires",
   "android_remote_url_required",
-  "HTTP or HTTPS URL under /job-sprint/",
-  "HTTP/IP is accepted only for basic remote functional validation",
+  "HTTPS URL under /job-sprint/",
+  "rejects HTTP and local fallback URLs",
   "/job-sprint/react/index.html",
   "android-remote-functional",
   "mode: IS_REMOTE_WEBVIEW ? \"remote\" : \"local\"",
@@ -36,7 +38,7 @@ for (const required of [
   "AndroidSessionCookies.hasSessionCookie",
   "authEvidence: AUTH_EVIDENCE"
 ]) {
-  assert.ok(androidTest.includes(required), `Android functional test should include ${required}`);
+  assert.ok(androidRuntime.includes(required), `Android functional test should include ${required}`);
 }
 
 assert.ok(

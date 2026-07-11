@@ -45,6 +45,10 @@ process.env.RUNTIME_DATA_PATH = path.join(tmpDir, "runtime.json");
 process.env.JOB_SPRINT_AUTH_USER = TEST_USER;
 process.env.JOB_SPRINT_AUTH_PASSWORD = TEST_PASSWORD;
 process.env.JOB_SPRINT_SESSION_SECRET = ["functional", "session", "secret", "long", "enough", "for", "tests"].join("-");
+process.env.ANTHROPIC_BASE_URL = "";
+process.env.ANTHROPIC_AUTH_TOKEN = "";
+process.env.ANTHROPIC_MODEL = "";
+process.env.AI_PROVIDER_TIMEOUT_MS = "";
 
 const { route } = require("../apps/server/app.js");
 
@@ -254,12 +258,15 @@ async function fillApplication(page, draft) {
   const form = page.locator("section[aria-labelledby='application-form-title']");
   await form.getByLabel("公司").fill(draft.company);
   await form.getByLabel("岗位").fill(draft.role);
+  await form.getByLabel("状态").selectOption(draft.status);
+  for (const details of [form.locator("details").nth(0), form.locator("details").nth(1)]) {
+    if (!await details.evaluate((element) => element.open)) await details.locator("summary").click();
+  }
   await form.getByLabel("来源").fill(draft.source);
   await form.getByLabel("薪资范围").fill(draft.salaryRange);
   await form.getByLabel("城市").fill(draft.city);
   await form.getByLabel("简历版本").fill(draft.resumeVersion);
   await form.getByLabel("JD 关键词").fill(draft.keywords);
-  await form.getByLabel("状态").selectOption(draft.status);
   await form.getByLabel("沟通反馈").fill(draft.hrFeedback);
   await form.getByLabel("反馈摘要").fill(draft.notes);
 }
@@ -267,18 +274,22 @@ async function fillApplication(page, draft) {
 async function fillReview(page, draft) {
   const form = page.locator("section[aria-labelledby='review-form-title']");
   await form.getByLabel("今天完成了什么可证明的结果？").fill(draft.projectPoint);
+  await form.getByLabel("今天最大的卡点是什么？").fill(draft.pathIssues);
+  await form.getByLabel("明天第一件事是什么？").fill(draft.tomorrowPriority);
+  const optionalDetails = form.locator("details");
+  if (!await optionalDetails.evaluate((element) => element.open)) {
+    await optionalDetails.locator("summary").click();
+  }
   await form.getByLabel("哪些面试题或表达已经能回答？").fill(draft.interviewQuestions);
   await form.getByLabel("今天补强了哪个知识边界？").fill(draft.javaPoint);
-  await form.getByLabel("今天卡在哪里？").fill(draft.pathIssues);
   await form.getByLabel("哪个回答还容易被追问？").fill(draft.fragileAnswers);
-  await form.getByLabel("明天第一件事是什么？").fill(draft.tomorrowPriority);
 }
 
 function waitForAcceptedArtifact(page, title) {
   return page.waitForFunction(
     (artifactTitle) => {
       const label = `接受 AI 建议：${artifactTitle}`;
-      return [...document.querySelectorAll("#coach-artifacts button[aria-label]")]
+      return [...document.querySelectorAll("#coach-stage-advice button[aria-label]")]
         .some((button) => button.getAttribute("aria-label") === label && button.disabled);
     },
     title,
@@ -287,8 +298,9 @@ function waitForAcceptedArtifact(page, title) {
 }
 
 async function exerciseCoachWorkspace(page, baseUrl, prefix) {
-  await gotoRoute(page, baseUrl, "/coach", "AI 求职教练");
-  const profilePanel = page.locator("#coach-profile");
+  await gotoRoute(page, baseUrl, "/coach", "准备工作台");
+  await page.getByRole("button", { name: "改用详细画像表单" }).click();
+  const profilePanel = page.getByLabel("当前准备阶段：确认求职画像");
   await profilePanel.getByLabel("画像名称").fill(`${prefix}画像`);
   await profilePanel.getByLabel("角色族", { exact: true }).selectOption("backend");
   await profilePanel.getByLabel("目标岗位", { exact: true }).fill(`${prefix}Java 后端教练`);
@@ -301,14 +313,14 @@ async function exerciseCoachWorkspace(page, baseUrl, prefix) {
   await profilePanel.getByLabel("项目证据").fill(`${prefix}项目证据：搜索链路、MQ 幂等、异常恢复。`);
   await profilePanel.getByLabel("不可夸大边界").fill(`${prefix}不可夸大边界：不编造大模型训练经历。`);
   await profilePanel.getByRole("button", { name: "保存画像" }).click();
-  await page.getByText("画像已保存。", { exact: true }).waitFor();
+  await page.getByText("求职画像已保存，后续 AI 建议会引用这份画像。", { exact: true }).waitFor();
   await page.getByLabel("知识主题").fill(`${prefix}MQ 幂等边界`);
   await page.getByLabel("掌握程度").selectOption("了解");
   await page.getByLabel("当前缺口").fill(`${prefix}当前缺口：失败重试和重复消费边界还需要讲清。`);
   await page.getByLabel("已有证据").fill(`${prefix}已有证据：项目里做过消息去重和补偿。`);
   await page.getByLabel("岗位用途").fill(`${prefix}岗位用途：后端稳定性追问。`);
   await page.getByRole("button", { name: "新增边界" }).click();
-  await page.getByText(`${prefix}MQ 幂等边界`).waitFor();
+  await page.getByText("知识边界已保存。", { exact: true }).waitFor();
   await page.getByLabel("日程标题").fill(`${prefix}自定义日程`);
   await page.getByLabel("日期").fill(todayDateInShanghai());
   await page.getByLabel("开始").fill("21:00");
@@ -316,7 +328,7 @@ async function exerciseCoachWorkspace(page, baseUrl, prefix) {
   await page.getByLabel("日程类型").selectOption("interview");
   await page.getByLabel("安排原因").fill(`${prefix}安排原因：今晚用口述验证知识边界。`);
   await page.getByRole("button", { name: "新增日程" }).click();
-  await page.getByText(`${prefix}自定义日程`).waitFor();
+  await page.getByText("自定义日程已加入今日 AI 教练。", { exact: true }).waitFor();
   await page.getByRole("button", { name: "生成 AI 建议" }).click();
   await page.getByLabel(new RegExp(`AI 建议标题：${prefix}MQ 幂等边界 面试表达卡`)).waitFor();
 
@@ -327,7 +339,7 @@ async function exerciseCoachWorkspace(page, baseUrl, prefix) {
   await page.getByLabel(new RegExp(`AI 建议内容：今晚 .*${prefix}MQ 幂等边界`)).fill(`${prefix}AI 日程草稿内容：先补机制，再补项目证据。`);
   await page.getByRole("button", { name: "保存编辑" }).nth(1).click();
   await page.getByRole("button", { name: `接受 AI 建议：${prefix}AI 日程草稿 已编辑` }).click();
-  await page.getByText(`${prefix}AI 日程草稿 已编辑`).waitFor();
+  await waitForAcceptedArtifact(page, `${prefix}AI 日程草稿 已编辑`);
 
   await page.getByLabel(new RegExp(`拒绝原因：.*追问：${prefix}MQ 幂等边界`)).fill(`${prefix}拒绝原因：今天先不加候选题。`);
   await page.getByRole("button", { name: new RegExp(`拒绝 AI 建议：.*追问：${prefix}MQ 幂等边界`) }).click();
@@ -370,7 +382,7 @@ async function runDesktopFlow(baseUrl) {
   await login(page, baseUrl);
   await page.evaluate(() => window.localStorage.clear());
   await gotoRoute(page, baseUrl, "/today", "今日 AI 教练");
-  await page.getByRole("heading", { name: /先导入简历建档/ }).waitFor();
+  await page.getByRole("heading", { name: /先导入真实经历/ }).waitFor();
   const beforeSnapshot = await snapshotStorage(page, "00-before");
   assert.strictEqual(beforeSnapshot.react.profileCount, 0);
   assert.strictEqual(beforeSnapshot.react.scheduleEventCount, 0);
@@ -401,17 +413,19 @@ async function runDesktopFlow(baseUrl) {
   assert.ok(todaySnapshot.react.completedCount >= 1);
   assert.strictEqual(todaySnapshot.react.delayCount, 1);
 
-  await gotoRoute(page, baseUrl, "/learn", "知识边界");
-  await page.getByLabel("搜索知识卡").fill("Spring");
-  await page.getByRole("button", { name: "清空筛选" }).click();
+  await gotoRoute(page, baseUrl, "/learn", "学习工作台");
   await page.getByRole("button", { name: /补学习笔记|再补一条/ }).first().click();
   await page.getByLabel("学习笔记内容").fill("功能测试学习页笔记：把知识卡转成项目证据和面试追问。");
   await page.getByRole("button", { name: "保存学习笔记" }).click();
   await page.getByText(/已保存到 学习 > 学习笔记/).waitFor();
+  await page.getByRole("button", { name: "任务知识摘要" }).click();
+  await page.getByLabel("搜索知识卡").fill("Spring");
+  await page.getByRole("button", { name: "清空筛选" }).click();
   await page.getByRole("button", { name: /标记重点/ }).first().click();
   await page.getByRole("button", { name: "只看重点" }).click();
   await page.getByText(/重点 1 张/).waitFor();
   await page.reload();
+  await page.getByRole("button", { name: "任务知识摘要" }).click();
   await page.getByText(/重点 1 张/).waitFor();
   await screenshot(page, "02-learning-marked-persisted");
   const learningSnapshot = await snapshotStorage(page, "02-after-learning");
@@ -420,24 +434,27 @@ async function runDesktopFlow(baseUrl) {
 
   await gotoRoute(page, baseUrl, "/interview", "面试训练");
   await page.getByRole("button", { name: /标记薄弱题/ }).first().click();
+  await page.getByText("选择其他题目与筛选", { exact: true }).click();
   await page.getByRole("button", { name: "只看薄弱题" }).click();
   await page.getByText(/薄弱 1 题/).waitFor();
   await page.getByLabel("我的口述回答").fill("功能测试口述：先讲结论，再讲链路、异常分支、指标和复盘动作。");
-  await page.getByRole("button", { name: "AI评分并生成复盘" }).click();
-  await page.getByLabel("AI评分结果").waitFor();
-  await page.getByRole("button", { name: "保存口述与AI分析" }).click();
-  await page.getByText("口述训练证据").first().waitFor();
+  await page.getByRole("button", { name: "按规则自检" }).click();
+  await page.getByLabel("规则自检结果").waitFor();
+  await page.getByRole("button", { name: "保存口述证据" }).click();
+  await page.getByText("已保存口述证据，并写入 Evidence Gate。", { exact: true }).waitFor();
   await waitForServerEvidence(page, baseUrl, "oral_score");
   await page.reload();
+  await page.getByText("选择其他题目与筛选", { exact: true }).click();
   await page.getByText(/薄弱 1 题/).waitFor();
+  await page.getByText("查看今日任务与历史记录", { exact: true }).click();
   await page.getByText("口述训练证据").first().waitFor();
   await screenshot(page, "03-interview-weak-oral-persisted");
   const interviewSnapshot = await snapshotStorage(page, "03-after-interview");
   assert.ok(interviewSnapshot.react.evidenceTypes.includes("oral_score"));
   assert.strictEqual(interviewSnapshot.interviewWeakCount, 1);
 
-  await gotoRoute(page, baseUrl, "/applications", "机会验证");
-  await page.getByRole("button", { name: "新增机会记录" }).click();
+  await gotoRoute(page, baseUrl, "/applications", "机会工作台");
+  await page.getByRole("button", { name: "新增机会", exact: true }).click();
   await fillApplication(page, {
     company: "功能测试公司A",
     role: "Java 后端工程师 A",
@@ -451,8 +468,8 @@ async function runDesktopFlow(baseUrl) {
     notes: "功能测试反馈摘要 A"
   });
   await page.getByRole("button", { name: "记录机会反馈" }).click();
-  await page.getByText("功能测试公司A").waitFor();
-  await page.getByRole("button", { name: "新增机会记录" }).click();
+  await page.getByText("功能测试公司A").first().waitFor();
+  await page.getByRole("button", { name: "新增机会", exact: true }).click();
   await fillApplication(page, {
     company: "功能测试公司B",
     role: "Java 后端工程师 B",
@@ -466,9 +483,9 @@ async function runDesktopFlow(baseUrl) {
     notes: "功能测试反馈摘要 B"
   });
   await page.getByRole("button", { name: "记录机会反馈" }).click();
-  await page.getByText("功能测试公司B").waitFor();
+  await page.getByText("功能测试公司B").first().waitFor();
   await page.getByLabel("机会状态筛选").selectOption("约面");
-  await page.getByText("功能测试公司B").waitFor();
+  await page.getByText("功能测试公司B").first().waitFor();
   await page.getByRole("button", { name: /编辑机会记录：功能测试公司B/ }).click();
   await fillApplication(page, {
     company: "功能测试公司B",
@@ -483,10 +500,12 @@ async function runDesktopFlow(baseUrl) {
     notes: "功能测试反馈摘要 B 已编辑"
   });
   await page.getByRole("button", { name: "保存机会反馈" }).click();
-  await page.getByText("Java 后端工程师 B 已编辑").waitFor();
+  await page.getByLabel("功能测试公司B", { exact: true }).getByText("Java 后端工程师 B 已编辑", { exact: true }).waitFor();
   await page.getByLabel("机会状态筛选").selectOption("all");
+  await page.getByRole("button", { name: "查看机会详情：功能测试公司A" }).click();
+  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: /删除机会记录：功能测试公司A/ }).click();
-  await page.getByText("功能测试公司A").waitFor({ state: "detached" });
+  await page.getByRole("button", { name: "查看机会详情：功能测试公司A" }).waitFor({ state: "detached" });
   const applicationDownload = page.waitForEvent("download");
   await page.getByRole("button", { name: "生成本地导出" }).click();
   const applicationExportPath = await saveDownload(await applicationDownload, "react-applications-export.json");
@@ -498,7 +517,7 @@ async function runDesktopFlow(baseUrl) {
     excludes: ["功能测试公司A"]
   });
   await page.reload();
-  await page.getByText("功能测试公司B").waitFor();
+  await page.getByText("功能测试公司B").first().waitFor();
   assert.strictEqual(await page.getByText("功能测试公司A").count(), 0);
   await screenshot(page, "04-applications-crud-export-persisted");
   const applicationsSnapshot = await snapshotStorage(page, "04-after-applications");
@@ -514,7 +533,9 @@ async function runDesktopFlow(baseUrl) {
     tomorrowPriority: "功能测试明日优先A"
   });
   await page.getByRole("button", { name: "保存复盘" }).click();
+  await page.getByRole("button", { name: "历史" }).click();
   await page.getByText("项目点：功能测试项目点A", { exact: true }).waitFor();
+  await page.getByRole("button", { name: "写复盘" }).click();
   await fillReview(page, {
     projectPoint: "功能测试项目点B",
     interviewQuestions: "功能测试面试题B1；功能测试面试题B2",
@@ -524,6 +545,7 @@ async function runDesktopFlow(baseUrl) {
     tomorrowPriority: "功能测试明日优先B"
   });
   await page.getByRole("button", { name: "保存复盘" }).click();
+  await page.getByRole("button", { name: "历史" }).click();
   await page.getByText("项目点：功能测试项目点B", { exact: true }).waitFor();
   await page.getByRole("button", { name: /编辑复盘记录 功能测试项目点B/ }).click();
   await fillReview(page, {
@@ -536,6 +558,7 @@ async function runDesktopFlow(baseUrl) {
   });
   await page.getByRole("button", { name: "更新复盘" }).click();
   await page.getByText("项目点：功能测试项目点B 已编辑", { exact: true }).waitFor();
+  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: /删除复盘记录 功能测试项目点A/ }).click();
   await page.getByText("项目点：功能测试项目点A", { exact: true }).waitFor({ state: "detached" });
   await page.getByLabel("复盘记录筛选").selectOption("has_tomorrow_priority");
@@ -550,6 +573,7 @@ async function runDesktopFlow(baseUrl) {
     excludes: ["功能测试项目点A"]
   });
   await page.reload();
+  await page.getByRole("button", { name: "历史" }).click();
   await page.getByText("项目点：功能测试项目点B 已编辑", { exact: true }).waitFor();
   assert.strictEqual(await page.getByText("项目点：功能测试项目点A", { exact: true }).count(), 0);
   await screenshot(page, "05-review-crud-export-persisted");
@@ -563,6 +587,7 @@ async function runDesktopFlow(baseUrl) {
   await gotoRoute(page, baseUrl, "/more", "我的数据");
   await page.getByText("已检测").waitFor();
   await page.getByText(/本地证据/).waitFor();
+  await page.getByRole("button", { name: "备份" }).click();
   const moreDownload = page.waitForEvent("download");
   await page.getByRole("button", { name: "导出 JSON" }).click();
   const moreExportPath = await saveDownload(await moreDownload, "job-sprint-react-state.json");
@@ -681,6 +706,7 @@ async function runImportRestoreFlow(baseUrl) {
     const page = await context.newPage();
     await login(page, baseUrl);
     await gotoRoute(page, baseUrl, "/more", "我的数据");
+    await page.getByRole("button", { name: "备份" }).click();
     await page.getByLabel("导入个人数据备份").setInputFiles(importPayloadPath);
     await page.getByText("个人数据备份已导入：完成 1 项，证据 1 条，延期 1 条，画像 1 个，知识边界 1 条，AI 建议 1 条").waitFor();
     await waitForServerRuntimeText(page, baseUrl, { includes: ["导入恢复证据", "导入恢复延期原因", "导入后补救动作", "导入恢复画像", "导入恢复 AI 草稿"] });

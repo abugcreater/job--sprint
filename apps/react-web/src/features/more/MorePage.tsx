@@ -40,6 +40,7 @@ export function MorePage() {
   const storageOwner = useSprintStore((state) => state.storageOwner);
   const restoreSnapshot = useSprintStore((state) => state.restoreSnapshot);
   const [exportMessage, setExportMessage] = useState("待导出");
+  const [moreView, setMoreView] = useState<"account" | "backup" | "links">("account");
   const storage = typeof window !== "undefined" ? window.localStorage : undefined;
   const dashboard = buildMoreDashboard({
     sprint,
@@ -86,39 +87,34 @@ export function MorePage() {
   return (
     <main className="app-main">
       <section className="app-page">
-        <header className="command-card min-w-0 p-4 md:p-5">
+        <header className="page-intro motion-enter">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="min-w-0 max-w-3xl">
-              <p className="text-sm font-black text-brand-700">{owner ? "我的数据 / 管理入口" : "我的数据 / 账号"}</p>
-              <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <DatabaseZap size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">我的数据</h1>
-              </div>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">More · 账号与数据安全</p>
+              <h1 className="mt-2 text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">我的数据</h1>
               <p className="mt-4 max-w-3xl break-words text-sm font-semibold leading-6 text-ink-500">
                 查看保存状态、备份个人数据，并进入低频功能。
               </p>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2 xl:min-w-[420px]">
-              <MetricTile label="同步状态" value={dashboard.sync.label} icon={<WifiOff size={15} aria-hidden="true" />} />
-              <MetricTile label="本地证据" value={`${dashboard.storage.evidenceCount} 条`} />
-              <MetricTile label="完成记录" value={`${dashboard.storage.completedCount} 项`} />
-              <MetricTile label="延期记录" value={`${dashboard.storage.delayCount} 条`} />
-              <MetricTile label="画像/边界" value={`${dashboard.storage.profileCount}/${dashboard.storage.boundaryCount}`} />
-              <MetricTile label="AI 建议" value={`${dashboard.storage.aiArtifactCount} 条`} />
-              {owner ? <MetricTile label="后台记录" value={`${dashboard.storage.legacyDetectedCount} 类`} /> : null}
-            </div>
+            <p className="text-sm font-black text-ink-700"><span className="text-3xl text-ink-950">{dashboard.storage.evidenceCount}</span> 条本地证据</p>
           </div>
         </header>
 
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-	          <aside className="min-w-0 space-y-4">
-	            <StatusPanel dashboard={dashboard} />
-	            {owner ? <FallbackPanel dashboard={dashboard} /> : <AccountPanel />}
-	          </aside>
+        <section className="grid gap-3 border-y border-line py-4 sm:grid-cols-3" aria-label="数据安全摘要">
+          <SmallStat label="同步状态" value={dashboard.sync.label} />
+          <SmallStat label="完成记录" value={`${dashboard.storage.completedCount} 项`} />
+          <SmallStat label="画像 / 边界" value={`${dashboard.storage.profileCount} / ${dashboard.storage.boundaryCount}`} />
+        </section>
 
-          <section className="min-w-0 space-y-4">
+        <nav className="grid grid-cols-3 gap-1 rounded-workbench bg-surface-1 p-1" aria-label="我的数据视图">
+          <MoreViewButton active={moreView === "account"} onClick={() => setMoreView("account")}>账号</MoreViewButton>
+          <MoreViewButton active={moreView === "backup"} onClick={() => setMoreView("backup")}>备份</MoreViewButton>
+          <MoreViewButton active={moreView === "links"} onClick={() => setMoreView("links")}>更多入口</MoreViewButton>
+        </nav>
+
+        {moreView === "account" ? <section className="grid min-w-0 gap-4 xl:grid-cols-2"><StatusPanel dashboard={dashboard} />{owner ? <FallbackPanel dashboard={dashboard} /> : <AccountPanel />}</section> : null}
+
+        {moreView === "backup" ? <section className="min-w-0 space-y-4">
             <ExportPanel
               items={owner ? dashboard.exportItems : dashboard.exportItems.filter((item) => item.id === "react-state")}
               exportMessage={exportMessage}
@@ -126,12 +122,16 @@ export function MorePage() {
 	              onImportReactState={handleImportReactState}
 	            />
 	            {owner ? <RollbackPanel dashboard={dashboard} /> : null}
-	            <NextEntries entries={owner ? [...dashboard.nextEntries, { label: "管理员中心", path: "/admin", description: "管理账号邀请和使用状态。" }] : [{ label: "查看统计", path: "/stats", description: "集中查看个人进展和数据完整度。" }, ...dashboard.nextEntries]} />
-	          </section>
-        </section>
+	          </section> : null}
+
+        {moreView === "links" ? <NextEntries entries={owner ? [...dashboard.nextEntries, { label: "管理员中心", path: "/admin", description: "管理账号邀请和使用状态。" }] : [{ label: "查看统计", path: "/stats", description: "集中查看个人进展和数据完整度。" }, ...dashboard.nextEntries]} /> : null}
       </section>
     </main>
   );
+}
+
+function MoreViewButton({ active, children, onClick }: { active: boolean; children: ReactNode; onClick: () => void }) {
+  return <button type="button" className={`min-h-11 rounded-control px-2 text-sm font-black transition focus:outline-none focus:ring-2 focus:ring-brand-600 ${active ? "bg-ink-950 text-white shadow-soft" : "text-ink-600 hover:bg-white"}`} aria-pressed={active} onClick={onClick}>{children}</button>;
 }
 
 function AccountPanel() {
@@ -146,18 +146,6 @@ function AccountPanel() {
         查看统计
       </Link>
     </article>
-  );
-}
-
-function MetricTile({ label, value, icon }: { label: string; value: string; icon?: ReactNode }) {
-  return (
-    <div className="min-w-0 rounded-card border border-line bg-surface-0 p-3">
-      <p className="text-[11px] font-black text-ink-500">{label}</p>
-      <p className="mt-1 flex min-w-0 items-center gap-1.5 break-words text-sm font-extrabold leading-5 text-ink-900">
-        {icon}
-        <span className="min-w-0 break-words">{value}</span>
-      </p>
-    </div>
   );
 }
 

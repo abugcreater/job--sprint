@@ -10,31 +10,33 @@ const controller = fs.readFileSync(
   "apps/android/app/src/main/java/com/kai/jobsprint/AndroidWindowLayoutController.java",
   "utf8"
 );
+const manifest = fs.readFileSync("apps/android/app/src/main/AndroidManifest.xml", "utf8");
+
+assert.match(manifest, /android:windowSoftInputMode="adjustResize"/);
 
 assert.match(controller, /final class AndroidWindowLayoutController/);
 assert.match(controller, /private final Activity activity/);
 assert.match(controller, /void configureWindowChrome\(\)/);
-assert.match(controller, /setStatusBarColor\(Color\.rgb\(17, 26, 32\)\)/);
+assert.match(controller, /setStatusBarColor\(Color\.rgb\(23, 33, 31\)\)/);
 assert.match(controller, /setNavigationBarColor\(Color\.WHITE\)/);
 assert.match(controller, /private void configureSystemBars\(\)/);
-assert.match(controller, /View\.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR/);
+assert.doesNotMatch(controller, /View\.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR/);
 assert.match(controller, /View\.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR/);
 assert.match(controller, /setSystemUiVisibility\(flags\)/);
 assert.match(controller, /WebView createWebView\(\)/);
 assert.match(controller, /new WebView\(activity\)/);
-assert.match(controller, /webView\.setBackgroundColor\(Color\.rgb\(243, 246, 247\)\)/);
+assert.match(controller, /webView\.setBackgroundColor\(Color\.rgb\(242, 244, 241\)\)/);
 assert.match(controller, /void attachContentView\(WebView webView\)/);
 assert.match(controller, /new FrameLayout\(activity\)/);
-assert.match(controller, /root\.setPadding\(0, statusBarHeight\(\), 0, 0\)/);
+assert.match(controller, /root\.setBackgroundColor\(Color\.rgb\(242, 244, 241\)\)/);
+assert.doesNotMatch(controller, /root\.setPadding/);
 assert.match(controller, /root\.addView\(webView, new FrameLayout\.LayoutParams/);
 assert.match(controller, /ViewGroup\.LayoutParams\.MATCH_PARENT/);
 assert.match(controller, /activity\.setContentView\(root\)/);
-assert.match(controller, /root\.requestApplyInsets\(\)/);
-assert.match(controller, /private void applySystemBarInsets\(View root\)/);
-assert.match(controller, /WindowInsets\.Type\.systemBars\(\)/);
-assert.match(controller, /insets\.getSystemWindowInsetTop\(\)/);
-assert.match(controller, /private int statusBarHeight\(\)/);
-assert.match(controller, /getIdentifier\("status_bar_height", "dimen", "android"\)/);
+assert.doesNotMatch(controller, /requestApplyInsets/);
+assert.doesNotMatch(controller, /applySystemBarInsets/);
+assert.doesNotMatch(controller, /WindowInsets/);
+assert.doesNotMatch(controller, /statusBarHeight/);
 
 assert.match(startup, /AndroidWindowLayoutController windowLayoutController = new AndroidWindowLayoutController\(activity\)/);
 assert.match(startup, /windowLayoutController\.configureWindowChrome\(\)/);

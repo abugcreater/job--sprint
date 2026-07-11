@@ -1,6 +1,7 @@
 package com.kai.jobsprint;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 
 public class MainActivity extends Activity {
@@ -27,6 +28,14 @@ public class MainActivity extends Activity {
         if (lifecycleController != null) {
             lifecycleController.onAudioPermissionResult(requestCode, grantResults);
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (lifecycleController != null && lifecycleController.onActivityResult(requestCode, resultCode, data)) {
+            return;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

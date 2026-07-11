@@ -54,7 +54,7 @@ export function buildWeeklyReviewAnalysis(input: WeeklyReviewAnalysisInput): Wee
     dateRangeLabel: `${formatDate(startDate)} 至 ${formatDate(endDate)}`,
     score,
     scoreLabel,
-    summary: `本周闭环 ${score}/100，${scoreLabel}。`,
+    summary: `本周记录 ${weeklyEvidence.length} 条证据，覆盖 ${typeBreadth} 类；完成 ${completedCount} 项任务。`,
     metrics: [
       { label: "证据", value: `${weeklyEvidence.length} 条` },
       { label: "覆盖", value: `${typeBreadth} 类` },
@@ -134,8 +134,8 @@ function buildNextWeekFocus(
   fragileAnswer: string
 ): string[] {
   return [
-    fragileAnswer ? `把「${fragileAnswer}」改成一段 60 秒可复述答案。` : "",
-    pathIssue ? `围绕「${pathIssue}」安排一条 30 分钟修复任务。` : "",
+    fragileAnswer ? `把「${sentenceFragment(fragileAnswer)}」改成一段 60 秒可复述答案。` : "",
+    pathIssue ? `围绕「${sentenceFragment(pathIssue)}」安排一条 30 分钟修复任务。` : "",
     typeCounts.delivery_record === 0 ? "至少记录一条机会/JD/沟通反馈，校准知识边界。" : "",
     typeCounts.oral_score + typeCounts.interview_answer === 0 ? "安排一轮口述训练，并把文本或评分沉淀为证据。" : "",
     aiFeedback?.acceptedOutcomeCount && aiFeedback.acceptedOutcomeRate < 60 ? "下一轮 AI 建议只保留一条能当天完成的动作。" : "",
@@ -172,6 +172,10 @@ function readContentField(content: string, label: string): string {
   const valueStart = start + marker.length;
   const valueEnd = content.indexOf("；", valueStart);
   return content.slice(valueStart, valueEnd >= 0 ? valueEnd : undefined).trim().replace(/\s+/g, " ");
+}
+
+function sentenceFragment(value: string): string {
+  return value.trim().replace(/[。！？；，,.!?;]+$/g, "");
 }
 
 function isInsideWindow(value: string, start: Date, end: Date): boolean {

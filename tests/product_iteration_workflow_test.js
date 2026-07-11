@@ -61,7 +61,7 @@ function makeFixture(overrides = {}) {
   ].join("\n"));
   writeFile(root, "docs/product/product-ops/known-issues.md", [
     "远端真实 LLM provider evidence 已通过",
-    "Android 远端 HTTPS 真机 evidence 缺失",
+    "Android 远端 HTTPS 真机 evidence 已通过",
     "当前线程 AI 团队处于 quarantine"
   ].join("\n"));
   writeFile(root, "docs/product/product-ops/doc-rules.md", [

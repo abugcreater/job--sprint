@@ -1,6 +1,6 @@
 # 产品已知问题与下一步
 
-日期：2026-07-07
+日期：2026-07-10
 
 ## P0 防回归
 
@@ -8,7 +8,7 @@
 |---|---|---|
 | 按钮只计数、不产生真实业务状态 | 已通过本地流程和测试修复为输入、反馈、保存、读回 | 每次 UI 改动继续跑 React/Vitest/本地功能/Android 本地功能。 |
 | Evidence 或 AI 草稿长列表失控 | Evidence 已改摘要；AI 草稿和自定义日程已补“查看全部/收起” | 后续把所有长列表统一成摘要、筛选、详情页模式。 |
-| 交付口径混乱 | 文档已强制区分本地、Android 本地、HTTP 演示和完整 HTTPS 交付 | 每次对外结论先跑 `npm run validate:delivery`。 |
+| 交付口径混乱 | 文档已强制区分本地、Android 本地、HTTPS 生产交付和 Git 合并状态 | 每次对外结论先跑 `npm run validate:delivery`。 |
 
 ## P1 产品缺口
 
@@ -26,7 +26,15 @@
 | 问题 | 影响 | 下一步 |
 |---|---|---|
 | GitHub 远端 GitFlow 保护缺少 CI 必过检查 | `develop` 已从当前 `main` 创建；ruleset `Protect main and develop` 已强制 PR、禁止强推和删除，管理员不能绕过。但当前 OAuth token 缺少 `workflow` scope，尚不能推送 `.github/workflows/gitflow-policy.yml`，因此还不能把 `GitFlow Policy` 设置为 GitHub required check。 | 授权 `workflow` scope 后推送 GitFlow 治理分支，创建 `-> develop` PR 并取得实际检查名称；再将该检查加入现有 ruleset，最后验证一个合规 PR 和一个故意错误目标的 PR 都按预期受控。 |
-| Android 远端 HTTPS 真机 evidence 缺失 | 不能标完整 HTTPS 生产交付 | HTTPS URL 就绪后运行 `npm run test:android:remote:functional`。 |
-| 最终统一交付报告缺 PASS | 不能标最终交付完成 | 真实服务器、远端 URL、账号和 Android 证据齐备后运行 `npm run final:delivery`。 |
-| Android 远端 URL/公网 HTTPS 未完成 | Android remote 脚本明确拒绝 HTTP WebView URL；`JOB_SPRINT_ANDROID_WEBVIEW_URL` 已配置为 `https://job-sprint.example.com/job-sprint/react/index.html`，`validate:delivery-inputs` 中 `android_remote_inputs=PASS`；`docs/evidence/server-remote/https-diagnostic-2026-07-06.md` 证明 HTTPS 域名 DNS 指向正确服务器、外部 TCP 443 可连但正式域名 SNI 在 ClientHello 后 EOF/reset、服务器本机 Nginx/cert/监听/本机 SNI HTTPS 和服务器本机公网域名 HTTPS 均正常；Android 真机 HTTPS 远端测试失败为 `net::ERR_CONNECTION_RESET`；临时裁剪 fullchain、8443 监听、localtunnel 和 trycloudflare 均不能形成可信远端验收；最新正式 APK 已重新安装成功，`npm run test:android:functional` 本地全流程 PASS，且远端验收脚本/readiness 已拒绝本地 `file:///android_asset/...` fallback 报告 | 需要在云厂商安全组、边界防火墙、负载均衡、WAF/CDN、DDoS 防护、运营商路径、公网转发或域名合规侧修复并验证公网 HTTPS，然后直接复跑真机 remote evidence 和 `npm run validate:delivery -- --allow-dirty`。 |
-| 当前线程 AI 团队处于 quarantine | 不能声称全角色真实参与 | 新任务若需要真实多 agent，需由用户明确重新启用 subagents，且先做 stall preflight。 |
+| Android 远端 HTTPS 真机 evidence 已通过 | OnePlus 8 Pro 已在私有交付 env 注入的正式 HTTPS React URL 完成登录/session、保存、AI 草稿处理和杀进程读回；所有快照保持正式 HTTPS URL | 后续每次正式 APK 改动都复跑 `npm run test:android:remote:functional`，禁止本地 fallback 报告冒充远端通过。 |
+| 最终统一交付报告为 `PASS_WITH_LIMITS` | 服务器、Web HTTPS、Android remote、formal APK 和 post validation 均 PASS；限制来自 `--allow-dirty` 与 P8 理论性架构门禁，不是生产链路缺口 | 提交工作树后在同一提交上重跑最终 runner；若 P8 范围变化，按架构门禁单独收口。 |
+| 正式域名 HTTPS 已恢复 | 备案与证书生效后，公网 443、HTTP 308、HTTPS 登录/session/写入读回均通过；Android 已拒绝 HTTP 并关闭 cleartext | 证书续期时复测公网 SNI、证书 SAN、Web 登录和 Android remote evidence，避免回退到 IP HTTP。 |
+| 当前线程 AI 团队处于 quarantine（历史任务标记） | 旧任务的 agent 生命周期状态不能继承成新任务证据 | 本次新目标已由用户明确重新启用 AI 团队，已派 1 名只读 UI Designer 并正常回传；后续每个新任务仍需独立执行 stall preflight。 |
+
+## P1 UI 后续迁移
+
+| 问题 | 影响 | 下一步 |
+|---|---|---|
+| 产品级 UI 主旅程已完成全局壳、Today、Coach、Applications、Learning、Interview、Review、Stats 与 More 竖切 | 主要页面已按单任务、主从或互斥视图收口，不再默认连续堆叠全部模块 | 后续只按真实用户证据迭代，不回到统一换皮或同权卡片模式。 |
+| 机会编辑尚无未保存修改确认 | Android 返回键退栈正确，但用户修改后直接返回会丢弃当前草稿 | 在 P3/P4 建立统一表单脏状态协议，再覆盖机会、面试和复盘编辑器。 |
+| React 生产构建单 chunk 超过 500 kB | 首屏加载和 Android WebView 冷启动仍有优化空间 | 在不改变功能合同的前提下按路由拆包，并用真实 Web/Android 启动指标验收。 |
