@@ -1875,3 +1875,11 @@
 
 1. 把 `diagnose:coach-runtime` 的分类口径复用到 Stats 的 AI 运行质量说明里。
 2. 检查求职画像整包撤销是否需要抽成复用 hook，避免后续每个模块复制本地 undo 状态。
+
+## 2026-07-12 GitFlow 主线回同步
+
+- 分支：`codex/chore/GITFLOW-002-sync-main-to-develop -> develop`。
+- 选择：`main` 已先后合入发布候选、产品 UI 基线和 `develop` 的测试修复，但 `develop` 未回收这些提交，下一项普通需求会基于过期集成基线开始。
+- 交付：从最新 `develop` 创建短生命周期同步分支，并以 `git merge --ff-only origin/main` 无冲突带入当前主线历史。
+- 验证：默认并发的根 `npm test` 在 React/Vitest 阶段出现 8 个 5 秒超时；同一批失败文件单 worker 16 条用例全通过，完整前端 35 个文件/111 条用例在 1 worker 与 2 worker 下均通过。前端默认测试改为 2 worker 后，再以根 `npm test`、GitFlow PR 目标门禁、产品工作流门禁和敏感扫描验证。
+- 限制：只创建 `-> develop` 草稿 PR，不在每日迭代中直接合并受保护分支；GitHub required check 仍以实际 Actions 运行结果为准；本轮能证明本机 2 worker 稳定，不能替代 GitHub Actions 实际资源下的运行证据。
