@@ -21,6 +21,7 @@
 
 | 日期 | 决策 | 理由 | 取舍 |
 |---|---|---|---|
+| 2026-07-12 | GitFlow 远端保护升级为真实 PR 必过门禁。 | 仅有分支命名和本地脚本不能阻止 GitHub 上的错误目标 PR、直接推送或强推；必须先用真实 PR 证明 Actions 检查名称，再将其加入受保护分支的 required checks。 | `main/develop` ruleset `Protect main and develop` 已禁止删除、强推和绕过，要求 PR 并要求 GitHub Actions `validate`（integration `15368`）；PR #6 已实际运行并通过 `GitFlow Policy / validate`。当前 `main -> develop` 回同步仍停在草稿 PR 审阅阶段，合并时保留 merge 历史，不直接推送受保护分支。 |
 | 2026-07-11 | 产品 UI 合并以新工作台结构为视觉基线，同时保留 main 的破坏性操作确认与短时撤销能力。 | 整页选择任一分支都会分别丢失产品化交互或用户数据恢复能力。 | 冲突按行为逐项裁决，并用页面测试、destructive-actions 测试和 Android remote 验收覆盖。 |
 | 2026-07-11 | Android 文件导入、HTTPS 远端页面和离线 React 回退必须来自同一发布版本。 | 只更新服务端会让离线包与线上行为分叉，用户在网络回退时重新遇到旧交互。 | 每次正式发布先 `sync:android-react`，再验签 APK；真实地址和签名材料仍只允许仓库外注入。 |
 | 2026-07-10 | AI 运行失败先做 runtime 分层诊断，再判断 provider。 | 用户看到 AI 运行记录长期失败时，真实问题可能是 5173 没有监听、纯 Vite 前端返回 HTML、API 路由缺失、鉴权缺失、服务端 5xx、provider 未配置、provider 调用失败 fallback 或 schema 失败；如果 UI/验收只看 `local-fallback / server_unavailable`，会把环境层问题误判成大模型质量问题。 | 新增 `tools/diagnose_coach_artifacts_runtime.js`、`npm run diagnose:coach-runtime` 和 `tests/coach_artifacts_runtime_diagnostic_test.js`，用非破坏性 POST smoke 分类 `runtime_unreachable`、`frontend_html_fallback`、`auth_required`、`api_unavailable`、`provider_not_configured`、`provider_failed_fallback`、`schema_failed` 和 `provider_success`；产品迭代门禁要求诊断脚本和测试入口持续存在。默认端口当前诊断为 `runtime_unreachable`，只说明本地 runtime 没启动，不替代远端 provider evidence 或真实 AI 质量归因。 |
