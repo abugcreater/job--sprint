@@ -2,6 +2,27 @@
 
 日期：2026-07-08
 
+## 2026-07-15 GitFlow 发布与回同步收口
+
+主任务：解除因未完成 `main → develop` 回同步造成的每日迭代阻塞，并按正式 release 流程收敛主干。
+
+今日动作：
+
+- 将无冲突且 `validate` 已通过的 PR #6 从 Draft 转为正式并合入 `develop`，恢复日常需求的正确集成基线。
+- 发现直接 `develop → main` 的 PR #7 被 GitFlow 门禁拒绝；关闭该未合并 PR，改从 `release/v0.2.0` 创建 PR #8 并合入 `main`。
+- 从 `main` 创建本分支，用一条发布回同步记录建立可审阅的 `main → develop` PR，避免发布 merge commit 再次让日更机制误判基线漂移。
+
+已验证：
+
+- PR #6 与 PR #8 的 GitFlow Policy `validate` 均通过；PR #8 已合入 `main`。
+- `npm test`：PASS，包含 111 个 React 测试、架构/功能覆盖/功能对齐/目标验收/GitFlow/敏感扫描与产品迭代门禁。
+- 本分支以 `chore` 类型向 `develop` 提交回同步 PR；不直接向受保护分支推送。
+
+限制与下一步：
+
+- 本条回同步 PR 合并前，`develop` 会因 release merge commit 比 `main` 少一个祖先关系，日更仍应保持只读；合并后再恢复正常的每日单需求迭代。
+- 发布分支与回同步分支均为短生命周期分支，合并后删除；已合并的历史 feature/chore/test 分支也在同一轮清理。
+
 ## 2026-07-10 至 2026-07-11 产品 UI 与 Android 收口
 
 - 将 Today、准备、机会、学习、面试、复盘、统计和我的数据重构为单任务、阶段式或主从工作台，移动导航收敛为今日、准备、机会、面试、复盘。
