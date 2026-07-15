@@ -31,6 +31,7 @@
 
 | 问题 | 影响 | 下一步 |
 |---|---|---|
+| `main -> develop` GitFlow 回同步待审阅 | `main` 已包含发布候选、产品 UI 基线、GitFlow 治理和测试修复，`develop` 尚未接收这些提交；如果此时从 `develop` 开始普通需求，会基于过期集成基线。 | 草稿 PR #6 已指向 `develop`，GitFlow Policy `validate` 已成功；审阅后使用 merge 保留主线历史，再确认 `develop` 与 `main` 已对齐。 |
 | Android 远端 HTTPS 真机 evidence 缺失 | 不能标完整 HTTPS 生产交付 | HTTPS URL 就绪后运行 `npm run test:android:remote:functional`。 |
 | 最终统一交付报告缺 PASS | 不能标最终交付完成 | 真实服务器、远端 URL、账号和 Android 证据齐备后运行 `npm run final:delivery`。 |
 | Android 远端 URL/公网 HTTPS 未完成 | Android remote 脚本明确拒绝 HTTP WebView URL；`JOB_SPRINT_ANDROID_WEBVIEW_URL` 已配置为 `https://job-sprint.example.com/job-sprint/react/index.html`，`validate:delivery-inputs` 中 `android_remote_inputs=PASS`；`docs/evidence/server-remote/https-diagnostic-2026-07-06.md` 证明 HTTPS 域名 DNS 指向正确服务器、外部 TCP 443 可连但正式域名 SNI 在 ClientHello 后 EOF/reset、服务器本机 Nginx/cert/监听/本机 SNI HTTPS 和服务器本机公网域名 HTTPS 均正常；Android 真机 HTTPS 远端测试失败为 `net::ERR_CONNECTION_RESET`；临时裁剪 fullchain、8443 监听、localtunnel 和 trycloudflare 均不能形成可信远端验收；最新正式 APK 已重新安装成功，`npm run test:android:functional` 本地全流程 PASS，且远端验收脚本/readiness 已拒绝本地 `file:///android_asset/...` fallback 报告 | 需要在云厂商安全组、边界防火墙、负载均衡、WAF/CDN、DDoS 防护、运营商路径、公网转发或域名合规侧修复并验证公网 HTTPS，然后直接复跑真机 remote evidence 和 `npm run validate:delivery -- --allow-dirty`。 |
