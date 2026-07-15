@@ -1,0 +1,21 @@
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8c4e51c148c3fc::t_4a007c6da6af81 5-25
+docs/product/product-ops/known-issues.md
+  s_8c4e51c148c3fc::t_4a007c6da6af81 34
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "063f1a4c61432b6cf0481da073ca1b706311a4af",
+  "prompts": {},
+  "sessions": {
+    "s_8c4e51c148c3fc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4b9b-c8ac-75a2-8110-16a46302f174",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
