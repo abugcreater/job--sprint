@@ -1,7 +1,7 @@
-use sqlx::SqlitePool;
+use sqlx_sqlite::SqlitePool;
 
 pub(crate) async fn create_coach_boundary_feedback(db: &SqlitePool) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE TABLE IF NOT EXISTS coach_boundary_feedback (
             id TEXT PRIMARY KEY,
@@ -22,7 +22,7 @@ pub(crate) async fn create_coach_boundary_feedback(db: &SqlitePool) -> sqlx::Res
     )
     .execute(db)
     .await?;
-    sqlx::query(
+    sqlx::query::query(
         r#"
         CREATE INDEX IF NOT EXISTS idx_coach_boundary_feedback_scope_created_at
         ON coach_boundary_feedback(scope, created_at DESC)

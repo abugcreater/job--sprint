@@ -1,5 +1,5 @@
 import { CheckCircle2, ChevronRight, ClipboardCheck, FilePlus2, Mic2, Send, ShieldAlert } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { EvidenceType, ReviewEvidence, Task } from "../../../types/sprint";
 
 interface EvidenceGateProps {
@@ -47,6 +47,8 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
   const [typeFilter, setTypeFilter] = useState<EvidenceType | "all">("all");
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | undefined>();
   const [feedback, setFeedback] = useState("");
+  const formTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const typeSelectRef = useRef<HTMLSelectElement | null>(null);
   const orderedEvidence = useMemo(() => [...evidence].sort((a, b) => timestampOf(b.createdAt) - timestampOf(a.createdAt)), [evidence]);
   const filteredEvidence = useMemo(
     () => (typeFilter === "all" ? orderedEvidence : orderedEvidence.filter((item) => item.type === typeFilter)),
@@ -56,10 +58,20 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
   const evidenceStats = useMemo(() => buildEvidenceStats(orderedEvidence), [orderedEvidence]);
   const selectedAction = useMemo(() => baseQuickActions.find((action) => action.type === draft.type) ?? baseQuickActions[0], [draft.type]);
 
-  const openEvidenceForm = (action: QuickAction) => {
+  useEffect(() => {
+    if (formOpen) typeSelectRef.current?.focus();
+  }, [formOpen]);
+
+  const openEvidenceForm = (action: QuickAction, trigger: HTMLButtonElement) => {
+    formTriggerRef.current = trigger;
     setDraft(createDraft(action, task));
     setFormOpen(true);
     setFeedback("");
+  };
+
+  const closeEvidenceForm = () => {
+    setFormOpen(false);
+    formTriggerRef.current?.focus();
   };
 
   const saveEvidence = () => {
@@ -69,7 +81,7 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
     onAddEvidence(draft.type, title, buildContent(content, task));
     setFeedback(`已保存${typeLabel(draft.type)}证据：${title}`);
     setDraft(createDraft(selectedAction, task));
-    setFormOpen(false);
+    closeEvidenceForm();
   };
 
   return (
@@ -119,7 +131,7 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
               type="button"
               className="secondary-button"
               aria-expanded={formOpen && draft.type === action.type}
-              onClick={() => openEvidenceForm(action)}
+              onClick={(event) => openEvidenceForm(action, event.currentTarget)}
             >
               <Icon size={16} aria-hidden="true" />
               {action.label}
@@ -134,6 +146,7 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
             <label className="grid gap-1 text-sm font-bold text-ink-700">
               证据类型
               <select
+                ref={typeSelectRef}
                 className="field-control bg-white"
                 value={draft.type}
                 onChange={(event) => {
@@ -167,10 +180,10 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
             />
           </label>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" className="primary-button min-h-10 px-3 text-sm" disabled={!draft.title.trim() || !draft.content.trim()} onClick={saveEvidence}>
+            <button type="button" className="primary-button min-h-11 px-3 text-sm" disabled={!draft.title.trim() || !draft.content.trim()} onClick={saveEvidence}>
               保存证据
             </button>
-            <button type="button" className="secondary-button min-h-10 px-3 text-sm" onClick={() => setFormOpen(false)}>
+            <button type="button" className="secondary-button min-h-11 px-3 text-sm" onClick={closeEvidenceForm}>
               取消
             </button>
           </div>
@@ -187,7 +200,7 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
-            className={`rounded-control px-2.5 py-1 text-xs font-black transition focus:outline-none focus:ring-2 focus:ring-brand-600 ${
+            className={`min-h-11 rounded-control px-2.5 py-1 text-xs font-black transition focus:outline-none focus:ring-2 focus:ring-brand-600 ${
               typeFilter === "all" ? "bg-brand-700 text-white" : "bg-white text-ink-600 hover:bg-brand-100"
             }`}
             aria-pressed={typeFilter === "all"}
@@ -199,7 +212,7 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
             <button
               key={stat.type}
               type="button"
-              className={`rounded-control px-2.5 py-1 text-xs font-black transition focus:outline-none focus:ring-2 focus:ring-brand-600 ${
+              className={`min-h-11 rounded-control px-2.5 py-1 text-xs font-black transition focus:outline-none focus:ring-2 focus:ring-brand-600 ${
                 typeFilter === stat.type ? "bg-brand-700 text-white" : "bg-white text-ink-600 hover:bg-brand-100"
               }`}
               aria-pressed={typeFilter === stat.type}
@@ -228,7 +241,7 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
                   ) : null}
                   <button
                     type="button"
-                    className="secondary-button mt-3 min-h-9 px-3 text-xs"
+                    className="secondary-button mt-3 min-h-11 px-3 text-xs"
                     aria-expanded={expanded}
                     onClick={() => setSelectedEvidenceId((current) => (current === item.id ? undefined : item.id))}
                   >
@@ -243,7 +256,7 @@ export function EvidenceGate({ task, evidence, summary, onAddEvidence }: Evidenc
           )}
         </div>
         {filteredEvidence.length > 3 ? (
-          <button type="button" className="secondary-button mt-3 min-h-10 px-3 text-xs" onClick={() => setShowAllEvidence((current) => !current)}>
+          <button type="button" className="secondary-button mt-3 min-h-11 px-3 text-xs" onClick={() => setShowAllEvidence((current) => !current)}>
             {showAllEvidence ? "收起证据列表" : `查看全部证据（${filteredEvidence.length}）`}
             <ChevronRight size={14} aria-hidden="true" />
           </button>

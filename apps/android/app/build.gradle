@@ -13,6 +13,8 @@ def releaseStoreFilePath = signingValue("JOB_SPRINT_ANDROID_KEYSTORE")
 def releaseStorePassword = signingValue("JOB_SPRINT_ANDROID_STORE_PASSWORD")
 def releaseKeyAlias = signingValue("JOB_SPRINT_ANDROID_KEY_ALIAS")
 def releaseKeyPassword = signingValue("JOB_SPRINT_ANDROID_KEY_PASSWORD")
+def remoteScheduleUrl = signingValue("JOB_SPRINT_ANDROID_WEBVIEW_URL")
+    ?: "https://job-sprint.example.com/job-sprint/react/index.html#/today"
 def releaseSigningConfigured = [
     releaseStoreFilePath,
     releaseStorePassword,
@@ -30,6 +32,7 @@ android {
         targetSdk 35
         versionCode 1
         versionName "0.1.0"
+        resValue "string", "remote_schedule_url", remoteScheduleUrl
     }
 
     signingConfigs {

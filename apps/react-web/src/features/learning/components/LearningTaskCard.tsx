@@ -24,6 +24,10 @@ export function LearningTaskCard({
   onCancelNote
 }: LearningTaskCardProps) {
   const noteFieldId = `learning-note-${task.id}`;
+  const noteActionHintId = `learning-note-action-${task.id}`;
+  const noteActionHint = noteDraft.trim()
+    ? `保存后会写入「${task.title}」的 Evidence Gate，并出现在学习笔记列表。`
+    : "先写一段学习笔记，才能保存到当前知识任务的 Evidence Gate。";
 
   return (
     <article className="rounded-card border border-line bg-white p-5 shadow-soft">
@@ -77,14 +81,18 @@ export function LearningTaskCard({
             学习笔记内容
             <textarea
               id={noteFieldId}
+              aria-describedby={noteActionHintId}
               className="field-control min-h-28 resize-y bg-white leading-6"
               value={noteDraft}
               onChange={(event) => onNoteDraftChange(event.target.value)}
               placeholder="写下今天真正补到的知识点、对应项目证据、还没讲清楚的追问。"
             />
           </label>
+          <p id={noteActionHintId} className="mt-3 rounded-control bg-white px-3 py-2 text-sm font-bold leading-6 text-ink-500" role="status" aria-live="polite">
+            {noteActionHint}
+          </p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <button type="button" className="primary-button min-h-10 px-3 text-sm" disabled={!noteDraft.trim()} onClick={() => onSaveNote(task)}>
+            <button type="button" className="primary-button min-h-10 px-3 text-sm" aria-describedby={noteActionHintId} disabled={!noteDraft.trim()} onClick={() => onSaveNote(task)}>
               保存学习笔记
             </button>
             <button type="button" className="secondary-button min-h-10 px-3 text-sm" onClick={onCancelNote}>
@@ -95,9 +103,10 @@ export function LearningTaskCard({
       ) : null}
 
       {feedback && feedback.includes(task.title) ? (
-        <p className="mt-3 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" aria-live="polite">
-          {feedback}
-        </p>
+        <div className="mt-3 rounded-control bg-success-100 p-3 text-sm font-bold text-success-600" aria-live="polite">
+          <p>{feedback}</p>
+          <Link to="/interview" className="mt-3 inline-flex min-h-11 items-center gap-2 rounded-control bg-ink-950 px-4 text-sm font-black text-white">用这条笔记练一道题<ArrowRight size={16} aria-hidden="true" /></Link>
+        </div>
       ) : null}
     </article>
   );

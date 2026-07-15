@@ -163,6 +163,9 @@ async function login(server, username, password, expectedStatus = 200) {
     assert.strictEqual(res.json.accountProvisioning.status, "PASS");
     assert.strictEqual(res.json.accountProvisioning.action, "created");
     assert.strictEqual(res.json.accountProvisioning.canLogin, true);
+    assert.strictEqual(res.json.accountAuditEvents[0].action, "created");
+    assert.strictEqual(res.json.accountAuditEvents[0].actorUsername, "kai");
+    assert.strictEqual(res.json.accountAuditEvents[0].username, "mia");
     assert.ok(res.json.configuredUsers.some((user) => user.username === "mia"));
     assert.ok(!res.raw.includes(firstLoginText));
     assert.ok(!res.raw.includes(sha256(firstLoginText)));
@@ -210,6 +213,8 @@ async function login(server, username, password, expectedStatus = 200) {
     }, { cookie: ownerCookie });
     assert.strictEqual(res.status, 200, res.raw);
     assert.strictEqual(res.json.accountProvisioning.action, "password_reset");
+    assert.strictEqual(res.json.accountAuditEvents[0].action, "password_reset");
+    assert.strictEqual(res.json.accountAuditEvents[0].username, "mia");
     await login(server, "mia", firstLoginText, 401);
     await login(server, "mia", resetLoginText);
 
@@ -224,6 +229,8 @@ async function login(server, username, password, expectedStatus = 200) {
     assert.strictEqual(res.status, 200, res.raw);
     assert.strictEqual(res.json.accountAction.status, "PASS");
     assert.strictEqual(res.json.accountAction.disabled, true);
+    assert.strictEqual(res.json.accountAuditEvents[0].action, "disable");
+    assert.strictEqual(res.json.accountAuditEvents[0].affectedCount, 1);
     assert.strictEqual(res.json.configuredUsers.find((user) => user.username === "mia").disabled, true);
     await login(server, "mia", resetLoginText, 401);
 
@@ -278,6 +285,9 @@ async function login(server, username, password, expectedStatus = 200) {
     assert.strictEqual(res.json.accountBatchAction.status, "PASS");
     assert.strictEqual(res.json.accountBatchAction.affectedCount, 2);
     assert.strictEqual(res.json.accountBatchAction.skippedCount, 2);
+    assert.strictEqual(res.json.accountAuditEvents[0].action, "batch_disable");
+    assert.deepStrictEqual(res.json.accountAuditEvents[0].affectedUsernames.sort(), ["leo", "mia"]);
+    assert.strictEqual(res.json.accountAuditEvents[0].skippedCount, 2);
     assert.strictEqual(res.json.configuredUsers.find((user) => user.username === "mia").disabled, true);
     assert.strictEqual(res.json.configuredUsers.find((user) => user.username === "leo").disabled, true);
     await login(server, "mia", resetLoginText, 401);
@@ -310,6 +320,8 @@ async function login(server, username, password, expectedStatus = 200) {
     assert.strictEqual(res.status, 200, res.raw);
     assert.strictEqual(res.json.accountAction.status, "PASS");
     assert.strictEqual(res.json.accountAction.removedCount, 1);
+    assert.strictEqual(res.json.accountAuditEvents[0].action, "delete");
+    assert.strictEqual(res.json.accountAuditEvents[0].username, "mia");
     assert.strictEqual(res.json.configuredUsers.some((user) => user.username === "mia"), false);
     await login(server, "mia", resetLoginText, 401);
 
@@ -322,6 +334,15 @@ async function login(server, username, password, expectedStatus = 200) {
     assert.strictEqual(res.json.accountBatchAction.affectedCount, 1);
     assert.strictEqual(res.json.configuredUsers.some((user) => user.username === "leo"), false);
     await login(server, "leo", leoLoginText, 401);
+    usersConfig = JSON.parse(fs.readFileSync(usersFile, "utf8"));
+    assert.ok(Array.isArray(usersConfig.accountAuditEvents));
+    assert.ok(usersConfig.accountAuditEvents.some((event) => event.action === "created" && event.username === "mia"));
+    assert.ok(usersConfig.accountAuditEvents.some((event) => event.action === "batch_delete" && event.affectedUsernames.includes("leo")));
+    assert.ok(!JSON.stringify(usersConfig.accountAuditEvents).includes(firstLoginText));
+    assert.ok(!JSON.stringify(usersConfig.accountAuditEvents).includes(resetLoginText));
+    assert.ok(!JSON.stringify(usersConfig.accountAuditEvents).includes(leoLoginText));
+    assert.ok(!res.raw.includes(sha256(resetLoginText)));
+    assert.ok(!res.raw.includes(sha256(leoLoginText)));
     console.log("invitation account provisioning tests passed");
   } finally {
     server.close();

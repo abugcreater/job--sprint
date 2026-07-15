@@ -11,6 +11,7 @@ const {
   fillApplication,
   fillReview
 } = require("./android_webview_react_form_helpers");
+const { resolveWebViewUrl } = require("./android_webview_url_config");
 const { envFileErrorInfo, loadDeliveryEnvFile } = require("../tools/delivery_env_file");
 
 const ROOT = path.resolve(__dirname, "..");
@@ -47,49 +48,6 @@ function envValue(name) {
   return value && String(value).trim() ? String(value).trim() : null;
 }
 
-function normalizeWebViewUrl(value) {
-  if (!value) {
-    return DEFAULT_WEBVIEW_URL;
-  }
-  const trimmed = value.trim();
-  const url = new URL(trimmed);
-  url.hash = "";
-  url.search = "";
-  if (/^https?:$/i.test(url.protocol) && (!url.pathname || url.pathname === "/")) {
-    url.pathname = REMOTE_MODE ? "/job-sprint/react/index.html" : "/react/index.html";
-  }
-  return url.toString();
-}
-
-function resolveWebViewUrl() {
-  const configured = envValue("JOB_SPRINT_ANDROID_WEBVIEW_URL")
-    || envValue("JOB_SPRINT_ANDROID_REMOTE_BASE_URL")
-    || envValue("JOB_SPRINT_REMOTE_BASE_URL")
-    || envValue("JOB_SPRINT_PUBLIC_BASE_URL")
-    || envValue("JOB_SPRINT_DELIVERY_BASE_URL");
-  if (REMOTE_MODE && !configured) {
-    console.error("USER_ACTION_REQUIRED: Android remote mode requires JOB_SPRINT_ANDROID_WEBVIEW_URL, JOB_SPRINT_ANDROID_REMOTE_BASE_URL, or JOB_SPRINT_REMOTE_BASE_URL.");
-    process.exit(2);
-  }
-  const webViewUrl = normalizeWebViewUrl(configured || DEFAULT_WEBVIEW_URL);
-  if (REMOTE_MODE) {
-    const parsed = new URL(webViewUrl);
-    if (!["https:", "http:"].includes(parsed.protocol) || !parsed.pathname.includes("/job-sprint/")) {
-      console.error(JSON.stringify({
-        status: "USER_ACTION_REQUIRED",
-        reason: "android_remote_url_required",
-        webViewUrl,
-        requiredInputs: [
-          "Set JOB_SPRINT_ANDROID_WEBVIEW_URL to an HTTP or HTTPS URL under /job-sprint/.",
-          "Use HTTPS for final production delivery; HTTP/IP is accepted only for basic remote functional validation."
-        ]
-      }, null, 2));
-      process.exit(2);
-    }
-  }
-  return webViewUrl;
-}
-
 function routeUrl(hash, searchParams = {}) {
   const url = new URL(WEBVIEW_URL);
   for (const [key, value] of Object.entries(searchParams)) {
@@ -99,7 +57,12 @@ function routeUrl(hash, searchParams = {}) {
   return url.toString();
 }
 
-const WEBVIEW_URL = resolveWebViewUrl();
+const webViewConfig = resolveWebViewUrl(effectiveEnv, REMOTE_MODE, DEFAULT_WEBVIEW_URL);
+if (!webViewConfig.ok) {
+  console.error(JSON.stringify({ status: "USER_ACTION_REQUIRED", ...webViewConfig }, null, 2));
+  process.exit(2);
+}
+const WEBVIEW_URL = webViewConfig.webViewUrl;
 const IS_REMOTE_WEBVIEW = /^https?:\/\//i.test(WEBVIEW_URL);
 const EXPECTED_REMOTE_ORIGIN = IS_REMOTE_WEBVIEW ? new URL(WEBVIEW_URL).origin : null;
 const AUTH_USER = envValue("JOB_SPRINT_AUTH_USER");
@@ -340,7 +303,7 @@ function assertRemoteRuntimeUrl(url, label) {
   }
   assert.ok(url && !url.startsWith("file:///"), `${label} must not fall back to local Android assets in remote mode: ${url}`);
   const parsed = new URL(url);
-  assert.ok(["https:", "http:"].includes(parsed.protocol), `${label} must stay on HTTP(S) remote origin in remote mode: ${url}`);
+  assert.strictEqual(parsed.protocol, "https:", `${label} must stay on HTTPS remote origin in remote mode: ${url}`);
   assert.strictEqual(parsed.origin, EXPECTED_REMOTE_ORIGIN, `${label} must stay on configured remote origin`);
   assert.ok(isAllowedRemoteRuntimePath(parsed.pathname), `${label} must stay on a job-sprint runtime path: ${url}`);
 }
@@ -508,8 +471,9 @@ async function gotoRoute(page, hash, heading) {
 }
 
 async function exerciseCoachWorkspace(page, prefix) {
-  await gotoRoute(page, "/coach", "AI 求职教练");
-  const profilePanel = page.locator("#coach-profile");
+  await gotoRoute(page, "/coach", "准备工作台");
+  await clickWebView(page.getByRole("button", { name: "改用详细画像表单" }));
+  const profilePanel = page.getByLabel("当前准备阶段：确认求职画像");
   await profilePanel.getByLabel("画像名称").fill(`${prefix}画像`);
   await profilePanel.getByLabel("角色族", { exact: true }).selectOption("backend");
   await profilePanel.getByLabel("目标岗位", { exact: true }).fill(`${prefix}Java 后端教练`);
@@ -522,7 +486,7 @@ async function exerciseCoachWorkspace(page, prefix) {
   await profilePanel.getByLabel("项目证据").fill(`${prefix}项目证据：搜索链路和 MQ 幂等。`);
   await profilePanel.getByLabel("不可夸大边界").fill(`${prefix}不可夸大边界：不编造大模型训练经历。`);
   await clickWebView(profilePanel.getByRole("button", { name: "保存画像" }));
-  await page.getByText("画像已保存。", { exact: true }).waitFor();
+  await page.getByText("求职画像已保存，后续 AI 建议会引用这份画像。", { exact: true }).waitFor();
 
   await page.getByLabel("知识主题").fill(`${prefix}MQ 幂等边界`);
   await page.getByLabel("掌握程度").selectOption("了解");
@@ -530,7 +494,7 @@ async function exerciseCoachWorkspace(page, prefix) {
   await page.getByLabel("已有证据").fill(`${prefix}已有证据：项目里做过消息去重。`);
   await page.getByLabel("岗位用途").fill(`${prefix}岗位用途：后端稳定性追问。`);
   await clickWebView(page.getByRole("button", { name: "新增边界" }));
-  await page.getByText(`${prefix}MQ 幂等边界`).waitFor();
+  await page.getByText("知识边界已保存。", { exact: true }).waitFor();
 
   await addCoachSchedule(page, clickWebView, { title: `${prefix}自定义日程`, date: ANDROID_FLOW_DATE, start: "21:00", end: "21:30", type: "interview", reason: `${prefix}安排原因：今晚用口述验证知识边界。` });
   await addCoachSchedule(page, clickWebView, { title: `${prefix}自定义日程二`, date: ANDROID_FLOW_DATE, start: "07:30", end: "08:00", type: "learning", reason: `${prefix}安排原因：早上补齐 MQ 可靠消息边界。` });
@@ -545,7 +509,7 @@ async function exerciseCoachWorkspace(page, prefix) {
   assert.strictEqual(snapshot.react.profileCount, 1);
   assert.ok(snapshot.react.boundaryCount >= 1);
   assert.ok(snapshot.react.scheduleEventCount >= 2);
-  assert.ok(snapshot.react.aiArtifactCount >= 3);
+  assert.ok(snapshot.react.aiArtifactCount >= 2);
   assert.ok(snapshot.react.llmRunCount >= 1);
   assert.ok(snapshot.react.llmRunStatuses.includes("fallback") || snapshot.react.llmRunStatuses.includes("success"));
   assert.ok(snapshot.react.llmRunProviders.includes("local-fallback") || snapshot.react.llmRunProviders.includes("anthropic-compatible"));
@@ -586,10 +550,11 @@ async function runWebViewFlow(page) {
   await clickWebView(page.getByRole("button", { name: "登记延期" }));
   await page.getByText(`25 分钟 · ${ANDROID_DELAY_REASON}`).first().waitFor();
 
-  await gotoRoute(page, "/learn", "知识边界");
+  await gotoRoute(page, "/learn", "学习工作台");
   await clickWebView(page.getByRole("button", { name: /补学习笔记|再补一条/ }));
   await page.getByLabel("学习笔记内容").fill(`${ANDROID_FLOW_LABEL}学习页笔记：把知识卡变成面试证据。`);
   await clickWebView(page.getByRole("button", { name: "保存学习笔记" }));
+  await clickWebView(page.getByRole("button", { name: "任务知识摘要" }));
   const unmarkKnowledgeButton = page.getByRole("button", { name: /取消重点标记/ });
   if (await unmarkKnowledgeButton.count()) {
     await clickWebView(unmarkKnowledgeButton);
@@ -606,16 +571,17 @@ async function runWebViewFlow(page) {
     await page.getByRole("button", { name: /标记薄弱题/ }).first().waitFor();
   }
   await clickWebView(page.getByRole("button", { name: /标记薄弱题/ }));
+  await clickWebView(page.getByText("选择其他题目与筛选", { exact: true }));
   await clickWebView(page.getByRole("button", { name: "只看薄弱题" }));
   await page.getByText(/薄弱 [1-9]\d* 题/).waitFor();
   await page.getByLabel("我的口述回答").fill(`${ANDROID_FLOW_LABEL}口述：结论、链路、异常、指标、复盘。`);
-  await clickWebView(page.getByRole("button", { name: "AI评分并生成复盘" }));
-  await page.getByLabel("AI评分结果").waitFor();
-  await clickWebView(page.getByRole("button", { name: "保存口述与AI分析" }));
-  await page.getByText("口述训练证据").first().waitFor();
+  await clickWebView(page.getByRole("button", { name: "按规则自检" }));
+  await page.getByLabel("规则自检结果").waitFor();
+  await clickWebView(page.getByRole("button", { name: "保存口述证据" }));
+  await page.getByText("已保存口述证据，并写入 Evidence Gate。", { exact: true }).waitFor();
 
-  await gotoRoute(page, "/applications", "机会验证");
-  await clickWebView(page.getByRole("button", { name: "新增机会记录" }));
+  await gotoRoute(page, "/applications", "机会工作台");
+  await clickWebView(page.getByRole("button", { name: "新增机会", exact: true }));
   await fillApplication(page, {
     company: `${ANDROID_FLOW_LABEL}公司A`,
     role: `${ANDROID_FLOW_LABEL} Java 后端 A`,
@@ -629,8 +595,9 @@ async function runWebViewFlow(page) {
     notes: `${ANDROID_FLOW_LABEL} 摘要 A`
   });
   await clickWebView(page.getByRole("button", { name: "记录机会反馈" }));
-  await page.getByText(`${ANDROID_FLOW_LABEL}公司A`).first().waitFor();
-  await clickWebView(page.getByRole("button", { name: "新增机会记录" }));
+  await page.getByRole("heading", { name: `${ANDROID_FLOW_LABEL}公司A`, exact: true }).waitFor();
+  await clickWebView(page.getByRole("button", { name: "返回机会列表" }));
+  await clickWebView(page.getByRole("button", { name: "新增机会", exact: true }));
   await fillApplication(page, {
     company: `${ANDROID_FLOW_LABEL}公司B`,
     role: `${ANDROID_FLOW_LABEL} Java 后端 B`,
@@ -658,9 +625,12 @@ async function runWebViewFlow(page) {
     notes: `${ANDROID_FLOW_LABEL} 摘要 B 已编辑`
   });
   await clickWebView(page.getByRole("button", { name: "保存机会反馈" }));
-  await page.getByText(`${ANDROID_FLOW_LABEL} Java 后端 B 已编辑`).first().waitFor();
+  await page.getByRole("heading", { name: `${ANDROID_FLOW_LABEL}公司B`, exact: true }).waitFor();
+  await clickWebView(page.getByRole("button", { name: "返回机会列表" }));
+  await clickWebView(page.getByRole("button", { name: `查看机会详情：${ANDROID_FLOW_LABEL}公司A` }));
+  page.once("dialog", (dialog) => dialog.accept());
   await clickWebView(page.getByRole("button", { name: `删除机会记录：${ANDROID_FLOW_LABEL}公司A` }));
-  await page.getByText(`${ANDROID_FLOW_LABEL}公司A`).waitFor({ state: "detached" });
+  await page.getByRole("button", { name: `查看机会详情：${ANDROID_FLOW_LABEL}公司A` }).waitFor({ state: "detached" });
   await clickWebView(page.getByRole("button", { name: "生成本地导出" }));
   await page.getByText(/已生成导出 \d+ 条/).waitFor();
 
@@ -674,7 +644,9 @@ async function runWebViewFlow(page) {
     tomorrowPriority: `${ANDROID_FLOW_LABEL} 明日优先A`
   });
   await clickWebView(page.getByRole("button", { name: "保存复盘" }));
+  await clickWebView(page.getByRole("button", { name: "历史" }));
   await page.getByText(`项目点：${ANDROID_FLOW_LABEL}项目点A`, { exact: true }).waitFor();
+  await clickWebView(page.getByRole("button", { name: "写复盘" }));
   await fillReview(page, {
     projectPoint: `${ANDROID_FLOW_LABEL}项目点B`,
     interviewQuestions: `${ANDROID_FLOW_LABEL}面试题B1；${ANDROID_FLOW_LABEL}面试题B2`,
@@ -684,6 +656,7 @@ async function runWebViewFlow(page) {
     tomorrowPriority: `${ANDROID_FLOW_LABEL} 明日优先B`
   });
   await clickWebView(page.getByRole("button", { name: "保存复盘" }));
+  await clickWebView(page.getByRole("button", { name: "历史" }));
   await clickWebView(page.getByRole("button", { name: `编辑复盘记录 ${ANDROID_FLOW_LABEL}项目点B` }));
   await fillReview(page, {
     projectPoint: `${ANDROID_FLOW_LABEL}项目点B 已编辑`,
@@ -695,12 +668,14 @@ async function runWebViewFlow(page) {
   });
   await clickWebView(page.getByRole("button", { name: "更新复盘" }));
   await page.getByText(`项目点：${ANDROID_FLOW_LABEL}项目点B 已编辑`, { exact: true }).waitFor();
+  page.once("dialog", (dialog) => dialog.accept());
   await clickWebView(page.getByRole("button", { name: `删除复盘记录 ${ANDROID_FLOW_LABEL}项目点A` }));
   await page.getByText(`项目点：${ANDROID_FLOW_LABEL}项目点A`, { exact: true }).waitFor({ state: "detached" });
   await clickWebView(page.getByRole("button", { name: "导出当前筛选" }));
   await page.locator("pre").last().waitFor();
 
   await gotoRoute(page, "/more", "我的数据");
+  await clickWebView(page.getByRole("button", { name: "备份" }));
   await page.getByRole("heading", { name: "个人数据备份", exact: true }).waitFor();
   await page.getByLabel("导入个人数据备份").waitFor();
   await clickWebView(page.getByRole("button", { name: "导出 JSON" }));
@@ -712,7 +687,7 @@ async function runWebViewFlow(page) {
   assert.strictEqual(snapshot.react.profileCount, 1);
   assert.ok(snapshot.react.boundaryCount >= 1);
   assert.ok(snapshot.react.scheduleEventCount >= 2);
-  assert.ok(snapshot.react.aiArtifactCount >= 3);
+  assert.ok(snapshot.react.aiArtifactCount >= 2);
   assert.ok(snapshot.react.llmRunCount >= 1);
   assert.strictEqual(snapshot.learningMarkedCount, 1);
   assert.strictEqual(snapshot.interviewWeakCount, 1);
@@ -730,6 +705,7 @@ async function verifyRestartReadback(flowSnapshot, initialPid) {
   const { browser, page, pid } = await connectWebView();
   try {
     await gotoRoute(page, "/more", "我的数据");
+    await clickWebView(page.getByRole("button", { name: "备份" }));
     await page.getByRole("heading", { name: "个人数据备份", exact: true }).waitFor();
     const snapshot = await snapshotStorage(page, "02-after-app-restart");
     assert.ok(snapshot.react.evidenceCount >= 5);
@@ -738,7 +714,7 @@ async function verifyRestartReadback(flowSnapshot, initialPid) {
     assert.strictEqual(snapshot.react.profileCount, 1);
     assert.ok(snapshot.react.boundaryCount >= 1);
     assert.ok(snapshot.react.scheduleEventCount >= 2);
-    assert.ok(snapshot.react.aiArtifactCount >= 3);
+    assert.ok(snapshot.react.aiArtifactCount >= 2);
     assert.ok(snapshot.react.llmRunCount >= 1);
     assert.strictEqual(snapshot.learningMarkedCount, 1);
     assert.strictEqual(snapshot.interviewWeakCount, 1);

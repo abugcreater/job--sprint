@@ -1,6 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 const { sha256 } = require("./auth");
+const {
+  appendAccountAuditEvent,
+  normalizeAccountAuditEvents,
+  usersConfigWithAudit
+} = require("./auth_account_audit_store");
 
 const USERNAME_PATTERN = /^[A-Za-z0-9._-]{2,64}$/;
 const ROLE_ALLOWLIST = new Set(["coach", "viewer"]);
@@ -28,7 +33,11 @@ function accountProvisioningCapability(env = process.env) {
   };
 }
 
-function provisionUserAccountFromInvitation(payload, env = process.env) {
+function provisionUserAccountFromInvitation(payload, env = process.env, operatorUsername = "") {
+  if (typeof env === "string") {
+    operatorUsername = env;
+    env = process.env;
+  }
   const capability = accountProvisioningCapability(env);
   if (!capability.enabled) {
     return {
@@ -84,7 +93,18 @@ function provisionUserAccountFromInvitation(payload, env = process.env) {
     nextUsers[currentIndex] = { ...nextUsers[currentIndex], ...nextUser };
   }
 
-  writeUsersConfig(usersFile, existingConfig.wasArray ? nextUsers : { ...existingConfig.raw, users: nextUsers });
+  const auditEvents = appendAccountAuditEvent(existingConfig.accountAuditEvents, {
+    actorUsername: operatorUsername,
+    action,
+    username,
+    role: nextUser.role,
+    dataScope: nextUser.dataScope,
+    inviteBatch: nextUser.inviteBatch,
+    affectedUsernames: [username],
+    affectedCount: 1,
+    message: action === "created" ? "登录账号已开通。" : "登录密码已重置。"
+  });
+  writeUsersConfig(usersFile, usersConfigWithAudit(existingConfig, nextUsers, auditEvents));
   return {
     ok: true,
     accountProvisioning: {
@@ -164,7 +184,18 @@ function updateUserAccountStatus(payload, currentUsername, env = process.env) {
   } else {
     nextUsers[currentIndex] = { ...target, disabled: action === "disable" };
   }
-  writeUsersConfig(usersFile, existingConfig.wasArray ? nextUsers : { ...existingConfig.raw, users: nextUsers });
+  const auditEvents = appendAccountAuditEvent(existingConfig.accountAuditEvents, {
+    actorUsername: currentUsername,
+    action,
+    username,
+    role: text(target, "role") || "coach",
+    dataScope: text(target, "dataScope") || username,
+    inviteBatch: text(target, "inviteBatch") || "default",
+    affectedUsernames: [username],
+    affectedCount: 1,
+    message: accountActionMessage(action, username)
+  });
+  writeUsersConfig(usersFile, usersConfigWithAudit(existingConfig, nextUsers, auditEvents));
   return {
     ok: true,
     accountAction: {
@@ -196,6 +227,15 @@ function userAccountsForManagement(env = process.env) {
       disabled: Boolean(user.disabled),
       canLogin: Boolean(!user.disabled)
     }));
+}
+
+function accountAuditEventsForManagement(env = process.env) {
+  const capability = accountProvisioningCapability(env);
+  if (!capability.enabled) return [];
+  const usersFile = resolveUsersFile(env);
+  const config = readUsersConfig(usersFile);
+  if (!config.ok) return [];
+  return config.accountAuditEvents;
 }
 
 function validateProvisioningPayload(username, password, accountRole = "") {
@@ -249,7 +289,8 @@ function readUsersConfig(usersFile) {
       ok: true,
       wasArray,
       raw,
-      users: users.filter((user) => user && typeof user === "object")
+      users: users.filter((user) => user && typeof user === "object"),
+      accountAuditEvents: normalizeAccountAuditEvents(wasArray ? [] : raw.accountAuditEvents)
     };
   } catch (error) {
     return {
@@ -303,6 +344,7 @@ function text(source, field) {
 }
 
 module.exports = {
+  accountAuditEventsForManagement,
   accountProvisioningCapability,
   provisionUserAccountFromInvitation,
   readUsersConfig,

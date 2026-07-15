@@ -90,8 +90,10 @@ describe("React Job Sprint today workspace", () => {
     render(<App />);
 
     expect(screen.getByRole("heading", { name: "今日 AI 教练" })).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "先导入简历建档，再开始今日任务" })).toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /导入简历建档/ })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "先导入真实经历，再开始今天的求职推进。" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /导入简历或 JD/ })).toHaveAttribute("href", "#/coach?entry=resume-import");
+    expect(screen.getByText("三步进入今天的行动")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "重试同步" })).not.toBeInTheDocument();
     expect(screen.queryByText(/Spring 事务/)).not.toBeInTheDocument();
     expect(screen.queryByText("今日风险")).not.toBeInTheDocument();
     expect(screen.queryByText("Evidence Gate（证据门）")).not.toBeInTheDocument();
@@ -105,12 +107,14 @@ describe("React Job Sprint today workspace", () => {
     expect(screen.getByRole("button", { name: "先补证据" })).toBeDisabled();
 
     fireEvent.click(screen.getByRole("button", { name: "补学习笔记" }));
+    expect(screen.getByLabelText("证据类型")).toHaveFocus();
     fireEvent.change(screen.getByLabelText("证据内容"), {
       target: { value: "手动学习笔记：质量平台缺陷归因、CI 稳定性指标和 Mock 边界已经整理成面试表达。" }
     });
     fireEvent.click(screen.getByRole("button", { name: "保存证据" }));
 
     expect(await screen.findByText("学习笔记证据")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "补学习笔记" })).toHaveFocus();
     expect(screen.getByText(/质量平台缺陷归因/)).toBeInTheDocument();
     const completeButton = screen.getByRole("button", { name: "标记完成" });
     expect(completeButton).toBeEnabled();

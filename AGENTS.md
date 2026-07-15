@@ -52,6 +52,21 @@
 | 只制定方案、不能改动 | `plan-only` | Team Lead 主线程收口；仅当计划问题需要产品或技术判断时派 `codex_product_reviewer` 或 `codex_tech_lead`；不派发实施修改 |
 | 验证 Codex agent、权限、沙箱或平台能力 | `runtime-spike` | `codex_runtime_spike`，Team Lead 主线程收口 |
 
+## GitFlow 版本管理硬规则
+
+权威规范是 `docs/product/product-ops/gitflow-development-governance.md`。所有新需求、缺陷、重构、文档、发布和热修都必须遵守；历史分支不追溯改名。
+
+1. `main` 只代表可发布版本，`develop` 只代表下一版本集成；两者禁止直接开发和直接提交。
+2. 普通需求从最新 `develop` 创建 `feature/`、`fix/`、`refactor/`、`docs/`、`chore/`、`test/` 或 `spike/` 分支；Codex 分支允许增加 `codex/` 前缀。
+3. `release/vX.Y.Z` 从 `develop` 创建并只向 `main` 提 PR；`hotfix/<ticket>-<slug>` 从 `main` 创建并在合并后回同步 `develop`。
+4. 开始任何写操作前必须检查 `git status`；发现无关未提交改动时保留并绕开，不能覆盖、重置或混入本需求提交。
+5. 禁止在混合工作树中直接 `git add -A`；按单一意图显式暂存文件并检查 `git diff --cached`。
+6. 提交和 PR 标题必须使用 `type(scope): description`；一个提交只表达一个可测试、可独立回退的意图。
+7. 普通需求 PR 目标必须是 `develop`；release/hotfix PR 目标必须是 `main`。合并前必须通过 `GitFlow Policy` 和影响范围内的测试、安全扫描。
+8. 普通需求使用 squash merge，合并后删除工作分支；release/hotfix 必须把 `main` 回同步到 `develop`。
+9. 新需求卡必须记录工作分支、来源分支、目标分支、提交计划和验证计划；缺少这些字段不得开始实施。
+10. 本地检查使用 `npm run validate:gitflow` 和 `npm run test:gitflow`；不得绕过失败门禁后宣称需求已完成。
+
 ## 问题修复硬规则
 
 以后处理任何线上故障、登录失败、页面白屏、部署异常、测试失败或用户反馈的 bug，必须先诊断再修改，不得拿到症状就直接动手改。

@@ -1,7 +1,8 @@
 use super::request;
 use axum::http::{Method, StatusCode};
 use serde_json::json;
-use sqlx::{Row, SqlitePool};
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 
 pub async fn verify_coach_onboarding_events(
     app: &axum::Router,
@@ -86,7 +87,7 @@ pub async fn verify_coach_onboarding_events(
     assert_eq!(res.json["summary"]["completionRateLabel"], "100%");
     assert_eq!(res.json["batches"][0]["inviteBatch"], "default");
 
-    let onboarding_row = sqlx::query(
+    let onboarding_row = sqlx::query::query(
         "SELECT scope, profile_id, step_id, completion_rate, drop_off_label FROM coach_onboarding_events WHERE scope = ? AND step_id = ?",
     )
     .bind("test-user")

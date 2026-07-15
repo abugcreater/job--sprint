@@ -224,9 +224,9 @@ export function buildReviewAiAnalysis(dashboard: ReviewDashboard, aiFeedback?: A
     aiFeedback?.acceptedOutcomeCount && aiFeedback.acceptedOutcomeRate < 40 ? "AI 建议被采纳后完成率偏低，说明建议粒度或执行约束需要收窄。" : ""
   ].filter(Boolean);
   const recommendations = [
-    fragileAnswers[0] ? `把「${fragileAnswers[0]}」改写成 60 秒回答，必须包含机制、边界和项目证据。` : "",
-    pathIssues[0] ? `明日先补路径问题：${pathIssues[0]}，完成后再扩展新任务。` : "",
-    tomorrowPriorities[0] ? `沿用你写下的明日优先：${tomorrowPriorities[0]}。` : "",
+    fragileAnswers[0] ? `把「${sentenceFragment(fragileAnswers[0])}」改写成 60 秒回答，必须包含机制、边界和项目证据。` : "",
+    pathIssues[0] ? `明日先补路径问题：${sentenceFragment(pathIssues[0])}，完成后再扩展新任务。` : "",
+    tomorrowPriorities[0] ? `沿用你写下的明日优先：${sentenceFragment(tomorrowPriorities[0])}。` : "",
     aiFeedback?.acceptedOutcomeCount && aiFeedback.acceptedOutcomeRate < 40 ? "下一轮 AI 只生成 30 分钟内可完成的单动作建议。" : "",
     dashboard.completion.pending > 0 ? "先收尾一个待完成任务，再新增学习或机会动作。" : ""
   ].filter(Boolean);
@@ -234,7 +234,7 @@ export function buildReviewAiAnalysis(dashboard: ReviewDashboard, aiFeedback?: A
   const readiness: ReviewAiAnalysis["readiness"] = !hasEvidence ? "needs_evidence" : !hasReview ? "needs_review" : "ready";
   return {
     readiness,
-    summary: readiness === "ready" ? "已生成复盘建议，可用于明日计划和提示词校准。" : "复盘输入不足，先补证据和今日复盘。",
+    summary: readiness === "ready" ? "已按当前记录完成规则整理，可用于明日计划和提示词校准。" : "复盘输入不足，先补证据和今日复盘。",
     facts: facts.length ? facts.slice(0, 5) : ["暂无足够事实。"],
     gaps: gaps.length ? gaps.slice(0, 5) : ["暂未发现明显缺口，继续观察后续结果。"],
     recommendations: recommendations.length ? recommendations.slice(0, 5) : ["保持当前节奏，明日继续补一条可验证证据。"],
@@ -302,6 +302,10 @@ function clean(value: string): string {
 
 function uniqueFilled(values: string[]): string[] {
   return Array.from(new Set(values.map(clean).filter(Boolean)));
+}
+
+function sentenceFragment(value: string): string {
+  return clean(value).replace(/[。！？；，,.!?;]+$/g, "");
 }
 
 function cleanLabeledValue(value: string, label: string): string {

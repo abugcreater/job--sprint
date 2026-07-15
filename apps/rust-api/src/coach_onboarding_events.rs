@@ -1,6 +1,7 @@
 use chrono::Utc;
 use serde_json::{Value, json};
-use sqlx::{Row, SqlitePool};
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 
 const STEP_IDS: &[&str] = &[
     "account_scope",
@@ -55,7 +56,7 @@ pub(crate) async fn insert_coach_onboarding_event(
     scope: &str,
     event: &Value,
 ) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         INSERT INTO coach_onboarding_events (
             id, scope, profile_id, step_id, step_label,
@@ -101,7 +102,7 @@ pub(crate) async fn list_coach_onboarding_events(
     scope: &str,
     limit: i64,
 ) -> sqlx::Result<Vec<Value>> {
-    let rows = sqlx::query(
+    let rows = sqlx::query::query(
         r#"
         SELECT id, profile_id, step_id, step_label, progress_label,
                completion_rate, completion_rate_label, drop_off_label,

@@ -1,4 +1,4 @@
-import { BarChart3, BookOpen, BriefcaseBusiness, ClipboardCheck, MessageCircleQuestion, ShieldCheck, UserRound, WifiOff, type LucideIcon } from "lucide-react";
+import { Activity, BarChart3, BookOpen, Bot, BriefcaseBusiness, ClipboardCheck, MessageCircleQuestion, ShieldCheck, UserRound, WifiOff, type LucideIcon } from "lucide-react";
 import { useMemo, type ReactNode } from "react";
 import { syncStateLabel } from "../../app/syncStatus";
 import { buildApplicationsDashboard } from "../../data/applicationsAdapter";
@@ -30,6 +30,7 @@ export function StatsPage() {
     const review = buildReviewDashboard(sprint, evidenceByTaskId);
     const evidenceCount = Object.values(evidenceByTaskId).reduce((count, records) => count + records.length, 0);
     const completedCount = Object.values(completed).filter(Boolean).length;
+    const llmRunSummary = summarizeLlmRuns(coach.llmRuns);
 
     return {
       coach,
@@ -38,42 +39,72 @@ export function StatsPage() {
       applications,
       review,
       evidenceCount,
-      completedCount
+      completedCount,
+      llmRunSummary
     };
   }, [aiArtifacts, coachScheduleEvents, completed, evidenceByTaskId, knowledgeBoundaries, llmRuns, sprint, userProfiles]);
 
   const headlineRows = [
     { label: "今日完成", value: `${sprint.progress.done}/${sprint.progress.total}`, detail: `${sprint.progress.pending} 项待推进，${sprint.progress.evidenceMissing} 项缺证据` },
-    { label: "Evidence Gate", value: `${stats.evidenceCount} 条`, detail: `本地完成记录 ${stats.completedCount} 项，延期 ${delayRecords.length} 条` },
-    { label: "画像完整度", value: stats.coach.activeProfile ? "已建立" : "未建立", detail: stats.coach.activeProfile ? `${stats.coach.activeProfile.targetRole} · ${stats.coach.boundaries.length} 条边界` : "先到画像页建立求职画像" },
+    { label: "本周有效推进", value: stats.coach.outcomeMetrics.effectiveActionLabel, detail: `完成且有验证证据；本地完成记录 ${stats.completedCount} 项`, icon: <Activity size={15} aria-hidden="true" /> },
+    { label: "采纳后完成", value: stats.coach.outcomeMetrics.acceptedScheduleCompletionLabel, detail: `${stats.coach.feedbackSummary.completedAcceptedOutcomeCount}/${stats.coach.feedbackSummary.acceptedOutcomeCount} 条采纳日程已完成` },
+    { label: "面试复盘", value: stats.coach.outcomeMetrics.interviewReviewRateLabel, detail: `${stats.coach.outcomeMetrics.interviewReviewLabel} · ${stats.coach.outcomeMetrics.interviewReviewCompletedCount}/${stats.coach.outcomeMetrics.interviewReviewTotalCount}` },
+    { label: "AI 运行", value: stats.llmRunSummary.valueLabel, detail: stats.llmRunSummary.detailLabel, icon: <Bot size={15} aria-hidden="true" /> },
     { label: "同步状态", value: syncStateLabel(syncState), detail: lastSavedAt ? `最近保存 ${formatDateTime(lastSavedAt)}` : "暂无保存记录", icon: <WifiOff size={15} aria-hidden="true" /> }
   ];
 
   return (
     <main className="app-main">
       <section className="app-page">
-        <header className="command-card p-4 md:p-5">
+        <header className="page-intro motion-enter">
           <div className="flex max-w-3xl flex-col gap-3">
-            <p className="text-sm font-black text-brand-700">集中统计 · 个人进展</p>
-            <div className="flex items-center gap-3">
-              <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                <BarChart3 size={22} aria-hidden="true" />
-              </span>
-              <h1 className="text-3xl font-black leading-tight md:text-4xl">进展统计</h1>
-            </div>
+            <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">Stats · 事实进展</p>
+            <h1 className="text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">进展统计</h1>
             <p className="max-w-3xl text-sm font-semibold leading-6 text-ink-500">
               这里集中查看个人执行、画像、知识、面试、机会和复盘数据；模块页面只保留完成任务所需的信息。
             </p>
           </div>
         </header>
 
-        <section className="grid gap-3 md:grid-cols-2 xl:grid-cols-4" aria-label="核心统计">
-          {headlineRows.map((row) => (
-            <MetricTile key={row.label} label={row.label} value={row.value} detail={row.detail} icon={row.icon} />
-          ))}
+        <section aria-labelledby="core-stats-title">
+          <div className="mb-3 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 id="core-stats-title" className="text-base font-black text-ink-900">关键结果</h2>
+              <p className="mt-1 text-sm font-semibold leading-6 text-ink-500">
+                优先看推进质量、AI 采纳后执行和面试复盘，不再只分散看各模块头部数字。
+              </p>
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {headlineRows.map((row) => (
+              <MetricTile key={row.label} label={row.label} value={row.value} detail={row.detail} icon={row.icon} />
+            ))}
+          </div>
         </section>
 
-        <section className="grid gap-4 xl:grid-cols-2">
+        <details className="rounded-workbench border border-line bg-white shadow-soft">
+          <summary className="flex min-h-12 cursor-pointer items-center px-5 text-sm font-black text-ink-900 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-brand-600">查看画像、知识、面试、机会与复盘明细</summary>
+        <section className="grid gap-4 border-t border-line p-4 xl:grid-cols-2">
+          <StatPanel
+            icon={Activity}
+            title="结果闭环"
+            rows={[
+              ["有效推进", stats.coach.outcomeMetrics.effectiveActionLabel],
+              ["采纳日程完成", stats.coach.outcomeMetrics.acceptedScheduleCompletionLabel],
+              ["面试复盘率", stats.coach.outcomeMetrics.interviewReviewRateLabel],
+              ["下一轮提示", stats.coach.feedbackSummary.nextPromptHint]
+            ]}
+          />
+          <StatPanel
+            icon={Bot}
+            title="AI 运行质量"
+            rows={[
+              ["运行总数", `${stats.llmRunSummary.totalCount} 次`],
+              ["成功 / 降级", `${stats.llmRunSummary.successCount} / ${stats.llmRunSummary.fallbackCount}`],
+              ["失败 / Schema 异常", `${stats.llmRunSummary.failedCount} / ${stats.llmRunSummary.schemaIssueCount}`],
+              ["最近状态", stats.llmRunSummary.latestLabel]
+            ]}
+          />
           <StatPanel
             icon={UserRound}
             title="画像与 AI 建议"
@@ -90,7 +121,7 @@ export function StatsPage() {
             rows={[
               ["今日知识任务", `${stats.learning.learningTasks.length} 个`],
               ["学习笔记", `${stats.learning.noteCount} 条`],
-              ["知识卡", `${stats.learning.knowledgeCards.length} 张`],
+              ["任务知识摘要", `${stats.learning.knowledgeCards.length} 张`],
               ["资料入口", `${stats.learning.resources.length} 个`]
             ]}
           />
@@ -101,7 +132,7 @@ export function StatsPage() {
               ["今日口述任务", `${stats.interview.oralTasks.length} 个`],
               ["候选题目", `${stats.interview.candidateQuestions.length} 题`],
               ["本地口述记录", `${stats.interview.recordCount} 条`],
-              ["评分维度", `${stats.interview.rubricDimensions.length} 项`]
+              ["规则自检维度", `${stats.interview.rubricDimensions.length} 项`]
             ]}
           />
           <StatPanel
@@ -135,6 +166,7 @@ export function StatsPage() {
             ]}
           />
         </section>
+        </details>
       </section>
     </main>
   );
@@ -181,4 +213,29 @@ function formatDateTime(value: string) {
     hour: "2-digit",
     minute: "2-digit"
   });
+}
+
+function summarizeLlmRuns(runs: Array<{ status: string; schemaStatus: string; provider: string; createdAt: string }>) {
+  const successCount = runs.filter((run) => run.status === "success").length;
+  const fallbackCount = runs.filter((run) => run.status === "fallback").length;
+  const failedCount = runs.filter((run) => run.status === "failed").length;
+  const schemaIssueCount = runs.filter((run) => run.schemaStatus === "failed").length;
+  const latest = [...runs].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+  return {
+    totalCount: runs.length,
+    successCount,
+    fallbackCount,
+    failedCount,
+    schemaIssueCount,
+    valueLabel: runs.length ? `${successCount}/${runs.length}` : "暂无",
+    detailLabel: runs.length ? `成功 ${successCount} 次，降级 ${fallbackCount} 次，失败 ${failedCount} 次` : "生成 AI 草稿后会统计 provider、fallback 和 schema 状态",
+    latestLabel: latest ? `${llmStatusLabel(latest.status)} · ${latest.provider}` : "暂无运行记录"
+  };
+}
+
+function llmStatusLabel(status: string) {
+  if (status === "success") return "成功";
+  if (status === "fallback") return "降级";
+  if (status === "failed") return "失败";
+  return status;
 }

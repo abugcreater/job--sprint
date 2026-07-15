@@ -1,6 +1,7 @@
 use chrono::Utc;
 use serde_json::{Value, json};
-use sqlx::{Row, SqlitePool};
+use sqlx::row::Row;
+use sqlx_sqlite::SqlitePool;
 use std::{env, fs};
 
 #[derive(Clone, Debug)]
@@ -15,7 +16,7 @@ pub(crate) async fn migrate_legacy_runtime_json(
     db: &SqlitePool,
     _default_scope: &str,
 ) -> sqlx::Result<()> {
-    let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM runtime_items")
+    let count: i64 = sqlx::query_scalar::query_scalar("SELECT COUNT(*) FROM runtime_items")
         .fetch_one(db)
         .await?;
     if count > 0 {
@@ -69,7 +70,7 @@ fn runtime_state_from_value(value: Value) -> RuntimeState {
 }
 
 pub(crate) async fn read_runtime_state(db: &SqlitePool, scope: &str) -> sqlx::Result<RuntimeState> {
-    let rows = sqlx::query("SELECT item_key, value FROM runtime_items WHERE scope = ?")
+    let rows = sqlx::query::query("SELECT item_key, value FROM runtime_items WHERE scope = ?")
         .bind(scope)
         .fetch_all(db)
         .await?;
@@ -100,7 +101,7 @@ pub(crate) async fn write_runtime_item(
     key: &str,
     value: &Value,
 ) -> sqlx::Result<()> {
-    sqlx::query(
+    sqlx::query::query(
         r#"
         INSERT INTO runtime_items (scope, item_key, value, updated_at)
         VALUES (?, ?, ?, ?)
@@ -130,7 +131,7 @@ pub(crate) async fn write_runtime_state(
         ("applications", &state.applications),
         ("interview_mistakes", &state.interview_mistakes),
     ] {
-        sqlx::query(
+        sqlx::query::query(
             r#"
             INSERT INTO runtime_items (scope, item_key, value, updated_at)
             VALUES (?, ?, ?, ?)

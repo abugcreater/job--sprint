@@ -14,6 +14,7 @@ import { createBoundarySuggestionFeedback, type BoundarySuggestionFeedbackDraft 
 import { buildApplicationsDashboard } from "../data/applicationsAdapter";
 import { buildOpportunitySignals } from "../data/opportunitySignalsAdapter";
 import type { AiArtifact, BoundarySuggestionFeedback, CoachScheduleEvent, DailySprint, KnowledgeBoundary, LlmRun, ReviewEvidence, SyncState, UserProfile } from "../types/sprint";
+import type { DeletedUserProfileBundle } from "./sprintStoreTypes";
 
 interface CoachActionState {
   completed: Record<string, boolean>;
@@ -65,6 +66,31 @@ export function deleteUserProfilePatch(state: CoachActionState, profileId: strin
   };
 }
 
+export function restoreUserProfileBundlePatch(state: CoachActionState, bundle: DeletedUserProfileBundle, createSprint: SprintFactory): CoachPatch | CoachActionState {
+  if (state.userProfiles.some((profile) => profile.id === bundle.profile.id)) return state;
+
+  const userProfiles = [
+    { ...bundle.profile, active: true },
+    ...state.userProfiles.map((profile) => ({ ...profile, active: false }))
+  ];
+  const knowledgeBoundaries = prependMissingById(bundle.knowledgeBoundaries, state.knowledgeBoundaries);
+  const boundarySuggestionFeedback = prependMissingById(bundle.boundarySuggestionFeedback, state.boundarySuggestionFeedback).slice(0, 200);
+  const coachScheduleEvents = prependMissingById(bundle.coachScheduleEvents, state.coachScheduleEvents);
+  const aiArtifacts = prependMissingById(bundle.aiArtifacts, state.aiArtifacts).slice(0, 80);
+  const llmRuns = prependMissingById(bundle.llmRuns, state.llmRuns).slice(0, 80);
+
+  return {
+    userProfiles,
+    knowledgeBoundaries,
+    boundarySuggestionFeedback,
+    coachScheduleEvents,
+    aiArtifacts,
+    llmRuns,
+    lastSavedAt: new Date().toISOString(),
+    sprint: createSprint(coachScheduleEvents, userProfiles)
+  };
+}
+
 export function saveKnowledgeBoundaryPatch(state: CoachActionState, draft: KnowledgeBoundaryDraft): CoachPatch | CoachActionState {
   const profileId = activeProfileId(state.userProfiles);
   if (!profileId) return state;
@@ -90,6 +116,16 @@ export function deleteKnowledgeBoundaryPatch(state: CoachActionState, boundaryId
   };
 }
 
+export function restoreKnowledgeBoundaryPatch(state: CoachActionState, boundary: KnowledgeBoundary): CoachPatch | CoachActionState {
+  if (state.knowledgeBoundaries.some((item) => item.id === boundary.id)) return state;
+  if (!state.userProfiles.some((profile) => profile.id === boundary.profileId)) return state;
+
+  return {
+    knowledgeBoundaries: [boundary, ...state.knowledgeBoundaries],
+    lastSavedAt: new Date().toISOString()
+  };
+}
+
 export function saveCoachScheduleEventPatch(state: CoachActionState, draft: CoachScheduleDraft, createSprint: SprintFactory): CoachPatch | CoachActionState {
   const profileId = activeProfileId(state.userProfiles);
   if (!profileId) return state;
@@ -104,6 +140,18 @@ export function saveCoachScheduleEventPatch(state: CoachActionState, draft: Coac
 
 export function deleteCoachScheduleEventPatch(state: CoachActionState, eventId: string, createSprint: SprintFactory): CoachPatch {
   const coachScheduleEvents = state.coachScheduleEvents.filter((event) => event.id !== eventId);
+  return {
+    coachScheduleEvents,
+    lastSavedAt: new Date().toISOString(),
+    sprint: createSprint(coachScheduleEvents)
+  };
+}
+
+export function restoreCoachScheduleEventPatch(state: CoachActionState, event: CoachScheduleEvent, createSprint: SprintFactory): CoachPatch | CoachActionState {
+  if (state.coachScheduleEvents.some((item) => item.id === event.id)) return state;
+  if (!state.userProfiles.some((profile) => profile.id === event.profileId)) return state;
+
+  const coachScheduleEvents = [event, ...state.coachScheduleEvents];
   return {
     coachScheduleEvents,
     lastSavedAt: new Date().toISOString(),
@@ -190,4 +238,9 @@ function nextProfilesAfterDelete(profiles: UserProfile[], deletedProfileId: stri
     active: index === 0,
     updatedAt: index === 0 ? savedAt : profile.updatedAt
   }));
+}
+
+function prependMissingById<T extends { id: string }>(restoredItems: T[], currentItems: T[]): T[] {
+  const currentIds = new Set(currentItems.map((item) => item.id));
+  return [...restoredItems.filter((item) => !currentIds.has(item.id)), ...currentItems];
 }

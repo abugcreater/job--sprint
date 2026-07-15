@@ -48,16 +48,19 @@ describe("React Job Sprint interview workspace", () => {
     render(<App />);
 
     expect(await screen.findByRole("heading", { name: "面试训练" })).toBeInTheDocument();
+    fireEvent.click(screen.getByText("查看今日任务与历史记录"));
     expect(screen.getByRole("heading", { name: "今日口述任务" })).toBeInTheDocument();
     expect(screen.getAllByText("练 Mock 服务边界 60 秒回答").length).toBeGreaterThan(0);
     expect(screen.getByLabelText("我的口述回答")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "AI评分并生成复盘" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "按规则自检" })).toBeInTheDocument();
   });
 
   it("supports candidate question search, category filter, detail hint and weak-question marks", async () => {
     render(<App />);
 
     await screen.findByRole("heading", { name: "面试训练" });
+    fireEvent.click(screen.getByText("选择其他题目与筛选"));
+    fireEvent.click(screen.getByText("查看回答提示、结构与关键词"));
 
     fireEvent.change(screen.getByLabelText("搜索候选题"), { target: { value: "Mock" } });
     fireEvent.change(screen.getByLabelText("候选题分类"), { target: { value: "current-task" } });
@@ -88,16 +91,17 @@ describe("React Job Sprint interview workspace", () => {
         value: "结论先说，Mock 服务边界要讲清请求入口、异常分支和接口证据。我的项目里会用失败样例、质量指标和复盘记录证明边界，不夸大线上所有权，下一步补恢复验证。"
       }
     });
-    fireEvent.click(screen.getByRole("button", { name: "AI评分并生成复盘" }));
+    fireEvent.click(screen.getByRole("button", { name: "按规则自检" }));
 
-    expect(await screen.findByLabelText("AI评分结果")).toHaveTextContent("自检评分");
-    expect(screen.getByText("AI 不可用，已按本地 rubric 给出自检结果。")).toBeInTheDocument();
+    expect(await screen.findByLabelText("规则自检结果")).toHaveTextContent("本地 rubric · 非 AI 评分");
+    expect(screen.getByText("已按本地规则检查结构、证据与风险覆盖；这不是 AI 评分。")).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole("button", { name: "保存口述与AI分析" }));
+    fireEvent.click(screen.getByRole("button", { name: "保存口述证据" }));
 
     expect(await screen.findByText("已记 1")).toBeInTheDocument();
     expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.interview]).toHaveLength(1);
-    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.interview][0].content).toContain("AI评分");
+    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.interview][0].content).toContain("规则覆盖");
+    expect(screen.getByRole("link", { name: "去复盘这次练习" })).toHaveAttribute("href", "#/review");
 
     fireEvent.click(screen.getByRole("link", { name: "回到今日" }));
 

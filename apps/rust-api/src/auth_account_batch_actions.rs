@@ -3,12 +3,16 @@ use serde_json::{Value, json};
 use std::{collections::BTreeSet, env, path::PathBuf};
 
 use crate::auth_account_store::account_provisioning_capability;
-use crate::auth_account_users_file::{read_users_config, write_users_config};
+use crate::auth_account_audit::{
+    account_audit_events_from_config, append_account_audit_event, write_users_config_with_audit,
+};
+use crate::auth_account_users_file::read_users_config;
 
 const USERNAME_CHARS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-";
 
 pub(crate) fn update_user_account_batch_status(
     payload: &Value,
+    current_username: &str,
 ) -> Result<Value, (StatusCode, Value)> {
     let capability = account_provisioning_capability();
     if capability.get("enabled").and_then(Value::as_bool) != Some(true) {
@@ -27,7 +31,7 @@ pub(crate) fn update_user_account_batch_status(
         return Err(invalid_batch_action(&action));
     }
     let users_file = PathBuf::from(env::var("JOB_SPRINT_USERS_FILE").unwrap_or_default());
-    let (raw_config, mut users, was_array) = read_users_config(&users_file).map_err(|message| {
+    let (raw_config, mut users, _was_array) = read_users_config(&users_file).map_err(|message| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             json!({"status": "FAIL", "error": "users_file_unreadable", "message": message}),
@@ -47,7 +51,7 @@ pub(crate) fn update_user_account_batch_status(
             skipped_users.push(json!({"username": username, "reason": "not_found"}));
             continue;
         };
-        if text(user, "role") == "owner" {
+        if text(user, "role") == "owner" || username == current_username {
             skipped_users.push(json!({"username": username, "reason": "protected_account"}));
             continue;
         }
@@ -59,6 +63,11 @@ pub(crate) fn update_user_account_batch_status(
             batch_action_value(&action, requested.len(), 0, skipped_users),
         ));
     }
+    let affected_users = users
+        .iter()
+        .filter(|user| affected.contains(&text(user, "username")))
+        .cloned()
+        .collect::<Vec<_>>();
     if action == "delete" {
         users.retain(|user| !affected.contains(&text(user, "username")));
     } else {
@@ -70,7 +79,24 @@ pub(crate) fn update_user_account_batch_status(
             }
         }
     }
-    write_users_config(&users_file, raw_config, users, was_array).map_err(|message| {
+    let audit_events = append_account_audit_event(
+        &account_audit_events_from_config(&raw_config),
+        json!({
+            "actorUsername": current_username,
+            "action": format!("batch_{action}"),
+            "username": "",
+            "role": "",
+            "dataScope": "",
+            "inviteBatch": common_invite_batch(&affected_users),
+            "affectedUsernames": affected.iter().cloned().collect::<Vec<_>>(),
+            "affectedCount": affected.len(),
+            "requestedCount": requested.len(),
+            "skippedCount": skipped_users.len(),
+            "skippedUsers": skipped_users.clone(),
+            "message": batch_action_message(&action, affected.len(), skipped_users.len())
+        }),
+    );
+    write_users_config_with_audit(&users_file, raw_config, users, audit_events).map_err(|message| {
         (
             StatusCode::INTERNAL_SERVER_ERROR,
             json!({"status": "FAIL", "error": "users_file_unwritable", "message": message}),
@@ -82,6 +108,15 @@ pub(crate) fn update_user_account_batch_status(
         affected.len(),
         skipped_users,
     ))
+}
+
+fn common_invite_batch(users: &[Value]) -> String {
+    let batches = users
+        .iter()
+        .map(|user| text(user, "inviteBatch"))
+        .map(|batch| if batch.is_empty() { "default".to_string() } else { batch })
+        .collect::<BTreeSet<_>>();
+    if batches.len() == 1 { batches.into_iter().next().unwrap_or_else(|| "default".to_string()) } else { "mixed".to_string() }
 }
 
 fn requested_usernames(payload: &Value, users: &[Value]) -> Vec<String> {
@@ -158,6 +193,15 @@ fn batch_action_value(
             "没有找到可批量处理的登录账号。".to_string()
         }
     })
+}
+
+fn batch_action_message(action: &str, affected_count: usize, skipped_count: usize) -> String {
+    if affected_count == 0 {
+        return "没有找到可批量处理的登录账号。".to_string();
+    }
+    let verb = match action { "disable" => "禁用", "enable" => "恢复", _ => "删除" };
+    let skipped = if skipped_count > 0 { format!("，跳过 {skipped_count} 个受保护或不存在账号") } else { String::new() };
+    format!("已{verb} {affected_count} 个登录账号{skipped}。")
 }
 
 fn valid_username(username: &str) -> bool {

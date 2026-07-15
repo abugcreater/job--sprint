@@ -1,13 +1,11 @@
-import { Bot } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
-  generateBoundarySuggestionsOnServer,
   generateCoachArtifactsOnServer,
   submitCoachFeedback,
   submitCoachOnboardingEvent
 } from "../../api/runtimeClient";
-import { submitBoundarySuggestionFeedback } from "../../api/boundaryFeedbackClient";
 import {
   buildCoachDashboard,
   canSaveBoundary,
@@ -22,23 +20,25 @@ import {
 } from "../../data/coachAdapter";
 import { buildApplicationsDashboard } from "../../data/applicationsAdapter";
 import { buildCoachFirstLoginFlow } from "../../data/coachFirstLoginFlowAdapter";
-import { generateBoundarySuggestionsFromText, type BoundarySuggestionDraft } from "../../data/boundarySuggestionAdapter";
-import { summarizeBoundarySuggestionFeedback, type BoundarySuggestionFeedbackDraft } from "../../data/boundarySuggestionFeedbackAdapter";
 import { createLlmRun } from "../../data/llmRunAdapter";
 import { buildOpportunitySignals } from "../../data/opportunitySignalsAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
-import type { AiArtifact } from "../../types/sprint";
+import type { AiArtifact, CoachScheduleEvent, KnowledgeBoundary } from "../../types/sprint";
 import { AiFeedbackPanel } from "./components/AiFeedbackPanel";
 import { ArtifactPanel } from "./components/ArtifactPanel";
 import { BoundaryPanel } from "./components/BoundaryPanel";
 import { BoundarySuggestionPanel } from "./components/BoundarySuggestionPanel";
-import { FirstLoginFlowPanel } from "./components/FirstLoginFlowPanel";
+import { CoachStageNavigation, type CoachStageId } from "./components/CoachStageNavigation";
+import { buildCoachStageProgress, CoachDisclosure, CoachStageContext, coachStageTitle } from "./components/CoachStageContext";
 import { InitializationWizardPanel } from "./components/InitializationWizardPanel";
 import { LlmRunPanel } from "./components/LlmRunPanel";
 import { ProfilePanel } from "./components/ProfilePanel";
 import { SchedulePanel } from "./components/SchedulePanel";
+import { useProfileRecovery } from "./useProfileRecovery";
+import { useBoundarySuggestions } from "./useBoundarySuggestions";
 
 export function CoachPage() {
+  const isResumeImportEntry = useSearchParams()[0].get("entry") === "resume-import";
   const sprint = useSprintStore((state) => state.sprint);
   const syncState = useSprintStore((state) => state.syncState);
   const evidenceByTaskId = useSprintStore((state) => state.evidenceByTaskId);
@@ -51,11 +51,13 @@ export function CoachPage() {
   const saveUserProfile = useSprintStore((state) => state.saveUserProfile);
   const activateUserProfile = useSprintStore((state) => state.activateUserProfile);
   const deleteUserProfile = useSprintStore((state) => state.deleteUserProfile);
+  const restoreUserProfileBundle = useSprintStore((state) => state.restoreUserProfileBundle);
   const saveKnowledgeBoundary = useSprintStore((state) => state.saveKnowledgeBoundary);
-  const recordBoundarySuggestionFeedback = useSprintStore((state) => state.recordBoundarySuggestionFeedback);
   const deleteKnowledgeBoundary = useSprintStore((state) => state.deleteKnowledgeBoundary);
+  const restoreKnowledgeBoundary = useSprintStore((state) => state.restoreKnowledgeBoundary);
   const saveCoachScheduleEvent = useSprintStore((state) => state.saveCoachScheduleEvent);
   const deleteCoachScheduleEvent = useSprintStore((state) => state.deleteCoachScheduleEvent);
+  const restoreCoachScheduleEvent = useSprintStore((state) => state.restoreCoachScheduleEvent);
   const generateAiArtifacts = useSprintStore((state) => state.generateAiArtifacts);
   const addAiArtifacts = useSprintStore((state) => state.addAiArtifacts);
   const addLlmRun = useSprintStore((state) => state.addLlmRun);
@@ -80,55 +82,83 @@ export function CoachPage() {
     }),
     [dashboard.activeProfile, dashboard.artifacts, dashboard.boundaries, dashboard.scheduleEvents, syncState]
   );
-  const boundaryFeedbackSummary = useMemo(() => summarizeBoundarySuggestionFeedback(
-    dashboard.activeProfile ? boundarySuggestionFeedback.filter((item) => !item.profileId || item.profileId === dashboard.activeProfile?.id) : boundarySuggestionFeedback
-  ), [boundarySuggestionFeedback, dashboard.activeProfile?.id]);
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>(() => createProfileDraft(dashboard.activeProfile));
   const [boundaryDraft, setBoundaryDraft] = useState<KnowledgeBoundaryDraft>(() => createBoundaryDraft());
-  const [boundarySourceText, setBoundarySourceText] = useState("");
-  const [boundarySuggestions, setBoundarySuggestions] = useState<BoundarySuggestionDraft[]>([]);
-  const [boundarySuggestionReasons, setBoundarySuggestionReasons] = useState<Record<string, string>>({});
   const [scheduleDraft, setScheduleDraft] = useState<CoachScheduleDraft>(() => createScheduleDraft(sprint.date));
   const [artifactEdits, setArtifactEdits] = useState<Record<string, Pick<AiArtifact, "title" | "body">>>({});
   const [rejectionReasons, setRejectionReasons] = useState<Record<string, string>>({});
   const [showAllSchedules, setShowAllSchedules] = useState(false);
   const [showAllArtifacts, setShowAllArtifacts] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isExtractingBoundaries, setIsExtractingBoundaries] = useState(false);
   const [isRecordingFirstLogin, setIsRecordingFirstLogin] = useState(false);
   const [feedback, setFeedback] = useState("");
   const [profileFeedback, setProfileFeedback] = useState("");
-
+  const [activeStage, setActiveStage] = useState<CoachStageId>(() => isResumeImportEntry ? "profile" : recommendedCoachStage(dashboard));
+  const [showOnboarding, setShowOnboarding] = useState(() => isResumeImportEntry || !dashboard.activeProfile);
+  const didFocusResumeImport = useRef(false);
+  const completedStages: Record<CoachStageId, boolean> = {
+    profile: Boolean(dashboard.activeProfile),
+    boundaries: dashboard.boundaries.length > 0,
+    plan: dashboard.scheduleEvents.length > 0,
+    advice: dashboard.artifacts.some((artifact) => artifact.status === "accepted" || artifact.status === "rejected")
+  };
+  const stageProgress = buildCoachStageProgress(completedStages);
+  const [recentlyDeletedBoundary, setRecentlyDeletedBoundary] = useState<KnowledgeBoundary | null>(null);
+  const [recentlyDeletedScheduleEvent, setRecentlyDeletedScheduleEvent] = useState<CoachScheduleEvent | null>(null);
+  const boundarySuggestionFlow = useBoundarySuggestions({
+    activeProfile: dashboard.activeProfile,
+    boundaries: dashboard.boundaries,
+    setBoundaryDraft,
+    setFeedback,
+    setRecentlyDeletedBoundary,
+    setActiveStage
+  });
+  const {
+    recentlyDeletedProfileBundle,
+    handleSaveProfile,
+    handleDeleteProfile,
+    handleUndoDeleteProfile,
+    handleNewProfile,
+    handleActivateProfile,
+    handleEditProfile,
+    dismissDeletedProfile
+  } = useProfileRecovery({
+    profiles: dashboard.profiles,
+    knowledgeBoundaries,
+    boundarySuggestionFeedback,
+    coachScheduleEvents,
+    aiArtifacts,
+    llmRuns,
+    saveUserProfile,
+    activateUserProfile,
+    deleteUserProfile,
+    restoreUserProfileBundle,
+    setProfileDraft,
+    setFeedback,
+    setProfileFeedback,
+    clearRelatedUndo: () => {
+      setRecentlyDeletedBoundary(null);
+      setRecentlyDeletedScheduleEvent(null);
+    }
+  });
   useEffect(() => {
     setProfileDraft(createProfileDraft(dashboard.activeProfile));
     setBoundaryDraft(createBoundaryDraft());
-    setBoundarySuggestions([]);
-    setBoundarySuggestionReasons({});
+    boundarySuggestionFlow.resetSuggestions();
     setScheduleDraft(createScheduleDraft(sprint.date));
+    setRecentlyDeletedBoundary(null);
+    setRecentlyDeletedScheduleEvent(null);
   }, [dashboard.activeProfile?.id, sprint.date]);
-
-  const handleSaveProfile = () => {
-    if (!canSaveProfile(profileDraft)) {
-      setFeedback("请至少填写目标岗位、经验摘要和每日可投入时间。");
-      setProfileFeedback("保存失败：请补齐目标岗位、经验摘要和每日可投入时间。");
-      return;
-    }
-    saveUserProfile(profileDraft);
-    setFeedback("求职画像已保存，后续 AI 建议会引用这份画像。");
-    setProfileFeedback("画像已保存。");
-  };
-
-  const handleDeleteProfile = (profileId: string) => {
-    const profile = dashboard.profiles.find((item) => item.id === profileId);
-    if (!profile) return;
-    const confirmed = window.confirm(`删除「${profile.name}」画像？关联知识边界、个人日程和 AI 建议也会一起移除。`);
-    if (!confirmed) return;
-    deleteUserProfile(profileId);
-    setProfileDraft(createProfileDraft());
-    setFeedback(`已删除「${profile.name}」画像。`);
-    setProfileFeedback(`已删除「${profile.name}」，关联边界、日程和 AI 建议已同步清理。`);
-  };
-
+  useEffect(() => {
+    if (!isResumeImportEntry || activeStage !== "profile" || !showOnboarding || didFocusResumeImport.current) return;
+    const animationFrame = window.requestAnimationFrame(() => {
+      didFocusResumeImport.current = true;
+      const importWorkspace = document.getElementById("coach-quick-init");
+      importWorkspace?.focus({ preventScroll: true });
+      importWorkspace?.scrollIntoView?.({ block: "start" });
+    });
+    return () => window.cancelAnimationFrame(animationFrame);
+  }, [activeStage, isResumeImportEntry, showOnboarding]);
   const handleSaveBoundary = () => {
     if (!dashboard.activeProfile) {
       setFeedback("请先保存一份求职画像。");
@@ -139,99 +169,28 @@ export function CoachPage() {
       return;
     }
     saveKnowledgeBoundary(boundaryDraft);
+    setRecentlyDeletedBoundary(null);
     setBoundaryDraft(createBoundaryDraft());
     setFeedback("知识边界已保存。");
+    setActiveStage("plan");
   };
 
-  const handleGenerateBoundarySuggestions = async () => {
-    if (!dashboard.activeProfile) {
-      setFeedback("请先保存一份求职画像。");
-      return;
+  const handleDeleteBoundary = (boundaryId: string) => {
+    const boundary = dashboard.boundaries.find((item) => item.id === boundaryId);
+    if (!boundary) return;
+    deleteKnowledgeBoundary(boundaryId);
+    setRecentlyDeletedBoundary(boundary);
+    if (boundaryDraft.id === boundaryId) {
+      setBoundaryDraft(createBoundaryDraft());
     }
-    if (boundarySourceText.trim().length < 12) {
-      setFeedback("请粘贴一段 JD、简历或面试反馈，至少 12 个字符。");
-      return;
-    }
-    setIsExtractingBoundaries(true);
-    try {
-      const response = await generateBoundarySuggestionsOnServer({
-        profile: dashboard.activeProfile,
-        knowledgeBoundaries: dashboard.boundaries,
-        text: boundarySourceText
-      });
-      if (response?.suggestions.length) {
-        setBoundarySuggestions(response.suggestions.map((suggestion) => ({
-          ...suggestion,
-          sourceConfidence: suggestion.sourceConfidence ?? suggestion.confidence,
-          sourceProvider: response.provider,
-          sourcePromptVersion: response.promptVersion,
-          sourceInputHash: response.inputSummaryHash
-        })));
-        setFeedback("已生成知识边界候选，请确认后再写入正式边界。");
-        return;
-      }
-      setBoundarySuggestions(createLocalBoundarySuggestions());
-      setFeedback("服务端边界提取暂不可用，已用本地规则生成候选。");
-    } catch (_) {
-      setBoundarySuggestions(createLocalBoundarySuggestions());
-      setFeedback("服务端边界提取失败，已用本地规则生成候选。");
-    } finally {
-      setIsExtractingBoundaries(false);
-    }
+    setFeedback(`已删除「${boundary.topic}」知识边界，可在知识边界顶部撤销。`);
   };
 
-  const createLocalBoundarySuggestions = () => generateBoundarySuggestionsFromText({
-    text: boundarySourceText,
-    profile: dashboard.activeProfile,
-    existingTopics: dashboard.boundaries.map((boundary) => boundary.topic)
-  });
-
-  const handleAcceptBoundarySuggestion = (suggestion: BoundarySuggestionDraft) => {
-    if (!dashboard.activeProfile) {
-      setFeedback("请先保存一份求职画像。");
-      return;
-    }
-    recordBoundarySuggestionDecision(suggestion, "accepted");
-    saveKnowledgeBoundary(suggestion);
-    setBoundarySuggestions((current) => current.filter((item) => item.id !== suggestion.id));
-    setBoundarySuggestionReasons((current) => removeKey(current, suggestion.id));
-    setFeedback(`已采纳「${suggestion.topic}」知识边界。`);
-  };
-
-  const handleReviseBoundarySuggestion = (suggestion: BoundarySuggestionDraft) => {
-    recordBoundarySuggestionDecision(suggestion, "needs_revision", boundarySuggestionReasons[suggestion.id]);
-    setBoundaryDraft({ ...suggestion, id: undefined });
-    setBoundarySuggestions((current) => current.filter((item) => item.id !== suggestion.id));
-    setBoundarySuggestionReasons((current) => removeKey(current, suggestion.id));
-    setFeedback(`已把「${suggestion.topic}」载入知识边界表单，请修订后保存。`);
-  };
-
-  const handleRejectBoundarySuggestion = (suggestion: BoundarySuggestionDraft) => {
-    recordBoundarySuggestionDecision(suggestion, "rejected", boundarySuggestionReasons[suggestion.id]);
-    setBoundarySuggestions((current) => current.filter((item) => item.id !== suggestion.id));
-    setBoundarySuggestionReasons((current) => removeKey(current, suggestion.id));
-    setFeedback(`已记录「${suggestion.topic}」不采纳原因。`);
-  };
-
-  const recordBoundarySuggestionDecision = (
-    suggestion: BoundarySuggestionDraft,
-    decision: BoundarySuggestionFeedbackDraft["decision"],
-    reason = ""
-  ) => {
-    const feedbackPayload = {
-      profileId: dashboard.activeProfile?.id,
-      suggestionId: suggestion.id,
-      topic: suggestion.topic,
-      decision,
-      reason,
-      sourceSummary: suggestion.sourceSummary,
-      sourceConfidence: suggestion.sourceConfidence ?? suggestion.confidence,
-      sourceProvider: suggestion.sourceProvider,
-      sourcePromptVersion: suggestion.sourcePromptVersion,
-      sourceInputHash: suggestion.sourceInputHash
-    };
-    recordBoundarySuggestionFeedback(feedbackPayload);
-    void submitBoundarySuggestionFeedback(feedbackPayload).catch(() => undefined);
+  const handleUndoDeleteBoundary = () => {
+    if (!recentlyDeletedBoundary) return;
+    restoreKnowledgeBoundary(recentlyDeletedBoundary);
+    setRecentlyDeletedBoundary(null);
+    setFeedback("已恢复刚删除的知识边界。");
   };
 
   const handleSaveSchedule = () => {
@@ -244,8 +203,28 @@ export function CoachPage() {
       return;
     }
     saveCoachScheduleEvent(scheduleDraft);
+    setRecentlyDeletedScheduleEvent(null);
     setScheduleDraft(createScheduleDraft(sprint.date));
     setFeedback("自定义日程已加入今日 AI 教练。");
+    setActiveStage("advice");
+  };
+
+  const handleDeleteScheduleEvent = (eventId: string) => {
+    const event = dashboard.scheduleEvents.find((item) => item.id === eventId);
+    if (!event) return;
+    deleteCoachScheduleEvent(eventId);
+    setRecentlyDeletedScheduleEvent(event);
+    if (scheduleDraft.id === eventId) {
+      setScheduleDraft(createScheduleDraft(sprint.date));
+    }
+    setFeedback(`已删除「${event.title}」个人日程，可在个人日程顶部撤销。`);
+  };
+
+  const handleUndoDeleteScheduleEvent = () => {
+    if (!recentlyDeletedScheduleEvent) return;
+    restoreCoachScheduleEvent(recentlyDeletedScheduleEvent);
+    setRecentlyDeletedScheduleEvent(null);
+    setFeedback("已恢复刚删除的个人日程。");
   };
 
   const handleGenerate = async () => {
@@ -377,132 +356,162 @@ export function CoachPage() {
   return (
     <main className="app-main">
       <section className="app-page">
-        <header className="command-card p-4 md:p-5">
+        <header className="page-intro motion-enter">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="max-w-3xl">
-              <p className="text-sm font-black text-brand-700">求职画像 · 知识边界 · AI 建议</p>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">Prepare · 建立求职基线</p>
               <div className="mt-2 flex items-center gap-3">
-                <span className="grid size-12 place-items-center rounded-control bg-brand-100 text-brand-700">
-                  <Bot size={22} aria-hidden="true" />
-                </span>
-                <h1 className="text-3xl font-black leading-tight md:text-4xl">AI 求职教练</h1>
+                <h1 className="text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">准备工作台</h1>
               </div>
-              <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500">
-                先确认求职画像和知识边界，再让 AI 生成建议；建议必须经你接受后才会写入日程或知识边界。
+              <p className="mt-3 max-w-3xl text-sm font-semibold leading-6 text-ink-500 md:text-base">
+                依次确认画像、知识边界、今日计划和 AI 建议。一次只处理一个阶段，完成后再进入今天的行动。
               </p>
             </div>
-	            <Link to="/stats" className="rounded-card border border-line bg-surface-0 p-4 text-left transition hover:border-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 xl:min-w-[320px]">
-	              <span className="text-xs font-black text-ink-500">集中统计</span>
-	              <span className="mt-1 block text-sm font-extrabold leading-6 text-ink-900">查看画像、边界、AI 建议和本周推进</span>
-	            </Link>
+            <Link to="/today" className="secondary-button shrink-0">
+              回到今日
+              <ArrowRight size={16} aria-hidden="true" />
+            </Link>
           </div>
-          {feedback ? (
-            <p className="mt-4 rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" role="status">
-              {feedback}
-            </p>
-          ) : null}
         </header>
 
-        <FirstLoginFlowPanel
-          flow={firstLoginFlow}
-          isGenerating={isGenerating}
-          isRecordingInsight={isRecordingFirstLogin}
-          onGenerate={handleGenerate}
-          onRecordInsight={handleRecordFirstLoginInsight}
+        <CoachStageNavigation
+          activeStage={activeStage}
+          completedStages={completedStages}
+          progressLabel={stageProgress.progressLabel}
+          nextActionLabel={stageProgress.nextActionLabel}
+          isRecording={isRecordingFirstLogin}
+          onStageChange={(stage) => {
+            setActiveStage(stage);
+            if (stage !== "profile") setShowOnboarding(false);
+            window.requestAnimationFrame(() => {
+              const stageWorkspace = document.getElementById(`coach-stage-${stage}`);
+              stageWorkspace?.focus({ preventScroll: true });
+              stageWorkspace?.scrollIntoView?.({ block: "start" });
+            });
+          }}
+          onRecordProgress={handleRecordFirstLoginInsight}
         />
-        {dashboard.setupChecklist.status !== "ready" ? <InitializationWizardPanel /> : null}
+        {feedback ? <p className="rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" role="status">{feedback}</p> : null}
 
-        <section className="grid gap-4 xl:grid-cols-[minmax(0,0.95fr)_minmax(0,1.05fr)]">
-          <aside className="space-y-4">
-            <div id="coach-profile" className="scroll-mt-4">
-              <ProfilePanel
-                profiles={dashboard.profiles}
-                activeProfileId={dashboard.activeProfile?.id}
-                draft={profileDraft}
-                onChange={(patch) => setProfileDraft((current) => ({ ...current, ...patch }))}
-                onNew={() => setProfileDraft(createProfileDraft())}
-                onActivate={(profile) => {
-                  activateUserProfile(profile.id);
-                  setFeedback(`已切换到「${profile.name}」。`);
-                }}
-	                onEdit={(profile) => setProfileDraft(createProfileDraft(profile))}
-	                onDelete={handleDeleteProfile}
-	                onSave={handleSaveProfile}
-	                feedback={profileFeedback}
-	              />
-            </div>
-            <div id="coach-schedule" className="scroll-mt-4">
+        <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <section id={`coach-stage-${activeStage}`} className="workspace-anchor min-w-0 space-y-4" tabIndex={-1} aria-label={`当前准备阶段：${coachStageTitle(activeStage)}`}>
+            {activeStage === "profile" ? (
+              showOnboarding ? (
+                <>
+                  <InitializationWizardPanel />
+                  <button type="button" className="secondary-button w-full" onClick={() => setShowOnboarding(false)}>改用详细画像表单</button>
+                </>
+              ) : (
+                <ProfilePanel
+                  profiles={dashboard.profiles}
+                  activeProfileId={dashboard.activeProfile?.id}
+                  draft={profileDraft}
+                  onChange={(patch) => setProfileDraft((current) => ({ ...current, ...patch }))}
+                  recentlyDeletedProfileBundle={recentlyDeletedProfileBundle}
+                  onNew={handleNewProfile}
+                  onActivate={handleActivateProfile}
+                  onEdit={handleEditProfile}
+                  onDelete={handleDeleteProfile}
+                  onUndoDelete={handleUndoDeleteProfile}
+                  onDismissDeletedProfile={dismissDeletedProfile}
+                  onSave={() => {
+                    const ready = canSaveProfile(profileDraft);
+                    handleSaveProfile(profileDraft);
+                    if (ready) {
+                      setActiveStage("boundaries");
+                      setShowOnboarding(false);
+                    }
+                  }}
+                  feedback={profileFeedback}
+                />
+              )
+            ) : null}
+
+            {activeStage === "boundaries" ? (
+              <>
+                <BoundarySuggestionPanel
+                  sourceText={boundarySuggestionFlow.sourceText}
+                  suggestions={boundarySuggestionFlow.suggestions}
+                  feedbackReasons={boundarySuggestionFlow.reasons}
+                  feedbackSummary={boundarySuggestionFlow.feedbackSummary}
+                  disabled={!dashboard.activeProfile}
+                  isGenerating={boundarySuggestionFlow.isGenerating}
+                  onTextChange={boundarySuggestionFlow.setSourceText}
+                  onGenerate={boundarySuggestionFlow.generateSuggestions}
+                  onAccept={boundarySuggestionFlow.acceptSuggestion}
+                  onRevise={boundarySuggestionFlow.reviseSuggestion}
+                  onReject={boundarySuggestionFlow.rejectSuggestion}
+                  onReasonChange={(suggestionId, reason) => boundarySuggestionFlow.setReasons((current) => ({ ...current, [suggestionId]: reason }))}
+                />
+                <BoundaryPanel
+                  boundaries={dashboard.boundaries}
+                  draft={boundaryDraft}
+                  activeProfileReady={Boolean(dashboard.activeProfile)}
+                  recentlyDeletedBoundary={recentlyDeletedBoundary}
+                  onChange={(patch) => setBoundaryDraft((current) => ({ ...current, ...patch }))}
+                  onEdit={(boundary) => setBoundaryDraft(createBoundaryDraft(boundary))}
+                  onDelete={handleDeleteBoundary}
+                  onUndoDelete={handleUndoDeleteBoundary}
+                  onDismissDeletedBoundary={() => setRecentlyDeletedBoundary(null)}
+                  onSave={handleSaveBoundary}
+                  onCancelEdit={() => setBoundaryDraft(createBoundaryDraft())}
+                />
+              </>
+            ) : null}
+
+            {activeStage === "plan" ? (
               <SchedulePanel
                 events={dashboard.scheduleEvents}
                 draft={scheduleDraft}
+                recentlyDeletedEvent={recentlyDeletedScheduleEvent}
                 onChange={(patch) => setScheduleDraft((current) => ({ ...current, ...patch }))}
                 onEdit={(event) => setScheduleDraft(createScheduleDraft(sprint.date, event))}
-                onDelete={deleteCoachScheduleEvent}
+                onDelete={handleDeleteScheduleEvent}
+                onUndoDelete={handleUndoDeleteScheduleEvent}
+                onDismissDeletedEvent={() => setRecentlyDeletedScheduleEvent(null)}
                 onSave={handleSaveSchedule}
+                onCancelEdit={() => setScheduleDraft(createScheduleDraft(sprint.date))}
                 showAll={showAllSchedules}
                 onToggleShowAll={() => setShowAllSchedules((current) => !current)}
               />
-            </div>
-          </aside>
+            ) : null}
 
-          <section className="space-y-4">
-            <div id="coach-boundaries" className="scroll-mt-4 space-y-4">
-              <BoundarySuggestionPanel
-                sourceText={boundarySourceText}
-                suggestions={boundarySuggestions}
-                feedbackReasons={boundarySuggestionReasons}
-                feedbackSummary={boundaryFeedbackSummary}
-                disabled={!dashboard.activeProfile}
-                isGenerating={isExtractingBoundaries}
-                onTextChange={setBoundarySourceText}
-                onGenerate={handleGenerateBoundarySuggestions}
-                onAccept={handleAcceptBoundarySuggestion}
-                onRevise={handleReviseBoundarySuggestion}
-                onReject={handleRejectBoundarySuggestion}
-                onReasonChange={(suggestionId, reason) => setBoundarySuggestionReasons((current) => ({ ...current, [suggestionId]: reason }))}
-              />
-              <BoundaryPanel
-                boundaries={dashboard.boundaries}
-                draft={boundaryDraft}
-                activeProfileReady={Boolean(dashboard.activeProfile)}
-                onChange={(patch) => setBoundaryDraft((current) => ({ ...current, ...patch }))}
-                onEdit={(boundary) => setBoundaryDraft(createBoundaryDraft(boundary))}
-                onDelete={deleteKnowledgeBoundary}
-                onSave={handleSaveBoundary}
-                onCancelEdit={() => setBoundaryDraft(createBoundaryDraft())}
-              />
-            </div>
-            <div id="coach-artifacts" className="scroll-mt-4">
-              <ArtifactPanel
-                readiness={dashboard.readiness}
-                artifacts={dashboard.artifacts}
-                artifactEdits={artifactEdits}
-                rejectionReasons={rejectionReasons}
-                isGenerating={isGenerating}
-                onGenerate={handleGenerate}
-                onEditDraft={(artifact, patch) => setArtifactEdits((current) => {
-                  const existing = current[artifact.id] ?? { title: artifact.title, body: artifact.body };
-                  return { ...current, [artifact.id]: { ...existing, ...patch } };
-                })}
-                onSaveEdit={handleEditArtifact}
-                onAccept={handleAcceptArtifact}
-                onReject={handleRejectArtifact}
-                onReasonChange={(artifactId, reason) => setRejectionReasons((current) => ({ ...current, [artifactId]: reason }))}
-                showAll={showAllArtifacts}
-                onToggleShowAll={() => setShowAllArtifacts((current) => !current)}
-              />
-            </div>
-            <AiFeedbackPanel summary={dashboard.feedbackSummary} />
-            <LlmRunPanel runs={dashboard.llmRuns} />
+            {activeStage === "advice" ? (
+              <>
+                <ArtifactPanel
+                  readiness={dashboard.readiness}
+                  artifacts={dashboard.artifacts}
+                  artifactEdits={artifactEdits}
+                  rejectionReasons={rejectionReasons}
+                  isGenerating={isGenerating}
+                  onGenerate={handleGenerate}
+                  onEditDraft={(artifact, patch) => setArtifactEdits((current) => {
+                    const existing = current[artifact.id] ?? { title: artifact.title, body: artifact.body };
+                    return { ...current, [artifact.id]: { ...existing, ...patch } };
+                  })}
+                  onSaveEdit={handleEditArtifact}
+                  onAccept={handleAcceptArtifact}
+                  onReject={handleRejectArtifact}
+                  onReasonChange={(artifactId, reason) => setRejectionReasons((current) => ({ ...current, [artifactId]: reason }))}
+                  showAll={showAllArtifacts}
+                  onToggleShowAll={() => setShowAllArtifacts((current) => !current)}
+                />
+                <CoachDisclosure title="AI 反馈复盘"><AiFeedbackPanel summary={dashboard.feedbackSummary} /></CoachDisclosure>
+                <CoachDisclosure title="AI 运行记录"><LlmRunPanel runs={dashboard.llmRuns} /></CoachDisclosure>
+              </>
+            ) : null}
           </section>
+
+          <CoachStageContext stage={activeStage} completed={completedStages[activeStage]} />
         </section>
       </section>
     </main>
   );
 }
 
-function removeKey<T>(record: Record<string, T>, key: string): Record<string, T> {
-  const next = { ...record };
-  delete next[key];
-  return next;
+function recommendedCoachStage(dashboard: ReturnType<typeof buildCoachDashboard>): CoachStageId {
+  if (!dashboard.activeProfile) return "profile";
+  if (!dashboard.boundaries.length) return "boundaries";
+  if (!dashboard.scheduleEvents.length) return "plan";
+  return "advice";
 }

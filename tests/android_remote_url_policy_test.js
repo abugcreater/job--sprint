@@ -17,18 +17,20 @@ const remoteWebViewClient = fs.readFileSync(
 const policy = fs.readFileSync("apps/android/app/src/main/java/com/kai/jobsprint/RemoteUrlPolicy.java", "utf8");
 const strings = fs.readFileSync("apps/android/app/src/main/res/values/strings.xml", "utf8");
 const manifest = fs.readFileSync("apps/android/app/src/main/AndroidManifest.xml", "utf8");
+const gradle = fs.readFileSync("apps/android/app/build.gradle", "utf8");
 
 assert.match(policy, /final class RemoteUrlPolicy/);
 assert.match(policy, /ALLOWED_REMOTE_HOSTS[\s\S]*job-sprint\.example\.com/);
 assert.match(policy, /ALLOWED_REMOTE_HOSTS[\s\S]*203\.0\.113\.10/);
-assert.match(policy, /ALLOWED_HTTP_REMOTE_HOSTS[\s\S]*203\.0\.113\.10/);
+assert.doesNotMatch(policy, /ALLOWED_HTTP_REMOTE_HOSTS/);
 assert.match(policy, /static String normalizeRemoteUrl\(String value\)/);
 assert.match(policy, /job-sprint\/react\/index\.html#\/today/);
 assert.match(policy, /static boolean isUsableHttpsUrl\(String url\)/);
 assert.match(policy, /static boolean isUsableRemoteUrl\(String url\)/);
 assert.match(policy, /static boolean isAllowedRemoteHost\(String host, String configuredRemoteUrl\)/);
 assert.match(policy, /your-domain\.example\.com/);
-assert.match(policy, /"http"\.equalsIgnoreCase\(scheme\)/);
+assert.doesNotMatch(policy, /"http"\.equalsIgnoreCase\(scheme\)/);
+assert.match(policy, /return "https"\.equalsIgnoreCase\(parsed\.getScheme\(\)\)/);
 assert.match(policy, /isConfiguredRemoteAppPath\(path\)/);
 assert.match(policy, /path\.contains\("\/job-sprint\/"\)/);
 assert.match(policy, /path\.endsWith\("\/schedule\.html"\)/);
@@ -46,8 +48,10 @@ assert.match(policy, /isAllowedRemoteNavigationPath\(parsed\.getPath\(\)\)/);
 assert.match(policy, /"\/login\.html"\.equals\(path\)/);
 assert.match(policy, /path\.startsWith\("\/react\/"\)/);
 assert.match(policy, /path\.startsWith\("\/api\/"\)/);
-assert.match(strings, /https:\/\/job-sprint\.example\.com\/job-sprint\/react\/index\.html#\/today/);
-assert.match(manifest, /android:usesCleartextTraffic="true"/);
+assert.doesNotMatch(strings, /remote_schedule_url/);
+assert.match(gradle, /JOB_SPRINT_ANDROID_WEBVIEW_URL/);
+assert.match(gradle, /resValue "string", "remote_schedule_url", remoteScheduleUrl/);
+assert.match(manifest, /android:usesCleartextTraffic="false"/);
 
 assert.match(controller, /RemoteUrlPolicy\.normalizeRemoteUrl/);
 assert.match(controller, /RemoteUrlPolicy\.isUsableRemoteUrl/);

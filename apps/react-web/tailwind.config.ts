@@ -17,16 +17,21 @@ export default {
           600: "#2563eb"
         },
         ink: {
-          400: "#94a3b8",
-          500: "#64748b",
-          700: "#334155",
-          900: "#0f172a"
+          200: "#d6dcda",
+          300: "#aab5b1",
+          400: "#7b8984",
+          500: "#596760",
+          600: "#46544e",
+          700: "#34413b",
+          800: "#25312c",
+          900: "#1e2925",
+          950: "#17211f"
         },
         surface: {
-          0: "#f8fafc",
+          0: "#f2f4f1",
           1: "#ffffff"
         },
-        line: "#dbe3ea",
+        line: "#d5ddd8",
         risk: {
           100: "#fee2e2",
           600: "#dc2626"
@@ -41,15 +46,16 @@ export default {
         }
       },
       boxShadow: {
-        panel: "0 18px 44px rgba(15, 23, 42, 0.08)",
-        soft: "0 8px 22px rgba(15, 23, 42, 0.05)"
+        panel: "0 22px 54px rgba(23, 33, 31, 0.10)",
+        soft: "0 8px 24px rgba(23, 33, 31, 0.055)"
       },
       borderRadius: {
-        card: "8px",
-        control: "8px"
+        card: "10px",
+        control: "8px",
+        workbench: "14px"
       },
       maxWidth: {
-        shell: "1680px"
+        shell: "1600px"
       }
     }
   },

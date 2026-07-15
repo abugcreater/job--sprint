@@ -16,9 +16,13 @@ export function WeeklyReviewPanel({
   serverStatus?: ServerOutcomeStatus;
   onSaveServerSnapshot?: () => void;
 }) {
+  const snapshotHintId = "weekly-review-snapshot-action";
+  const canSaveSnapshot = Boolean(onSaveServerSnapshot) && (serverStatus === "ready" || serverStatus === "saved");
+  const snapshotHint = serverOutcomeActionHint(serverStatus, Boolean(onSaveServerSnapshot));
+
   return (
     <article className="rounded-card border border-line bg-white p-5 shadow-soft" aria-labelledby="weekly-review-title">
-      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+      <div>
         <div>
           <div className="flex items-center gap-2 text-brand-700">
             <CalendarDays size={18} aria-hidden="true" />
@@ -26,11 +30,6 @@ export function WeeklyReviewPanel({
           </div>
           <p className="mt-2 text-xs font-bold text-ink-500">{analysis.dateRangeLabel}</p>
           <p className="mt-3 text-sm font-semibold leading-6 text-ink-500">{analysis.summary}</p>
-        </div>
-        <div className="rounded-card bg-brand-100 px-4 py-3 text-right">
-          <p className="text-xs font-black text-brand-700">闭环分</p>
-          <p className="mt-1 text-3xl font-black text-ink-900">{analysis.score}</p>
-          <p className="text-xs font-bold text-ink-500">{analysis.scoreLabel}</p>
         </div>
       </div>
 
@@ -60,13 +59,17 @@ export function WeeklyReviewPanel({
           <button
             type="button"
             className="inline-flex min-h-10 items-center justify-center gap-2 rounded-control border border-line bg-white px-3 text-xs font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600 disabled:cursor-not-allowed disabled:text-ink-300"
-            disabled={!onSaveServerSnapshot || serverStatus === "saving" || serverStatus === "loading"}
+            aria-describedby={snapshotHintId}
+            disabled={!canSaveSnapshot}
             onClick={onSaveServerSnapshot}
           >
             <Save size={14} aria-hidden="true" />
             保存结果快照
           </button>
         </div>
+        <p id={snapshotHintId} className="mt-3 rounded-control bg-white px-3 py-2 text-xs font-bold leading-5 text-ink-500" role="status" aria-live="polite">
+          {snapshotHint}
+        </p>
         <div className="mt-3 grid gap-2 sm:grid-cols-3">
           <SmallMetric label="有效推进" value={serverOutcome ? `${serverOutcome.metrics.effectiveActionCount} 项` : "待同步"} />
           <SmallMetric label="采纳后完成" value={serverOutcome?.metrics.acceptedScheduleCompletionRateLabel ?? "待同步"} />
@@ -75,6 +78,17 @@ export function WeeklyReviewPanel({
       </div>
     </article>
   );
+}
+
+function serverOutcomeActionHint(status: ServerOutcomeStatus, hasSaveAction: boolean): string {
+  if (!hasSaveAction) return "当前入口缺少保存动作，不能写入服务端周结果快照。";
+  if (status === "loading") return "正在读取周结果，读取完成后才能保存快照。";
+  if (status === "saving") return "正在写入服务端周结果快照。";
+  if (status === "local") return "本地模式不会写服务端快照；恢复服务端后再同步本周结果。";
+  if (status === "error") return "服务端周结果暂不可用；先保留本地复盘，恢复后再保存快照。";
+  if (status === "ready") return "保存会把本周有效推进、采纳后完成和面试复盘率写入服务端快照。";
+  if (status === "saved") return "快照已保存；再次保存会刷新本周服务端结果快照。";
+  return "等待周结果读取完成后再保存快照。";
 }
 
 function serverOutcomeStatusLabel(status: ServerOutcomeStatus): string {

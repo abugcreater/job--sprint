@@ -1,5 +1,5 @@
 use serde_json::{Value, json};
-use sqlx::SqlitePool;
+use sqlx_sqlite::SqlitePool;
 
 use crate::auth_config::UserConfig;
 use crate::coach_onboarding_event_summary::summarize_coach_onboarding_events;

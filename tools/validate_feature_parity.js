@@ -37,8 +37,8 @@ const featureMatrix = [
   },
   {
     id: "coach_personalization",
-    web: ["AI 求职教练", "生成 AI 建议", "userProfiles", "knowledgeBoundaries", "coachScheduleEvents", "aiArtifacts"],
-    android: ["AI 求职教练", "生成 AI 建议", "profileCount", "aiArtifactCount"],
+    web: ["准备工作台", "生成 AI 建议", "userProfiles", "knowledgeBoundaries", "coachScheduleEvents", "aiArtifacts"],
+    android: ["准备工作台", "生成 AI 建议", "profileCount", "aiArtifactCount"],
     min: [
       ["flowSnapshot.react.profileCount", 1],
       ["flowSnapshot.react.boundaryCount", 2],
@@ -57,8 +57,8 @@ const featureMatrix = [
   },
   {
     id: "application_tracking",
-    web: ["机会验证", "applications"],
-    android: ["机会验证", "applications"],
+    web: ["机会工作台", "applications"],
+    android: ["机会工作台", "applications"],
     evidenceTypes: ["delivery_record"]
   },
   {
