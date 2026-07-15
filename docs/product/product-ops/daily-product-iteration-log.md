@@ -1884,3 +1884,39 @@
 - 验证：默认并发的根 `npm test` 在 React/Vitest 阶段出现 8 个 5 秒超时；同一批失败文件单 worker 16 条用例全通过，完整前端 35 个文件/111 条用例在 1 worker 与 2 worker 下均通过。前端默认测试改为 2 worker 后，再以根 `npm test`、GitFlow PR 目标门禁、产品工作流门禁和敏感扫描验证。
 - 远端证据：草稿 PR #6 的 `GitFlow Policy / validate` 已成功；随后 `main/develop` ruleset 已要求 PR、禁止删除/强推，并将该 Actions `validate` 加为 required check。
 - 限制：不在每日迭代中直接合并受保护分支；本轮能证明本机 2 worker 稳定，不能替代 GitHub Actions 实际资源下的完整根测试证据。
+
+## 2026-07-15 主线回同步门禁复核
+
+主任务：复核 `main -> develop` 回同步是否已解除，避免在过期集成基线上继续日常产品迭代。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | 普通用户功能改动必须进入一致的集成基线，才能避免后续回同步时覆盖或遗漏已验收能力。 |
+| 问题确定性 | 5 | `origin/main...origin/develop` 显示 `10 0`；PR #6 仍为 Draft。 |
+| 风险降低 | 5 | 不在过期 `develop` 上启动新需求，避免产生第二条待人工裁决的产品分叉。 |
+| 交互改善 | 1 | 本轮是交付治理门禁，不直接修改用户界面。 |
+| 可验证性 | 5 | GitHub PR 状态、分支比较、产品迭代门禁与敏感扫描均可复现。 |
+| 实现大小 | 5 | 仅补运行记录，不改产品代码或远端配置。 |
+
+改动：
+
+- `docs/product/product-ops/daily-product-iteration-log.md`
+
+已验证：
+
+- `gh pr view 6 --repo abugcreater/job--sprint --json ...`：PR #6 为 `OPEN / Draft / CLEAN`，目标分支 `develop`，`GitFlow Policy / validate` 为 `SUCCESS`。
+- `git rev-list --left-right --count origin/main...origin/develop`：`10 0`，确认仅 `main` 领先，`develop` 没有待回带提交。
+- `npm run validate:product-iteration`：PASS，检查 10 份产品文档。
+- `npm run scan:sensitive`：PASS，未发现高风险命中。
+
+限制：
+
+- 本轮不将 Draft PR 标记为可审阅、不直接合并受保护分支，也不在未同步的 `develop` 上启动普通需求。
+- 这只能证明本机分支关系、PR 元数据和本地门禁状态，不能替代人工审阅或 GitHub 合并后的最终分支对齐检查。
+
+明日候选：
+
+1. 审阅并合并 PR #6 后，先确认 `main` 与 `develop` 的提交关系，再从更新后的 `develop` 选择一个普通用户路径的小步改进。
+2. 在回同步尚未完成前，只做不改变集成基线的只读核验，不新增产品代码分支。
