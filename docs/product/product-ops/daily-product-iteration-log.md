@@ -1942,6 +1942,25 @@
 1. 审阅并合并 PR #6 后，先确认 `main` 与 `develop` 的提交关系，再从更新后的 `develop` 选择一个普通用户路径的小步改进。
 2. 在回同步尚未完成前，只做不改变集成基线的只读核验，不新增产品代码分支。
 
+## 2026-07-16 第四十二次主动迭代
+
+主任务：让 Stats 的 AI 运行质量使用与 AI 运行记录一致的诊断口径。
+
+改动：
+
+- 新增 `apps/react-web/src/data/llmRunDiagnosis.ts`，统一运行记录、Stats 的诊断标签、说明和建议动作。
+- `LlmRunPanel` 与 `StatsPage` 共用诊断口径；Stats 会展示最新诊断和建议动作，区分本地前端未连接后端、schema 异常、真实 provider 成功、运行失败与规则降级。
+- 补 `StatsPage.test.tsx` 覆盖 `provider_not_configured` 与 `runtime_unreachable` 的代表性状态，并同步产品运维台账。
+
+已验证：
+
+- React 定向测试、全量前端测试、typecheck 和 build 均通过；Browser visual QA 在桌面与移动视口通过。
+- `npm run validate:product-iteration` 与 `npm run scan:sensitive` 通过；本轮不启动远端 provider。
+
+限制：
+
+- Stats 只解释已保存的运行记录，不替代 Node/Rust runtime 或远端 provider 的实际探测。
+
 ## 2026-07-20 第四十三次主动迭代
 
 主任务：为 Rust 本地 coach runtime 补独立 smoke，并纠正 health 对空 provider 环境变量的误报。

@@ -76,7 +76,31 @@ describe("React Job Sprint stats workspace", () => {
     expect(within(aiRunPanel!).getByText("成功 / 降级")).toBeInTheDocument();
     expect(within(aiRunPanel!).getAllByText("1 / 1")).toHaveLength(2);
     expect(within(aiRunPanel!).getByText("失败 / Schema 异常")).toBeInTheDocument();
-    expect(within(aiRunPanel!).getByText("失败 · anthropic-compatible")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("Schema 失败 · anthropic-compatible")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("最新诊断")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("模型响应未通过结构校验")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("建议动作")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("检查 schema、prompt version 和服务端 llm_runs 日志。")).toBeInTheDocument();
+  });
+
+  it("explains a local runtime fallback without calling it a provider failure", async () => {
+    useSprintStore.setState({
+      llmRuns: [
+        {
+          ...llmRuns()[1],
+          provider: "local-fallback",
+          warning: "server_unavailable",
+          createdAt: "2026-07-02T13:30:00+08:00"
+        }
+      ]
+    });
+    render(<App />);
+
+    const aiRunPanel = (await screen.findByRole("heading", { name: "AI 运行质量" })).closest("article");
+    expect(aiRunPanel).not.toBeNull();
+    expect(within(aiRunPanel!).getByText("本地模式 · local-fallback")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("本地前端未连接后端 AI API")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("用服务端 runtime 或远端环境复验 /api/coach/artifacts。")).toBeInTheDocument();
   });
 });
 
