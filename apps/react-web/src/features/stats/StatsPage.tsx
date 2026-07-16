@@ -5,8 +5,10 @@ import { buildApplicationsDashboard } from "../../data/applicationsAdapter";
 import { buildCoachDashboard } from "../../data/coachAdapter";
 import { buildInterviewDashboard } from "../../data/interviewAdapter";
 import { buildLearningDashboard } from "../../data/learningAdapter";
+import { diagnoseLlmRun } from "../../data/llmRunDiagnosis";
 import { buildReviewDashboard } from "../../data/reviewAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
+import type { LlmRun } from "../../types/sprint";
 
 export function StatsPage() {
   const sprint = useSprintStore((state) => state.sprint);
@@ -102,7 +104,9 @@ export function StatsPage() {
               ["运行总数", `${stats.llmRunSummary.totalCount} 次`],
               ["成功 / 降级", `${stats.llmRunSummary.successCount} / ${stats.llmRunSummary.fallbackCount}`],
               ["失败 / Schema 异常", `${stats.llmRunSummary.failedCount} / ${stats.llmRunSummary.schemaIssueCount}`],
-              ["最近状态", stats.llmRunSummary.latestLabel]
+              ["最近状态", stats.llmRunSummary.latestLabel],
+              ["最新诊断", stats.llmRunSummary.latestDiagnosisLabel],
+              ["建议动作", stats.llmRunSummary.latestNextAction]
             ]}
           />
           <StatPanel
@@ -215,12 +219,13 @@ function formatDateTime(value: string) {
   });
 }
 
-function summarizeLlmRuns(runs: Array<{ status: string; schemaStatus: string; provider: string; createdAt: string }>) {
+function summarizeLlmRuns(runs: LlmRun[]) {
   const successCount = runs.filter((run) => run.status === "success").length;
   const fallbackCount = runs.filter((run) => run.status === "fallback").length;
   const failedCount = runs.filter((run) => run.status === "failed").length;
   const schemaIssueCount = runs.filter((run) => run.schemaStatus === "failed").length;
   const latest = [...runs].sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
+  const latestDiagnosis = latest ? diagnoseLlmRun(latest) : null;
   return {
     totalCount: runs.length,
     successCount,
@@ -228,8 +233,10 @@ function summarizeLlmRuns(runs: Array<{ status: string; schemaStatus: string; pr
     failedCount,
     schemaIssueCount,
     valueLabel: runs.length ? `${successCount}/${runs.length}` : "暂无",
-    detailLabel: runs.length ? `成功 ${successCount} 次，降级 ${fallbackCount} 次，失败 ${failedCount} 次` : "生成 AI 草稿后会统计 provider、fallback 和 schema 状态",
-    latestLabel: latest ? `${llmStatusLabel(latest.status)} · ${latest.provider}` : "暂无运行记录"
+    detailLabel: runs.length ? `成功 ${successCount} 次，降级 ${fallbackCount} 次，失败 ${failedCount} 次；最近为${latestDiagnosis?.label}` : "生成 AI 草稿后会统计 provider、fallback 和 schema 状态",
+    latestLabel: latest ? `${latestDiagnosis?.label ?? llmStatusLabel(latest.status)} · ${latest.provider}` : "暂无运行记录",
+    latestDiagnosisLabel: latestDiagnosis?.title ?? "暂无 AI 运行记录",
+    latestNextAction: latestDiagnosis?.nextAction ?? "生成 AI 草稿后会给出诊断和恢复动作"
   };
 }
 
