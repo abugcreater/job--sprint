@@ -5,6 +5,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node apps/server/app.js",
+    "start:local": "node --env-file=.env apps/server/app.js",
+    "dev:coach-runtime": "npm --prefix apps/react-web run dev:coach-runtime",
     "start:rust": "cargo run --manifest-path apps/rust-api/Cargo.toml",
     "test:rust": "cargo test --manifest-path apps/rust-api/Cargo.toml",
     "build:rust": "cargo build --release --manifest-path apps/rust-api/Cargo.toml",

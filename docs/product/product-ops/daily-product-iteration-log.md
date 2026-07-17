@@ -2007,3 +2007,40 @@
 
 1. 审阅 PR #11 合入后，验证 Stats 页的 AI 运行诊断是否能正确区分 `provider_not_configured` 与 `runtime_unreachable`。
 2. 在 PR #12 合入后，为 Vite proxy + 登录 Cookie 到 Node/Rust runtime 补一条本地端到端 smoke，不接远端 provider。
+
+## 2026-07-17 第四十四次主动迭代
+
+主任务：让本地 React AI 联调真正连到 Node API，而不是把纯 Vite 结果当成模型失败。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | 诊断文案存在但缺少可复现恢复路径，本地使用者仍无法验证 AI 草稿生成链路。 |
+| 问题确定性 | 5 | `VITE_JOB_SPRINT_SERVER_RUNTIME=true` 只开启服务端调用，原 Vite 配置没有 `/api` proxy，`5173` 无法转到 Node `8000`。 |
+| 风险降低 | 5 | 新命令只绑定回环地址，smoke 使用免登录 Node fallback，不读取真实密钥、不调用远端 provider。 |
+| 交互改善 | 4 | 浏览器可沿同一端口使用 React 与 API，诊断进入鉴权、fallback、provider 或 schema 的准确分类。 |
+| 可验证性 | 5 | Vite proxy 回归测试与真实临时进程 smoke 均可复现。 |
+| 实现大小 | 4 | 只涉及本地启动配置、公开模板、测试和说明，不改变业务数据或权限模型。 |
+
+改动：
+
+- `apps/react-web/vite.config.ts`：从仓库根读取本地 env，为 `/api` 配置可覆盖、默认指向 `127.0.0.1:8000` 的开发代理。
+- `apps/react-web/package.json` 与根 `package.json`：新增 `dev:coach-runtime` 和 `start:local`，前端联调固定绑定回环地址。
+- `.env.example`：去除会抢占单用户认证或误触 provider 的占位值，明确多用户 JSON/file 与单用户配置互斥。
+- `README.md`：补本地登录、两进程启动、诊断状态边界和 Cookie 限制说明。
+- `apps/react-web/src/test/viteConfig.test.ts`：锁定 `/api` proxy 与可配置 target。
+
+已验证：
+
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，36 个测试文件、112 个测试通过。
+- `npm --prefix apps/react-web run build`：PASS；保留既有 Vite chunk size warning。
+- `npm run test:coach-runtime-diagnostic`：PASS，8 类诊断用例通过。
+- 临时 Node runtime + `npm run dev:coach-runtime`：PASS；`5173 -> /api -> Node` 返回 `provider_not_configured`，两个临时进程均已停止。
+- `npm run validate:product-iteration -- --json`、`npm run scan:sensitive`、`npm run build:public-safe && npm run scan:public-safe`、`npm run validate:workspace-boundaries`、`git diff --check`：PASS。
+
+限制：
+
+- smoke 刻意使用 `JOB_SPRINT_AUTH_DISABLED=true`，只证明 Vite proxy、Node API、fallback 与 schema；没有验证真实用户 Cookie 或真实 provider。
+- `npm run start:local` 要求使用未跟踪的 `.env`；本轮没有修改服务器配置、发布或同步 Android 资源。

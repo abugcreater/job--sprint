@@ -1,6 +1,6 @@
 # 产品决策账本
 
-日期：2026-07-16
+日期：2026-07-20
 
 ## 当前主合同
 
@@ -21,6 +21,7 @@
 
 | 日期 | 决策 | 理由 | 取舍 |
 |---|---|---|---|
+| 2026-07-17 | 本地 React AI 联调必须显式经过 API proxy，而不是把纯 Vite 结果当成 provider 结果。 | `VITE_JOB_SPRINT_SERVER_RUNTIME=true` 只打开服务端调用开关；没有 `/api` proxy 时，请求仍落在 `5173` 的前端服务，用户无法判断是环境、鉴权还是模型问题。 | 新增 `npm run start:local` 和只绑定回环地址的 `npm run dev:coach-runtime`；Vite 将 `/api` 默认代理到 `127.0.0.1:8000`，目标可由 `JOB_SPRINT_API_PROXY_TARGET` 覆盖。真实 provider 仍使用仓库外密钥和独立 evidence。 |
 | 2026-07-16 | Stats 与 AI 运行记录必须复用同一诊断规则。 | 只在 Coach 页解释 `local-fallback / server_unavailable` 会让用户在统计页仍把环境降级计入 provider 失败，导致跨模块指标和恢复动作互相矛盾。 | 抽出 `diagnoseLlmRun` 供 Coach 与 Stats 共同使用；Stats 只显示最近运行的诊断和建议动作，不主动探测、请求 API 或写入运行记录。 |
 | 2026-07-16 | GitFlow 基线先比较文件树，再判断提交祖先。 | rebase、squash 或 merge commit 会让提交 SHA 与领先数量不同；只看历史会把内容已对齐的分支误判为阻塞，导致每日迭代停摆。 | `git diff --quiet origin/main origin/develop` 为 0 时标记“历史差异、内容已对齐”，从最新 `develop` 正常开发；只有文件树存在真实差异时才核对回同步 PR、required check 与人工合并状态。 |
 | 2026-07-12 | GitFlow 远端保护升级为真实 PR 必过门禁。 | 仅有分支命名和本地脚本不能阻止 GitHub 上的错误目标 PR、直接推送或强推；必须先用真实 PR 证明 Actions 检查名称，再将其加入受保护分支的 required checks。 | `main/develop` ruleset `Protect main and develop` 已禁止删除、强推和绕过，要求 PR 并要求 GitHub Actions `validate`（integration `15368`）；PR #6 当时已实际运行并通过 `GitFlow Policy / validate`。后续分支对齐以文件树优先，历史差异不再单独阻塞普通需求。 |
