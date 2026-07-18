@@ -2044,3 +2044,36 @@
 
 - smoke 刻意使用 `JOB_SPRINT_AUTH_DISABLED=true`，只证明 Vite proxy、Node API、fallback 与 schema；没有验证真实用户 Cookie 或真实 provider。
 - `npm run start:local` 要求使用未跟踪的 `.env`；本轮没有修改服务器配置、发布或同步 Android 资源。
+
+## 2026-07-18 第四十五次主动迭代
+
+主任务：把本地 Vite -> Node AI runtime 联调从手工 smoke 升级为可重复自动验证。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 本地用户需要稳定区分 proxy、鉴权、fallback 与 provider，避免开发服务变化后重新面对“AI 一直失败”。 |
+| 问题确定性 | 5 | 前一轮已手工证明 `5173 -> /api -> Node`，但没有自动入口守住该关键链路。 |
+| 风险降低 | 5 | 动态端口、临时免登录 runtime、超时和子进程清理不依赖用户 `.env`，也不与常用端口冲突。 |
+| 交互改善 | 3 | 本轮是开发验收闭环，间接保证两进程启动时得到准确 AI 诊断。 |
+| 可验证性 | 5 | 测试直接断言经 Vite `/api` proxy 的 health 与 artifacts JSON，并验证分类为 `provider_not_configured`。 |
+| 实现大小 | 5 | 只新增一个 Node smoke 和两个 package script，不改产品数据、权限或服务器。 |
+
+改动：
+
+- `tests/local_coach_runtime_proxy_test.js`：动态启动临时 Node runtime 与 Vite，验证 health、artifacts 合同、proxy、fallback/schema，并在 finally 中回收子进程和临时 runtime JSON。
+- `package.json`：新增 `test:coach-runtime-proxy`，并把它加入 `test:coach-runtime-diagnostic`。
+- `product-ledger.md`、`known-issues.md`、本日志：记录自动 smoke 的证据范围和剩余 Cookie/provider/Rust 限制。
+
+已验证：
+
+- `node --check tests/local_coach_runtime_proxy_test.js`：PASS。
+- `npm run test:coach-runtime-proxy`：PASS。
+- `npm run test:coach-runtime-diagnostic`：PASS，8 类诊断单测与 proxy smoke 均通过。
+- smoke 后进程检查：PASS，未发现测试遗留的 Node runtime 或 Vite 进程。
+
+限制：
+
+- 测试使用 `JOB_SPRINT_AUTH_DISABLED=true`，只证明 Node fallback、proxy 与 schema，不能证明真实用户 Cookie、真实 provider 或远端服务。
+- Rust/Axum runtime、Android WebView 和 HTTPS 远端验收未运行；Rust runtime 已由后一轮独立 smoke 补齐本地证据。
