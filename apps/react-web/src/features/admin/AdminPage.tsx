@@ -46,7 +46,7 @@ export function AdminPage() {
   }
 
   if (!owner) {
-    return <Navigate to="/more" replace />;
+    return <Navigate to="/today" replace />;
   }
 
   return (

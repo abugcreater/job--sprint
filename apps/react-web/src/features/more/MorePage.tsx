@@ -90,10 +90,10 @@ export function MorePage() {
         <header className="page-intro motion-enter">
           <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
             <div className="min-w-0 max-w-3xl">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">More · 账号与数据安全</p>
-              <h1 className="mt-2 text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">我的数据</h1>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-brand-700">Account · 个人数据安全</p>
+              <h1 className="mt-2 text-3xl font-black leading-tight tracking-[-0.035em] text-ink-950 md:text-[44px]">账号与数据</h1>
               <p className="mt-4 max-w-3xl break-words text-sm font-semibold leading-6 text-ink-500">
-                查看保存状态、备份个人数据，并进入低频功能。
+                管理自己的同步状态与数据备份；邀请账号和批次管理仅向管理员开放。
               </p>
             </div>
             <p className="text-sm font-black text-ink-700"><span className="text-3xl text-ink-950">{dashboard.storage.evidenceCount}</span> 条本地证据</p>
@@ -106,10 +106,10 @@ export function MorePage() {
           <SmallStat label="画像 / 边界" value={`${dashboard.storage.profileCount} / ${dashboard.storage.boundaryCount}`} />
         </section>
 
-        <nav className="grid grid-cols-3 gap-1 rounded-workbench bg-surface-1 p-1" aria-label="我的数据视图">
+        <nav className="grid grid-cols-3 gap-1 rounded-workbench bg-surface-1 p-1" aria-label="账号与数据视图">
           <MoreViewButton active={moreView === "account"} onClick={() => setMoreView("account")}>账号</MoreViewButton>
           <MoreViewButton active={moreView === "backup"} onClick={() => setMoreView("backup")}>备份</MoreViewButton>
-          <MoreViewButton active={moreView === "links"} onClick={() => setMoreView("links")}>更多入口</MoreViewButton>
+          <MoreViewButton active={moreView === "links"} onClick={() => setMoreView("links")}>常用入口</MoreViewButton>
         </nav>
 
         {moreView === "account" ? <section className="grid min-w-0 gap-4 xl:grid-cols-2"><StatusPanel dashboard={dashboard} />{owner ? <FallbackPanel dashboard={dashboard} /> : <AccountPanel />}</section> : null}

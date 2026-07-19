@@ -2077,3 +2077,38 @@
 
 - 测试使用 `JOB_SPRINT_AUTH_DISABLED=true`，只证明 Node fallback、proxy 与 schema，不能证明真实用户 Cookie、真实 provider 或远端服务。
 - Rust/Axum runtime、Android WebView 和 HTTPS 远端验收未运行；Rust runtime 已由后一轮独立 smoke 补齐本地证据。
+
+## 2026-07-19 第四十六次主动迭代
+
+主任务：将普通用户的“更多”入口收敛为个人“账号与数据”工作区，并固化管理员直链的权限边界。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | 普通求职者需要一眼分清个人同步/备份与邀请、批次、账号生命周期管理。 |
+| 问题确定性 | 5 | `/admin` 已有 owner 守卫，但普通导航仍显示“更多”，非 owner 直达管理员页会跳到 `/more`，产品语义不清。 |
+| 风险降低 | 5 | 只改 React 导航、页面文案和前端路由落点；不改服务端权限、不触碰账号数据。 |
+| 交互改善 | 5 | 桌面导航把“账号与数据”和 owner-only“管理员”拆开，个人操作不再像后台入口。 |
+| 可验证性 | 5 | 路由页面测试覆盖普通用户页面、隐藏的管理员能力和 `/admin` 越权直链落点。 |
+| 实现大小 | 5 | 改动限制在导航、个人数据页、路由守卫落点、页面测试和 product-ops 记录。 |
+
+改动：
+
+- `apps/react-web/src/app/navigation.ts` 将 `/more` 展示为“账号 / 账号与数据”，明确邀请与批次管理仅在管理员中心提供。
+- `apps/react-web/src/app/AppShell.tsx` 将桌面导航拆为“账号与数据”和仅 owner 可见的“管理员”分组。
+- `apps/react-web/src/features/more/MorePage.tsx` 将页面标题、辅助说明和页内标签改为个人账号、同步与备份语义。
+- `apps/react-web/src/features/admin/AdminPage.tsx` 将非 owner 直达 `/admin` 的落点改为 `/today`；会话检查等待态保持不变。
+- 更新 `MorePage`、路由页面测试、产品台账和已知问题。
+
+已验证：
+
+- `npm run validate:gitflow -- --phase start`：PASS。
+- `npm --prefix apps/react-web test -- MorePage.test.tsx navigationRoutes.test.tsx`：PASS，2 个测试文件、9 条用例通过。
+- `npm --prefix apps/react-web test`：PASS，35 个测试文件、111 条用例通过。
+- `npm --prefix apps/react-web run build`、`git diff --check`：PASS；保留既有 Vite chunk size warning。
+
+限制：
+
+- 本轮只收敛客户端导航与落点；Node/Rust 服务端的 owner 权限校验仍是最终安全边界。
+- 未改远端配置、未删除账号、未迁移数据，也未绕过受保护分支。
