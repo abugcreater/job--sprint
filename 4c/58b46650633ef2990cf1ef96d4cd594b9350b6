@@ -1,0 +1,37 @@
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_d6f0bdd05d3bfc 1944-1990
+apps/react-web/src/features/admin/AdminPage.tsx
+  s_8f6b4df0c955b0::t_07d22b907e3d48 49
+apps/react-web/src/features/modules/ModulePlaceholderPage.tsx
+  s_8f6b4df0c955b0::t_07d22b907e3d48 99,120
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_07d22b907e3d48 14
+apps/react-web/src/app/AppShell.tsx
+  s_8f6b4df0c955b0::t_07d22b907e3d48 79,137,211-212
+apps/react-web/src/features/more/MorePage.tsx
+  s_8f6b4df0c955b0::t_07d22b907e3d48 93-94,96,109,112
+apps/react-web/src/test/navigationRoutes.test.tsx
+  s_8f6b4df0c955b0::t_07d22b907e3d48 70,132,137,139-140
+apps/react-web/src/test/MorePage.test.tsx
+  s_8f6b4df0c955b0::t_07d22b907e3d48 43,52,73,81
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_07d22b907e3d48 46
+apps/react-web/src/app/navigation.ts
+  s_8f6b4df0c955b0::t_07d22b907e3d48 125,127,129-132,134-135
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "4c58b46650633ef2990cf1ef96d4cd594b9350b6",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
