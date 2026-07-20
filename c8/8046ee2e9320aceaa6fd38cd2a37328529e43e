@@ -12,6 +12,9 @@ apps/react-web/src/test/StatsPage.test.tsx
   s_8f6b4df0c955b0::t_3e37bc2a6a70e2 91,101
 docs/product/product-ops/daily-product-iteration-log.md
   s_8f6b4df0c955b0::t_70ad1c1993e9ca 1944-1948,1968-1971,1983-1985,1990-1992,1999-2001,2005-2007
+  s_8c4e51c148c3fc::t_ebd920eea71fbe 1949-1963
+docs/product/product-ops/known-issues.md
+  s_8c4e51c148c3fc::t_ebd920eea71fbe 22
 ---
 {
   "schema_version": "authorship/3.0.0",
@@ -19,6 +22,14 @@ docs/product/product-ops/daily-product-iteration-log.md
   "base_commit_sha": "c88046ee2e9320aceaa6fd38cd2a37328529e43e",
   "prompts": {},
   "sessions": {
+    "s_8c4e51c148c3fc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4b9b-c8ac-75a2-8110-16a46302f174",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    },
     "s_8f6b4df0c955b0": {
       "agent_id": {
         "tool": "codex",
