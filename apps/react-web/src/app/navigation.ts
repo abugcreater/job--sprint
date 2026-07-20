@@ -6,7 +6,6 @@ import {
   BarChart3,
   Settings2,
   MessageCircleQuestion,
-  MoreHorizontal,
   UserRound,
   type LucideIcon
 } from "lucide-react";
@@ -123,17 +122,17 @@ export const appRoutes: AppRoute[] = [
 	    primaryFocus: "邀请账号、批次首登、权限隔离",
 	    migrationScope: "把邀请用户从画像页移出，收敛到管理员中心"
 	  },
-	  {
+  {
     id: "more",
-    label: "更多",
+    label: "账号",
     path: "/more",
-    icon: MoreHorizontal,
-    eyebrow: "More",
-    title: "更多入口",
-	    summary: "同步状态、导出恢复、账号状态和低频入口集中处理；管理员工具按权限隐藏。",
+    icon: UserRound,
+    eyebrow: "Account",
+    title: "账号与数据",
+    summary: "查看个人同步状态、备份和低频工具；邀请账号和批次管理仅在管理员中心提供。",
     status: "已接入",
-    primaryFocus: "低频工具、导出恢复、离线边界",
-    migrationScope: "已迁移同步状态、localStorage 状态、导出恢复和回滚说明"
+    primaryFocus: "个人同步、数据备份、恢复边界",
+    migrationScope: "已迁移同步状态、个人导出恢复和账号说明；管理员能力保持在 owner-only 管理员中心"
   }
 ];
 
