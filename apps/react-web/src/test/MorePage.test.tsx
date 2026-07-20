@@ -40,7 +40,7 @@ describe("React Job Sprint more workspace", () => {
   it("renders ordinary-user sync, account and export panels without admin tools", async () => {
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "我的数据" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "账号与数据" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "同步状态" })).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "我的账号" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "备份" }));
@@ -49,7 +49,7 @@ describe("React Job Sprint more workspace", () => {
     expect(screen.queryByRole("heading", { name: "旧版回滚说明" })).not.toBeInTheDocument();
     expect(screen.queryByText("旧版每日复盘")).not.toBeInTheDocument();
     expect(screen.queryByText("apps/android/app/src/main/assets/web/schedule.html")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "更多入口" }));
+    fireEvent.click(screen.getByRole("button", { name: "常用入口" }));
     expect(screen.getByRole("link", { name: "查看统计 集中查看个人进展和数据完整度。" })).toBeInTheDocument();
   });
 
@@ -70,7 +70,7 @@ describe("React Job Sprint more workspace", () => {
     expect(revokeObjectURL).toHaveBeenCalledWith("blob:job-sprint");
     expect(screen.getByRole("status")).toHaveTextContent("个人数据备份已导出");
 
-    fireEvent.click(screen.getByRole("button", { name: "更多入口" }));
+    fireEvent.click(screen.getByRole("button", { name: "常用入口" }));
     fireEvent.click(screen.getByRole("link", { name: "进入复盘 记录今日事实、卡点和明日行动。" }));
     expect(await screen.findByRole("heading", { name: "今日复盘" })).toBeInTheDocument();
     expect(window.location.hash).toBe("#/review");
@@ -78,7 +78,7 @@ describe("React Job Sprint more workspace", () => {
     firstRender.unmount();
     resetSprint("#/more");
     render(<App />);
-    fireEvent.click(screen.getByRole("button", { name: "更多入口" }));
+    fireEvent.click(screen.getByRole("button", { name: "常用入口" }));
     fireEvent.click(await screen.findByRole("link", { name: "回到今日 回到当前任务和 Evidence Gate。" }));
     expect(await screen.findByRole("heading", { name: "今日 AI 教练" })).toBeInTheDocument();
     expect(window.location.hash).toBe("#/today");

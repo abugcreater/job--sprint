@@ -132,3 +132,10 @@
 - Android evidence：正式签名 release v2/v3 通过并覆盖安装；本地 WebView 全功能流、杀进程读回、384 CSS px 无横向溢出、44px 触控门和键盘态通过。
 - P0 追加：准备页已拆为 4 阶段，Android `384 × 792` 下从 11171px 降为 2680px；阶段焦点、3 次物理上滑到底和 IME 隐藏底栏通过。
 - 边界：P5 已补远端部署、全项目 UI 回归和正式签名 APK；仍需用真实冷启动指标决定 bundle 拆分，并在提交后重跑同一门禁。
+
+## 2026-07-20 GitFlow 自动收口基线
+
+- 普通日更完成定义已从“提交或 Draft PR”升级为“合入 `develop`、删除短分支、工作树干净”；开放 PR、Draft 或冲突存在时禁止再创建新需求分支。
+- 正式主分支为 `main`。定期发布只允许 `release/* -> main`，触发条件为距上次 release 满 7 天、累计 3 项需求或用户明确要求；禁止直接创建 `develop -> main` PR。
+- `.github/gitflow-automation-contract.json` 是积压阻断、目标分支、合并方式、发布阈值与回同步目标的机器事实源；`.github/workflows/gitflow-policy.yml` 的 `validate` 除 GitFlow 策略测试外，还执行产品迭代合同测试/校验与敏感扫描器测试/扫描。
+- 该基线约束 Git 仓库合并与发布，不代表服务器、Android APK 或生产数据已自动部署；这些仍按最终交付门禁单独验收。

@@ -43,7 +43,22 @@ const docChecks = [
   {
     id: "requirement_development_template_reusable",
     file: "docs/product/product-ops/requirement-development-template.md",
-    tokens: ["# 需求开发复用模板", "复制入口", "标准需求卡", "数据隔离清单", "UI/UX 实现约束", "分层验收命令", "最终报告模板"]
+    tokens: ["# 需求开发复用模板", "复制入口", "标准需求卡", "数据隔离清单", "UI/UX 实现约束", "分层验收命令", "普通需求目标为 `develop`", "`release/*` 目标为 `main`", "合并后删除工作分支", "目标分支 merge commit", "develop squash SHA", "main release SHA", "最终报告模板"]
+  },
+  {
+    id: "daily_iteration_closeout",
+    file: "docs/product/product-ops/daily-product-iteration.md",
+    tokens: ["积压收口门禁", "不得创建新的工作分支", "squash merge", "release/vX.Y.Z", "最大版本", "工作分支已删除"]
+  },
+  {
+    id: "gitflow_daily_closeout",
+    file: "docs/product/product-ops/gitflow-development-governance.md",
+    tokens: ["每日迭代收口规则", "每 7 天", "3 项需求", "release/* -> main", "回同步 `develop`"]
+  },
+  {
+    id: "github_pr_quality_gate",
+    file: ".github/workflows/gitflow-policy.yml",
+    tokens: ["node tests/product_iteration_workflow_test.js", "node tools/validate_product_iteration_workflow.js", "node tests/scan_sensitive_content_test.js", "node tools/scan_sensitive_content.js"]
   },
   {
     id: "completion_audit_scope",
@@ -198,19 +213,87 @@ function validateCoachEvidence(root, findings, warnings) {
   }
 }
 
+function valueAtPath(value, pathParts) {
+  return pathParts.reduce((current, part) => current && current[part], value);
+}
+
+function validateGitflowAutomationContract(root, findings) {
+  const file = ".github/gitflow-automation-contract.json";
+  if (!fileExists(root, file)) {
+    findings.push({
+      id: "gitflow_automation_contract",
+      code: "required_gitflow_contract_missing",
+      file,
+      missing: [`file:${file}`]
+    });
+    return;
+  }
+
+  let contract;
+  try {
+    contract = readJson(root, file);
+  } catch (error) {
+    findings.push({
+      id: "gitflow_automation_contract",
+      code: "gitflow_contract_invalid_json",
+      file,
+      error: error.message
+    });
+    return;
+  }
+
+  const expected = [
+    [["version"], 1],
+    [["workBranches", "source"], "develop"],
+    [["workBranches", "target"], "develop"],
+    [["workBranches", "mergeMethod"], "squash"],
+    [["workBranches", "blockNewBranchWhenBacklog"], true],
+    [["workBranches", "draftCountsAsBacklog"], true],
+    [["workBranches", "deleteAfterMerge"], true],
+    [["release", "source"], "develop"],
+    [["release", "target"], "main"],
+    [["release", "branchPattern"], "release/vX.Y.Z"],
+    [["release", "gitGate"], "npm run test:git-release"],
+    [["release", "deploymentGate"], "npm run test:release"],
+    [["release", "maxDaysBetweenReleases"], 7],
+    [["release", "mergedRequirementsThreshold"], 3],
+    [["release", "backsyncTarget"], "develop"],
+    [["release", "allowDirectDevelopToMain"], false],
+    [["release", "deleteAfterMerge"], true]
+  ];
+  const mismatches = expected
+    .filter(([pathParts, expectedValue]) => valueAtPath(contract, pathParts) !== expectedValue)
+    .map(([pathParts, expectedValue]) => `${pathParts.join(".")}=${JSON.stringify(expectedValue)}`);
+  if (mismatches.length) {
+    findings.push({
+      id: "gitflow_automation_contract",
+      code: "gitflow_contract_mismatch",
+      file,
+      missing: mismatches
+    });
+  }
+}
+
 function validateProductIterationWorkflow(root = repoRoot) {
   const findings = [];
   const warnings = [];
 
   docChecks.forEach((check) => addMissingTokens(root, findings, check));
+  validateGitflowAutomationContract(root, findings);
   requireScriptContains(root, findings, "test", [
     "npm --prefix apps/react-web run typecheck",
     "npm --prefix apps/react-web test",
     "node tests/product_iteration_workflow_test.js"
   ]);
-  requireScriptContains(root, findings, "test:release", [
+  requireScriptContains(root, findings, "test:git-release", [
     "npm test",
+    "npm run test:gitflow",
     "npm run test:local-functional",
+    "npm run build:public-safe",
+    "npm run scan:public-safe"
+  ]);
+  requireScriptContains(root, findings, "test:release", [
+    "npm run test:git-release",
     "npm run build:rust:linux",
     "npm run build:server-delivery"
   ]);
@@ -232,6 +315,7 @@ function validateProductIterationWorkflow(root = repoRoot) {
     warnings,
     metrics: {
       checkedDocs: docChecks.length,
+      checkedContracts: 1,
       warningCount: warnings.length
     }
   };

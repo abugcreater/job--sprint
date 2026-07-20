@@ -66,3 +66,11 @@ cargo clippy --manifest-path apps/rust-api/Cargo.toml --all-targets -- -D warnin
 cargo test --manifest-path apps/rust-api/Cargo.toml
 cargo build --release --manifest-path apps/rust-api/Cargo.toml
 ```
+
+本地 coach runtime 的最小诊断 smoke（临时端口与临时 SQLite，不读取真实账号或 provider 配置）：
+
+```bash
+npm run test:rust-coach-runtime
+```
+
+该命令只证明 Rust API、`/api/coach/artifacts` 的 fallback schema 和 `llm_runs` 临时读回可用；`provider_not_configured` 是预期诊断，不代表真实模型已配置或远端 AI 调用通过。

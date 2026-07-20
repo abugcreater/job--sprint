@@ -485,15 +485,22 @@ npm run final:delivery -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.
 git status --short --branch
 git diff --check
 npm run scan:sensitive
-git add -A
+git add <本需求文件>
 git diff --cached --check
 git commit -m "<summary>"
 git push -u origin <branch>
-gh pr create --base main --head <branch> --title "<title>" --body "<summary and verification>"
-gh pr merge <number> --merge
-git fetch origin main
-git branch -r --contains <commit>
+gh pr create --base develop --head <branch> --title "<title>" --body "<summary and verification>"
+gh pr checks <number> --watch
+gh pr merge <number> --squash --delete-branch
+git fetch --prune origin
+gh pr view <number> --json state,mergeCommit
+git status --short --branch
 ```
+
+- 普通需求目标为 `develop`，完成后使用 squash merge；合并后删除工作分支。
+- `release/*` 目标为 `main`，hotfix 同样只向 `main` 提交，并在合并后回同步 `develop`。
+- 禁止直接创建 `develop -> main` PR；主分支同步必须从 `develop` 派生正式 release 分支。
+- 仅做 Git 版本发布时运行 `npm run test:git-release`；只有明确授权服务器交付时才运行需要外部服务器输入的 `npm run test:release`。
 
 提交前确认：
 
@@ -501,7 +508,7 @@ git branch -r --contains <commit>
 - 没有提交私有 env、真实证据、keystore、token。
 - 大体量构建产物是项目要求的一部分才提交。
 - PR 描述包含验证命令和限制。
-- 合并后确认 `origin/main` 包含本次提交。
+- 普通需求合并后确认 `origin/develop` 包含 squash 结果；release/hotfix 合并后确认 `origin/main` 包含发布结果，并完成 `main -> develop` 回同步。
 
 ## 最终报告模板
 
@@ -515,7 +522,7 @@ Dispatch:
 交付结果：
 - 独立路径：<path>
 - PR：<url>
-- main merge commit：<sha>
+- 目标分支 merge commit：<普通需求填写 develop squash SHA；release/hotfix 填写 main release SHA>
 - 服务器：<URL 或说明>
 - Android APK：<path>
 - 最终验收：<PASS / PASS_WITH_LIMITS / PARTIAL>

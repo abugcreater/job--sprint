@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "workBranches": {
+    "source": "develop",
+    "target": "develop",
+    "mergeMethod": "squash",
+    "blockNewBranchWhenBacklog": true,
+    "draftCountsAsBacklog": true,
+    "deleteAfterMerge": true
+  },
+  "release": {
+    "source": "develop",
+    "target": "main",
+    "branchPattern": "release/vX.Y.Z",
+    "gitGate": "npm run test:git-release",
+    "deploymentGate": "npm run test:release",
+    "maxDaysBetweenReleases": 7,
+    "mergedRequirementsThreshold": 3,
+    "backsyncTarget": "develop",
+    "allowDirectDevelopToMain": false,
+    "deleteAfterMerge": true
+  }
+}

@@ -67,7 +67,7 @@ describe("React Job Sprint module routing", () => {
     expect(window.location.hash).toBe("#/review");
 
     expect(within(nav).queryByRole("link", { name: "统计" })).not.toBeInTheDocument();
-    expect(within(nav).queryByRole("link", { name: "更多" })).not.toBeInTheDocument();
+    expect(within(nav).queryByRole("link", { name: "账号" })).not.toBeInTheDocument();
   });
 
   it("lands the resume import entry directly on the import workspace", async () => {
@@ -129,14 +129,14 @@ describe("React Job Sprint module routing", () => {
     }
   });
 
-  it("redirects non-owner direct admin access to the ordinary more workspace", async () => {
+  it("redirects non-owner direct admin access to the daily workspace", async () => {
     resetSprint("#/admin");
 
     render(<App />);
 
-    expect(await screen.findByRole("heading", { name: "我的数据" })).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "今日 AI 教练" })).toBeInTheDocument();
     expect(screen.queryByRole("heading", { name: "管理员中心" })).not.toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "我的账号" })).toBeInTheDocument();
-    expect(window.location.hash).toBe("#/more");
+    expect(screen.queryByRole("heading", { name: "我的账号" })).not.toBeInTheDocument();
+    expect(window.location.hash).toBe("#/today");
   });
 });

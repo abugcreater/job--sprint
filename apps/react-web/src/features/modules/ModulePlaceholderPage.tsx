@@ -96,7 +96,7 @@ function RouteActions() {
         className="inline-flex min-h-11 items-center gap-2 rounded-control border border-line bg-white px-4 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600"
       >
         <RotateCcw size={16} aria-hidden="true" />
-        查看更多
+        账号与数据
       </NavLink>
     </div>
   );
@@ -117,7 +117,7 @@ function MoreLinks() {
       </NavLink>
       <div className="flex min-h-12 items-center gap-2 rounded-control border border-line bg-surface-0 px-4 text-sm font-bold text-ink-500">
         <DatabaseZap size={16} aria-hidden="true" />
-        设置、导出和远端同步集中在更多入口
+        个人设置、导出和远端同步集中在账号与数据
       </div>
     </div>
   );

@@ -69,8 +69,8 @@ const featureMatrix = [
   },
   {
     id: "more_import_export",
-    web: ["我的数据", "导出 JSON", "导入个人数据备份"],
-    android: ["我的数据", "导入个人数据备份", "android-webview-functional-persistence-report.json"]
+    web: ["账号与数据", "导出 JSON", "导入个人数据备份"],
+    android: ["账号与数据", "导入个人数据备份", "android-webview-functional-persistence-report.json"]
   },
   {
     id: "restart_persistence",

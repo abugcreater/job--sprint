@@ -76,7 +76,7 @@ export function AppShell() {
               <p className="truncate text-base font-black">{currentRoute.label}作战台</p>
             </div>
           </div>
-          <NavLink to="/more" className="status-chip min-h-11 shrink-0 border border-white/15 bg-white/10 text-white" aria-label={`${syncLabel}，打开更多页处理同步`}>
+          <NavLink to="/more" className="status-chip min-h-11 shrink-0 border border-white/15 bg-white/10 text-white" aria-label={`${syncLabel}，打开账号与数据处理同步`}>
             <CloudOff size={14} aria-hidden="true" />
             {syncState === "failed" ? "处理同步" : syncLabel}
           </NavLink>
@@ -134,7 +134,7 @@ export function AppShell() {
         <div className="border-t border-white/10 p-4">
           <NavLink to="/more" className="flex min-h-11 items-center justify-between gap-3 rounded-control border border-white/10 bg-white/5 px-3 text-xs font-bold text-ink-200 transition hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-brand-100">
             <span className="inline-flex items-center gap-2"><CloudOff size={15} aria-hidden="true" />{syncLabel}</span>
-            <span className="text-brand-100">管理</span>
+            <span className="text-brand-100">账号</span>
           </NavLink>
           <AuthStatusBar session={authSession} onLogout={handleLogout} dark />
         </div>
@@ -208,7 +208,8 @@ const navGroups: Array<{ label: string; ids: AppRouteId[] }> = [
   { label: "行动", ids: ["today", "applications", "review"] },
   { label: "准备", ids: ["coach", "learn", "interview"] },
   { label: "洞察", ids: ["stats"] },
-  { label: "系统", ids: ["admin", "more"] }
+  { label: "账号与数据", ids: ["more"] },
+  { label: "管理员", ids: ["admin"] }
 ];
 
 function ScrollToTop() {

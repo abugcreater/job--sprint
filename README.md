@@ -61,6 +61,38 @@ Rust server:
 npm run start:rust
 ```
 
+### Local Coach Runtime
+
+For a browser session that exercises the React app, Node API, login cookie, and
+AI runtime together, first copy `.env.example` to an untracked `.env` and set
+one authentication mode. The smallest local setup uses
+`JOB_SPRINT_AUTH_USER`, `JOB_SPRINT_AUTH_PASSWORD`, and a unique
+`JOB_SPRINT_SESSION_SECRET` of at least 32 characters. Do not also set
+`JOB_SPRINT_USERS_JSON` or `JOB_SPRINT_USERS_FILE` unless you intentionally
+use those multi-user modes.
+
+Start the two local processes in separate terminals:
+
+```bash
+npm run start:local
+npm run dev:coach-runtime
+```
+
+Open `http://127.0.0.1:5173`, log in with the local account, and then run the
+non-destructive runtime diagnostic:
+
+```bash
+npm run diagnose:coach-runtime
+```
+
+The dev server proxies `/api` to `http://127.0.0.1:8000` by default; override
+`JOB_SPRINT_API_PROXY_TARGET` only when validating another local runtime. A
+successful local fallback returns `provider_not_configured`, while
+`provider_success` additionally proves that a configured provider completed
+the request. With authentication enabled, the CLI needs a logged-in Cookie to
+pass the authorization step; `auth_required` means the API is reachable, not
+that the model failed.
+
 React app tests:
 
 ```bash
