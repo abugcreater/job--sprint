@@ -54,7 +54,7 @@
 - 自上次 release 后已有 3 项需求合入 `develop`；
 - 用户明确要求立即发布或同步主分支。
 
-版本号取现有语义化 tag 与已合并 `release/vX.Y.Z` PR 中的最大版本，再递增补丁位；不得复用已存在的 release 分支、PR 或 tag。release 必须走 `release/vX.Y.Z -> main`，运行 release gate 与敏感扫描，required checks 通过后合并并打标签；随后将 `main` 回同步 `develop`，最后删除 release/回同步短分支。这里只授权 Git 仓库发布收口，不自动修改远端服务器、账号、数据或生产配置。
+版本号取现有语义化 tag 与已合并 `release/vX.Y.Z` PR 中的最大版本，再递增补丁位；不得复用已存在的 release 分支、PR 或 tag。Git 版本发布必须走 `release/vX.Y.Z -> main`，运行 `npm run test:git-release` 与敏感扫描，required checks 通过后合并并打标签；随后将 `main` 回同步 `develop`，最后删除 release/回同步短分支。只有明确授权服务器交付时才运行包含远端 Linux 构建的 `npm run test:release`。这里只授权 Git 仓库发布收口，不自动修改远端服务器、账号、数据或生产配置。
 
 ## 候选评分
 

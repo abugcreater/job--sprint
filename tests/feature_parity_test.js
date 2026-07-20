@@ -26,7 +26,7 @@ function makeFixture() {
     "用户名 密码 进入工作台 今日 AI 教练 delivery_record learning_note",
     "延期原因 delayRecords 知识边界 learningKnowledgeMarks 面试训练 interviewWeakQuestions",
     "准备工作台 生成 AI 建议 userProfiles knowledgeBoundaries coachScheduleEvents aiArtifacts",
-    "机会工作台 applications 今日复盘 review 我的数据 导出 JSON 导入个人数据备份",
+    "机会工作台 applications 今日复盘 review 账号与数据 导出 JSON 导入个人数据备份",
     "browser restart should preserve expected localStorage bytes and hashes"
   ].join("\n"));
   writeFile(root, "tests/android_webview_functional_persistence_test.js", [
@@ -34,7 +34,7 @@ function makeFixture() {
     "assertExpectedStorage Android 延期原因 delayRecords",
     "准备工作台 生成 AI 建议 profileCount aiArtifactCount",
     "知识边界 learningMarkedCount 面试训练 interviewWeakCount 机会工作台 applications 今日复盘 review",
-    "我的数据 导入个人数据备份 android-webview-functional-persistence-report.json",
+    "账号与数据 导入个人数据备份 android-webview-functional-persistence-report.json",
     "am\", \"force-stop\" Android app restart should preserve expected localStorage bytes and hashes"
   ].join("\n"));
   writeFile(root, "docs/evidence/android-functional/android-webview-functional-persistence-report.json", JSON.stringify({

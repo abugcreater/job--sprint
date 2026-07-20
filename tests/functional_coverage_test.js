@@ -27,19 +27,19 @@ function makeFixture() {
     }
   }, null, 2));
   writeFile(root, "tests/react_functional_persistence_test.js", [
-    "今日 AI 教练 延期原因 准备工作台 生成 AI 建议 userProfiles aiArtifacts 知识边界 面试训练 机会工作台 今日复盘 我的数据",
+    "今日 AI 教练 延期原因 准备工作台 生成 AI 建议 userProfiles aiArtifacts 知识边界 面试训练 机会工作台 今日复盘 账号与数据",
     "导入个人数据备份 browser restart should preserve expected localStorage bytes and hashes",
     "mobile viewport should read the injected desktop storage without mutation waitForServerRuntimeText",
     "react-functional-persistence-report.json"
   ].join("\n"));
   writeFile(root, "tests/android_webview_functional_persistence_test.js", [
-    "Android 延期原因 准备工作台 生成 AI 建议 profileCount aiArtifactCount 知识边界 面试训练 机会工作台 今日复盘 我的数据 导入个人数据备份",
+    "Android 延期原因 准备工作台 生成 AI 建议 profileCount aiArtifactCount 知识边界 面试训练 机会工作台 今日复盘 账号与数据 导入个人数据备份",
     "AUTH_EVIDENCE sessionStates am\", \"force-stop\"",
     "Android app restart should preserve expected localStorage bytes and hashes",
     "android-webview-functional-persistence-report.json"
   ].join("\n"));
   writeFile(root, "tests/rust_sqlite_ui_persistence_test.js", [
-    "JOB_SPRINT_RUNTIME_DB_PATH runtimeStorage === \"sqlite\" 延期原因 准备工作台 生成 AI 建议 userProfiles aiArtifacts 面试训练 机会工作台 今日复盘 我的数据",
+    "JOB_SPRINT_RUNTIME_DB_PATH runtimeStorage === \"sqlite\" 延期原因 准备工作台 生成 AI 建议 userProfiles aiArtifacts 面试训练 机会工作台 今日复盘 账号与数据",
     "导入个人数据备份 sqliteSnapshot runtime_items progress reviews applications interview_mistakes",
     "rust-sqlite-ui-persistence-report.json"
   ].join("\n"));

@@ -23,7 +23,8 @@ function makeFixture(overrides = {}) {
         "npm --prefix apps/react-web run typecheck",
         "npm --prefix apps/react-web test"
       ].join(" && "),
-      "test:release": "npm test && npm run test:local-functional && npm run build:rust:linux && npm run build:server-delivery",
+      "test:git-release": "npm test && npm run test:gitflow && npm run test:local-functional && npm run build:public-safe && npm run scan:public-safe",
+      "test:release": "npm run test:git-release && npm run build:rust:linux && npm run build:server-delivery",
       "validate:product-iteration": "node tools/validate_product_iteration_workflow.js",
       "diagnose:coach-runtime": "node tools/diagnose_coach_artifacts_runtime.js",
       "test:coach-runtime-diagnostic": "node tests/coach_artifacts_runtime_diagnostic_test.js"
@@ -118,6 +119,8 @@ function makeFixture(overrides = {}) {
       source: "develop",
       target: "main",
       branchPattern: "release/vX.Y.Z",
+      gitGate: "npm run test:git-release",
+      deploymentGate: "npm run test:release",
       maxDaysBetweenReleases: 7,
       mergedRequirementsThreshold: 3,
       backsyncTarget: "develop",
@@ -191,7 +194,8 @@ function testMissingReactGateInNpmTestFails() {
     "package.json": JSON.stringify({
       scripts: {
         test: "node tests/product_iteration_workflow_test.js",
-        "test:release": "npm test && npm run test:local-functional && npm run build:rust:linux && npm run build:server-delivery",
+        "test:git-release": "npm test && npm run test:gitflow && npm run test:local-functional && npm run build:public-safe && npm run scan:public-safe",
+        "test:release": "npm run test:git-release && npm run build:rust:linux && npm run build:server-delivery",
         "validate:product-iteration": "node tools/validate_product_iteration_workflow.js",
         "diagnose:coach-runtime": "node tools/diagnose_coach_artifacts_runtime.js",
         "test:coach-runtime-diagnostic": "node tests/coach_artifacts_runtime_diagnostic_test.js"

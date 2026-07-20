@@ -628,8 +628,8 @@ async function runWebViewFlow(page) {
   await page.getByRole("heading", { name: `${ANDROID_FLOW_LABEL}公司B`, exact: true }).waitFor();
   await clickWebView(page.getByRole("button", { name: "返回机会列表" }));
   await clickWebView(page.getByRole("button", { name: `查看机会详情：${ANDROID_FLOW_LABEL}公司A` }));
-  page.once("dialog", (dialog) => dialog.accept());
   await clickWebView(page.getByRole("button", { name: `删除机会记录：${ANDROID_FLOW_LABEL}公司A` }));
+  await clickWebView(page.getByRole("button", { name: `确认删除机会记录 ${ANDROID_FLOW_LABEL}公司A` }));
   await page.getByRole("button", { name: `查看机会详情：${ANDROID_FLOW_LABEL}公司A` }).waitFor({ state: "detached" });
   await clickWebView(page.getByRole("button", { name: "生成本地导出" }));
   await page.getByText(/已生成导出 \d+ 条/).waitFor();
@@ -668,13 +668,13 @@ async function runWebViewFlow(page) {
   });
   await clickWebView(page.getByRole("button", { name: "更新复盘" }));
   await page.getByText(`项目点：${ANDROID_FLOW_LABEL}项目点B 已编辑`, { exact: true }).waitFor();
-  page.once("dialog", (dialog) => dialog.accept());
   await clickWebView(page.getByRole("button", { name: `删除复盘记录 ${ANDROID_FLOW_LABEL}项目点A` }));
+  await clickWebView(page.getByRole("button", { name: `确认删除复盘记录 ${ANDROID_FLOW_LABEL}项目点A` }));
   await page.getByText(`项目点：${ANDROID_FLOW_LABEL}项目点A`, { exact: true }).waitFor({ state: "detached" });
   await clickWebView(page.getByRole("button", { name: "导出当前筛选" }));
   await page.locator("pre").last().waitFor();
 
-  await gotoRoute(page, "/more", "我的数据");
+  await gotoRoute(page, "/more", "账号与数据");
   await clickWebView(page.getByRole("button", { name: "备份" }));
   await page.getByRole("heading", { name: "个人数据备份", exact: true }).waitFor();
   await page.getByLabel("导入个人数据备份").waitFor();
@@ -704,7 +704,7 @@ async function verifyRestartReadback(flowSnapshot, initialPid) {
   await new Promise((resolve) => setTimeout(resolve, 3000));
   const { browser, page, pid } = await connectWebView();
   try {
-    await gotoRoute(page, "/more", "我的数据");
+    await gotoRoute(page, "/more", "账号与数据");
     await clickWebView(page.getByRole("button", { name: "备份" }));
     await page.getByRole("heading", { name: "个人数据备份", exact: true }).waitFor();
     const snapshot = await snapshotStorage(page, "02-after-app-restart");

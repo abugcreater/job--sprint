@@ -500,6 +500,7 @@ git status --short --branch
 - 普通需求目标为 `develop`，完成后使用 squash merge；合并后删除工作分支。
 - `release/*` 目标为 `main`，hotfix 同样只向 `main` 提交，并在合并后回同步 `develop`。
 - 禁止直接创建 `develop -> main` PR；主分支同步必须从 `develop` 派生正式 release 分支。
+- 仅做 Git 版本发布时运行 `npm run test:git-release`；只有明确授权服务器交付时才运行需要外部服务器输入的 `npm run test:release`。
 
 提交前确认：
 

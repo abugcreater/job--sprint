@@ -253,6 +253,8 @@ function validateGitflowAutomationContract(root, findings) {
     [["release", "source"], "develop"],
     [["release", "target"], "main"],
     [["release", "branchPattern"], "release/vX.Y.Z"],
+    [["release", "gitGate"], "npm run test:git-release"],
+    [["release", "deploymentGate"], "npm run test:release"],
     [["release", "maxDaysBetweenReleases"], 7],
     [["release", "mergedRequirementsThreshold"], 3],
     [["release", "backsyncTarget"], "develop"],
@@ -283,9 +285,15 @@ function validateProductIterationWorkflow(root = repoRoot) {
     "npm --prefix apps/react-web test",
     "node tests/product_iteration_workflow_test.js"
   ]);
-  requireScriptContains(root, findings, "test:release", [
+  requireScriptContains(root, findings, "test:git-release", [
     "npm test",
+    "npm run test:gitflow",
     "npm run test:local-functional",
+    "npm run build:public-safe",
+    "npm run scan:public-safe"
+  ]);
+  requireScriptContains(root, findings, "test:release", [
+    "npm run test:git-release",
     "npm run build:rust:linux",
     "npm run build:server-delivery"
   ]);

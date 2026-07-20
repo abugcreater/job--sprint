@@ -503,8 +503,8 @@ async function runDesktopFlow(baseUrl) {
   await page.getByLabel("功能测试公司B", { exact: true }).getByText("Java 后端工程师 B 已编辑", { exact: true }).waitFor();
   await page.getByLabel("机会状态筛选").selectOption("all");
   await page.getByRole("button", { name: "查看机会详情：功能测试公司A" }).click();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: /删除机会记录：功能测试公司A/ }).click();
+  await page.getByRole("button", { name: "确认删除机会记录 功能测试公司A" }).click();
   await page.getByRole("button", { name: "查看机会详情：功能测试公司A" }).waitFor({ state: "detached" });
   const applicationDownload = page.waitForEvent("download");
   await page.getByRole("button", { name: "生成本地导出" }).click();
@@ -558,8 +558,8 @@ async function runDesktopFlow(baseUrl) {
   });
   await page.getByRole("button", { name: "更新复盘" }).click();
   await page.getByText("项目点：功能测试项目点B 已编辑", { exact: true }).waitFor();
-  page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: /删除复盘记录 功能测试项目点A/ }).click();
+  await page.getByRole("button", { name: /确认删除复盘记录 功能测试项目点A/ }).click();
   await page.getByText("项目点：功能测试项目点A", { exact: true }).waitFor({ state: "detached" });
   await page.getByLabel("复盘记录筛选").selectOption("has_tomorrow_priority");
   await page.getByRole("button", { name: "导出当前筛选" }).click();
@@ -584,7 +584,7 @@ async function runDesktopFlow(baseUrl) {
   await page.getByText("口述训练证据").first().waitFor();
   await page.getByText("复盘证据").first().waitFor();
   await screenshot(page, "06-today-all-evidence-types");
-  await gotoRoute(page, baseUrl, "/more", "我的数据");
+  await gotoRoute(page, baseUrl, "/more", "账号与数据");
   await page.getByText("已检测").waitFor();
   await page.getByText(/本地证据/).waitFor();
   await page.getByRole("button", { name: "备份" }).click();
@@ -621,7 +621,7 @@ async function runDesktopFlow(baseUrl) {
     viewport: { width: 1440, height: 1000 }
   });
   const reopenPage = reopenContext.pages()[0] || await reopenContext.newPage();
-  await gotoRoute(reopenPage, baseUrl, "/more", "我的数据");
+  await gotoRoute(reopenPage, baseUrl, "/more", "账号与数据");
   await reopenPage.getByText("已检测").waitFor();
   await screenshot(reopenPage, "08-browser-restart-more-persisted");
   const reopenSnapshot = await snapshotStorage(reopenPage, "07-after-browser-restart");
@@ -676,7 +676,7 @@ async function runMobileReadback(baseUrl, rawStorage, desktopSnapshot) {
         && profiles.length >= 1;
     });
     await screenshot(page, "09-mobile-today-readback");
-    await gotoRoute(page, baseUrl, "/more", "我的数据");
+    await gotoRoute(page, baseUrl, "/more", "账号与数据");
     await page.getByText("已检测").waitFor();
     await screenshot(page, "10-mobile-more-readback");
     const snapshot = await snapshotStorage(page, "08-mobile-readback");
@@ -705,7 +705,7 @@ async function runImportRestoreFlow(baseUrl) {
   try {
     const page = await context.newPage();
     await login(page, baseUrl);
-    await gotoRoute(page, baseUrl, "/more", "我的数据");
+    await gotoRoute(page, baseUrl, "/more", "账号与数据");
     await page.getByRole("button", { name: "备份" }).click();
     await page.getByLabel("导入个人数据备份").setInputFiles(importPayloadPath);
     await page.getByText("个人数据备份已导入：完成 1 项，证据 1 条，延期 1 条，画像 1 个，知识边界 1 条，AI 建议 1 条").waitFor();
