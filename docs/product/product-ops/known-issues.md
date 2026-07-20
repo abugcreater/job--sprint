@@ -1,6 +1,6 @@
 # 产品已知问题与下一步
 
-日期：2026-07-10
+日期：2026-07-20
 
 ## P0 防回归
 
@@ -19,7 +19,7 @@
 
 | 问题 | 影响 | 下一步 |
 |---|---|---|
-| 每日主动产品迭代机制刚建立 | 已新增 `daily-product-iteration.md`、`daily-product-iteration-log.md` 并准备接入 Codex heartbeat，但尚未经过连续多天运行验证 | 后续每日按 runbook 选择 1 个主任务推进，并在日志中记录候选、改动、验证、限制和下一步；不要把机制创建等同于长期稳定运行。 |
+| 每日主动产品迭代曾持续遗留 Draft 和冲突分支 | 旧 heartbeat 只要求实现、验证和汇报，没有把合入 `develop`、删除短分支和定期 release 写进完成定义，导致 #11/#12/#13 跨日堆叠，后续分支反复冲突，还曾错误创建 `develop -> main` PR。 | 已增加积压收口门禁与机器合同：有开放需求 PR 时不得创建新分支；完成后必须 rebase、验证、转 Ready、通过 required checks、squash merge 到 `develop` 并删分支。每 7 天或累计 3 项需求后通过 `release/* -> main` 发布并回同步；validator 校验 `.github/gitflow-automation-contract.json` 的精确值，GitHub `validate` 同时运行合同/扫描器回归测试与实际校验。 |
 | 本地验收时 AI 运行记录长期显示 `local-fallback / server_unavailable` | 纯 Vite 前端无法处理 `/api/coach/artifacts`，容易把环境问题误读成模型失败。Coach 与 Stats 已共用诊断口径；`start:local`、`dev:coach-runtime` 和 Vite `/api` proxy 提供两进程启动路径，`npm run test:coach-runtime-diagnostic` 会动态启动临时免登录 Node runtime 与 Vite，验证 health 和 artifacts 经 proxy 返回 `provider_not_configured`，然后回收进程和临时数据。 | 自动 smoke 只覆盖 Node fallback、proxy 与 schema，不携带真实用户 Cookie、不调用真实 provider；下一步补真实登录 Cookie 到 Node/Rust runtime 的分层 smoke。 |
 | Rust 健康接口曾把空 provider 环境变量误报为已配置 | `ANTHROPIC_BASE_URL=""` 和 `ANTHROPIC_AUTH_TOKEN=""` 会使 Rust 生成链路正确回落到本地规则，但旧 `/api/health` 只检查变量存在，会返回 `apiConfigured=true`，造成运行记录诊断自相矛盾 | 已改为仅当两个必需变量均为非空时才返回 `apiConfigured=true`，空模型名也不再显示；新增 `npm run test:rust-coach-runtime`，以临时端口、临时 SQLite 和本地免登录启动 Rust，断言 health、`/api/coach/artifacts` 的 `provider_not_configured` 诊断及 `llm_runs` 读回。下一步仍需补真实登录 Cookie/Vite proxy 与真实 provider 的分层 smoke。 |
 | 远端真实 LLM provider evidence 已通过，质量闭环仍需增强 | Node 与 Rust 均已有 Anthropic-compatible `/api/coach/artifacts` 接口；React 已记录用户态 AI 运行记录，包含 provider、model、prompt version、schema version、输入摘要 hash、schema 结果、生成数量和 fallback 状态；Rust 已有独立 `llm_runs` 表和 `llm_feedback` 表，并用本地 mock provider 合同覆盖 token、延迟和可选成本写入；Node/Rust `/api/coach/feedback` 已返回采纳率、拒绝类型、拒绝原因和下一轮提示校准 `summary`；React 已能把已采纳 AI 日程草稿关联到今日 `coach-event-*` 任务完成状态，计算本地日程级采纳后完成率；React 复盘页已新增本地 7 日周复盘归因，能把证据覆盖、完成任务、延期、机会反馈、面试证据和 AI 反馈转成闭环分、有效信号、风险和下周焦点；Node/Rust `/api/coach/outcomes` 已能服务端计算周结果并写入 `coachOutcomeSnapshots`；`configure:remote-provider` 已把仓库外 DeepSeek/Anthropic-compatible provider env 写入远端 systemd drop-in 并重启服务；`docs/evidence/server-remote/coach-artifacts.json` 已证明远端 `apiConfigured=true`、provider 为 `anthropic-compatible`、model 为 `deepseek-v4-flash`、`llmRunStatus=success`、`llmRunSchemaStatus=pass`、token/延迟/成本字段齐全，且生成物引用 `MQ`、`Redis`、`稳定性`、故障恢复和面试候选题语义；同一报告还证明 feedback summary 与 `/api/coach/outcomes` GET/POST 通过 | 下一步不是再证明 provider 是否存在，而是把真实 LLM 周复盘、机会状态、面试结果、边界候选反馈和长期质量归因串起来；DeepSeek 远端 smoke 只能证明服务端真实模型调用和 schema 合同通过，不等于真实 JD 深度解析质量已经产品化。 |

@@ -75,8 +75,56 @@ function makeFixture(overrides = {}) {
     "数据隔离清单",
     "UI/UX 实现约束",
     "分层验收命令",
+    "普通需求目标为 `develop`",
+    "`release/*` 目标为 `main`",
+    "合并后删除工作分支",
+    "目标分支 merge commit",
+    "develop squash SHA",
+    "main release SHA",
     "最终报告模板"
   ].join("\n"));
+  writeFile(root, "docs/product/product-ops/daily-product-iteration.md", [
+    "积压收口门禁",
+    "不得创建新的工作分支",
+    "squash merge",
+    "release/vX.Y.Z",
+    "最大版本",
+    "工作分支已删除"
+  ].join("\n"));
+  writeFile(root, "docs/product/product-ops/gitflow-development-governance.md", [
+    "每日迭代收口规则",
+    "每 7 天",
+    "3 项需求",
+    "release/* -> main",
+    "回同步 `develop`"
+  ].join("\n"));
+  writeFile(root, ".github/workflows/gitflow-policy.yml", [
+    "node tests/product_iteration_workflow_test.js",
+    "node tools/validate_product_iteration_workflow.js",
+    "node tests/scan_sensitive_content_test.js",
+    "node tools/scan_sensitive_content.js"
+  ].join("\n"));
+  writeFile(root, ".github/gitflow-automation-contract.json", JSON.stringify({
+    version: 1,
+    workBranches: {
+      source: "develop",
+      target: "develop",
+      mergeMethod: "squash",
+      blockNewBranchWhenBacklog: true,
+      draftCountsAsBacklog: true,
+      deleteAfterMerge: true
+    },
+    release: {
+      source: "develop",
+      target: "main",
+      branchPattern: "release/vX.Y.Z",
+      maxDaysBetweenReleases: 7,
+      mergedRequirementsThreshold: 3,
+      backsyncTarget: "develop",
+      allowDirectDevelopToMain: false,
+      deleteAfterMerge: true
+    }
+  }, null, 2));
   writeFile(root, "docs/product/it-job-coach-v1/completion-audit.md", [
     "PASS_WITH_LIMITS",
     "当前团队工作是 `TEAM_ROOM_PARTIAL`",
@@ -162,6 +210,34 @@ function testMissingRequirementDevelopmentTemplateFails() {
   assert(report.findings.some((item) => item.id === "requirement_development_template_reusable"));
 }
 
+function testMissingDailyCloseoutGateFails() {
+  const report = validateProductIterationWorkflow(makeFixture({
+    "docs/product/product-ops/daily-product-iteration.md": "只开发，不负责合并"
+  }));
+  assert.strictEqual(report.ok, false);
+  assert(report.findings.some((item) => item.id === "daily_iteration_closeout"));
+}
+
+function testInvalidAutomationContractFails() {
+  const report = validateProductIterationWorkflow(makeFixture({
+    ".github/gitflow-automation-contract.json": JSON.stringify({
+      version: 1,
+      workBranches: { source: "main", target: "main", mergeMethod: "merge" },
+      release: { source: "develop", target: "develop", allowDirectDevelopToMain: true }
+    })
+  }));
+  assert.strictEqual(report.ok, false);
+  assert(report.findings.some((item) => item.id === "gitflow_automation_contract" && item.code === "gitflow_contract_mismatch"));
+}
+
+function testWorkflowStepNamesWithoutCommandsFail() {
+  const report = validateProductIterationWorkflow(makeFixture({
+    ".github/workflows/gitflow-policy.yml": "Validate product iteration contract\nScan sensitive content"
+  }));
+  assert.strictEqual(report.ok, false);
+  assert(report.findings.some((item) => item.id === "github_pr_quality_gate"));
+}
+
 function testRemoteCoachEvidenceMustIncludeRoleQuestionBank() {
   const report = validateProductIterationWorkflow(makeFixture({
     "docs/evidence/server-remote/coach-artifacts.json": JSON.stringify({
@@ -196,8 +272,11 @@ testFixtureWarnsWhenProviderIsFallbackOnly();
 testMissingPrdVersionFails();
 testMissingReactGateInNpmTestFails();
 testMissingRequirementDevelopmentTemplateFails();
+testMissingDailyCloseoutGateFails();
+testInvalidAutomationContractFails();
+testWorkflowStepNamesWithoutCommandsFail();
 testRemoteCoachEvidenceMustIncludeRoleQuestionBank();
 testMissingRemoteCoachEvidenceWarnsOnly();
 testCurrentRepoPassesProductIterationGate();
 
-console.log("产品迭代工作流门禁测试：8 项通过。");
+console.log("产品迭代工作流门禁测试：11 项通过。");

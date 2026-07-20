@@ -21,6 +21,7 @@
 
 | 日期 | 决策 | 理由 | 取舍 |
 |---|---|---|---|
+| 2026-07-20 | 每日自动迭代必须先收口历史 PR，并把合入 `develop` 与删除分支作为完成条件。 | 只创建新分支和 Draft 会把冲突、测试与功能叠加成本推迟到未来；直接 `develop -> main` 又会被正式 GitFlow 拒绝。 | 开放需求 PR 存在时禁止再开新分支；依次 rebase、验证、Ready、squash merge 到 `develop` 并删除分支。发布按每 7 天、累计 3 项需求或用户明确要求触发 `release/* -> main`，随后回同步 `develop`；`.github/gitflow-automation-contract.json` 精确约束参数，GitHub required check 同时运行合同回归测试、实际校验和敏感扫描。 |
 | 2026-07-18 | 本地 React AI 联调必须用自动 smoke 守住 Vite -> API proxy，不只靠一次手工验证。 | 单次手工成功不能防止后续移除 proxy、改错 env 读取或留下无法回收的本地进程。 | `test:coach-runtime-diagnostic` 同时启动临时免登录 Node runtime 与 Vite，动态分配回环端口，验证 health 与 artifacts 返回 `provider_not_configured`，并清理子进程和临时 runtime；它不调用真实 provider，也不替代真实 Cookie 或 Rust runtime 验收。 |
 | 2026-07-17 | 本地 React AI 联调必须显式经过 API proxy，而不是把纯 Vite 结果当成 provider 结果。 | `VITE_JOB_SPRINT_SERVER_RUNTIME=true` 只打开服务端调用开关；没有 `/api` proxy 时，请求仍落在 `5173` 的前端服务，用户无法判断是环境、鉴权还是模型问题。 | 新增 `npm run start:local` 和只绑定回环地址的 `npm run dev:coach-runtime`；Vite 将 `/api` 默认代理到 `127.0.0.1:8000`，目标可由 `JOB_SPRINT_API_PROXY_TARGET` 覆盖。真实 provider 仍使用仓库外密钥和独立 evidence。 |
 | 2026-07-16 | Stats 与 AI 运行记录必须复用同一诊断规则。 | 只在 Coach 页解释 `local-fallback / server_unavailable` 会让用户在统计页仍把环境降级计入 provider 失败，导致跨模块指标和恢复动作互相矛盾。 | 抽出 `diagnoseLlmRun` 供 Coach 与 Stats 共同使用；Stats 只显示最近运行的诊断和建议动作，不主动探测、请求 API 或写入运行记录。 |
