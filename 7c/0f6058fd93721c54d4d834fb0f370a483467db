@@ -1,0 +1,58 @@
+docs/product/product-ops/daily-product-iteration.md
+  s_8c4e51c148c3fc::t_6dcd98ace9bfe3 57,119
+  s_8c4e51c148c3fc::t_5862ec98ac4408 118,120-123,129
+  s_8c4e51c148c3fc::t_e68e6215786821 13,42
+  s_8c4e51c148c3fc::t_84d571775bcba9 3,29-41,43-56
+docs/product/product-ops/known-issues.md
+  s_8c4e51c148c3fc::t_e68e6215786821 22
+  s_8c4e51c148c3fc::t_c8a67446542540 3
+.github/workflows/gitflow-policy.yml
+  s_8c4e51c148c3fc::t_84d571775bcba9 33,37-38,42-44
+  s_8c4e51c148c3fc::t_3522d1e7a1fde6 34-36,39-41
+tools/validate_product_iteration_workflow.js
+  s_8c4e51c148c3fc::t_66fdea32444daa 47-50,52-60
+  s_8c4e51c148c3fc::t_3522d1e7a1fde6 61,216-274,280,310
+  s_8c4e51c148c3fc::t_23a9f5738fc372 46
+  s_8c4e51c148c3fc::t_6dcd98ace9bfe3 51
+docs/product/product-ops/product-ledger.md
+  s_8c4e51c148c3fc::t_e68e6215786821 24
+docs/product/product-ops/gitflow-development-governance.md
+  s_8c4e51c148c3fc::t_e68e6215786821 174
+  s_8c4e51c148c3fc::t_ed3cbc4f43be80 129
+  s_8c4e51c148c3fc::t_c1e24f7e67e814 124-128,130-131
+  s_8c4e51c148c3fc::t_6dcd98ace9bfe3 135-141
+docs/product/product-ops/requirement-development-template.md
+  s_8c4e51c148c3fc::t_9e2273ce2788d8 488,492-495,500-503,510
+  s_8c4e51c148c3fc::t_6dcd98ace9bfe3 496-497
+  s_8c4e51c148c3fc::t_23a9f5738fc372 524
+tests/product_iteration_workflow_test.js
+  s_8c4e51c148c3fc::t_23a9f5738fc372 81-83
+  s_8c4e51c148c3fc::t_3522d1e7a1fde6 102-105,107-127,219-239,276-277,282
+  s_8c4e51c148c3fc::t_66fdea32444daa 78-80,86-90,92-101,106,213-218,275
+  s_8c4e51c148c3fc::t_6dcd98ace9bfe3 91
+  s_8c4e51c148c3fc::t_853c3ba2c600aa 240
+.github/gitflow-automation-contract.json
+  s_8c4e51c148c3fc::t_3522d1e7a1fde6 1-21
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8c4e51c148c3fc::t_c8a67446542540 2116-2131,2133-2136
+  s_8c4e51c148c3fc::t_e68e6215786821 2132
+docs/core/04-acceptance-and-risk.md
+  s_8c4e51c148c3fc::t_c8a67446542540 135-139,141
+  s_8c4e51c148c3fc::t_e68e6215786821 140
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "7c0f6058fd93721c54d4d834fb0f370a483467db",
+  "prompts": {},
+  "sessions": {
+    "s_8c4e51c148c3fc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4b9b-c8ac-75a2-8110-16a46302f174",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
