@@ -1,6 +1,6 @@
 # 每日主动产品迭代机制
 
-日期：2026-07-08
+日期：2026-07-20
 
 ## 目标
 
@@ -10,6 +10,7 @@
 
 每天开始前先读取这些事实源：
 
+- `.github/gitflow-automation-contract.json`
 - `docs/README.md`
 - `docs/core/01-project-background.md`
 - `docs/core/02-project-plan.md`
@@ -25,14 +26,35 @@
 ## 每日循环
 
 1. 事实检查：确认分支、未提交改动、最近文档、已知问题、当前交付边界。
-2. 产品扫描：从用户路径、数据隔离、权限、空状态、创建/编辑/删除、AI 草稿、统计、Android、服务器交付中找不足。
-3. 候选排序：按用户价值、证据强度、风险、实现大小和可验证性评分。
-4. 选择任务：每天默认只选 1 个主任务，最多 1 个顺手小修；大需求必须先建 feature capsule。
-5. AI 团队路由：默认 Manager Dispatch；日常小步改进优先主线程，只有 UI/数据/安全/验收风险明确时才派 1 个专家。
-6. 实施：保持改动窄，尊重已有 worktree，不覆盖用户未提交内容。
-7. 验证：按影响面运行最小充分命令，不能把局部证据扩大成全量通过。
-8. 记录：更新日志、product ledger、known issues 或 completion audit。
-9. 汇报：给出改了什么、为什么、证据、限制、明天优先级。
+2. 积压收口门禁：先检查所有目标为 `develop` 的开放 PR、Draft、冲突、required checks 和对应远端分支；存在未收口需求时，不得创建新的工作分支。
+3. 处理积压：按最早创建顺序将分支 rebase 到最新 `develop`，逐项保留功能与文档语义，运行影响范围测试，转为 Ready，required checks 通过后执行 squash merge 并删除工作分支。
+4. 发布判定：积压为零后，判断是否达到定期发布条件；达到条件时从 `develop` 创建 `release/vX.Y.Z`，按 GitFlow 合入 `main` 并回同步 `develop`。
+5. 产品扫描：仅在积压已清零且无需优先发布时，从用户路径、数据隔离、权限、空状态、创建/编辑/删除、AI 草稿、统计、Android、服务器交付中找不足。
+6. 候选排序：按用户价值、证据强度、风险、实现大小和可验证性评分。
+7. 选择任务：每天默认只选 1 个主任务，最多 1 个顺手小修；大需求必须先建 feature capsule。
+8. AI 团队路由：默认 Manager Dispatch；日常小步改进优先主线程，只有 UI/数据/安全/验收风险明确时才派 1 个专家。
+9. 实施：保持改动窄，尊重已有 worktree，不覆盖用户未提交内容。
+10. 验证与收口：按影响面运行最小充分命令；完成后必须推送、建 PR、解决冲突、等待 required checks、合入 `develop` 并删除短分支。
+11. 记录与汇报：更新日志、product ledger、known issues 或 completion audit，说明合并结果、删除的分支、验证证据、限制和下一优先级。
+
+## 积压收口门禁
+
+- `.github/gitflow-automation-contract.json` 是可执行流程参数的机器事实源；本文负责解释原因和操作顺序，不得与合同值冲突。
+- 每次运行先执行 `git fetch --prune origin`，并用 `gh pr list` 检查目标为 `develop` 的开放 PR；Draft 也属于未完成需求，不能长期停放。
+- 若工作分支落后或冲突，先 rebase 到最新 `origin/develop`。冲突必须按行为逐项合并，禁止对页面或 product-ops 文档整文件选择 ours/theirs。
+- 分支已有完整实现时，补跑影响范围测试和敏感扫描，转为 Ready；GitHub required checks 通过后使用 squash merge，并删除远端与本地工作分支。
+- 若 required check、外部账号、用户输入或不可控平台状态阻塞，保留唯一阻塞 PR，报告明确动作；当日不得绕开它再堆一个新需求分支。
+- “已提交”“已推送”“已创建 Draft PR”都不是完成。每日需求只有在 PR 已合入 `develop`、工作分支已删除、工作树干净后才算完成。
+
+## 定期发布条件
+
+积压清零且 `origin/develop` 与 `origin/main` 文件树存在真实差异时，满足以下任一条件就启动 release：
+
+- 距上次正式 release 已满 7 天；
+- 自上次 release 后已有 3 项需求合入 `develop`；
+- 用户明确要求立即发布或同步主分支。
+
+版本号取现有语义化 tag 与已合并 `release/vX.Y.Z` PR 中的最大版本，再递增补丁位；不得复用已存在的 release 分支、PR 或 tag。release 必须走 `release/vX.Y.Z -> main`，运行 release gate 与敏感扫描，required checks 通过后合并并打标签；随后将 `main` 回同步 `develop`，最后删除 release/回同步短分支。这里只授权 Git 仓库发布收口，不自动修改远端服务器、账号、数据或生产配置。
 
 ## 候选评分
 
@@ -93,18 +115,18 @@ AI团队：按 Job Sprint 每日主动产品迭代机制执行。
 
 每日流程：
 1. 检查 git status 和当前事实源，不覆盖用户未提交改动。
-2. 从 known issues、product ledger、测试缺口、UI/UX 不顺、数据隔离、权限、Android/服务器交付边界中找候选。
-3. 按用户价值、风险、可验证性和实现大小选择 1 个当天主任务。
-4. 小任务直接实现；产品级大任务先建 feature capsule，不要裸改。
-5. 运行最小充分验证，不能把局部 PASS 扩大解释。
-6. 更新 daily-product-iteration-log.md，并按需要更新 product-ledger.md 或 known-issues.md。
-7. 用中文汇报：今日选择、改动、验证、限制、明日建议。
+2. 执行 `git fetch --prune origin`，检查所有目标为 develop 的开放 PR、Draft、冲突、required checks 和短分支。存在积压时不得创建新分支；从最早 PR 开始 rebase、解决冲突、验证、转 Ready、等待 checks、squash merge 并删除分支。
+3. 积压清零后判断 release：当 develop 与 main 文件树不同，且距上次 release 已满 7 天、累计 3 项需求或用户明确要求时，从现有 tag 和已合并 release PR 的最大版本递增补丁位，创建未使用的 release/vX.Y.Z，走 release PR 合入 main、打标签、回同步 develop 并删除短分支。不要直接创建 develop -> main PR。
+4. 无积压且无需发布时，才从 known issues、product ledger、测试缺口、UI/UX、数据隔离、权限、Android/服务器交付边界中选择 1 个当天主任务。
+5. 小任务直接实现；产品级大任务先建 feature capsule。实现后运行最小充分验证，推送并创建目标为 develop 的 PR。
+6. 当轮必须继续处理到 PR 合入 develop、工作分支已删除、工作树干净；只有 required check、用户输入或外部平台阻塞时才允许停在开放 PR，并明确说明唯一阻塞项。
+7. 更新 daily-product-iteration-log.md，并按需更新 product-ledger.md 或 known-issues.md；用中文汇报合并结果、删除分支、验证、限制和下一步。
 
 AI 团队规则：
 - 默认 manager-dispatch。
 - 每天最多 1 个专家 agent；当前线程若处于 quarantine，则 max_agents=0。
 - 不等待或关闭 inherited/stale agents。
-- 不做真实发布、远端改配置、账号删除、数据迁移或破坏性操作，除非用户明确要求。
+- 允许按上述 GitFlow 完成 PR 合并、短分支清理和定期 release；不自动部署服务器，不改远端配置、账号或生产数据，除非用户明确要求。
 ```
 
 ## 每日报告格式

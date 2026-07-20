@@ -2113,3 +2113,24 @@
 - 已以 `npm --prefix apps/react-web run dev -- --host 127.0.0.1 --port 5173` 启动本地 Vite，`curl http://127.0.0.1:5173/` 返回 `200`；这只证明页面可打开，未把它扩大解释为 Node/Rust API 或真实 AI 调用通过。
 - 本轮只收敛客户端导航与落点；Node/Rust 服务端的 owner 权限校验仍是最终安全边界。
 - 未改远端配置、未删除账号、未迁移数据，也未绕过受保护分支。
+
+## 2026-07-20 第四十七次主动迭代
+
+主任务：清理连续日更遗留的冲突 PR，并把“合入 develop、定期 release、删除短分支”固化为自动迭代完成定义。
+
+根因：
+
+- 原 heartbeat 只要求选题、实现、验证和汇报，没有要求把 PR 从 Draft 推进到合并，也没有积压门禁；因此每天创建新分支，#11/#12/#13 的 product-ops 文档与功能持续叠加冲突。
+- 自动化曾直接创建 `develop -> main` PR；仓库 GitFlow 只允许 `release/* -> main`，required check 按预期拒绝。
+
+处理：
+
+- #11、#12、#13 均按最新 `develop` 逐个解决冲突、通过影响范围测试和 GitHub required check，并以 squash merge 合入；对应短分支删除。
+- 关闭错误的 `develop -> main` PR #16。
+- `daily-product-iteration.md` 增加积压收口门禁和定期发布条件；`gitflow-development-governance.md` 增加每日迭代收口规则；需求模板纠正普通需求与 release 的 PR 目标。
+- 产品迭代 validator 增加对收口规则、发布节奏和 GitHub 质量门禁的检查；GitHub `validate` 增加产品迭代合同与敏感扫描。
+- 交叉审查发现关键词包含检查可能接受反向规则，现新增 `.github/gitflow-automation-contract.json`，validator 精确检查积压阻断、目标分支、squash、删除分支、7 天/3 项阈值和回同步值；GitHub `validate` 也先运行合同与扫描器自身的回归测试。
+
+边界：
+
+- 本轮处理的是 Git 仓库工作流与已完成需求合并；不会自动部署服务器、修改远端配置、账号或生产数据。

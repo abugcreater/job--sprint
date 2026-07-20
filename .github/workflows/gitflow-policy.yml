@@ -30,3 +30,15 @@ jobs:
 
       - name: Test GitFlow policy
         run: node tests/gitflow_policy_test.js
+
+      - name: Test product iteration contract
+        run: node tests/product_iteration_workflow_test.js
+
+      - name: Validate product iteration contract
+        run: node tools/validate_product_iteration_workflow.js
+
+      - name: Test sensitive content scanner
+        run: node tests/scan_sensitive_content_test.js
+
+      - name: Scan sensitive content
+        run: node tools/scan_sensitive_content.js

@@ -121,15 +121,24 @@ git push -u origin feature/REQ-102-profile-import
 - 合并前若目标分支前进，优先 rebase 当前工作分支；禁止对共享的 `main`、`develop`、`release`、`hotfix` 做 force push。
 - 发现合并后回归时，优先 revert 对应 squash commit，再另建修复分支，不在 `develop` 直接补丁。
 
+### 6. 每日迭代收口规则
+
+- 每次自动迭代开始前必须先检查目标为 `develop` 的全部开放 PR；只要存在 Draft、冲突、失败/等待中的 required check 或未合并工作分支，就先收口积压，不再创建新需求分支。
+- 自动迭代不得把“提交已推送”或“Draft PR 已创建”当作完成。实现完整且验证通过后必须转 Ready，required checks 成功后 squash merge 到 `develop`，随后删除远端和本地短分支。
+- 同一时刻原则上只保留一个正在实施的日更需求；外部阻塞时保留该 PR 并停止新增，避免功能堆叠后集中解决冲突。
+- 按每 7 天一次的节奏检查发布条件；当 `develop` 与 `main` 文件树有差异，且距上次 release 已满 7 天、或已有 3 项需求合入 `develop`、或用户明确要求时，启动 `release/* -> main`。
+- release 合并并打标签后必须回同步 `develop`；只有确认内容与历史均已按规范收口，才删除 release 和回同步短分支。
+
 ## 发布流程
 
 1. 从已通过需求验收的 `develop` 创建 `release/vX.Y.Z`。
-2. release 分支只允许版本号、发布说明、打包配置和发布阻断修复。
-3. 运行完整 release gate、安全扫描和实际交付边界验证。
-4. 以 `chore(release): prepare vX.Y.Z` 为 PR 标题合并到 `main`。
-5. 在 `main` 创建附注标签 `vX.Y.Z`。
-6. 将 `main` 回同步到 `develop`，确保 release 修复不会在下一版本丢失。
-7. 删除 release 分支。
+2. 版本号从现有 tag 与已合并 release PR 的最大语义化版本递增补丁位；禁止复用已有 release 分支、PR 或 tag。
+3. release 分支只允许版本号、发布说明、打包配置和发布阻断修复。
+4. 运行完整 release gate、安全扫描和实际交付边界验证。
+5. 以 `chore(release): prepare vX.Y.Z` 为 PR 标题合并到 `main`。
+6. 在 `main` 创建附注标签 `vX.Y.Z`。
+7. 将 `main` 回同步到 `develop`，确保 release 修复不会在下一版本丢失。
+8. 删除 release 分支。
 
 ## Hotfix 流程
 
@@ -162,6 +171,7 @@ git push -u origin feature/REQ-102-profile-import
 | `npm run validate:gitflow -- --phase pr --base <base> --message "..."` | 检查 PR 目标、标题和干净工作树。 |
 | `npm run test:gitflow` | 运行 GitFlow 策略单测。 |
 | `.github/workflows/gitflow-policy.yml` | GitHub PR 自动检查分支、目标分支和 PR 标题。 |
+| `.github/gitflow-automation-contract.json` | 精确约束积压阻断、普通需求合并方式、release 周期、目标分支和回同步目标，避免关键词文档被反向改写后仍通过。 |
 
 ## 完成定义
 
