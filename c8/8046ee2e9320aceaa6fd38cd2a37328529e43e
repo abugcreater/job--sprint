@@ -1,0 +1,31 @@
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_cac48033fa8e7d 25-26
+  s_8f6b4df0c955b0::t_70ad1c1993e9ca 3,24
+apps/react-web/src/data/llmRunDiagnosis.ts
+  s_8f6b4df0c955b0::t_e4b2027832c935 1-55
+apps/react-web/src/features/coach/components/LlmRunPanel.tsx
+  s_8f6b4df0c955b0::t_e4b2027832c935 3
+apps/react-web/src/features/stats/StatsPage.tsx
+  s_8f6b4df0c955b0::t_e4b2027832c935 8,11,107-109,222,228,236-239
+apps/react-web/src/test/StatsPage.test.tsx
+  s_8f6b4df0c955b0::t_e4b2027832c935 79-90,92-100,102-103
+  s_8f6b4df0c955b0::t_3e37bc2a6a70e2 91,101
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_70ad1c1993e9ca 1944-1948,1968-1971,1983-1985,1990-1992,1999-2001,2005-2007
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "c88046ee2e9320aceaa6fd38cd2a37328529e43e",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
