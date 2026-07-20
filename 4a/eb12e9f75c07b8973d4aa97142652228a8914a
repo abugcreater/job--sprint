@@ -1,0 +1,62 @@
+docs/product/product-ops/requirement-development-template.md
+  s_8c4e51c148c3fc::t_9e08fb2d13ad9c 503
+tests/rust_sqlite_ui_persistence_test.js
+  s_8c4e51c148c3fc::t_c5abe0445cd35d 376
+package.json
+  s_8c4e51c148c3fc::t_f9643440f91fae 59-60
+  s_8c4e51c148c3fc::t_9960feb6af5833 3
+tests/android_webview_functional_persistence_test.js
+  s_8c4e51c148c3fc::t_c5abe0445cd35d 677,707
+  s_8c4e51c148c3fc::t_4c509ed9378f3c 632,672
+tools/validate_functional_coverage.js
+  s_8c4e51c148c3fc::t_c5abe0445cd35d 30,51,74
+.github/gitflow-automation-contract.json
+  s_8c4e51c148c3fc::t_f9643440f91fae 15-16
+docs/product/product-ops/daily-product-iteration.md
+  s_8c4e51c148c3fc::t_9e08fb2d13ad9c 57
+tools/validate_feature_parity.js
+  s_8c4e51c148c3fc::t_940202685c1887 72-73
+docs/product/product-ops/gitflow-development-governance.md
+  s_8c4e51c148c3fc::t_9e08fb2d13ad9c 137
+tools/validate_final_delivery_readiness.js
+  s_8c4e51c148c3fc::t_d32a0b1e105fb7 245
+  s_8c4e51c148c3fc::t_44e98dc7b2e7a3 235-242,244,246
+  s_8c4e51c148c3fc::t_23bb0a031eff12 225,263
+tools/validate_product_iteration_workflow.js
+  s_8c4e51c148c3fc::t_d32a0b1e105fb7 290
+  s_8c4e51c148c3fc::t_f9643440f91fae 256-257,288,292-296
+tests/react_functional_persistence_test.js
+  s_8c4e51c148c3fc::t_32a74bd9391e83 507
+  s_8c4e51c148c3fc::t_95e5df0b8ae74a 562
+  s_8c4e51c148c3fc::t_9556f8f93c8bfd 587
+  s_8c4e51c148c3fc::t_d8aea1ae83b244 624,679,708
+tests/product_iteration_workflow_test.js
+  s_8c4e51c148c3fc::t_f9643440f91fae 27,122-123,198
+  s_8c4e51c148c3fc::t_d32a0b1e105fb7 26,197
+tests/feature_parity_test.js
+  s_8c4e51c148c3fc::t_940202685c1887 29,37
+tests/final_delivery_readiness_test.js
+  s_8c4e51c148c3fc::t_23bb0a031eff12 297-298
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8c4e51c148c3fc::t_7e92a037aa32cb 2133-2134
+tests/functional_coverage_test.js
+  s_8c4e51c148c3fc::t_c5abe0445cd35d 30,36,42
+tests/final_delivery_runner_test.js
+  s_8c4e51c148c3fc::t_23bb0a031eff12 17-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "4aeb12e9f75c07b8973d4aa97142652228a8914a",
+  "prompts": {},
+  "sessions": {
+    "s_8c4e51c148c3fc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f4b9b-c8ac-75a2-8110-16a46302f174",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
