@@ -373,7 +373,7 @@ async function runUiFlow(baseUrl) {
     await waitForRuntimeText(baseUrl, cookieHeader, "RustSQLiteMQ 幂等边界");
     await waitForRuntimeText(baseUrl, cookieHeader, "RustSQLiteAI 日程草稿 已编辑");
 
-    await gotoRoute(page, baseUrl, "/more", "我的数据");
+    await gotoRoute(page, baseUrl, "/more", "账号与数据");
     await page.getByRole("button", { name: "备份" }).click();
     const currentReactState = await page.evaluate(() => {
       const raw = window.localStorage.getItem("jobSprint.react.v1");

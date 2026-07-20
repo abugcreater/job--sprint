@@ -222,6 +222,7 @@ function releaseGateScriptCheck() {
 
   const scripts = packageJson.scripts || {};
   const localFunctional = String(scripts["test:local-functional"] || "");
+  const gitReleaseGate = String(scripts["test:git-release"] || "");
   const releaseGate = String(scripts["test:release"] || "");
   const issues = [];
 
@@ -231,25 +232,18 @@ function releaseGateScriptCheck() {
     }
   }
 
-  const requiredReleaseOrder = [
-    "npm test",
-    "npm run test:local-functional",
-    "npm run build:rust:linux",
-    "npm run build:public-safe",
-    "npm run scan:public-safe",
-    "npm run build:server-delivery"
-  ];
-  let previousIndex = -1;
-  for (const command of requiredReleaseOrder) {
-    const index = releaseGate.indexOf(command);
-    if (index === -1) {
-      issues.push(`test_release_missing_${command.replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "").toLowerCase()}`);
-    } else if (index < previousIndex) {
-      issues.push(`test_release_order_invalid_${command.replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "").toLowerCase()}`);
-    } else {
-      previousIndex = index;
+  const validateOrder = (script, label, commands) => {
+    let previousIndex = -1;
+    for (const command of commands) {
+      const index = script.indexOf(command);
+      const key = command.replace(/[^a-z0-9]+/gi, "_").replace(/^_|_$/g, "").toLowerCase();
+      if (index === -1) issues.push(`${label}_missing_${key}`);
+      else if (index < previousIndex) issues.push(`${label}_order_invalid_${key}`);
+      else previousIndex = index;
     }
-  }
+  };
+  validateOrder(gitReleaseGate, "test_git_release", ["npm test", "npm run test:gitflow", "npm run test:local-functional", "npm run build:public-safe", "npm run scan:public-safe"]);
+  validateOrder(releaseGate, "test_release", ["npm run test:git-release", "npm run build:rust:linux", "npm run build:server-delivery"]);
 
   if (issues.length) {
     return {
@@ -266,6 +260,7 @@ function releaseGateScriptCheck() {
     status: "PASS",
     file: relative(file),
     localFunctional,
+    gitReleaseGate,
     releaseGate
   };
 }

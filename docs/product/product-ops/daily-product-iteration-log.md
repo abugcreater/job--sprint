@@ -2130,6 +2130,8 @@
 - `daily-product-iteration.md` 增加积压收口门禁和定期发布条件；`gitflow-development-governance.md` 增加每日迭代收口规则；需求模板纠正普通需求与 release 的 PR 目标。
 - 产品迭代 validator 增加对收口规则、发布节奏和 GitHub 质量门禁的检查；GitHub `validate` 增加产品迭代合同与敏感扫描。
 - 交叉审查发现关键词包含检查可能接受反向规则，现新增 `.github/gitflow-automation-contract.json`，validator 精确检查积压阻断、目标分支、squash、删除分支、7 天/3 项阈值和回同步值；GitHub `validate` 也先运行合同与扫描器自身的回归测试。
+- PR #17 已将治理规则合入 `develop`。随后从最新 `develop` 建立 `release/v0.2.2`；发布门禁发现浏览器功能流仍按旧的一键删除和“我的数据”标题验收，现已改为二次确认删除与“账号与数据”真实交互，并同步 Web、Android、Rust 覆盖合同。
+- Git 版本发布与服务器交付门禁已拆分：`npm run test:git-release` 不读取服务器地址或密钥，负责完整本地测试、功能流和公开包扫描；`npm run test:release` 仅在明确授权部署时追加远端 Linux 与服务端交付包构建。
 
 边界：
 

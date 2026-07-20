@@ -294,9 +294,9 @@ const releaseGateScript = report.checks.find((check) => check.id === "release_ga
 assert.strictEqual(releaseGateScript.status, "PASS");
 assert.ok(releaseGateScript.localFunctional.includes("npm run test:functional"));
 assert.ok(releaseGateScript.localFunctional.includes("npm run test:rust:functional"));
-assert.ok(releaseGateScript.releaseGate.includes("npm run test:local-functional"));
+assert.ok(releaseGateScript.gitReleaseGate.includes("npm run test:local-functional"));
+assert.ok(releaseGateScript.releaseGate.includes("npm run test:git-release"));
 assert.ok(releaseGateScript.releaseGate.includes("npm run build:rust:linux"));
-
 const architectureQuality = report.checks.find((check) => check.id === "architecture_quality");
 assert.strictEqual(architectureQuality.status, "PASS");
 assert.ok(architectureQuality.sourceFileCount > 50);

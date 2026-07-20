@@ -134,7 +134,7 @@ git push -u origin feature/REQ-102-profile-import
 1. 从已通过需求验收的 `develop` 创建 `release/vX.Y.Z`。
 2. 版本号从现有 tag 与已合并 release PR 的最大语义化版本递增补丁位；禁止复用已有 release 分支、PR 或 tag。
 3. release 分支只允许版本号、发布说明、打包配置和发布阻断修复。
-4. 运行完整 release gate、安全扫描和实际交付边界验证。
+4. Git 版本发布运行 `npm run test:git-release`、安全扫描和本地功能流；只有明确授权服务器交付时，才运行追加远端 Linux 与交付包构建的 `npm run test:release`。
 5. 以 `chore(release): prepare vX.Y.Z` 为 PR 标题合并到 `main`。
 6. 在 `main` 创建附注标签 `vX.Y.Z`。
 7. 将 `main` 回同步到 `develop`，确保 release 修复不会在下一版本丢失。

@@ -14,8 +14,12 @@ assert.strictEqual(
   "local functional gate should exercise Web persistence and Rust/SQLite UI persistence"
 );
 assert.ok(
-  packageJson.scripts["test:release"].includes("npm run test:local-functional"),
-  "release gate should run local full functional tests before packaging"
+  packageJson.scripts["test:git-release"].includes("npm run test:local-functional"),
+  "Git release gate should run local full functional tests"
+);
+assert.ok(
+  packageJson.scripts["test:release"].includes("npm run test:git-release"),
+  "deployment release gate should reuse the Git release gate before packaging"
 );
 assert.ok(
   packageJson.scripts["test:release"].includes("npm run build:rust:linux"),
