@@ -1941,3 +1941,50 @@
 
 1. 审阅并合并 PR #6 后，先确认 `main` 与 `develop` 的提交关系，再从更新后的 `develop` 选择一个普通用户路径的小步改进。
 2. 在回同步尚未完成前，只做不改变集成基线的只读核验，不新增产品代码分支。
+
+## 2026-07-20 第四十三次主动迭代
+
+主任务：为 Rust 本地 coach runtime 补独立 smoke，并纠正 health 对空 provider 环境变量的误报。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | AI 运行记录需要明确区分“Rust API 可用但未配置真实模型”和“服务不可用”，否则本地验收继续把 fallback 误读为失败。 |
+| 问题确定性 | 5 | 现有诊断单测已有 `provider_not_configured` 分类，但缺少真实 Rust 启动 smoke；新 smoke 首次运行还复现 health 在空变量下返回 `apiConfigured=true`、生成实际 fallback 的口径矛盾。 |
+| 风险降低 | 5 | 测试只使用临时端口、临时 SQLite 和 `JOB_SPRINT_AUTH_DISABLED=true`，不读取真实 users file、不调用 provider、不写远端。 |
+| 交互改善 | 3 | 本轮主要修正开发验收与运行状态事实，间接支撑 AI 运行记录和后续 Stats 的正确解释。 |
+| 可验证性 | 5 | 可启动真实 Rust 进程，分别断言 health、artifacts schema/诊断与 `llm_runs` SQLite 读回，并在 finally 中清理。 |
+| 实现大小 | 5 | 改动限定在 health 状态判断、一个 Node smoke、一个 npm 命令、Rust README 与 product-ops 记录。 |
+
+基线：
+
+- `git fetch --prune origin` 后，`git diff --quiet origin/main origin/develop` 通过；双方提交祖先关系均不成立，提交差异为 `1 / 2`，判定“历史差异、内容已对齐”。已从最新 `develop` 创建本轮分支。
+- PR #11、#12、#13 都是目标为 `develop` 的 Draft，GitHub `validate` 均成功；本轮没有复制其中 Stats、Vite proxy 或账号导航改动。
+
+改动：
+
+- `apps/rust-api/src/health_routes.rs`：`apiConfigured` 改为检查 provider base URL 与 token 都为非空；空模型名不再作为已配置模型返回。
+- `tests/rust_coach_runtime_smoke_test.js`：临时启动 Rust、等待 `/api/health`、调用 `/api/coach/artifacts`、复用 runtime 诊断分类，并断言 fallback 的 schema 与 `llm_runs` 读回；结束时终止进程并清理临时 SQLite。
+- `package.json`：新增 `npm run test:rust-coach-runtime`。
+- `apps/rust-api/README.md`、`known-issues.md`、`product-ledger.md`：说明命令、口径与限制。
+
+已验证：
+
+- `npm run test:rust-coach-runtime`：PASS，真实 Rust runtime 返回 `provider_not_configured`、SQLite、临时 DB、`llmRunCount=1`。
+- `cargo test --manifest-path apps/rust-api/Cargo.toml`：PASS，23 个单元测试和 2 个合同测试通过。
+- `node tests/coach_artifacts_runtime_diagnostic_test.js`：PASS。
+- `node tests/rust_http_responses_boundary_test.js`：PASS。
+- `git diff --check`：PASS。
+- `cargo fmt --manifest-path apps/rust-api/Cargo.toml -- --check`：未通过；失败只列出提交前已有的其它 Rust 文件格式差异，本轮未批量格式化这些无关文件。`health_routes.rs` 已用 Rust 2024 edition 单独格式化。
+
+限制：
+
+- 本轮证明的是免登录的临时 Rust runtime 和本地 fallback 合同，不代表 Vite 已代理到 Rust、带真实 Cookie 的 API 可用、真实 provider 已配置，或远端 AI 调用成功。
+- 未改远端环境、账号、users file、正式 SQLite、Android 或发布包；未删除或迁移任何数据。
+- 仍需单独治理仓库中既有的全量 `cargo fmt --check` 格式差异，不能把本轮局部格式化说成全仓格式门禁通过。
+
+明日候选：
+
+1. 审阅 PR #11 合入后，验证 Stats 页的 AI 运行诊断是否能正确区分 `provider_not_configured` 与 `runtime_unreachable`。
+2. 在 PR #12 合入后，为 Vite proxy + 登录 Cookie 到 Node/Rust runtime 补一条本地端到端 smoke，不接远端 provider。
