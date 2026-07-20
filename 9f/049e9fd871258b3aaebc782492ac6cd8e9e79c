@@ -1,0 +1,46 @@
+package.json
+  s_8f6b4df0c955b0::t_6b85c346553bb6 8-9
+  s_8f6b4df0c955b0::t_681c1657e4a84e 34-35
+apps/react-web/package.json
+  s_8f6b4df0c955b0::t_6b85c346553bb6 8
+.env.example
+  s_8f6b4df0c955b0::t_6b85c346553bb6 14-15,17-18,23-28,31-33,37-39
+  s_a739f8c89cc215::t_fc79234f9f4da5 40
+apps/react-web/src/test/viteConfig.test.ts
+  s_8f6b4df0c955b0::t_d3c2c12b5ea414 1
+  s_8f6b4df0c955b0::t_6f87575d5f8b0a 2-18
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_0177129df49a1b 1944,2012-2018,2025-2027,2030-2032,2033-2036,2037-2039,2042-2044,2047,2077
+  s_8f6b4df0c955b0::t_78446d658d1c87 2047,2049-2055,2060-2065,2067-2071,2073,2075-2078
+apps/react-web/vite.config.ts
+  s_8f6b4df0c955b0::t_6b85c346553bb6 1-3,7-30
+README.md
+  s_8f6b4df0c955b0::t_6b85c346553bb6 64-95
+tests/local_coach_runtime_proxy_test.js
+  s_8f6b4df0c955b0::t_4049743699aa80 1-89,91,95,98,103-143
+  s_8f6b4df0c955b0::t_10bc2d3e57a0a2 90,92-94,96-97,99-102
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.14",
+  "base_commit_sha": "9f049e9fd871258b3aaebc782492ac6cd8e9e79c",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    },
+    "s_a739f8c89cc215": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f2708-7bef-7071-b33e-b6e6a78fc93b",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
