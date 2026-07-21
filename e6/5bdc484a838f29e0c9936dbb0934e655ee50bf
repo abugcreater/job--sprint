@@ -1,0 +1,27 @@
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_015cfcc3b83244 3-43
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_c307adfbdfbf5e 23
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_11b54a89d9f9d8 26
+package.json
+  s_8f6b4df0c955b0::t_349b59da1a0514 34-35
+tests/local_coach_runtime_proxy_auth_test.js
+  s_8f6b4df0c955b0::t_996fbc1ad8a611 1-197
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "e65bdc484a838f29e0c9936dbb0934e655ee50bf",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "unknown"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
