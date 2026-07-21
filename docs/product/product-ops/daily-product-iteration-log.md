@@ -1,5 +1,46 @@
 # 每日主动产品迭代日志
 
+日期：2026-07-21
+
+## 2026-07-21 第四十八次主动迭代
+
+主任务：补齐 Vite proxy 到 Node runtime 的真实登录 Cookie 冒烟，区分未登录与未配置 AI provider。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | 用户看到 AI 运行记录失败时，需要知道是未登录、后端不可达还是模型未配置，不能靠免登录路径猜测。 |
+| 问题确定性 | 5 | 现有自动 smoke 明确使用 `JOB_SPRINT_AUTH_DISABLED=true`；诊断工具虽能分类 `auth_required`，但未真实经过 Vite Cookie 和 Node 会话。 |
+| 风险降低 | 5 | 临时账号与独立 `dataScope` 能证明测试不会把真实用户 Cookie、用户文件或数据域带入公开测试。 |
+| 交互改善 | 3 | 本轮是开发验收闭环，直接支撑 Coach 和 Stats 向用户给出不同的恢复动作。 |
+| 可验证性 | 5 | 测试会启动真实 Node 与 Vite 进程，断言匿名、登录会话、数据域、已登录 AI 请求和分类结果。 |
+| 实现大小 | 4 | 新增一条窄范围自动 smoke 与命令接入，不修改产品页面、远端配置或账号数据。 |
+
+改动：
+
+- 新增 `tests/local_coach_runtime_proxy_auth_test.js`：动态回环端口、临时 runtime JSON 和进程内临时 coach 账号，经 Vite `/api` proxy 验证匿名请求为 `auth_required`，登录 Cookie 的会话身份/数据域正确，已登录请求为 `provider_not_configured` 且 schema 可用；finally 回收进程和临时目录。
+- `package.json`：新增 `test:coach-runtime-proxy-auth`，并纳入 `test:coach-runtime-diagnostic`。
+- `product-ledger.md` 与 `known-issues.md`：将本地 AI 验收边界从“免登录 proxy”更新为“免登录 + Cookie 分层证据”。
+
+已验证：
+
+- `node --check tests/local_coach_runtime_proxy_auth_test.js`：PASS。
+- `npm run test:coach-runtime-proxy-auth`：PASS；匿名、登录 Cookie、数据域和未配置 provider 的分类均符合预期。
+- `npm run test:coach-runtime-diagnostic`：PASS；8 类诊断单测、既有免登录 proxy smoke 和新增登录 Cookie proxy smoke 均通过。
+- `node tests/node_auth_routes_boundary_test.js`：PASS。
+- `npm run validate:product-iteration -- --json`、`npm run scan:sensitive`、`git diff --check`：PASS；敏感扫描未发现高风险命中。
+
+限制：
+
+- 临时账号只存在于测试子进程环境，未读取真实 `.env` 或 `JOB_SPRINT_USERS_FILE`，也不会调用真实 provider、修改服务器、账号或持久化业务数据。
+- 本轮只覆盖 Node runtime；Rust Cookie + Vite proxy、真实 provider、Android 和远端 HTTPS 仍是独立验收层。
+
+明日候选：
+
+1. 以同一分层口径补 Rust runtime 的登录 Cookie + Vite proxy smoke，前提是仍能用临时 SQLite 和临时账号完成。
+2. 在有外部 HTTPS 修复证据后恢复 Android 远端真机验收，不以本地 smoke 代替。
+
 日期：2026-07-08
 
 ## 2026-07-15 GitFlow 发布与回同步收口
