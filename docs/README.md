@@ -8,6 +8,7 @@
 
 | 文件 | 用途 |
 |---|---|
+| `core/00-project-overview.md` | 面向新读者的完整项目介绍：背景、用户闭环、能力、权限边界、技术选型、开发方式、验收与交付状态。 |
 | `core/01-project-background.md` | 项目背景、定位、边界、非目标。 |
 | `core/02-project-plan.md` | 当前阶段、下一步规划、文档治理策略。 |
 | `core/03-technical-architecture.md` | 技术栈、目录、数据流、安全边界和架构风险。 |
