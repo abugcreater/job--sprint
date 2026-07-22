@@ -71,6 +71,9 @@ cargo build --release --manifest-path apps/rust-api/Cargo.toml
 
 ```bash
 npm run test:rust-coach-runtime
+npm run test:rust-coach-runtime-proxy-auth
 ```
+
+前者验证免登录 Rust fallback、SQLite 与 `llm_runs`；后者通过临时账号和 Vite `/api` proxy 验证匿名请求、登录 Cookie、独立数据域和未配置 provider 的分层诊断。两者都不读取真实 `.env` 或 users file，也不调用真实 provider。
 
 该命令只证明 Rust API、`/api/coach/artifacts` 的 fallback schema 和 `llm_runs` 临时读回可用；`provider_not_configured` 是预期诊断，不代表真实模型已配置或远端 AI 调用通过。
