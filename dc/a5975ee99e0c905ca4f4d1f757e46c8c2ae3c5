@@ -1,0 +1,22 @@
+docs/README.md
+  s_8f6b4df0c955b0::t_0579bed642de5c 11
+docs/core/00-project-overview.md
+  s_8f6b4df0c955b0::t_b14bf6875f1769 3
+  s_8f6b4df0c955b0::t_0579bed642de5c 1-2,4-288
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "dca5975ee99e0c905ca4f4d1f757e46c8c2ae3c5",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
