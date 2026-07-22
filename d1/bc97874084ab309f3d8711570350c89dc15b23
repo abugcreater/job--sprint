@@ -1,0 +1,31 @@
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_219125981ecaed 23-24
+apps/rust-api/README.md
+  s_8f6b4df0c955b0::t_219125981ecaed 74,77
+  s_8f6b4df0c955b0::t_e9cb4618b12a6b 78
+tests/rust_coach_runtime_proxy_auth_test.js
+  s_8f6b4df0c955b0::t_219125981ecaed 1-213
+package.json
+  s_8f6b4df0c955b0::t_219125981ecaed 38
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_219125981ecaed 27
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_219125981ecaed 3-27,34-43
+  s_8f6b4df0c955b0::t_60bf42e992b72a 28-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "d1bc97874084ab309f3d8711570350c89dc15b23",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
