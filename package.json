@@ -35,6 +35,7 @@
     "test:coach-runtime-proxy-auth": "node tests/local_coach_runtime_proxy_auth_test.js",
     "test:coach-runtime-proxy": "node tests/local_coach_runtime_proxy_test.js",
     "test:rust-coach-runtime": "node tests/rust_coach_runtime_smoke_test.js",
+    "test:rust-coach-runtime-proxy-auth": "node tests/rust_coach_runtime_proxy_auth_test.js",
     "scan:sensitive": "node tools/scan_sensitive_content.js",
     "build:public-safe": "node tools/build_public_safe_bundle.js",
     "build:server-delivery": "node tools/build_server_delivery_package.js",
