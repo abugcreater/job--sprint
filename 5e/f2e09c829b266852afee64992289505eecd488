@@ -1,0 +1,25 @@
+docs/core/00-project-overview.md
+  s_8f6b4df0c955b0::t_799f6022ab2a00 3,234,236-238,240
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_799f6022ab2a00 3-37
+CHANGELOG.md
+  s_8f6b4df0c955b0::t_ffd4f680c91b75 7-13
+package.json
+  s_8f6b4df0c955b0::t_965ffe6ae55601 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.15",
+  "base_commit_sha": "5ef2e09c829b266852afee64992289505eecd488",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
