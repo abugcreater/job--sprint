@@ -1,5 +1,119 @@
 # 每日主动产品迭代日志
 
+日期：2026-07-22
+
+## 2026-07-23 第五十次主动迭代
+
+主任务：按 GitFlow 发布阈值收口 `v0.2.3`，将已合入的运行诊断补强和项目总览进入稳定源码版本。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 稳定版本让协作者能从明确 tag 获取 AI 诊断与项目文档，而不是依赖尚在 `develop` 的提交。 |
+| 问题确定性 | 5 | `main` 与 `develop` 文件树不同，且 `v0.2.2` 后已合入三项独立改动，触发 GitFlow 的累计发布阈值。 |
+| 风险降低 | 5 | 通过 `release/* -> main`、tag 和回同步避免源码分支长期漂移，也不把 Git 合并误报为服务器交付。 |
+| 交互改善 | 2 | 本轮不改变页面交互，改善的是版本可追溯性和对外使用的稳定基线。 |
+| 可验证性 | 5 | 可运行 Git release gate、敏感扫描、GitHub required check，并核对 tag、回同步和分支清理。 |
+| 实现大小 | 5 | 仅包含版本元数据、发布说明、当前事实更新和日志记录。 |
+
+改动：
+
+- `package.json`：版本从 `0.2.2` 升至 `0.2.3`。
+- `CHANGELOG.md`：记录 Node/Rust 认证 Vite proxy 诊断和项目全景介绍。
+- `docs/core/00-project-overview.md`：更新稳定 tag、回同步和“Git 发布不等于服务器同步”的当前事实。
+- 本日志：记录本次发布阈值、验证和交付边界。
+
+已验证：
+
+- `npm run test:git-release`：PASS，覆盖根测试、GitFlow 策略、Web/Rust 本地功能持久化、public-safe 构建与扫描；React 36 个测试文件、113 条用例通过。
+- `npm run scan:sensitive`：PASS，未发现高风险命中。
+- GitFlow release/PR 门禁、GitHub `validate`、`v0.2.3` tag、`main -> develop` 回同步、短分支清理和干净工作树将在发布 PR 收口时核对。
+
+限制：
+
+- 本轮只发布 Git 仓库；不会运行 `npm run test:release`，不会同步服务器、重启服务、修改远端配置、账号或生产数据。
+- 服务器与 Android 是否已更新仍需由对应版本的交付 manifest、远端认证/保存读回和真机 evidence 单独证明。
+
+## 2026-07-22 第四十九次主动迭代
+
+主任务：补齐 Rust runtime 经 Vite proxy 的真实登录 Cookie 冒烟，统一 Node/Rust 的 AI 运行诊断边界。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | 用户不应因为本地运行时切换到 Rust 就重新面对“AI 一直失败但不知道原因”的模糊反馈。 |
+| 问题确定性 | 5 | P1 明确记录 Rust 仅有免登录 SQLite smoke，未证明 Vite proxy 与真实 Cookie 会话。 |
+| 风险降低 | 5 | 使用动态端口、临时 SQLite 和随机凭据，能验证登录数据域与 AI 权限而不接触真实账号或数据。 |
+| 交互改善 | 3 | 本轮是运行验收闭环，直接支撑页面对未登录和模型未配置给出不同恢复动作。 |
+| 可验证性 | 5 | 测试会启动真实 Rust、Vite 和 SQLite，断言匿名、会话、dataScope、AI 分类和 `llm_runs` 读回。 |
+| 实现大小 | 4 | 新增一个窄范围 smoke、命令和边界记录，不修改业务页面或远端配置。 |
+
+改动：
+
+- 新增 `tests/rust_coach_runtime_proxy_auth_test.js`：经 Vite `/api` proxy 验证 Rust 匿名请求为 `auth_required`、临时登录 Cookie 的用户与 `dataScope` 正确、已登录请求为 `provider_not_configured`，并读回临时 SQLite 的 `llm_runs`。
+- `package.json` 与 Rust README：新增 `npm run test:rust-coach-runtime-proxy-auth`，保持既有免登录 Rust smoke 独立可跑。
+- `product-ledger.md` 与 `known-issues.md`：把本地 AI 诊断更新为 Node/Rust 同口径的分层证据，并明确真实 provider 仍未被此测试覆盖。
+
+已验证：
+
+- `node --check tests/rust_coach_runtime_proxy_auth_test.js`：PASS。
+- `npm run test:rust-coach-runtime-proxy-auth`：PASS；Rust 经 Vite proxy 的匿名、登录 Cookie、dataScope、未配置 provider 与 `llm_runs` 读回均符合预期。
+- `npm run test:rust-coach-runtime`：PASS；既有免登录 SQLite fallback smoke 继续通过。
+- `node tests/coach_artifacts_runtime_diagnostic_test.js`、`node tests/rust_auth_routes_boundary_test.js`、`node tests/rust_session_token_boundary_test.js`：PASS。
+- `cargo test --manifest-path apps/rust-api/Cargo.toml`：PASS，23 个单元测试和 2 个合同测试通过。
+- `npm run validate:product-iteration -- --json`、`npm run scan:sensitive`、`git diff --check`：PASS；敏感扫描未发现高风险命中。
+
+限制：
+
+- 测试只使用子进程环境的随机凭据、临时 SQLite 与回环端口；不读取真实 `.env` 或 users file，不调用真实 provider，不修改服务器、账号或业务数据。
+- Android、远端 HTTPS 与真实 provider 错误治理仍是独立交付层。
+
+明日候选：
+
+1. 为真实 provider 的 timeout、限流和 5xx fallback 补可区分的运行分类与用户恢复提示，先建 feature capsule。
+2. 保持 Android/正式域名证据随下一次 APK 或证书变更重新验收。
+
+## 2026-07-21 第四十八次主动迭代
+
+主任务：补齐 Vite proxy 到 Node runtime 的真实登录 Cookie 冒烟，区分未登录与未配置 AI provider。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | 用户看到 AI 运行记录失败时，需要知道是未登录、后端不可达还是模型未配置，不能靠免登录路径猜测。 |
+| 问题确定性 | 5 | 现有自动 smoke 明确使用 `JOB_SPRINT_AUTH_DISABLED=true`；诊断工具虽能分类 `auth_required`，但未真实经过 Vite Cookie 和 Node 会话。 |
+| 风险降低 | 5 | 临时账号与独立 `dataScope` 能证明测试不会把真实用户 Cookie、用户文件或数据域带入公开测试。 |
+| 交互改善 | 3 | 本轮是开发验收闭环，直接支撑 Coach 和 Stats 向用户给出不同的恢复动作。 |
+| 可验证性 | 5 | 测试会启动真实 Node 与 Vite 进程，断言匿名、登录会话、数据域、已登录 AI 请求和分类结果。 |
+| 实现大小 | 4 | 新增一条窄范围自动 smoke 与命令接入，不修改产品页面、远端配置或账号数据。 |
+
+改动：
+
+- 新增 `tests/local_coach_runtime_proxy_auth_test.js`：动态回环端口、临时 runtime JSON 和进程内临时 coach 账号，经 Vite `/api` proxy 验证匿名请求为 `auth_required`，登录 Cookie 的会话身份/数据域正确，已登录请求为 `provider_not_configured` 且 schema 可用；finally 回收进程和临时目录。
+- `package.json`：新增 `test:coach-runtime-proxy-auth`，并纳入 `test:coach-runtime-diagnostic`。
+- `product-ledger.md` 与 `known-issues.md`：将本地 AI 验收边界从“免登录 proxy”更新为“免登录 + Cookie 分层证据”。
+
+已验证：
+
+- `node --check tests/local_coach_runtime_proxy_auth_test.js`：PASS。
+- `npm run test:coach-runtime-proxy-auth`：PASS；匿名、登录 Cookie、数据域和未配置 provider 的分类均符合预期。
+- `npm run test:coach-runtime-diagnostic`：PASS；8 类诊断单测、既有免登录 proxy smoke 和新增登录 Cookie proxy smoke 均通过。
+- `node tests/node_auth_routes_boundary_test.js`：PASS。
+- `npm run validate:product-iteration -- --json`、`npm run scan:sensitive`、`git diff --check`：PASS；敏感扫描未发现高风险命中。
+
+限制：
+
+- 临时账号只存在于测试子进程环境，未读取真实 `.env` 或 `JOB_SPRINT_USERS_FILE`，也不会调用真实 provider、修改服务器、账号或持久化业务数据。
+- 本轮只覆盖 Node runtime；Rust Cookie + Vite proxy、真实 provider、Android 和远端 HTTPS 仍是独立验收层。
+
+明日候选：
+
+1. 以同一分层口径补 Rust runtime 的登录 Cookie + Vite proxy smoke，前提是仍能用临时 SQLite 和临时账号完成。
+2. 在有外部 HTTPS 修复证据后恢复 Android 远端真机验收，不以本地 smoke 代替。
+
 日期：2026-07-08
 
 ## 2026-07-15 GitFlow 发布与回同步收口
