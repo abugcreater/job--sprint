@@ -4,6 +4,13 @@ All notable changes should be documented in this file.
 
 ## Unreleased
 
+## 0.2.3 - 2026-07-23
+
+- Added authenticated Vite proxy diagnostics for both Node and Rust coach runtimes, including session scope and AI run readback coverage.
+- Added a Chinese project overview covering product positioning, user workflow, technical choices, delivery boundaries, and current limitations.
+
+## 0.2.2 - 2026-07-20
+
 - Prepared repository metadata for open-source review.
 - Added public security guidance and contribution rules.
 - Expanded `.gitignore` and `.env.example` for safer local development.

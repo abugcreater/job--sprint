@@ -2,6 +2,39 @@
 
 日期：2026-07-22
 
+## 2026-07-23 第五十次主动迭代
+
+主任务：按 GitFlow 发布阈值收口 `v0.2.3`，将已合入的运行诊断补强和项目总览进入稳定源码版本。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 稳定版本让协作者能从明确 tag 获取 AI 诊断与项目文档，而不是依赖尚在 `develop` 的提交。 |
+| 问题确定性 | 5 | `main` 与 `develop` 文件树不同，且 `v0.2.2` 后已合入三项独立改动，触发 GitFlow 的累计发布阈值。 |
+| 风险降低 | 5 | 通过 `release/* -> main`、tag 和回同步避免源码分支长期漂移，也不把 Git 合并误报为服务器交付。 |
+| 交互改善 | 2 | 本轮不改变页面交互，改善的是版本可追溯性和对外使用的稳定基线。 |
+| 可验证性 | 5 | 可运行 Git release gate、敏感扫描、GitHub required check，并核对 tag、回同步和分支清理。 |
+| 实现大小 | 5 | 仅包含版本元数据、发布说明、当前事实更新和日志记录。 |
+
+改动：
+
+- `package.json`：版本从 `0.2.2` 升至 `0.2.3`。
+- `CHANGELOG.md`：记录 Node/Rust 认证 Vite proxy 诊断和项目全景介绍。
+- `docs/core/00-project-overview.md`：更新稳定 tag、回同步和“Git 发布不等于服务器同步”的当前事实。
+- 本日志：记录本次发布阈值、验证和交付边界。
+
+已验证：
+
+- `npm run test:git-release`：PASS，覆盖根测试、GitFlow 策略、Web/Rust 本地功能持久化、public-safe 构建与扫描；React 36 个测试文件、113 条用例通过。
+- `npm run scan:sensitive`：PASS，未发现高风险命中。
+- GitFlow release/PR 门禁、GitHub `validate`、`v0.2.3` tag、`main -> develop` 回同步、短分支清理和干净工作树将在发布 PR 收口时核对。
+
+限制：
+
+- 本轮只发布 Git 仓库；不会运行 `npm run test:release`，不会同步服务器、重启服务、修改远端配置、账号或生产数据。
+- 服务器与 Android 是否已更新仍需由对应版本的交付 manifest、远端认证/保存读回和真机 evidence 单独证明。
+
 ## 2026-07-22 第四十九次主动迭代
 
 主任务：补齐 Rust runtime 经 Vite proxy 的真实登录 Cookie 冒烟，统一 Node/Rust 的 AI 运行诊断边界。
