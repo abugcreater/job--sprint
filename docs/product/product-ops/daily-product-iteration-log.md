@@ -1,6 +1,6 @@
 # 每日主动产品迭代日志
 
-日期：2026-07-23
+日期：2026-07-22
 
 ## 2026-07-23 第五十次主动迭代
 
@@ -28,8 +28,7 @@
 
 - `npm run test:git-release`：PASS，覆盖根测试、GitFlow 策略、Web/Rust 本地功能持久化、public-safe 构建与扫描；React 36 个测试文件、113 条用例通过。
 - `npm run scan:sensitive`：PASS，未发现高风险命中。
-- GitFlow release/PR 门禁与 GitHub `validate`：PASS；PR #24 已合入 `main` 并创建 `v0.2.3` 附注 tag。
-- 当前回同步 PR 负责把 `main` 的发布提交带回 `develop`；合并后仍需核对短分支清理和干净工作树。
+- GitFlow release/PR 门禁、GitHub `validate`、`v0.2.3` tag、`main -> develop` 回同步、短分支清理和干净工作树将在发布 PR 收口时核对。
 
 限制：
 
