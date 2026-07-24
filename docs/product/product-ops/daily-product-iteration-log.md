@@ -2,6 +2,46 @@
 
 日期：2026-07-22
 
+## 2026-07-24 第五十一次主动迭代
+
+主任务：让 AI 运行记录从“失败标签”变成可恢复的行动提示。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | 用户已明确反馈 AI 运行记录持续显示失败；能判断下一步动作比单纯看到 fallback 更重要。 |
+| 问题确定性 | 5 | 已有 Node/Rust proxy 证据能区分认证和 provider，但前端仍缺少针对 API 与合同异常的统一恢复提示。 |
+| 风险降低 | 5 | 诊断码不携带服务端原始错误或密钥，且禁止把本地规则草稿伪装为真实模型成功。 |
+| 交互改善 | 4 | Coach 生成后即时反馈，运行记录和 Stats 都展示中文原因与恢复动作。 |
+| 可验证性 | 5 | 可用前端类型/组件测试、Node/Rust smoke、浏览器桌面与移动端走查验证。 |
+| 实现大小 | 4 | 仅改诊断映射、前端反馈和文档，不触碰远端配置或生产数据。 |
+
+改动：
+
+- `runtimeClient.ts`：把认证、服务端不可用、响应合同异常和未知生成失败收敛为安全的 `CoachArtifactRuntimeError` 诊断码。
+- `llmRunDiagnosis.ts`、Coach、Stats 与运行记录：统一展示“需登录、未配置模型、服务异常、响应异常”等中文解释与恢复动作；服务端 fallback 也不再模糊地记作普通失败。
+- 新增 `LlmRunPanel.test.tsx`，并扩展 runtime、Stats 测试，覆盖诊断码到用户可见恢复提示的映射。
+- 新增 `ai-runtime-recovery` feature capsule，并回写产品账本与已知问题。
+
+已验证：
+
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- 定向 Vitest：4 个文件、12 条用例 PASS；完整 Vitest：37 个文件、116 条用例 PASS。
+- `npm --prefix apps/react-web run build`：PASS；仅保留既有 500 kB 分包提示。
+- `npm run test:coach-runtime-diagnostic`、`npm run test:rust-coach-runtime-proxy-auth`：PASS。
+- 浏览器走查：本地生成 fallback 后，桌面和 `390px` 移动端均显示“本地前端未连接后端 AI API”、不误报模型失败、给出 `/api/coach/artifacts` 复验动作；控制台无 error。
+
+限制：
+
+- 未调用真实 provider，也没有实现 timeout、限流、5xx 的自动重试或熔断。
+- 未运行服务器交付、未改远端 provider 配置、未更新 Android；Git 合并不等于服务器已同步。
+
+明日候选：
+
+1. 基于真实 provider 的可匿名脱敏错误证据，补 timeout、限流和 5xx 的细分恢复策略，先新建 feature capsule。
+2. 或评估 Android HTTPS 远端恢复后的真机运行记录展示，不能用本地 Web 走查代替。
+
 ## 2026-07-23 第五十次主动迭代
 
 主任务：按 GitFlow 发布阈值收口 `v0.2.3`，将已合入的运行诊断补强和项目总览进入稳定源码版本。

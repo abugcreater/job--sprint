@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
+  coachArtifactRuntimeWarningFromError,
   generateCoachArtifactsOnServer,
   submitCoachFeedback,
   submitCoachOnboardingEvent
@@ -20,6 +21,7 @@ import {
 } from "../../data/coachAdapter";
 import { buildApplicationsDashboard } from "../../data/applicationsAdapter";
 import { buildCoachFirstLoginFlow } from "../../data/coachFirstLoginFlowAdapter";
+import { diagnoseLlmRun } from "../../data/llmRunDiagnosis";
 import { createLlmRun } from "../../data/llmRunAdapter";
 import { buildOpportunitySignals } from "../../data/opportunitySignalsAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
@@ -251,19 +253,25 @@ export function CoachPage() {
       });
       if (response?.artifacts.length) {
         addAiArtifacts(response.artifacts);
-        addLlmRun(response.llmRun ?? createLlmRun({
+        const warning = response.llmRun?.warning ?? response.warning ?? (response.provider === "local-fallback" ? "provider_not_configured" : undefined);
+        const llmRun = response.llmRun
+          ? { ...response.llmRun, warning }
+          : createLlmRun({
             profileId: dashboard.activeProfile?.id,
             provider: response.provider,
             model: response.model,
             promptVersion: response.promptVersion,
             schemaVersion: response.schemaVersion,
             inputSummaryHash: response.inputSummaryHash,
-            status: response.provider === "anthropic-compatible" && !response.warning ? "success" : "fallback",
+            status: response.provider === "anthropic-compatible" && !warning ? "success" : "fallback",
             artifactCount: response.artifacts.length,
-            warning: response.warning
-          }));
-        const mode = response.provider === "anthropic-compatible" ? "服务端大模型" : "服务端规则 fallback";
-        setFeedback(`${mode}已生成 AI 建议，接受后才会写入正式记录。`);
+            warning
+          });
+        addLlmRun(llmRun);
+        const diagnosis = diagnoseLlmRun(llmRun);
+        setFeedback(diagnosis.tone === "success"
+          ? "服务端大模型已生成 AI 建议，接受后才会写入正式记录。"
+          : `${diagnosis.title}：${diagnosis.detail}`);
         return;
       }
       generateAiArtifacts();
@@ -275,16 +283,18 @@ export function CoachPage() {
         warning: "server_unavailable"
       }));
       setFeedback("服务端 AI 暂不可用，已使用本地规则生成 AI 建议。");
-    } catch (_) {
+    } catch (error) {
       generateAiArtifacts();
-      addLlmRun(createLlmRun({
+      const llmRun = createLlmRun({
         profileId: dashboard.activeProfile?.id,
         provider: "local-fallback",
         status: "fallback",
         artifactCount: dashboard.boundaries.length ? 3 : 1,
-        warning: "server_generation_failed"
-      }));
-      setFeedback("服务端 AI 生成失败，已使用本地规则生成 AI 建议。");
+        warning: coachArtifactRuntimeWarningFromError(error)
+      });
+      addLlmRun(llmRun);
+      const diagnosis = diagnoseLlmRun(llmRun);
+      setFeedback(`${diagnosis.title}：${diagnosis.detail}`);
     } finally {
       setIsGenerating(false);
     }

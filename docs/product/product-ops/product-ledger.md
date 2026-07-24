@@ -21,6 +21,7 @@
 
 | 日期 | 决策 | 理由 | 取舍 |
 |---|---|---|---|
+| 2026-07-24 | AI 运行记录必须把可恢复的环境、认证、provider 与合同问题转成用户语言，而不是把所有 fallback 记作失败。 | 用户此前只能看到 `local-fallback` 或 `server_unavailable`，无法判断该重新登录、等待服务、请求维护者配置模型，还是反馈响应合同问题。 | React 抽出 `CoachArtifactRuntimeError` 与安全诊断码，Coach、Stats 和运行记录复用 `diagnoseLlmRun`；本轮只给出恢复动作，不做自动重试/熔断，不改远端 provider 或服务器配置。 |
 | 2026-07-20 | 每日自动迭代必须先收口历史 PR，并把合入 `develop` 与删除分支作为完成条件。 | 只创建新分支和 Draft 会把冲突、测试与功能叠加成本推迟到未来；直接 `develop -> main` 又会被正式 GitFlow 拒绝。 | 开放需求 PR 存在时禁止再开新分支；依次 rebase、验证、Ready、squash merge 到 `develop` 并删除分支。发布按每 7 天、累计 3 项需求或用户明确要求触发 `release/* -> main`，随后回同步 `develop`；`.github/gitflow-automation-contract.json` 精确约束参数，GitHub required check 同时运行合同回归测试、实际校验和敏感扫描。 |
 | 2026-07-18 | 本地 React AI 联调必须用自动 smoke 守住 Vite -> API proxy，不只靠一次手工验证。 | 单次手工成功不能防止后续移除 proxy、改错 env 读取或留下无法回收的本地进程。 | `test:coach-runtime-diagnostic` 同时启动临时免登录 Node runtime 与 Vite，动态分配回环端口，验证 health 与 artifacts 返回 `provider_not_configured`，并清理子进程和临时 runtime；它不调用真实 provider，也不替代真实 Cookie 或 Rust runtime 验收。 |
 | 2026-07-21 | 本地 AI 运行诊断必须覆盖“未登录”和“已登录但未配模型”两个不同的恢复路径。 | 仅用免登录 proxy smoke 时，`auth_required` 只能由纯函数推断，用户无法确认 Vite Cookie、Node 会话和 AI 权限在真实两进程路径中是否能区分登录问题与 provider 配置问题。 | `test:coach-runtime-proxy-auth` 使用动态回环端口、临时 runtime JSON 和进程内临时 coach 账号，经 Vite `/api` proxy 依次断言匿名请求为 `auth_required`、登录 Cookie 的会话身份和数据域正确、已登录请求为 `provider_not_configured` 且 schema 可用；不读取真实 `.env`、users file 或 provider，也不替代 Rust、远端或真实模型验收。 |
