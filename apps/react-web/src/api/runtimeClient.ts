@@ -6,6 +6,29 @@ export type { BoundarySuggestionResponse, CoachArtifactResponse, CoachFeedbackPa
 
 export const RUNTIME_KEEPALIVE_BODY_LIMIT_BYTES = 60000;
 
+export type CoachArtifactRuntimeWarning = "auth_required" | "api_unavailable" | "api_contract_error" | "server_generation_failed";
+
+export class CoachArtifactRuntimeError extends Error {
+  readonly code: CoachArtifactRuntimeWarning;
+
+  constructor(code: CoachArtifactRuntimeWarning, message: string) {
+    super(message);
+    this.name = "CoachArtifactRuntimeError";
+    this.code = code;
+  }
+}
+
+export function coachArtifactRuntimeWarningForStatus(status: number): CoachArtifactRuntimeWarning {
+  if ([401, 403].includes(status)) return "auth_required";
+  if (status >= 500) return "api_unavailable";
+  return "api_contract_error";
+}
+
+export function coachArtifactRuntimeWarningFromError(error: unknown): CoachArtifactRuntimeWarning {
+  if (error instanceof CoachArtifactRuntimeError) return error.code;
+  return "server_generation_failed";
+}
+
 export function canUseServerRuntime(): boolean {
   if (typeof window === "undefined") return false;
   const env = runtimeImportEnv();
@@ -103,10 +126,20 @@ export async function generateCoachArtifactsOnServer({
       }
     })
   });
-  if ([401, 403, 503].includes(response.status)) return null;
-  if (!response.ok) throw new Error(`coach_artifact_generation_failed:${response.status}`);
-  const data = await response.json();
-  return Array.isArray(data.artifacts) ? data as CoachArtifactResponse : null;
+  if (!response.ok) {
+    const code = coachArtifactRuntimeWarningForStatus(response.status);
+    throw new CoachArtifactRuntimeError(code, `coach_artifact_generation_failed:${response.status}`);
+  }
+  let data: unknown;
+  try {
+    data = await response.json();
+  } catch {
+    throw new CoachArtifactRuntimeError("api_contract_error", "coach_artifact_generation_invalid_json");
+  }
+  if (!data || typeof data !== "object" || !Array.isArray((data as CoachArtifactResponse).artifacts)) {
+    throw new CoachArtifactRuntimeError("api_contract_error", "coach_artifact_generation_invalid_payload");
+  }
+  return data as CoachArtifactResponse;
 }
 
 export async function generateBoundarySuggestionsOnServer({

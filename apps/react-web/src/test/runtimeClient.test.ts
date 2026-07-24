@@ -1,5 +1,8 @@
 import {
+  CoachArtifactRuntimeError,
   RUNTIME_KEEPALIVE_BODY_LIMIT_BYTES,
+  coachArtifactRuntimeWarningForStatus,
+  coachArtifactRuntimeWarningFromError,
   shouldUseServerRuntimeForEnv,
   shouldUseRuntimeKeepalive
 } from "../api/runtimeClient";
@@ -24,5 +27,13 @@ describe("runtimeClient", () => {
     expect(shouldUseServerRuntimeForEnv({ protocol: "http:", mode: "production", dev: false })).toBe(true);
     expect(shouldUseServerRuntimeForEnv({ protocol: "http:", mode: "test", dev: false, serverRuntime: "true" })).toBe(false);
     expect(shouldUseServerRuntimeForEnv({ protocol: "file:", mode: "production", dev: false })).toBe(false);
+  });
+
+  it("maps coach artifact HTTP and client failures to safe recovery codes", () => {
+    expect(coachArtifactRuntimeWarningForStatus(401)).toBe("auth_required");
+    expect(coachArtifactRuntimeWarningForStatus(503)).toBe("api_unavailable");
+    expect(coachArtifactRuntimeWarningForStatus(400)).toBe("api_contract_error");
+    expect(coachArtifactRuntimeWarningFromError(new CoachArtifactRuntimeError("api_contract_error", "invalid payload"))).toBe("api_contract_error");
+    expect(coachArtifactRuntimeWarningFromError(new Error("network error"))).toBe("server_generation_failed");
   });
 });
