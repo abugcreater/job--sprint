@@ -4,7 +4,7 @@
 
 ## 实施顺序
 
-1. 在 `runtimeClient` 中把公开失败状态收敛为有限诊断码。
+1. 在 `runtimeClient` 中把公开失败状态收敛为有限诊断码；`429`、`408` 和 `504` 必须分别保持限流与超时语义，不能落为响应合同异常。
 2. 在 Coach 生成流程中将诊断码写入已有运行记录，并给出面向用户的即时反馈。
 3. 在 `diagnoseLlmRun` 中维护单一映射，供 Coach 与 Stats 使用。
 4. 添加 runtime client、诊断映射和 Coach 页面测试。
@@ -24,4 +24,5 @@ npm run scan:sensitive
 ## 不覆盖的验证
 
 - 真实 provider 的限流、5xx、成本、重试和熔断。
+- 基于 `Retry-After` 的倒计时、客户端自动重试或重复写入保护。
 - 远端服务器部署、Android 资源同步、APK 或 HTTPS 真机链路。

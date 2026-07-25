@@ -12,4 +12,16 @@
 | Node/Rust 本地 proxy 诊断未回归 | PASS | `npm run test:coach-runtime-diagnostic` 与 `npm run test:rust-coach-runtime-proxy-auth` 通过，覆盖本地 proxy、认证、数据域、fallback 与 schema 读回。 |
 | 敏感信息未进入前端或文档 | PASS_WITH_LIMITS | 本轮只记录诊断码和用户恢复文案，不引入凭据、地址或真实 provider 返回；仍需在 PR 门禁中跑敏感扫描。 |
 
-限制：本审计不证明真实 provider 的 timeout/限流/5xx 分类、自动重试或熔断策略；不部署服务器、不改远端 provider 配置、不更新 Android，也不代表完整 HTTPS 生产交付。
+限制：本审计验证的是前端对 HTTP `429`、`408`、`504` 的分类和本地临时桩交互，不证明真实 provider 的返回、`Retry-After` 语义、自动重试或熔断策略；不部署服务器、不改远端 provider 配置、不更新 Android，也不代表完整 HTTPS 生产交付。
+
+## 2026-07-25 限流与超时补充
+
+状态：PASS_WITH_LIMITS
+
+- HTTP `429` 现在归类为 `rate_limited`，不再误报为 `api_contract_error`。
+- HTTP `408` 与 `504` 现在归类为 `api_timeout`；其他 `5xx` 仍归类为 `api_unavailable`。
+- Coach 页面把恢复动作放到即时反馈中，AI 运行记录和统计页保留诊断码、原因和完整下一步。
+- 浏览器使用本地回环临时桩返回 `429` 完成走查：没有自动重试或正式写入，桌面和 `390px` 移动端都能完整显示“请求过多 / rate_limited”诊断。
+- React 全量测试、构建、Node 诊断与 Rust 代理鉴权冒烟均通过；构建仅保留既有的大 bundle 警告。
+
+本次没有引入 `Retry-After` 倒计时、自动重试、熔断或 provider 配置修改。这些能力必须以真实运行时证据和独立验收需求推进。

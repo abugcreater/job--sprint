@@ -6,7 +6,7 @@ export type { BoundarySuggestionResponse, CoachArtifactResponse, CoachFeedbackPa
 
 export const RUNTIME_KEEPALIVE_BODY_LIMIT_BYTES = 60000;
 
-export type CoachArtifactRuntimeWarning = "auth_required" | "api_unavailable" | "api_contract_error" | "server_generation_failed";
+export type CoachArtifactRuntimeWarning = "auth_required" | "rate_limited" | "api_timeout" | "api_unavailable" | "api_contract_error" | "server_generation_failed";
 
 export class CoachArtifactRuntimeError extends Error {
   readonly code: CoachArtifactRuntimeWarning;
@@ -20,6 +20,8 @@ export class CoachArtifactRuntimeError extends Error {
 
 export function coachArtifactRuntimeWarningForStatus(status: number): CoachArtifactRuntimeWarning {
   if ([401, 403].includes(status)) return "auth_required";
+  if (status === 429) return "rate_limited";
+  if ([408, 504].includes(status)) return "api_timeout";
   if (status >= 500) return "api_unavailable";
   return "api_contract_error";
 }

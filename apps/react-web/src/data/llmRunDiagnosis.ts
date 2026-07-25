@@ -20,6 +20,26 @@ export function diagnoseLlmRun(run: LlmRun): LlmRunDiagnosis {
       tone: "neutral"
     };
   }
+  if (run.warning === "rate_limited") {
+    return {
+      code: "rate_limited",
+      label: "请求过多",
+      title: "AI 服务正在限流",
+      detail: "服务端或上游 provider 暂时拒绝了本次请求；系统没有自动重复发送，也不会把草稿写入正式记录。",
+      nextAction: "请等待片刻后再生成；不要连续点击或反复刷新页面。",
+      tone: "neutral"
+    };
+  }
+  if (run.warning === "api_timeout") {
+    return {
+      code: "api_timeout",
+      label: "响应超时",
+      title: "AI 服务响应超时",
+      detail: "请求已发出但未在当前时间窗口取得可用结果；系统保留本地规则草稿，不把它当作模型成功。",
+      nextAction: "稍后再生成；若持续超时，由维护者检查 runtime、provider 网络和超时配置。",
+      tone: "risk"
+    };
+  }
   if (run.warning === "provider_not_configured") {
     return {
       code: "provider_not_configured",
