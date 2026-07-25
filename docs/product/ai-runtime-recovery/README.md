@@ -1,7 +1,7 @@
 # AI 运行恢复提示
 
 日期：2026-07-24
-状态：实施中
+状态：已完成，2026-07-25 完成限流与超时补充
 
 ## 需求卡
 
@@ -28,9 +28,16 @@
 | `auth_required` | 服务端可达，但当前登录态或 AI 权限缺失。 | 重新登录后再生成。 |
 | `provider_not_configured` | 服务端和 schema 可用，但未启用真实 provider；规则草稿仍可审核。 | 继续审核草稿，或由维护者在仓库外配置 provider。 |
 | `ai_generation_fallback` | 真实 provider 本轮未完成，系统安全降级为规则草稿。 | 保留草稿，稍后由已配置 runtime 复验。 |
+| `rate_limited` | 服务端或上游 provider 正在限流，本次请求没有自动重放。 | 等待片刻后手动再生成，不要连续点击。 |
+| `api_timeout` | 请求已发出但在当前时间窗口未取得可用结果。 | 稍后手动再生成；持续超时由维护者检查 runtime、provider 网络和超时配置。 |
 | `api_unavailable` | API 可达但服务端当前异常。 | 检查 Node/Rust runtime，再重新生成。 |
 | `api_contract_error` | 返回内容不符合可安全写入草稿的合同。 | 检查服务端响应与 schema，不自动写入。 |
 | `server_unavailable` | 当前前端没有连接到后端 AI API。 | 启动服务端 runtime 或配置 Vite API proxy。 |
+
+## 2026-07-25 补充
+
+- HTTP `429` 不再误归类为响应合同问题，页面会引导用户等待，而不是连续重试。
+- HTTP `408` 与 `504` 归为响应超时；这只改变用户可见诊断，不引入客户端自动重试、熔断、`Retry-After` 解析或 provider 配置读取。
 
 ## 验收入口
 

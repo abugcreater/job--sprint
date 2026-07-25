@@ -271,7 +271,7 @@ export function CoachPage() {
         const diagnosis = diagnoseLlmRun(llmRun);
         setFeedback(diagnosis.tone === "success"
           ? "服务端大模型已生成 AI 建议，接受后才会写入正式记录。"
-          : `${diagnosis.title}：${diagnosis.detail}`);
+          : `${diagnosis.title}：${diagnosis.nextAction}`);
         return;
       }
       generateAiArtifacts();
@@ -294,7 +294,7 @@ export function CoachPage() {
       });
       addLlmRun(llmRun);
       const diagnosis = diagnoseLlmRun(llmRun);
-      setFeedback(`${diagnosis.title}：${diagnosis.detail}`);
+      setFeedback(`${diagnosis.title}：${diagnosis.nextAction}`);
     } finally {
       setIsGenerating(false);
     }
