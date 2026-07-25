@@ -1,0 +1,42 @@
+docs/product/ai-runtime-recovery/development-workflow.md
+  s_8f6b4df0c955b0::t_0a397b44b3c001 7,27
+docs/product/ai-runtime-recovery/completion-audit.md
+  s_8f6b4df0c955b0::t_add8e251fa78bf 15-27
+apps/react-web/src/test/StatsPage.test.tsx
+  s_8f6b4df0c955b0::t_0a397b44b3c001 127-148
+apps/react-web/src/test/runtimeClient.test.ts
+  s_8f6b4df0c955b0::t_0a397b44b3c001 34-36
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_add8e251fa78bf 23
+apps/react-web/src/data/llmRunDiagnosis.ts
+  s_8f6b4df0c955b0::t_0a397b44b3c001 23-42
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_add8e251fa78bf 5-44
+docs/product/ai-runtime-recovery/README.md
+  s_8f6b4df0c955b0::t_0a397b44b3c001 4,31-32,37-40
+  s_8f6b4df0c955b0::t_e043296adf6afc 41
+apps/react-web/src/features/coach/CoachPage.tsx
+  s_8f6b4df0c955b0::t_0a397b44b3c001 274,297
+apps/react-web/src/api/runtimeClient.ts
+  s_8f6b4df0c955b0::t_0a397b44b3c001 9,23-24
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_add8e251fa78bf 24
+apps/react-web/src/test/LlmRunPanel.test.tsx
+  s_8f6b4df0c955b0::t_0a397b44b3c001 9,11,17-18,21-22,25,27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "1221a1eff23bf0a5924995a3e4c3659c6649d390",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
