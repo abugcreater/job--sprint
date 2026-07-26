@@ -1,0 +1,52 @@
+docs/product/application-unsaved-changes/README.md
+  s_8f6b4df0c955b0::t_c51b55e1f1684f 4,30-37
+  s_8f6b4df0c955b0::t_c0adb5fb83acb1 1-3,5-29
+docs/product/application-unsaved-changes/development-workflow.md
+  s_8f6b4df0c955b0::t_c0adb5fb83acb1 1-26
+apps/react-web/src/test/applicationsAdapter.test.ts
+  s_8f6b4df0c955b0::t_9b958925ac2f56 6,8-9,78-86
+  s_8f6b4df0c955b0::t_df2f0bedcefd5c 87-88
+docs/product/application-unsaved-changes/prd-recommended.md
+  s_8f6b4df0c955b0::t_c0adb5fb83acb1 1-21
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_c51b55e1f1684f 11
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_c51b55e1f1684f 24
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_de28dedd353f33 5-43
+apps/react-web/src/test/ApplicationsPage.test.tsx
+  s_8f6b4df0c955b0::t_bd564acfa72a88 91-138
+docs/product/product-flow-redesign/p2-opportunity-workbench.md
+  s_8f6b4df0c955b0::t_de28dedd353f33 61
+  s_8f6b4df0c955b0::t_c51b55e1f1684f 67
+docs/product/application-unsaved-changes/prd-options.md
+  s_8f6b4df0c955b0::t_c0adb5fb83acb1 1-11
+apps/react-web/src/data/applicationsAdapter.ts
+  s_8f6b4df0c955b0::t_9b958925ac2f56 109-130
+docs/product/application-unsaved-changes/completion-audit.md
+  s_8f6b4df0c955b0::t_c51b55e1f1684f 1-12,14-15
+  s_8f6b4df0c955b0::t_de28dedd353f33 13
+docs/product/application-unsaved-changes/review-and-adjudication.md
+  s_8f6b4df0c955b0::t_c0adb5fb83acb1 1-29
+apps/react-web/src/features/applications/ApplicationsPage.tsx
+  s_8f6b4df0c955b0::t_ac4ff68527728c 330,340,359-365,382-400
+  s_8f6b4df0c955b0::t_d1086b9b739103 125-126,130-144,175,177-178
+  s_8f6b4df0c955b0::t_c71f8bdd4d0af5 1,9,12,35,44,65,70,72-73,89,96-98,100
+  s_8f6b4df0c955b0::t_0e9c612a9e14cd 401-403
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "65fc79a501bf22999eb8d6be0db325a7177b2704",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
