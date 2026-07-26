@@ -4,6 +4,11 @@ All notable changes should be documented in this file.
 
 ## Unreleased
 
+## 0.2.4 - 2026-07-26
+
+- Added AI recovery guidance and clearer rate-limit and timeout feedback for coach runs.
+- Added unsaved-change confirmation to the opportunity editor, preserving drafts until a user explicitly discards them.
+
 ## 0.2.3 - 2026-07-23
 
 - Added authenticated Vite proxy diagnostics for both Node and Rust coach runtimes, including session scope and AI run readback coverage.
