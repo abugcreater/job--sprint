@@ -3,8 +3,10 @@ import {
   buildApplicationEvidenceContent,
   buildApplicationsDashboard,
   buildApplicationsExportPayload,
+  cloneApplicationDraft,
   createApplicationDraft,
-  filterApplicationRecords
+  filterApplicationRecords,
+  isApplicationDraftDirty
 } from "../data/applicationsAdapter";
 import type { ReviewEvidence } from "../types/sprint";
 import { buildQaSprint, qaTaskIds } from "./fixtures/coachFlow";
@@ -71,6 +73,17 @@ describe("applicationsAdapter", () => {
     expect(buildApplicationEvidenceContent(task!, draft)).toContain("岗位：测试开发工程师");
     expect(buildApplicationEvidenceContent(task!, draft)).toContain("状态：约面");
     expect(buildApplicationEvidenceContent(task!, draft)).not.toContain("沟通反馈：沟通反馈：");
+  });
+
+  it("detects unsaved changes without sharing tag arrays", () => {
+    const baseline = createApplicationDraft();
+    const clone = cloneApplicationDraft(baseline);
+
+    clone.tags.push("稳定性治理");
+
+    expect(isApplicationDraftDirty(baseline, clone)).toBe(true);
+    expect(baseline.tags).toEqual([]);
+    expect(isApplicationDraftDirty(cloneApplicationDraft(baseline), baseline)).toBe(false);
   });
 
   it("filters, edits and exports local application records from generated evidence", () => {

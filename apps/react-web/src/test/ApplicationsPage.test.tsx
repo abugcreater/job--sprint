@@ -88,6 +88,54 @@ describe("React Job Sprint applications workspace", () => {
     expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.interview]).toBeUndefined();
   });
 
+  it("asks before discarding changed new opportunity facts and keeps the draft when editing continues", async () => {
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "新增机会" }));
+    fireEvent.change(screen.getByLabelText("公司"), { target: { value: "Guarded Cloud" } });
+    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "平台工程师" } });
+    fireEvent.click(screen.getByRole("button", { name: "取消新增" }));
+
+    expect(screen.getByRole("alertdialog", { name: "放弃未保存的修改？" })).toBeInTheDocument();
+    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.opportunity]).toBeUndefined();
+
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.queryByRole("alertdialog", { name: "放弃未保存的修改？" })).not.toBeInTheDocument();
+    expect(screen.getByLabelText("公司")).toHaveValue("Guarded Cloud");
+    expect(screen.getByLabelText("岗位")).toHaveValue("平台工程师");
+
+    fireEvent.click(screen.getByRole("button", { name: "取消新增" }));
+    fireEvent.click(screen.getByRole("button", { name: "放弃修改" }));
+
+    expect(screen.queryByLabelText("公司")).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "机会工作台" })).toBeInTheDocument();
+    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.opportunity]).toBeUndefined();
+  });
+
+  it("keeps an existing opportunity unchanged when a changed editor is discarded", async () => {
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "新增机会" }));
+    fireEvent.change(screen.getByLabelText("公司"), { target: { value: "Original Cloud" } });
+    fireEvent.change(screen.getByLabelText("岗位"), { target: { value: "后端工程师" } });
+    fireEvent.change(screen.getByLabelText("沟通反馈"), { target: { value: "等待一面" } });
+    fireEvent.click(screen.getByRole("button", { name: "记录机会反馈" }));
+
+    fireEvent.click(screen.getByRole("button", { name: "编辑机会记录：Original Cloud" }));
+    fireEvent.change(screen.getByLabelText("沟通反馈"), { target: { value: "不应写入的改动" } });
+    fireEvent.click(screen.getByRole("button", { name: "关闭机会编辑器" }));
+
+    expect(screen.getByRole("alertdialog", { name: "放弃未保存的修改？" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "放弃修改" }));
+
+    expect(screen.getAllByText(/等待一面/).length).toBeGreaterThan(0);
+    expect(screen.queryByText("不应写入的改动")).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "编辑机会记录：Original Cloud" }));
+    fireEvent.click(screen.getByRole("button", { name: "取消编辑" }));
+    expect(screen.queryByRole("alertdialog", { name: "放弃未保存的修改？" })).not.toBeInTheDocument();
+  });
+
   it("filters, edits, deletes and exports local application records", async () => {
     render(<App />);
 
