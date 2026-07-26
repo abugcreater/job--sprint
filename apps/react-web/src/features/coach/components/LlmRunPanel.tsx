@@ -31,7 +31,7 @@ export function LlmRunPanel({ runs }: { runs: LlmRun[] }) {
                 <p className="mt-1">{diagnosis.detail}</p>
                 <p className="mt-1">恢复动作：{diagnosis.nextAction}</p>
               </div>
-              {run.warning ? <p className="mt-2 text-xs font-bold text-ink-500">原始降级码：{run.warning}</p> : null}
+              {run.warning ? <p className="mt-2 text-xs font-bold text-ink-500">诊断码：{diagnosis.code}</p> : null}
               {run.error ? <p className="mt-2 text-sm font-bold text-risk-600">错误：{run.error}</p> : null}
             </div>
           );

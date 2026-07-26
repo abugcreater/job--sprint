@@ -102,6 +102,50 @@ describe("React Job Sprint stats workspace", () => {
     expect(within(aiRunPanel!).getByText("本地前端未连接后端 AI API")).toBeInTheDocument();
     expect(within(aiRunPanel!).getByText("用服务端 runtime 或远端环境复验 /api/coach/artifacts。")).toBeInTheDocument();
   });
+
+  it("keeps an unconfigured provider separate from an unavailable API", async () => {
+    useSprintStore.setState({
+      llmRuns: [
+        {
+          ...llmRuns()[1],
+          provider: "local-fallback",
+          artifactCount: 2,
+          schemaStatus: "pass",
+          warning: "provider_not_configured",
+          createdAt: "2026-07-02T13:30:00+08:00"
+        }
+      ]
+    });
+    render(<App />);
+
+    const aiRunPanel = (await screen.findByRole("heading", { name: "AI 运行质量" })).closest("article");
+    expect(aiRunPanel).not.toBeNull();
+    expect(within(aiRunPanel!).getByText("未配置模型 · local-fallback")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("服务端已连接，但未启用真实 provider")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("需要真实模型时，由维护者在仓库外配置 provider 后再生成。")).toBeInTheDocument();
+  });
+
+  it("tells a rate-limited user to wait instead of treating the response as a contract failure", async () => {
+    useSprintStore.setState({
+      llmRuns: [
+        {
+          ...llmRuns()[1],
+          provider: "local-fallback",
+          artifactCount: 2,
+          schemaStatus: "pass",
+          warning: "rate_limited",
+          createdAt: "2026-07-02T13:30:00+08:00"
+        }
+      ]
+    });
+    render(<App />);
+
+    const aiRunPanel = (await screen.findByRole("heading", { name: "AI 运行质量" })).closest("article");
+    expect(aiRunPanel).not.toBeNull();
+    expect(within(aiRunPanel!).getByText("请求过多 · local-fallback")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("AI 服务正在限流")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("请等待片刻后再生成；不要连续点击或反复刷新页面。")).toBeInTheDocument();
+  });
 });
 
 function evidence(taskId: string, type: ReviewEvidence["type"], title: string): ReviewEvidence {

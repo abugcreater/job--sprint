@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardList, Plus, Target, X } from "lucide-react";
+import { AlertTriangle, ArrowLeft, ArrowRight, BriefcaseBusiness, CheckCircle2, ClipboardList, Plus, Target, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import {
@@ -6,8 +6,10 @@ import {
   buildApplicationEvidenceContent,
   buildApplicationsExportPayload,
   buildApplicationsDashboard,
+  cloneApplicationDraft,
   createApplicationDraft,
   filterApplicationRecords,
+  isApplicationDraftDirty,
   isApplicationDraftReady,
   type ApplicationEvidenceRecord,
   type ApplicationFormDraft,
@@ -30,6 +32,7 @@ export function ApplicationsPage() {
   const restoreEvidence = useSprintStore((state) => state.restoreEvidence);
   const [searchParams, setSearchParams] = useSearchParams();
   const [draft, setDraft] = useState<ApplicationFormDraft>(() => createApplicationDraft());
+  const [draftBaseline, setDraftBaseline] = useState<ApplicationFormDraft>(() => createApplicationDraft());
   const [editingRecordId, setEditingRecordId] = useState<string | undefined>();
   const [statusFilter, setStatusFilter] = useState<ApplicationStatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,6 +41,7 @@ export function ApplicationsPage() {
   const [exportSummary, setExportSummary] = useState("");
   const [formFeedback, setFormFeedback] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
+  const [discardConfirmation, setDiscardConfirmation] = useState<{ subject: string } | null>(null);
   const [recentlyDeletedRecord, setRecentlyDeletedRecord] = useState<ApplicationEvidenceRecord | null>(null);
   const dashboard = useMemo(() => buildApplicationsDashboard(sprint, evidenceByTaskId), [sprint, evidenceByTaskId]);
   const visibleRecords = useMemo(() => {
@@ -58,12 +62,15 @@ export function ApplicationsPage() {
   const comparisonRecords = comparisonIds.map((recordId) => dashboard.recentRecords.find((record) => record.id === recordId)).filter((record): record is ApplicationEvidenceRecord => Boolean(record));
   const comparisonMode = searchParams.get("mode") === "compare" && comparisonRecords.length === 2;
   const mobileSecondaryView = Boolean(explicitSelectedRecord) || comparisonMode || formOpen;
+  const hasUnsavedChanges = formOpen && isApplicationDraftDirty(draft, draftBaseline);
   const createButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     if (!formOpen || !explicitSelectedRecord || editingRecordId === explicitSelectedRecord.id) return;
+    const nextDraft = applicationRecordToDraft(explicitSelectedRecord);
     setEditingRecordId(explicitSelectedRecord.id);
-    setDraft(applicationRecordToDraft(explicitSelectedRecord));
+    setDraft(nextDraft);
+    setDraftBaseline(cloneApplicationDraft(nextDraft));
   }, [editingRecordId, explicitSelectedRecord, formOpen]);
 
   const updateDraft = useCallback((patch: Partial<ApplicationFormDraft>) => {
@@ -79,15 +86,18 @@ export function ApplicationsPage() {
   }, []);
 
   const resetDraft = useCallback((preserve?: ApplicationFormDraft) => {
-    setDraft({
+    const nextDraft = {
       ...createApplicationDraft(),
       source: preserve?.source ?? "",
       salaryRange: preserve?.salaryRange ?? "",
       city: preserve?.city ?? "",
       resumeVersion: preserve?.resumeVersion ?? "",
       tags: preserve?.tags.length ? preserve.tags : createApplicationDraft().tags
-    });
+    };
+    setDraft(nextDraft);
+    setDraftBaseline(cloneApplicationDraft(nextDraft));
     setEditingRecordId(undefined);
+    return nextDraft;
   }, []);
 
   const updateViewParams = useCallback((patch: { record?: string; mode?: "detail" | "compare" | "edit" }) => {
@@ -112,12 +122,26 @@ export function ApplicationsPage() {
     focusEditorTitle();
   }, [draft, resetDraft, updateViewParams]);
 
-  const closeForm = useCallback(() => {
-    resetDraft(draft);
+  const finishCloseForm = useCallback(() => {
+    resetDraft();
     setValidationMessage("");
     updateViewParams({ record: selectedRecord?.id, mode: selectedRecord ? "detail" : undefined });
     window.requestAnimationFrame(() => createButtonRef.current?.focus({ preventScroll: true }));
-  }, [draft, resetDraft, selectedRecord, updateViewParams]);
+  }, [resetDraft, selectedRecord, updateViewParams]);
+
+  const requestCloseForm = useCallback(() => {
+    if (hasUnsavedChanges) {
+      const subject = [draft.company, draft.role].filter(Boolean).join(" · ") || "这条机会记录";
+      setDiscardConfirmation({ subject });
+      return;
+    }
+    finishCloseForm();
+  }, [draft.company, draft.role, finishCloseForm, hasUnsavedChanges]);
+
+  const discardChanges = useCallback(() => {
+    setDiscardConfirmation(null);
+    finishCloseForm();
+  }, [finishCloseForm]);
 
   const handleRecord = useCallback(() => {
     if (!isApplicationDraftReady(draft)) {
@@ -148,8 +172,10 @@ export function ApplicationsPage() {
   }, [addEvidence, dashboard.targetTask, draft, editingRecord, resetDraft, sprint.tasks, updateEvidence, updateViewParams]);
 
   const handleEditRecord = useCallback((record: ApplicationEvidenceRecord) => {
+    const nextDraft = applicationRecordToDraft(record);
     setEditingRecordId(record.id);
-    setDraft(applicationRecordToDraft(record));
+    setDraft(nextDraft);
+    setDraftBaseline(cloneApplicationDraft(nextDraft));
     setFormFeedback("");
     setValidationMessage("");
     updateViewParams({ record: record.id, mode: "edit" });
@@ -301,7 +327,7 @@ export function ApplicationsPage() {
             ) : null}
             {!formOpen && comparisonRecords.length ? <OpportunityComparisonPanel records={comparisonRecords} onRemove={handleRemoveCompare} /> : null}
             {formOpen ? (
-              <ApplicationEditorShell onClose={closeForm}>
+              <ApplicationEditorShell onClose={requestCloseForm}>
                 <ApplicationForm
                   draft={draft}
                   disabled={!dashboard.targetTask}
@@ -311,7 +337,7 @@ export function ApplicationsPage() {
                   onChange={updateDraft}
                   onToggleTag={toggleTag}
                   onRecord={handleRecord}
-                  onCancelEdit={closeForm}
+                  onCancelEdit={requestCloseForm}
                 />
               </ApplicationEditorShell>
             ) : (
@@ -330,6 +356,13 @@ export function ApplicationsPage() {
           </div>
         </details>
       </section>
+      {discardConfirmation ? (
+        <DiscardChangesDialog
+          subject={discardConfirmation.subject}
+          onContinue={() => setDiscardConfirmation(null)}
+          onDiscard={discardChanges}
+        />
+      ) : null}
     </main>
   );
 }
@@ -343,6 +376,28 @@ function ApplicationEditorShell({ children, onClose }: { children: ReactNode; on
       </div>
       {children}
     </section>
+  );
+}
+
+function DiscardChangesDialog({ subject, onContinue, onDiscard }: { subject: string; onContinue: () => void; onDiscard: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end bg-ink-900/40 p-4 backdrop-blur-[1px] sm:items-center sm:justify-center" role="presentation">
+      <section className="w-full max-w-md rounded-card border border-line bg-white p-5 shadow-soft" role="alertdialog" aria-modal="true" aria-labelledby="discard-application-changes-title" aria-describedby="discard-application-changes-detail">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-control bg-warn-100 text-warn-600">
+            <AlertTriangle size={20} aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <h2 id="discard-application-changes-title" className="text-lg font-black text-ink-950">放弃未保存的修改？</h2>
+            <p id="discard-application-changes-detail" className="mt-2 text-sm font-semibold leading-6 text-ink-600">你对「{subject}」的本次修改尚未保存。继续编辑会保留所有输入；放弃后将回到机会详情或列表。</p>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          <button type="button" className="primary-button justify-center" onClick={onContinue}>继续编辑</button>
+          <button type="button" className="secondary-button justify-center border-risk-200 text-risk-600 hover:bg-risk-100" onClick={onDiscard}>放弃修改</button>
+        </div>
+      </section>
+    </div>
   );
 }
 
