@@ -106,6 +106,28 @@ export function createApplicationDraft(): ApplicationFormDraft {
   };
 }
 
+export function cloneApplicationDraft(draft: ApplicationFormDraft): ApplicationFormDraft {
+  return {
+    ...draft,
+    tags: [...draft.tags]
+  };
+}
+
+export function isApplicationDraftDirty(draft: ApplicationFormDraft, baseline: ApplicationFormDraft): boolean {
+  return draft.company !== baseline.company
+    || draft.role !== baseline.role
+    || draft.source !== baseline.source
+    || draft.salaryRange !== baseline.salaryRange
+    || draft.city !== baseline.city
+    || draft.keywords !== baseline.keywords
+    || draft.resumeVersion !== baseline.resumeVersion
+    || draft.status !== baseline.status
+    || draft.hrFeedback !== baseline.hrFeedback
+    || draft.notes !== baseline.notes
+    || draft.tags.length !== baseline.tags.length
+    || draft.tags.some((tag, index) => tag !== baseline.tags[index]);
+}
+
 export function buildApplicationsDashboard(
   sprint: DailySprint,
   evidenceByTaskId: Record<string, ReviewEvidence[]>
