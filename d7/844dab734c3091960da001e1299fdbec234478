@@ -1,0 +1,21 @@
+package.json
+  s_8f6b4df0c955b0::t_84588511c115a6 3
+CHANGELOG.md
+  s_8f6b4df0c955b0::t_84588511c115a6 7-11
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "d7844dab734c3091960da001e1299fdbec234478",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
