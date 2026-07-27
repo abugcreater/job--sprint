@@ -1,6 +1,51 @@
 # 每日主动产品迭代日志
 
-日期：2026-07-22
+日期：2026-07-27
+
+## 2026-07-27 第五十四次主动迭代
+
+主任务：修复 Sub2API 远端基路径验收对固定 `logo.png` 的错误依赖，恢复交付证据的可信度。
+
+基线：
+
+- `git fetch --prune origin`、`git status --short`、开放 PR 查询均通过；工作树干净，`develop` 没有待收口需求 PR 或短分支。
+- `git diff --quiet origin/main origin/develop` 通过；两分支文件树一致。提交祖先关系仍因 squash/rebase 不成立，按 GitFlow 规则判定为“历史差异、内容已对齐”，不阻塞正常迭代。
+- `v0.2.4` 于 2026-07-26 发布。本轮合入后只有 1 项新需求，且未满 7 天，不创建 release 分支，也不执行服务器交付。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 错误的失败记录会误导维护者判断服务器是否可用，也会拖慢普通用户获得最新修复的节奏。 |
+| 问题确定性 | 5 | `remote_sub2api_basepath_check.sh` 只匹配 `logo.png`，而最新已知远端页面使用 `logo.svg`。 |
+| 风险降低 | 5 | 只修复只读验收脚本和测试，不改生产服务、账号、数据域或部署配置。 |
+| 交互改善 | 2 | 本轮不改变页面交互，但让发布验收不再把可用页面错误标红。 |
+| 可验证性 | 5 | 本地 HTTP 夹具可完整证明 SVG 页面、JS/CSS、公开设置接口和动态资源路径均能通过脚本。 |
+| 实现大小 | 5 | 改动收敛在一个 Bash 脚本、一个独立 Node 回归测试、发布门禁和产品事实源。 |
+
+改动：
+
+- `tools/remote_sub2api_basepath_check.sh` 将图标发现与 root-absolute 检查从固定 `logo.png` 扩展为 `logo.png` 或 `logo.svg`；JS、CSS、公开设置接口和动态资源路径校验不变。
+- `tests/remote_sub2api_basepath_check_test.js` 新增本地 HTTP 夹具，真实执行 Bash 脚本并断言 SVG 图标的完整验收通过。
+- `package.json` 新增 `test:remote-sub2api-basepath`，并将其纳入 `test:git-release`。
+- 更新已知问题与决策账本，修正已完成的“账号/管理员”入口和 GitFlow 回同步事实。
+
+已验证：
+
+- `bash -n tools/remote_sub2api_basepath_check.sh && npm run test:remote-sub2api-basepath`：PASS。
+- `node tools/validate_architecture_quality.js`：PASS，检查 406 个源码文件。
+- `node tests/final_delivery_readiness_test.js`：PASS。
+- `git diff --check`：PASS。
+
+限制：
+
+- 本轮只对本地夹具执行验收脚本；没有修改或重新部署远端 Sub2API、Job Sprint 服务、账号或生产数据，因此不能把本地 PASS 扩大为新的远端交付证据。
+- Android HTTPS 真机 evidence 仍是独立交付缺口；本轮不运行 `npm run test:release`。
+
+明日候选：
+
+1. 为其它创建/编辑表单梳理统一的未保存修改退出协议，先以 feature capsule 审计页面范围与返回场景。
+2. 在下次明确服务器交付时，使用修复后的验收脚本重新生成远端 acceptance evidence，并与 Android HTTPS 证据分开报告。
 
 ## 2026-07-26 第五十三次主动迭代
 
