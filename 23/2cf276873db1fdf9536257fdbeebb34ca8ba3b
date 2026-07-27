@@ -1,0 +1,30 @@
+tests/remote_sub2api_basepath_check_test.js
+  s_8f6b4df0c955b0::t_ce4b482b87bd9e 1-80
+package.json
+  s_8f6b4df0c955b0::t_c6550112bc817e 61,65-66
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_8c3b679e9d8f61 3,15-16,38
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_28aed5a4e73110 73
+  s_8f6b4df0c955b0::t_8c3b679e9d8f61 3,24
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_8c3b679e9d8f61 3-48
+tools/remote_sub2api_basepath_check.sh
+  s_8f6b4df0c955b0::t_ce4b482b87bd9e 72,77,83
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.16",
+  "base_commit_sha": "232cf276873db1fdf9536257fdbeebb34ca8ba3b",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
