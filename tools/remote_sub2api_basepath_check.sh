@@ -69,18 +69,18 @@ if awk 'tolower($1)=="www-authenticate:"{found=1} END{exit found ? 0 : 1}' "$HTM
   exit 1
 fi
 
-if grep -Eq '(src|href)="/(assets/|logo\.png)' "$HTML"; then
+if grep -Eq '(src|href)="/(assets/|logo\.(png|svg))' "$HTML"; then
   echo "FAIL /sub2api/: HTML still contains root-absolute asset references" >&2
   exit 1
 fi
 
-if ! grep -Eq '(src|href)="/sub2api/(assets/|logo\.png)' "$HTML"; then
+if ! grep -Eq '(src|href)="/sub2api/(assets/|logo\.(png|svg))' "$HTML"; then
   echo "FAIL /sub2api/: HTML does not contain /sub2api asset references" >&2
   exit 1
 fi
 echo "OK /sub2api/ asset references rewritten"
 
-logo_path="$(grep -Eo '/sub2api/logo\.png[^"'\'' >]*' "$HTML" | head -n 1 || true)"
+logo_path="$(grep -Eo '/sub2api/logo\.(png|svg)[^"'\'' >]*' "$HTML" | head -n 1 || true)"
 js_path="$(grep -Eo '/sub2api/assets/[^"'\'' >]+\.js' "$HTML" | head -n 1 || true)"
 css_path="$(grep -Eo '/sub2api/assets/[^"'\'' >]+\.css' "$HTML" | head -n 1 || true)"
 
