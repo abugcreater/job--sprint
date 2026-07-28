@@ -37,6 +37,7 @@ import { LlmRunPanel } from "./components/LlmRunPanel";
 import { ProfilePanel } from "./components/ProfilePanel";
 import { SchedulePanel } from "./components/SchedulePanel";
 import { useProfileRecovery } from "./useProfileRecovery";
+import { useProfileDraftProtection } from "./useProfileDraftProtection";
 import { useBoundarySuggestions } from "./useBoundarySuggestions";
 
 export function CoachPage() {
@@ -143,8 +144,16 @@ export function CoachPage() {
       setRecentlyDeletedScheduleEvent(null);
     }
   });
+  const profileDraftProtection = useProfileDraftProtection({
+    activeProfile: dashboard.activeProfile,
+    sprintDate: sprint.date,
+    profileDraft,
+    setProfileDraft,
+    handleNewProfile,
+    handleActivateProfile,
+    handleEditProfile
+  });
   useEffect(() => {
-    setProfileDraft(createProfileDraft(dashboard.activeProfile));
     setBoundaryDraft(createBoundaryDraft());
     boundarySuggestionFlow.resetSuggestions();
     setScheduleDraft(createScheduleDraft(sprint.date));
@@ -418,9 +427,9 @@ export function CoachPage() {
                   draft={profileDraft}
                   onChange={(patch) => setProfileDraft((current) => ({ ...current, ...patch }))}
                   recentlyDeletedProfileBundle={recentlyDeletedProfileBundle}
-                  onNew={handleNewProfile}
-                  onActivate={handleActivateProfile}
-                  onEdit={handleEditProfile}
+                  onNew={() => profileDraftProtection.requestReplacement({ kind: "new" })}
+                  onActivate={(profile) => profileDraftProtection.requestReplacement({ kind: "activate", profile })}
+                  onEdit={(profile) => profileDraftProtection.requestReplacement({ kind: "edit", profile })}
                   onDelete={handleDeleteProfile}
                   onUndoDelete={handleUndoDeleteProfile}
                   onDismissDeletedProfile={dismissDeletedProfile}
@@ -428,11 +437,15 @@ export function CoachPage() {
                     const ready = canSaveProfile(profileDraft);
                     handleSaveProfile(profileDraft);
                     if (ready) {
+                      profileDraftProtection.markSaved();
                       setActiveStage("boundaries");
                       setShowOnboarding(false);
                     }
                   }}
                   feedback={profileFeedback}
+                  discardConfirmation={profileDraftProtection.discardConfirmation}
+                  onContinueEditing={profileDraftProtection.continueEditing}
+                  onDiscardChanges={profileDraftProtection.discardChanges}
                 />
               )
             ) : null}

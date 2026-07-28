@@ -1,6 +1,46 @@
 # 每日主动产品迭代日志
 
-日期：2026-07-27
+日期：2026-07-28
+
+## 2026-07-28 第五十五次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft 或短分支积压。
+- `origin/main` 与 `origin/develop` 文件树存在真实差异，且提交祖先关系因既有 squash/back-sync 不可直接比较；差异为 `v0.2.4` 后已合入的一个正常增量，不是待处理 PR 或回同步冲突。
+- `v0.2.4` 于 2026-07-26 发布。截至本轮开始只有 1 项新需求，距发布 2 天，未达到 7 天或累计 3 项需求的 release 条件；本轮不创建 release 分支，也不执行服务器交付。
+
+### 今日选择：画像详细表单未保存修改保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 求职画像是后续知识、日程和 AI 建议的基础，丢失岗位和经验输入会中断首要建档路径。 |
+| 确定性 | 5/5 | “新建画像”、切换画像和“编辑当前画像”均会直接替换 `ProfileDraft`，复现路径明确。 |
+| 风险降低 | 5/5 | 确认前不更改 active profile、不覆盖草稿且不写入持久数据。 |
+| 交互改善 | 4/5 | 用户可明确选择继续编辑或放弃；未修改时维持一步完成。 |
+| 可验证性 | 5/5 | 可通过草稿比较单测、页面交互测试、全量前端回归和治理校验验证。 |
+| 实现范围 | 4/5 | 只覆盖详细画像表单的三种替换动作，不偷渡全局表单框架。 |
+
+### 改动
+
+- 建立 `profile-unsaved-changes` feature capsule，比较局部确认、浏览器离页拦截和全局协议后，裁决为当前画像表单的局部确认。
+- `coachAdapter` 新增草稿克隆和精确 dirty 判断，覆盖全部画像字段，基线不会与编辑草稿共享引用。
+- 教练页将请求替换草稿和实际执行动作分离：有修改时显示“继续编辑 / 放弃修改”；确认放弃前不新建、不切换 active profile、不重载已保存画像。
+- 保存成功和 active profile 改变后刷新基线；未修改时仍直接新建、切换或重新编辑。
+- 补充适配层与页面测试，更新产品账本、已知问题和完成审计，明确本轮不是全局草稿协议。
+
+### 验证
+
+- `npm --prefix apps/react-web test -- coachAdapter.test.ts profileDraftAdapter.test.ts CoachPage.test.tsx ProfileDraftProtection.test.tsx`：PASS，4 个文件、16 项测试。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，39 个文件、124 项测试。
+- `npm --prefix apps/react-web run build`：PASS；仅保留既有的 bundle 大小告警。
+- `git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮不拦截刷新、关闭标签页、外部路由、Android 系统返回或应用强杀；不做自动保存、服务端草稿、服务器交付或 Android 更新。
+- 明日优先审计知识边界、日程和复盘表单的退出路径，先确认跨模块状态和 Android 返回策略，再决定是否建立统一协议。
 
 ## 2026-07-27 第五十四次主动迭代
 
