@@ -1,5 +1,4 @@
 import { fireEvent, render, screen, within } from "@testing-library/react";
-import { vi } from "vitest";
 import { App } from "../App";
 import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";

@@ -6,7 +6,8 @@ import type {
   DailySprint,
   KnowledgeBoundary,
   KnowledgeBoundaryLevel,
-  LlmRun, ProfileRoleFamily, UserProfile
+  LlmRun,
+  UserProfile
 } from "../types/sprint";
 import { buildAcceptedAiScheduleOutcomes, summarizeAiFeedback, type AiFeedbackSummary } from "./aiFeedbackAdapter";
 import { roleFamilyLabel } from "./coachConstantsAdapter";
@@ -14,9 +15,12 @@ import { cleanText as clean, newEntityId, normalizeCoachConfidence as normalizeC
 import { buildCoachOutcomeMetrics, type CoachOutcomeMetrics, type EvidenceByTaskId } from "./coachOutcomeMetricsAdapter";
 import { buildCoachSetupChecklist, type CoachSetupChecklist } from "./coachSetupChecklistAdapter";
 import { buildOpportunityCoachContext, type OpportunitySignal } from "./opportunitySignalsAdapter";
+import type { ProfileDraft } from "./profileDraftAdapter";
 import { roleFamilyPlaybookFor, roleFamilyQuestionBank } from "./roleFamilyPlaybook";
 
 export { coachEventKinds, knowledgeBoundaryLevels, profileRoleFamilies, roleFamilyLabel } from "./coachConstantsAdapter";
+export { cloneProfileDraft, createProfileDraft, isProfileDraftDirty } from "./profileDraftAdapter";
+export type { ProfileDraft } from "./profileDraftAdapter";
 
 export interface CoachDashboard {
   activeProfile?: UserProfile;
@@ -46,21 +50,6 @@ export interface CoachDashboard {
     llmRunCount: number;
   };
 }
-export interface ProfileDraft {
-  id?: string;
-  name: string;
-  roleFamily: ProfileRoleFamily;
-  targetRole: string;
-  targetLevel: string;
-  cities: string;
-  salaryTarget: string;
-  companyTypes: string;
-  experienceSummary: string;
-  projectEvidence: string;
-  nonClaims: string;
-  dailyMinutes: string;
-}
-
 export interface KnowledgeBoundaryDraft {
   id?: string;
   topic: string;
@@ -85,23 +74,6 @@ export interface CoachScheduleDraft {
   kind: CoachScheduleEventKind;
   reason: string;
   evidenceRequired: boolean;
-}
-
-export function createProfileDraft(profile?: UserProfile): ProfileDraft {
-  return {
-    id: profile?.id,
-    name: profile?.name ?? "我的求职画像",
-    roleFamily: profile?.roleFamily ?? "backend",
-    targetRole: profile?.targetRole ?? "",
-    targetLevel: profile?.targetLevel ?? "",
-    cities: profile?.cities ?? "",
-    salaryTarget: profile?.salaryTarget ?? "",
-    companyTypes: profile?.companyTypes ?? "",
-    experienceSummary: profile?.experienceSummary ?? "",
-    projectEvidence: profile?.projectEvidence ?? "",
-    nonClaims: profile?.nonClaims ?? "",
-    dailyMinutes: String(profile?.dailyMinutes ?? 60)
-  };
 }
 
 export function createBoundaryDraft(boundary?: KnowledgeBoundary): KnowledgeBoundaryDraft {
