@@ -1,6 +1,130 @@
 # 每日主动产品迭代日志
 
-日期：2026-07-22
+日期：2026-07-29
+
+## 2026-07-29 第五十六次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 与 `origin/develop` 文件树存在正常增量；既有 squash/back-sync 使提交祖先关系不可直接作为内容漂移结论，本轮无待处理回同步冲突。
+- `v0.2.4` 于 2026-07-26 发布；开始时仅有 #32、#33 两项新增需求，未达到 7 天或累计 3 项需求阈值。本轮 #34 合入后成为第三项，按 GitFlow 创建 `release/v0.2.5`；这是源码发布、标签和回同步流程，不执行服务器交付。
+
+### 今日选择：复盘编辑未保存修改保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 复盘记录承接当日求职事实并写入 Evidence Gate，误取消会使用户丢失刚整理的结果、卡点和明日行动。 |
+| 确定性 | 5/5 | 已确认 `取消编辑` 直接清空草稿与编辑态，复现入口单一且行为明确。 |
+| 风险降低 | 5/5 | 确认前不更新、删除或同步 Evidence Gate，保留已保存记录。 |
+| 交互改善 | 4/5 | 有修改时由用户选择继续或放弃，未修改维持一步取消。 |
+| 可验证性 | 5/5 | 草稿单测、页面真实交互、类型检查、完整前端回归和架构门禁均可验证。 |
+| 实现范围 | 4/5 | 只保护复盘编辑的已证实取消入口，不偷渡全局表单框架。 |
+
+### 改动
+
+- 建立 `review-unsaved-changes` feature capsule，比较局部确认、统一离页守卫和服务端草稿后，裁决为复盘编辑器局部基线确认。
+- 新增复盘草稿克隆与六字段 dirty 判断；打开本机复盘时保存独立基线，防止引用共享造成误判。
+- 复盘页将请求取消与实际取消分离：有修改时显示“继续编辑 / 放弃修改”，继续编辑保留输入，放弃才退出编辑并清空新增草稿；确认面板不写入 Evidence Gate。
+- 保存后刷新草稿基线；未修改取消保持快速路径。补充草稿与页面回归，更新产品账本、已知问题和完成审计。
+
+### 验证
+
+- `npm --prefix apps/react-web test -- ReviewPage.test.tsx reviewDraftAdapter.test.ts`：PASS，2 个文件、5 项测试。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，40 个文件、126 项测试。
+- `npm --prefix apps/react-web run build`：PASS；仅保留既有单包超过 500 kB 告警。
+- `node tools/validate_architecture_quality.js` 与 `git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮不拦截刷新、关闭标签页、外部路由、Android 系统返回或应用强杀；不覆盖删除、视图切换等其它复盘离开动作，不实现全局草稿协议、自动保存、服务端草稿、服务器交付或 Android 更新。
+- 明日优先审计知识边界与日程编辑的离开路径，先确认数据写入、移动端返回和跨模块状态，再决定是否建立统一协议。
+
+## 2026-07-28 第五十五次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft 或短分支积压。
+- `origin/main` 与 `origin/develop` 文件树存在真实差异，且提交祖先关系因既有 squash/back-sync 不可直接比较；差异为 `v0.2.4` 后已合入的一个正常增量，不是待处理 PR 或回同步冲突。
+- `v0.2.4` 于 2026-07-26 发布。截至本轮开始只有 1 项新需求，距发布 2 天，未达到 7 天或累计 3 项需求的 release 条件；本轮不创建 release 分支，也不执行服务器交付。
+
+### 今日选择：画像详细表单未保存修改保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 求职画像是后续知识、日程和 AI 建议的基础，丢失岗位和经验输入会中断首要建档路径。 |
+| 确定性 | 5/5 | “新建画像”、切换画像和“编辑当前画像”均会直接替换 `ProfileDraft`，复现路径明确。 |
+| 风险降低 | 5/5 | 确认前不更改 active profile、不覆盖草稿且不写入持久数据。 |
+| 交互改善 | 4/5 | 用户可明确选择继续编辑或放弃；未修改时维持一步完成。 |
+| 可验证性 | 5/5 | 可通过草稿比较单测、页面交互测试、全量前端回归和治理校验验证。 |
+| 实现范围 | 4/5 | 只覆盖详细画像表单的三种替换动作，不偷渡全局表单框架。 |
+
+### 改动
+
+- 建立 `profile-unsaved-changes` feature capsule，比较局部确认、浏览器离页拦截和全局协议后，裁决为当前画像表单的局部确认。
+- `coachAdapter` 新增草稿克隆和精确 dirty 判断，覆盖全部画像字段，基线不会与编辑草稿共享引用。
+- 教练页将请求替换草稿和实际执行动作分离：有修改时显示“继续编辑 / 放弃修改”；确认放弃前不新建、不切换 active profile、不重载已保存画像。
+- 保存成功和 active profile 改变后刷新基线；未修改时仍直接新建、切换或重新编辑。
+- 补充适配层与页面测试，更新产品账本、已知问题和完成审计，明确本轮不是全局草稿协议。
+
+### 验证
+
+- `npm --prefix apps/react-web test -- coachAdapter.test.ts profileDraftAdapter.test.ts CoachPage.test.tsx ProfileDraftProtection.test.tsx`：PASS，4 个文件、16 项测试。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，39 个文件、124 项测试。
+- `npm --prefix apps/react-web run build`：PASS；仅保留既有的 bundle 大小告警。
+- `git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮不拦截刷新、关闭标签页、外部路由、Android 系统返回或应用强杀；不做自动保存、服务端草稿、服务器交付或 Android 更新。
+- 明日优先审计知识边界、日程和复盘表单的退出路径，先确认跨模块状态和 Android 返回策略，再决定是否建立统一协议。
+
+## 2026-07-27 第五十四次主动迭代
+
+主任务：修复 Sub2API 远端基路径验收对固定 `logo.png` 的错误依赖，恢复交付证据的可信度。
+
+基线：
+
+- `git fetch --prune origin`、`git status --short`、开放 PR 查询均通过；工作树干净，`develop` 没有待收口需求 PR 或短分支。
+- `git diff --quiet origin/main origin/develop` 通过；两分支文件树一致。提交祖先关系仍因 squash/rebase 不成立，按 GitFlow 规则判定为“历史差异、内容已对齐”，不阻塞正常迭代。
+- `v0.2.4` 于 2026-07-26 发布。本轮合入后只有 1 项新需求，且未满 7 天，不创建 release 分支，也不执行服务器交付。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 错误的失败记录会误导维护者判断服务器是否可用，也会拖慢普通用户获得最新修复的节奏。 |
+| 问题确定性 | 5 | `remote_sub2api_basepath_check.sh` 只匹配 `logo.png`，而最新已知远端页面使用 `logo.svg`。 |
+| 风险降低 | 5 | 只修复只读验收脚本和测试，不改生产服务、账号、数据域或部署配置。 |
+| 交互改善 | 2 | 本轮不改变页面交互，但让发布验收不再把可用页面错误标红。 |
+| 可验证性 | 5 | 本地 HTTP 夹具可完整证明 SVG 页面、JS/CSS、公开设置接口和动态资源路径均能通过脚本。 |
+| 实现大小 | 5 | 改动收敛在一个 Bash 脚本、一个独立 Node 回归测试、发布门禁和产品事实源。 |
+
+改动：
+
+- `tools/remote_sub2api_basepath_check.sh` 将图标发现与 root-absolute 检查从固定 `logo.png` 扩展为 `logo.png` 或 `logo.svg`；JS、CSS、公开设置接口和动态资源路径校验不变。
+- `tests/remote_sub2api_basepath_check_test.js` 新增本地 HTTP 夹具，真实执行 Bash 脚本并断言 SVG 图标的完整验收通过。
+- `package.json` 新增 `test:remote-sub2api-basepath`，并将其纳入 `test:git-release`。
+- 更新已知问题与决策账本，修正已完成的“账号/管理员”入口和 GitFlow 回同步事实。
+
+已验证：
+
+- `bash -n tools/remote_sub2api_basepath_check.sh && npm run test:remote-sub2api-basepath`：PASS。
+- `node tools/validate_architecture_quality.js`：PASS，检查 406 个源码文件。
+- `node tests/final_delivery_readiness_test.js`：PASS。
+- `git diff --check`：PASS。
+
+限制：
+
+- 本轮只对本地夹具执行验收脚本；没有修改或重新部署远端 Sub2API、Job Sprint 服务、账号或生产数据，因此不能把本地 PASS 扩大为新的远端交付证据。
+- Android HTTPS 真机 evidence 仍是独立交付缺口；本轮不运行 `npm run test:release`。
+
+明日候选：
+
+1. 为其它创建/编辑表单梳理统一的未保存修改退出协议，先以 feature capsule 审计页面范围与返回场景。
+2. 在下次明确服务器交付时，使用修复后的验收脚本重新生成远端 acceptance evidence，并与 Android HTTPS 证据分开报告。
 
 ## 2026-07-26 第五十三次主动迭代
 
