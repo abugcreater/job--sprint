@@ -132,4 +132,52 @@ describe("React Job Sprint review workspace", () => {
     expect(evidence).toHaveLength(1);
     expect(evidence[0]?.content).toContain("Step14 KeepMe Edited");
   });
+
+  it("protects unsaved local review edits before canceling", async () => {
+    render(<App />);
+
+    fireEvent.change(screen.getByLabelText("今天完成了什么可证明的结果？"), {
+      target: { value: "Guard baseline 项目结果" }
+    });
+    fireEvent.change(screen.getByLabelText("今天最大的卡点是什么？"), {
+      target: { value: "Guard baseline 卡点" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "保存复盘" }));
+    fireEvent.click(screen.getByRole("button", { name: "历史" }));
+
+    const editRecord = () => screen.getByRole("button", { name: /编辑复盘记录 Guard baseline 项目结果/ });
+    fireEvent.click(editRecord());
+    fireEvent.click(screen.getByRole("button", { name: "取消编辑" }));
+    expect(screen.queryByRole("alertdialog", { name: "放弃未保存的复盘修改？" })).not.toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "写一条今日复盘" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "历史" }));
+    fireEvent.click(editRecord());
+    fireEvent.change(screen.getByLabelText("今天最大的卡点是什么？"), {
+      target: { value: "Guard unsaved 卡点" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "取消编辑" }));
+    expect(screen.getByRole("alertdialog", { name: "放弃未保存的复盘修改？" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.getByLabelText("今天最大的卡点是什么？")).toHaveValue("Guard unsaved 卡点");
+
+    fireEvent.click(screen.getByRole("button", { name: "取消编辑" }));
+    fireEvent.click(screen.getByRole("button", { name: "放弃修改" }));
+    expect(screen.getByRole("heading", { name: "写一条今日复盘" })).toBeInTheDocument();
+    const discardedEvidence = Object.values(useSprintStore.getState().evidenceByTaskId).flat();
+    expect(discardedEvidence).toHaveLength(1);
+    expect(discardedEvidence[0]?.content).toContain("Guard baseline 卡点");
+    expect(discardedEvidence[0]?.content).not.toContain("Guard unsaved 卡点");
+
+    fireEvent.click(screen.getByRole("button", { name: "历史" }));
+    fireEvent.click(editRecord());
+    fireEvent.change(screen.getByLabelText("今天最大的卡点是什么？"), {
+      target: { value: "Guard saved 卡点" }
+    });
+    fireEvent.click(screen.getByRole("button", { name: "更新复盘" }));
+    fireEvent.click(editRecord());
+    fireEvent.click(screen.getByRole("button", { name: "取消编辑" }));
+    expect(screen.queryByRole("alertdialog", { name: "放弃未保存的复盘修改？" })).not.toBeInTheDocument();
+    expect(Object.values(useSprintStore.getState().evidenceByTaskId).flat()[0]?.content).toContain("Guard saved 卡点");
+  });
 });

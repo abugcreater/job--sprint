@@ -12,7 +12,6 @@ import {
   createReviewDraft,
   filterReviewRecords,
   isReviewDraftReady,
-  reviewRecordToDraft,
   type ReviewEvidenceRecord,
   type ReviewFormDraft,
   type ReviewRecordFilter,
@@ -21,7 +20,9 @@ import {
 import { useSprintStore } from "../../stores/sprintStore";
 import { ReviewEmptyProfile } from "./components/ReviewEmptyProfile";
 import { LocalReviewRecords } from "./components/LocalReviewRecords";
+import { ReviewDiscardChangesDialog } from "./components/ReviewDiscardChangesDialog";
 import { WeeklyReviewPanel } from "./components/WeeklyReviewPanel";
+import { useReviewDraftProtection, type ReviewEditingRecord } from "./useReviewDraftProtection";
 import { useServerOutcome } from "./useServerOutcome";
 import type { RiskItem } from "../../types/sprint";
 
@@ -41,7 +42,7 @@ export function ReviewPage() {
   const restoreEvidence = useSprintStore((state) => state.restoreEvidence);
   const [draft, setDraft] = useState<ReviewFormDraft>(() => createReviewDraft());
   const [recordFilter, setRecordFilter] = useState<ReviewRecordFilter>("all");
-  const [editingRecord, setEditingRecord] = useState<{ taskId: string; evidenceId: string } | null>(null);
+  const [editingRecord, setEditingRecord] = useState<ReviewEditingRecord | null>(null);
   const [recentlyDeletedReview, setRecentlyDeletedReview] = useState<ReviewEvidenceRecord | null>(null);
   const [exportPreview, setExportPreview] = useState("");
   const [formFeedback, setFormFeedback] = useState("");
@@ -64,6 +65,13 @@ export function ReviewPage() {
   const updateDraft = useCallback((patch: Partial<ReviewFormDraft>) => {
     setDraft((current) => ({ ...current, ...patch }));
   }, []);
+  const reviewDraftProtection = useReviewDraftProtection({
+    draft,
+    setDraft,
+    setEditingRecord,
+    setFormFeedback,
+    setReviewView
+  });
 
   const handleSaveReview = useCallback(() => {
     if (!dashboard.targetTask || !isReviewDraftReady(draft)) {
@@ -82,15 +90,8 @@ export function ReviewPage() {
       setFormFeedback("复盘记录已保存，并写入 Evidence Gate。");
     }
     setDraft(createReviewDraft());
-  }, [addEvidence, dashboard.targetTask, draft, editingRecord, sprint, updateEvidence]);
-
-  const handleEditReview = useCallback((record: ReviewEvidenceRecord) => {
-    if (record.source !== "local") return;
-    setDraft(reviewRecordToDraft(record));
-    setEditingRecord({ taskId: record.taskId, evidenceId: record.id });
-    setFormFeedback(`正在编辑「${record.title}」。`);
-    setReviewView("write");
-  }, []);
+    reviewDraftProtection.resetAfterSave();
+  }, [addEvidence, dashboard.targetTask, draft, editingRecord, reviewDraftProtection, sprint, updateEvidence]);
 
   const handleDeleteReview = useCallback(
     (record: ReviewEvidenceRecord) => {
@@ -120,12 +121,6 @@ export function ReviewPage() {
     setRecentlyDeletedReview(null);
     setFormFeedback("已恢复刚删除的复盘记录。");
   }, [recentlyDeletedReview, restoreEvidence]);
-
-  const handleCancelEdit = useCallback(() => {
-    setEditingRecord(null);
-    setDraft(createReviewDraft());
-    setFormFeedback("已取消编辑。");
-  }, []);
 
   const handleExportReviews = useCallback(() => {
     const payload = buildReviewExportPayload(filteredReviewRecords, sprint.date);
@@ -165,10 +160,16 @@ export function ReviewPage() {
               disabled={!dashboard.targetTask}
               isEditing={Boolean(editingRecord)}
               feedback={formFeedback}
-              onCancelEdit={handleCancelEdit}
+              onCancelEdit={reviewDraftProtection.requestCancelEdit}
               onChange={updateDraft}
               onSave={handleSaveReview}
             />
+            {reviewDraftProtection.discardConfirmation ? (
+              <ReviewDiscardChangesDialog
+                onContinue={reviewDraftProtection.continueEditing}
+                onDiscard={reviewDraftProtection.discardChanges}
+              />
+            ) : null}
             <aside className="space-y-4">
               <TomorrowAdvice advice={dashboard.tomorrowAdvice} />
               <ReviewTaskPanel tasks={dashboard.reviewTasks} />
@@ -199,7 +200,7 @@ export function ReviewPage() {
               exportPreview={exportPreview}
               onFilterChange={setRecordFilter}
               onExport={handleExportReviews}
-              onEdit={handleEditReview}
+              onEdit={reviewDraftProtection.beginEditing}
               onDelete={handleDeleteReview}
               recentlyDeletedRecord={recentlyDeletedReview}
               onDismissDeletedRecord={() => setRecentlyDeletedReview(null)}
