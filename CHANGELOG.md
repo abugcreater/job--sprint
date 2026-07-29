@@ -4,6 +4,12 @@ All notable changes should be documented in this file.
 
 ## Unreleased
 
+## 0.2.5 - 2026-07-29
+
+- Added unsaved-change confirmation for editing local review records, preserving the original Evidence Gate record until the user explicitly discards the draft.
+- Added unsaved-change confirmation for detailed profile editing flows, preserving the active profile and its draft until the user confirms a replacement action.
+- Corrected the Sub2API remote base-path acceptance check to recognize both PNG and SVG branding assets.
+
 ## 0.2.4 - 2026-07-26
 
 - Added AI recovery guidance and clearer rate-limit and timeout feedback for coach runs.
