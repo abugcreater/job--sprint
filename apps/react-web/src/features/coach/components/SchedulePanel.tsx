@@ -1,4 +1,4 @@
-import { CalendarPlus, CheckCircle2, Edit3, RotateCcw, Trash2, XCircle } from "lucide-react";
+import { AlertTriangle, CalendarPlus, CheckCircle2, Edit3, RotateCcw, Trash2, XCircle } from "lucide-react";
 import { useState } from "react";
 import { coachEventKinds, type CoachScheduleDraft } from "../../../data/coachAdapter";
 import type { CoachScheduleEvent } from "../../../types/sprint";
@@ -15,6 +15,9 @@ export function SchedulePanel({
   onDismissDeletedEvent,
   onSave,
   onCancelEdit,
+  discardConfirmation,
+  onContinueEditing,
+  onDiscardChanges,
   showAll,
   onToggleShowAll
 }: {
@@ -28,6 +31,9 @@ export function SchedulePanel({
   onDismissDeletedEvent: () => void;
   onSave: () => void;
   onCancelEdit: () => void;
+  discardConfirmation: { actionLabel: string } | null;
+  onContinueEditing: () => void;
+  onDiscardChanges: () => void;
   showAll: boolean;
   onToggleShowAll: () => void;
 }) {
@@ -181,6 +187,43 @@ export function SchedulePanel({
           </div>
         ) : null}
       </div>
+      {discardConfirmation ? (
+        <ScheduleDiscardChangesDialog
+          actionLabel={discardConfirmation.actionLabel}
+          onContinue={onContinueEditing}
+          onDiscard={onDiscardChanges}
+        />
+      ) : null}
     </article>
+  );
+}
+
+function ScheduleDiscardChangesDialog({
+  actionLabel,
+  onContinue,
+  onDiscard
+}: {
+  actionLabel: string;
+  onContinue: () => void;
+  onDiscard: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end bg-ink-900/40 p-4 backdrop-blur-[1px] sm:items-center sm:justify-center" role="presentation">
+      <section className="w-full max-w-md rounded-card border border-line bg-white p-5 shadow-soft" role="alertdialog" aria-modal="true" aria-labelledby="discard-schedule-changes-title" aria-describedby="discard-schedule-changes-detail">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-control bg-warn-100 text-warn-600">
+            <AlertTriangle size={20} aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <h2 id="discard-schedule-changes-title" className="text-lg font-black text-ink-950">放弃未保存的日程修改？</h2>
+            <p id="discard-schedule-changes-detail" className="mt-2 text-sm font-semibold leading-6 text-ink-600">你对当前日程的本次修改尚未保存。继续编辑会保留输入；放弃后将{actionLabel}。</p>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          <button type="button" className="primary-button justify-center" onClick={onContinue}>继续编辑</button>
+          <button type="button" className="secondary-button justify-center border-risk-200 text-risk-600 hover:bg-risk-100" onClick={onDiscard}>放弃修改</button>
+        </div>
+      </section>
+    </div>
   );
 }
