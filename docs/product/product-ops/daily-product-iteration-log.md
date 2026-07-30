@@ -1,6 +1,47 @@
 # 每日主动产品迭代日志
 
-日期：2026-07-29
+日期：2026-07-30
+
+## 2026-07-30 第五十七次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 与 `origin/develop` 的文件树一致；提交祖先关系因既有 squash/back-sync 仍不成立，按 GitFlow 规则判定为“历史差异、内容已对齐”，不阻塞正常迭代。
+- `v0.2.5` 于 2026-07-29 发布。本轮开始时没有未发布需求，当前只有这一项新增需求，未达到 7 天或累计 3 项需求的 release 条件；本轮只合入 `develop`，不创建 release 分支，也不执行服务器交付。
+
+### 今日选择：个人日程未保存修改保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 日程是用户每天的行动锚点；丢失刚填写的行动和安排原因会直接打断今日执行。 |
+| 确定性 | 5/5 | 已确认新建草稿点击“编辑日程”会被静默替换，已有日程“取消编辑”会被静默清空。 |
+| 风险降低 | 5/5 | 确认前不保存、删除或同步个人日程，也不改变今日行动。 |
+| 交互改善 | 4/5 | 有修改时清楚地给出继续或放弃，未修改维持一步完成。 |
+| 可验证性 | 5/5 | 草稿单测、页面真实交互、类型检查、全量前端回归和构建均可验证。 |
+| 实现范围 | 4/5 | 只保护两个确定的替换入口，不偷渡全局草稿框架。 |
+
+### 改动
+
+- 建立 `schedule-unsaved-changes` feature capsule，比较局部确认、浏览器离页拦截和全局服务端草稿后，裁决为日程编辑器局部基线确认。
+- 新增日程草稿克隆与八字段 dirty 判断；基线与编辑草稿不共享引用。
+- 教练页把请求替换草稿和真正替换拆开：新建时点击已有日程编辑、已有日程点击取消编辑，只有草稿有修改时才显示“继续编辑 / 放弃修改”。
+- 确认前不写入个人日程、今日行动或同步层；保存、删除当前编辑日程、画像或日期变化会刷新基线，未修改保持快速路径。
+- 新增页面和适配层回归测试，更新产品账本、已知问题和完成审计。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test -- ScheduleDraftProtection.test.tsx scheduleDraftAdapter.test.ts CoachPage.test.tsx`：PASS，3 个文件、6 项测试。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，42 个文件、128 项测试。
+- `npm --prefix apps/react-web run build`：PASS；仅保留既有单包超过 500 kB 告警。
+- `node tools/validate_architecture_quality.js` 与 `git diff --check`：PASS。
+- `npm test`、`npm run validate:product-iteration` 与 `npm run scan:sensitive`：PASS；功能/对齐门禁仅提示既有 Android 远端 evidence 缺失，不影响本地代码门禁。
+
+### 限制与明日建议
+
+- 本轮不拦截刷新、关闭标签页、外部路由、Android 系统返回或应用强杀；不覆盖删除另一条日程或知识边界等其它表单，不做自动保存、服务端草稿、服务器交付或 Android 更新。
+- 明日优先审计知识边界编辑的离开路径，先确认它的删除、切换和移动端返回行为，再决定是否做同样的局部保护。
 
 ## 2026-07-29 第五十六次主动迭代
 

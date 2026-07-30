@@ -38,6 +38,7 @@ import { ProfilePanel } from "./components/ProfilePanel";
 import { SchedulePanel } from "./components/SchedulePanel";
 import { useProfileRecovery } from "./useProfileRecovery";
 import { useProfileDraftProtection } from "./useProfileDraftProtection";
+import { useScheduleDraftProtection } from "./useScheduleDraftProtection";
 import { useBoundarySuggestions } from "./useBoundarySuggestions";
 
 export function CoachPage() {
@@ -153,10 +154,16 @@ export function CoachPage() {
     handleActivateProfile,
     handleEditProfile
   });
+  const scheduleDraftProtection = useScheduleDraftProtection({
+    scopeKey: dashboard.activeProfile?.id,
+    sprintDate: sprint.date,
+    scheduleDraft,
+    setScheduleDraft,
+    setFeedback
+  });
   useEffect(() => {
     setBoundaryDraft(createBoundaryDraft());
     boundarySuggestionFlow.resetSuggestions();
-    setScheduleDraft(createScheduleDraft(sprint.date));
     setRecentlyDeletedBoundary(null);
     setRecentlyDeletedScheduleEvent(null);
   }, [dashboard.activeProfile?.id, sprint.date]);
@@ -215,7 +222,7 @@ export function CoachPage() {
     }
     saveCoachScheduleEvent(scheduleDraft);
     setRecentlyDeletedScheduleEvent(null);
-    setScheduleDraft(createScheduleDraft(sprint.date));
+    scheduleDraftProtection.resetAfterSave();
     setFeedback("自定义日程已加入今日 AI 教练。");
     setActiveStage("advice");
   };
@@ -226,7 +233,7 @@ export function CoachPage() {
     deleteCoachScheduleEvent(eventId);
     setRecentlyDeletedScheduleEvent(event);
     if (scheduleDraft.id === eventId) {
-      setScheduleDraft(createScheduleDraft(sprint.date));
+      scheduleDraftProtection.resetAfterSave();
     }
     setFeedback(`已删除「${event.title}」个人日程，可在个人日程顶部撤销。`);
   };
@@ -488,12 +495,15 @@ export function CoachPage() {
                 draft={scheduleDraft}
                 recentlyDeletedEvent={recentlyDeletedScheduleEvent}
                 onChange={(patch) => setScheduleDraft((current) => ({ ...current, ...patch }))}
-                onEdit={(event) => setScheduleDraft(createScheduleDraft(sprint.date, event))}
+                onEdit={(event) => scheduleDraftProtection.requestReplacement({ kind: "edit", event })}
                 onDelete={handleDeleteScheduleEvent}
                 onUndoDelete={handleUndoDeleteScheduleEvent}
                 onDismissDeletedEvent={() => setRecentlyDeletedScheduleEvent(null)}
                 onSave={handleSaveSchedule}
-                onCancelEdit={() => setScheduleDraft(createScheduleDraft(sprint.date))}
+                onCancelEdit={() => scheduleDraftProtection.requestReplacement({ kind: "cancel" })}
+                discardConfirmation={scheduleDraftProtection.discardConfirmation}
+                onContinueEditing={scheduleDraftProtection.continueEditing}
+                onDiscardChanges={scheduleDraftProtection.discardChanges}
                 showAll={showAllSchedules}
                 onToggleShowAll={() => setShowAllSchedules((current) => !current)}
               />
