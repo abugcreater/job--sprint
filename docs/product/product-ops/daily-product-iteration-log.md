@@ -1,6 +1,47 @@
 # 每日主动产品迭代日志
 
-日期：2026-07-30
+日期：2026-07-31
+
+## 2026-07-31 第五十八次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 与 `origin/develop` 文件树存在真实差异：`v0.2.5` 后只有 #38 一项正常需求，且距发布 2 天，提交祖先关系继续受既有 squash/back-sync 影响，不作为内容同步结论。
+- `v0.2.5` 于 2026-07-29 发布；未达到 7 天或累计 3 项需求阈值，本轮只合入 `develop`，不创建 release 分支，也不执行服务器交付。
+
+### 今日选择：知识边界未保存修改保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 知识边界是 AI 建议、学习和面试的事实上下文，误丢输入或误记反馈会污染后续求职路径。 |
+| 确定性 | 5/5 | 已确认编辑另一条、取消编辑会直接替换草稿；修订 AI 候选会直接写反馈并移除候选。 |
+| 风险降低 | 5/5 | 确认前不保存正式边界、不影响今日行动、不同步，也不记录候选反馈。 |
+| 交互改善 | 5/5 | 三个不同入口收敛为同一明确选择，未修改保持快速路径。 |
+| 可验证性 | 5/5 | 草稿单测、页面真实交互、既有候选反馈回归、类型检查和前端回归可验证。 |
+| 实现范围 | 4/5 | 只保护确定入口，不偷渡全局草稿或 AI 自动保存。 |
+
+### 改动
+
+- 建立 `boundary-unsaved-changes` feature capsule，比较局部确认、浏览器离页拦截和全局服务端草稿后，裁决为边界编辑器局部基线确认。
+- 新增边界草稿克隆与 12 字段 dirty 判断；基线与编辑草稿不共享引用。
+- 教练页将编辑另一条、取消编辑与“修订后编辑”统一为请求替换草稿；有修改时显示“继续编辑 / 放弃修改”。
+- AI 候选的 `needs_revision` 反馈与候选移除改为确认后的动作，继续编辑时两者均保持原状。
+- 保存、删除当前编辑边界、画像或日期变化会刷新基线；补页面、适配层与候选反馈回归，更新产品账本、已知问题和完成审计。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test -- BoundaryDraftProtection.test.tsx boundaryDraftAdapter.test.ts CoachBoundarySuggestionFeedbackPage.test.tsx CoachPage.test.tsx`：PASS，4 个文件、8 项测试。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，44 个文件、131 项测试。
+- `npm --prefix apps/react-web run build`：PASS；仅保留既有单包超过 500 kB 告警。
+- `node tools/validate_architecture_quality.js` 与 `git diff --check`：PASS；初次发现 `CoachPage` 561/560 行后已收敛至门禁范围内并复验通过。
+- `npm test`、`npm run validate:product-iteration` 与 `npm run scan:sensitive`：PASS；功能/对齐门禁仅提示既有 Android 远端 evidence 缺失，不影响本地代码门禁。
+
+### 限制与明日建议
+
+- 本轮不拦截刷新、关闭标签页、外部路由、Android 系统返回或应用强杀；不覆盖采纳、拒绝、删除另一条边界或其它表单，不做自动保存、服务端草稿、服务器交付或 Android 更新。
+- 明日优先根据累计发布项数复核 release 条件；若未发布仍不足 3 项，则优先审计 React 表单在路由/移动端返回下的统一离开策略，而非继续复制局部确认。
 
 ## 2026-07-30 第五十七次主动迭代
 
