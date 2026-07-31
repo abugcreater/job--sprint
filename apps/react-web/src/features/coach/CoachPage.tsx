@@ -37,6 +37,7 @@ import { LlmRunPanel } from "./components/LlmRunPanel";
 import { ProfilePanel } from "./components/ProfilePanel";
 import { SchedulePanel } from "./components/SchedulePanel";
 import { useProfileRecovery } from "./useProfileRecovery";
+import { useBoundaryDraftProtection } from "./useBoundaryDraftProtection";
 import { useProfileDraftProtection } from "./useProfileDraftProtection";
 import { useScheduleDraftProtection } from "./useScheduleDraftProtection";
 import { useBoundarySuggestions } from "./useBoundarySuggestions";
@@ -109,14 +110,6 @@ export function CoachPage() {
   const stageProgress = buildCoachStageProgress(completedStages);
   const [recentlyDeletedBoundary, setRecentlyDeletedBoundary] = useState<KnowledgeBoundary | null>(null);
   const [recentlyDeletedScheduleEvent, setRecentlyDeletedScheduleEvent] = useState<CoachScheduleEvent | null>(null);
-  const boundarySuggestionFlow = useBoundarySuggestions({
-    activeProfile: dashboard.activeProfile,
-    boundaries: dashboard.boundaries,
-    setBoundaryDraft,
-    setFeedback,
-    setRecentlyDeletedBoundary,
-    setActiveStage
-  });
   const {
     recentlyDeletedProfileBundle,
     handleSaveProfile,
@@ -154,15 +147,28 @@ export function CoachPage() {
     handleActivateProfile,
     handleEditProfile
   });
+  const boundaryDraftProtection = useBoundaryDraftProtection({
+    scopeKey: dashboard.activeProfile?.id, sprintDate: sprint.date,
+    boundaryDraft,
+    setBoundaryDraft,
+    setFeedback
+  });
   const scheduleDraftProtection = useScheduleDraftProtection({
-    scopeKey: dashboard.activeProfile?.id,
-    sprintDate: sprint.date,
+    scopeKey: dashboard.activeProfile?.id, sprintDate: sprint.date,
     scheduleDraft,
     setScheduleDraft,
     setFeedback
   });
+  const boundarySuggestionFlow = useBoundarySuggestions({
+    activeProfile: dashboard.activeProfile,
+    boundaries: dashboard.boundaries,
+    setBoundaryDraft,
+    setFeedback,
+    setRecentlyDeletedBoundary,
+    setActiveStage,
+    onRequestRevision: boundaryDraftProtection.requestReplacement
+  });
   useEffect(() => {
-    setBoundaryDraft(createBoundaryDraft());
     boundarySuggestionFlow.resetSuggestions();
     setRecentlyDeletedBoundary(null);
     setRecentlyDeletedScheduleEvent(null);
@@ -188,7 +194,7 @@ export function CoachPage() {
     }
     saveKnowledgeBoundary(boundaryDraft);
     setRecentlyDeletedBoundary(null);
-    setBoundaryDraft(createBoundaryDraft());
+    boundaryDraftProtection.resetToNewDraft();
     setFeedback("知识边界已保存。");
     setActiveStage("plan");
   };
@@ -199,7 +205,7 @@ export function CoachPage() {
     deleteKnowledgeBoundary(boundaryId);
     setRecentlyDeletedBoundary(boundary);
     if (boundaryDraft.id === boundaryId) {
-      setBoundaryDraft(createBoundaryDraft());
+      boundaryDraftProtection.resetToNewDraft();
     }
     setFeedback(`已删除「${boundary.topic}」知识边界，可在知识边界顶部撤销。`);
   };
@@ -479,12 +485,15 @@ export function CoachPage() {
                   activeProfileReady={Boolean(dashboard.activeProfile)}
                   recentlyDeletedBoundary={recentlyDeletedBoundary}
                   onChange={(patch) => setBoundaryDraft((current) => ({ ...current, ...patch }))}
-                  onEdit={(boundary) => setBoundaryDraft(createBoundaryDraft(boundary))}
+                  onEdit={(boundary) => boundaryDraftProtection.requestReplacement({ kind: "edit", boundary })}
                   onDelete={handleDeleteBoundary}
                   onUndoDelete={handleUndoDeleteBoundary}
                   onDismissDeletedBoundary={() => setRecentlyDeletedBoundary(null)}
                   onSave={handleSaveBoundary}
-                  onCancelEdit={() => setBoundaryDraft(createBoundaryDraft())}
+                  onCancelEdit={() => boundaryDraftProtection.requestReplacement({ kind: "cancel" })}
+                  discardConfirmation={boundaryDraftProtection.discardConfirmation}
+                  onContinueEditing={boundaryDraftProtection.continueEditing}
+                  onDiscardChanges={boundaryDraftProtection.discardChanges}
                 />
               </>
             ) : null}
