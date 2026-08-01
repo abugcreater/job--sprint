@@ -1,5 +1,6 @@
 import { useCallback, useState, type Dispatch, type SetStateAction } from "react";
 import { cloneReviewDraft, isReviewDraftDirty } from "../../data/reviewDraftAdapter";
+import { useRouteLeaveGuard } from "../../app/RouteLeaveGuard";
 import { createReviewDraft, reviewRecordToDraft, type ReviewEvidenceRecord, type ReviewFormDraft } from "../../data/reviewAdapter";
 
 export type ReviewEditingRecord = { taskId: string; evidenceId: string };
@@ -21,6 +22,8 @@ export function useReviewDraftProtection({
 }: ReviewDraftProtectionOptions) {
   const [baseline, setBaseline] = useState<ReviewFormDraft>(() => createReviewDraft());
   const [confirmingDiscard, setConfirmingDiscard] = useState(false);
+  const hasUnsavedChanges = isReviewDraftDirty(draft, baseline);
+  useRouteLeaveGuard(hasUnsavedChanges);
 
   const beginEditing = useCallback((record: ReviewEvidenceRecord) => {
     if (record.source !== "local") return;
@@ -42,12 +45,12 @@ export function useReviewDraftProtection({
   }, [setDraft, setEditingRecord, setFormFeedback]);
 
   const requestCancelEdit = useCallback(() => {
-    if (isReviewDraftDirty(draft, baseline)) {
+    if (hasUnsavedChanges) {
       setConfirmingDiscard(true);
       return;
     }
     discardEdit();
-  }, [baseline, discardEdit, draft]);
+  }, [discardEdit, hasUnsavedChanges]);
 
   return {
     beginEditing,

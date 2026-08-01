@@ -1,6 +1,45 @@
 # 每日主动产品迭代日志
 
-日期：2026-07-31
+日期：2026-08-01
+
+## 2026-08-01 第五十九次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 与 `origin/develop` 文件树存在真实差异；`v0.2.5` 于 2026-07-29 发布，开始时已有 #38、#39 两项正常需求，距发布 3 天，尚未达到 7 天或累计 3 项阈值，因此先完成本项需求的 `develop` PR，不执行服务器交付。
+
+### 今日选择：未保存内容的路由离开保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 用户填写画像、知识、日程、机会或复盘后切换模块会直接丢失内存草稿，影响连续建档与每日执行。 |
+| 确定性 | 5/5 | 已确认项目使用 `HashRouter`，侧栏、移动底栏和页面 CTA 通过 `Link` / `NavLink` 卸载当前页面；既有保护只覆盖各表单内的取消或替换。 |
+| 风险降低 | 5/5 | 确认前不写入正式记录、同步层、AI 反馈或数据域；用户能保留输入或明确放弃。 |
+| 交互改善 | 5/5 | 五类表单共用一套清晰的离开确认，未修改仍保持直接跳转。 |
+| 可验证性 | 5/5 | Provider 单测、真实画像页 AppShell 跳转回归、全量前端和根门禁均可验证。 |
+| 实现范围 | 4/5 | 基于现有 HashRouter 增量实现，不迁移路由、不过早引入服务端草稿。 |
+
+### 改动
+
+- 建立 `route-leave-protection` feature capsule，比较逐页拦截、data router、AppShell 统一注册和自动保存，裁决为 AppShell 统一路由保护。
+- 新增 `RouteLeaveGuardProvider` 与 `useRouteLeaveGuard`：受保护页面只注册实时 dirty 状态，Provider 拦截当前 React 的 `#/...` 链接。
+- 站内跳转有未保存内容时显示“继续编辑 / 放弃修改并离开”；继续编辑保留输入并回到原链接焦点，放弃后才跳转。
+- 画像、知识边界、日程、机会和复盘接入统一守卫；刷新、关闭页签和登录等整页离开由 `beforeunload` 触发浏览器原生提示。
+- 补统一守卫测试和真实画像页侧栏导航回归，更新产品账本、已知问题与完成审计。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test -- RouteLeaveGuard.test.tsx ProfileDraftProtection.test.tsx ScheduleDraftProtection.test.tsx BoundaryDraftProtection.test.tsx ApplicationsPage.test.tsx ReviewPage.test.tsx`：PASS，6 个文件、20 项测试。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，45 个文件、134 项测试。
+- `npm --prefix apps/react-web run build`：PASS；仅保留既有单包超过 500 kB 告警。
+- `node tools/validate_architecture_quality.js`、`git diff --check`、`npm test`、`npm run validate:product-iteration` 与 `npm run scan:sensitive`：PASS；根门禁仅提示既有 Android 远端 evidence 缺失，不影响本地 React 或 Git 门禁。
+
+### 限制与明日建议
+
+- 本轮不拦截浏览器/Android 系统返回、应用强杀或进程回收；不自动保存、恢复草稿、迁移到 data router、修改 Android 包、服务器或远端配置。
+- 本项合入 `develop` 后将成为 `v0.2.5` 之后第三项需求，按 GitFlow 立即创建 `release/v0.2.6 -> main`，完成标签和 `main -> develop` 回同步；不运行未获授权的服务器交付。
 
 ## 2026-07-31 第五十八次主动迭代
 
