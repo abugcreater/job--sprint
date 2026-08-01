@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { createScheduleDraft, type CoachScheduleDraft } from "../../data/coachAdapter";
 import { cloneScheduleDraft, isScheduleDraftDirty } from "../../data/scheduleDraftAdapter";
+import { useRouteLeaveGuard } from "../../app/RouteLeaveGuard";
 import type { CoachScheduleEvent } from "../../types/sprint";
 
 type ScheduleDraftReplacement =
@@ -24,6 +25,8 @@ export function useScheduleDraftProtection({
 }: ScheduleDraftProtectionOptions) {
   const [baseline, setBaseline] = useState<CoachScheduleDraft>(() => createScheduleDraft(sprintDate));
   const [discardAction, setDiscardAction] = useState<ScheduleDraftReplacement | null>(null);
+  const hasUnsavedChanges = isScheduleDraftDirty(scheduleDraft, baseline);
+  useRouteLeaveGuard(hasUnsavedChanges);
 
   const resetDraft = useCallback(() => {
     const nextDraft = createScheduleDraft(sprintDate);
@@ -50,12 +53,12 @@ export function useScheduleDraftProtection({
   }, [resetDraft, setFeedback, setScheduleDraft, sprintDate]);
 
   const requestReplacement = useCallback((action: ScheduleDraftReplacement) => {
-    if (isScheduleDraftDirty(scheduleDraft, baseline)) {
+    if (hasUnsavedChanges) {
       setDiscardAction(action);
       return;
     }
     runReplacement(action);
-  }, [baseline, runReplacement, scheduleDraft]);
+  }, [hasUnsavedChanges, runReplacement]);
 
   return {
     requestReplacement,

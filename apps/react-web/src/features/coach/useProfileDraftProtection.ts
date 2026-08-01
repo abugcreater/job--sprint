@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { cloneProfileDraft, createProfileDraft, isProfileDraftDirty, type ProfileDraft } from "../../data/coachAdapter";
+import { useRouteLeaveGuard } from "../../app/RouteLeaveGuard";
 import type { UserProfile } from "../../types/sprint";
 
 type ProfileDraftReplacement =
@@ -28,6 +29,8 @@ export function useProfileDraftProtection({
 }: ProfileDraftProtectionOptions) {
   const [baseline, setBaseline] = useState<ProfileDraft>(() => cloneProfileDraft(createProfileDraft(activeProfile)));
   const [discardAction, setDiscardAction] = useState<ProfileDraftReplacement | null>(null);
+  const hasUnsavedChanges = isProfileDraftDirty(profileDraft, baseline);
+  useRouteLeaveGuard(hasUnsavedChanges);
 
   useEffect(() => {
     const nextDraft = createProfileDraft(activeProfile);
@@ -51,12 +54,12 @@ export function useProfileDraftProtection({
   }, [handleActivateProfile, handleEditProfile, handleNewProfile]);
 
   const requestReplacement = useCallback((action: ProfileDraftReplacement) => {
-    if (isProfileDraftDirty(profileDraft, baseline)) {
+    if (hasUnsavedChanges) {
       setDiscardAction(action);
       return;
     }
     runReplacement(action);
-  }, [baseline, profileDraft, runReplacement]);
+  }, [hasUnsavedChanges, runReplacement]);
 
   return {
     requestReplacement,
