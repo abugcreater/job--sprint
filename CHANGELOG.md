@@ -4,6 +4,12 @@ All notable changes should be documented in this file.
 
 ## Unreleased
 
+## 0.2.6 - 2026-08-01
+
+- Added a unified route-leave confirmation for unsaved profile, knowledge boundary, schedule, opportunity, and review drafts.
+- Added browser-native leave protection for refresh, tab close, login, and other full-page exits when protected drafts are dirty.
+- Preserved the existing local discard confirmations and their no-write-before-confirmation behavior.
+
 ## 0.2.5 - 2026-07-29
 
 - Added unsaved-change confirmation for editing local review records, preserving the original Evidence Gate record until the user explicitly discards the draft.

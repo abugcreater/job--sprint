@@ -17,6 +17,7 @@ import {
   type ApplicationTaskSummary
 } from "../../data/applicationsAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
+import { useRouteLeaveGuard } from "../../app/RouteLeaveGuard";
 import { ApplicationForm } from "./components/ApplicationForm";
 import { OpportunityComparisonPanel } from "./components/OpportunityComparisonPanel";
 import { OpportunityDetailPanel } from "./components/OpportunityDetailPanel";
@@ -63,6 +64,7 @@ export function ApplicationsPage() {
   const comparisonMode = searchParams.get("mode") === "compare" && comparisonRecords.length === 2;
   const mobileSecondaryView = Boolean(explicitSelectedRecord) || comparisonMode || formOpen;
   const hasUnsavedChanges = formOpen && isApplicationDraftDirty(draft, draftBaseline);
+  useRouteLeaveGuard(hasUnsavedChanges);
   const createButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {

@@ -7,6 +7,7 @@ import { summarizeBoundarySuggestionFeedback, type BoundarySuggestionFeedbackDra
 import { useSprintStore } from "../../stores/sprintStore";
 import type { KnowledgeBoundary, UserProfile } from "../../types/sprint";
 import type { CoachStageId } from "./components/CoachStageNavigation";
+import type { BoundarySuggestionRevisionRequest } from "./useBoundaryDraftProtection";
 
 type BoundarySuggestionOptions = {
   activeProfile?: UserProfile;
@@ -15,6 +16,7 @@ type BoundarySuggestionOptions = {
   setFeedback: Dispatch<SetStateAction<string>>;
   setRecentlyDeletedBoundary: Dispatch<SetStateAction<KnowledgeBoundary | null>>;
   setActiveStage: Dispatch<SetStateAction<CoachStageId>>;
+  onRequestRevision?: (request: BoundarySuggestionRevisionRequest) => void;
 };
 
 export function useBoundarySuggestions({
@@ -23,7 +25,8 @@ export function useBoundarySuggestions({
   setBoundaryDraft,
   setFeedback,
   setRecentlyDeletedBoundary,
-  setActiveStage
+  setActiveStage,
+  onRequestRevision
 }: BoundarySuggestionOptions) {
   const feedbackRecords = useSprintStore((state) => state.boundarySuggestionFeedback);
   const saveKnowledgeBoundary = useSprintStore((state) => state.saveKnowledgeBoundary);
@@ -107,10 +110,22 @@ export function useBoundarySuggestions({
     setActiveStage("plan");
   };
   const reviseSuggestion = (suggestion: BoundarySuggestionDraft) => {
-    recordDecision(suggestion, "needs_revision", reasons[suggestion.id]);
-    setBoundaryDraft({ ...suggestion, id: undefined });
-    removeSuggestion(suggestion.id);
-    setFeedback(`已把「${suggestion.topic}」载入知识边界表单，请修订后保存。`);
+    const request: BoundarySuggestionRevisionRequest = {
+      kind: "suggestion_revision",
+      draft: { ...suggestion, id: undefined },
+      topic: suggestion.topic,
+      apply: () => {
+        recordDecision(suggestion, "needs_revision", reasons[suggestion.id]);
+        removeSuggestion(suggestion.id);
+        setFeedback(`已把「${suggestion.topic}」载入知识边界表单，请修订后保存。`);
+      }
+    };
+    if (onRequestRevision) {
+      onRequestRevision(request);
+      return;
+    }
+    setBoundaryDraft(request.draft);
+    request.apply();
   };
   const rejectSuggestion = (suggestion: BoundarySuggestionDraft) => {
     recordDecision(suggestion, "rejected", reasons[suggestion.id]);
