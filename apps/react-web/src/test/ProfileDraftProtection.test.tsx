@@ -160,4 +160,42 @@ describe("profile draft protection", () => {
     expect(returnedPanel.getByLabelText("目标岗位")).toHaveValue("");
     expect(useSprintStore.getState().userProfiles[0].experienceSummary).toBe("保存后摘要");
   });
+
+  it("guards AppShell navigation when profile input is still unsaved", async () => {
+    const profile: UserProfile = {
+      id: "profile-route-protection",
+      name: "路由保护画像",
+      roleFamily: "backend",
+      targetRole: "后端工程师",
+      targetLevel: "高级",
+      cities: "杭州",
+      salaryTarget: "面议",
+      companyTypes: "产品型公司",
+      experienceSummary: "路由保护前摘要",
+      projectEvidence: "支付链路治理",
+      nonClaims: "不包装算法训练经验",
+      dailyMinutes: 60,
+      active: true,
+      createdAt: fixedNow.toISOString(),
+      updatedAt: fixedNow.toISOString()
+    };
+    useSprintStore.setState({ userProfiles: [profile] });
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "画像阶段" }));
+    const panel = profilePanel();
+    fireEvent.change(panel.getByLabelText("经验摘要"), { target: { value: "切页前未保存摘要" } });
+    const nav = screen.getByRole("navigation", { name: "桌面模块导航" });
+    fireEvent.click(within(nav).getByRole("link", { name: "机会" }));
+
+    expect(screen.getByRole("alertdialog", { name: "离开当前页面？" })).toBeInTheDocument();
+    expect(panel.getByLabelText("经验摘要")).toHaveValue("切页前未保存摘要");
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.queryByRole("alertdialog", { name: "离开当前页面？" })).not.toBeInTheDocument();
+    expect(panel.getByLabelText("经验摘要")).toHaveValue("切页前未保存摘要");
+
+    fireEvent.click(within(nav).getByRole("link", { name: "机会" }));
+    fireEvent.click(screen.getByRole("button", { name: "放弃修改并离开" }));
+    expect(await screen.findByRole("heading", { name: "机会工作台" })).toBeInTheDocument();
+  });
 });

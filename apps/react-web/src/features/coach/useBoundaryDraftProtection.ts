@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { createBoundaryDraft, type KnowledgeBoundaryDraft } from "../../data/coachAdapter";
 import { cloneBoundaryDraft, isBoundaryDraftDirty } from "../../data/boundaryDraftAdapter";
+import { useRouteLeaveGuard } from "../../app/RouteLeaveGuard";
 import type { KnowledgeBoundary } from "../../types/sprint";
 
 export type BoundarySuggestionRevisionRequest = {
@@ -32,6 +33,8 @@ export function useBoundaryDraftProtection({
 }: BoundaryDraftProtectionOptions) {
   const [baseline, setBaseline] = useState<KnowledgeBoundaryDraft>(() => createBoundaryDraft());
   const [discardAction, setDiscardAction] = useState<BoundaryDraftReplacement | null>(null);
+  const hasUnsavedChanges = isBoundaryDraftDirty(boundaryDraft, baseline);
+  useRouteLeaveGuard(hasUnsavedChanges);
 
   const resetToNewDraft = useCallback(() => {
     const nextDraft = createBoundaryDraft();
@@ -65,12 +68,12 @@ export function useBoundaryDraftProtection({
   }, [resetToNewDraft, setBoundaryDraft, setFeedback]);
 
   const requestReplacement = useCallback((action: BoundaryDraftReplacement) => {
-    if (isBoundaryDraftDirty(boundaryDraft, baseline)) {
+    if (hasUnsavedChanges) {
       setDiscardAction(action);
       return;
     }
     runReplacement(action);
-  }, [baseline, boundaryDraft, runReplacement]);
+  }, [hasUnsavedChanges, runReplacement]);
 
   return {
     requestReplacement,
