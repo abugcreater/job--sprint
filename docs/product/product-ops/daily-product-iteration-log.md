@@ -1,6 +1,45 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-01
+日期：2026-08-02
+
+## 2026-08-02 第六十次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 与 `origin/develop` 文件树一致，且 `origin/main` 是 `origin/develop` 的祖先；属于内容与历史均已对齐，不需要回同步。
+- 最新 tag 为 `v0.2.6`（2026-08-01）。本轮只会产生 1 项未发布需求，未满 7 天且未达到累计 3 项阈值，因此完成 `develop` PR 后不创建 release，也不执行服务器交付。
+
+### 今日选择：Android 系统返回未保存内容保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | Android 用户在填写画像、边界、日程、机会或复盘时按系统返回会直接丢失内存草稿。 |
+| 确定性 | 5/5 | `MainActivity` 将返回委托给生命周期控制器，后者此前直接调用 `WebView.goBack()`，绕过 React 链接守卫。 |
+| 风险降低 | 5/5 | 用户确认前不执行导航、保存、同步、AI 反馈或数据域写入。 |
+| 交互改善 | 5/5 | Android 系统返回与站内导航复用同一组清晰选择，干净草稿保持原有快速返回。 |
+| 可验证性 | 4/5 | React 行为回归、原生结构回归、assets 同步和 debug APK 编译可证明；没有连接设备，不能替代真机验收。 |
+| 实现范围 | 4/5 | 仅新增最小原生-网页协商与无参数返回桥，不引入自动保存或 history 伪造。 |
+
+### 改动
+
+- 建立 `android-system-back-leave-guard` feature capsule，比较 history 伪造、原生-网页协商与自动保存，裁决为单次协商。
+- 新增 Android 返回协调器与只含 `completeBackNavigation()` 的 JS bridge；原生先派发可取消事件，只有网页未接管或用户确认放弃时才执行一次 `goBack()` 或退出。
+- `RouteLeaveGuardProvider` 监听 Android 返回事件，有脏草稿时复用现有确认面板；继续编辑保留输入，放弃后才调用 bridge。
+- Android React assets 已同步，补 Android 生命周期/初始化结构回归与 React 系统返回回归。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test -- RouteLeaveGuard.test.tsx`：PASS，4 项。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，45 个文件、136 项。
+- `npm --prefix apps/react-web run build && npm run sync:android-react`：PASS；Android assets 同步完成。
+- `:app:assembleDebug`、Android 生命周期/初始化结构回归与架构质量门禁：PASS。
+
+### 限制与明日建议
+
+- 未连接 Android 真机或模拟器，未运行物理返回键、预测返回手势或退出后的运行时验收；浏览器历史返回、强杀、进程回收和草稿恢复仍未解决。
+- 明日优先把 Android debug APK 安装到可用设备，以真实脏草稿验证系统返回确认；之后再单独设计浏览器历史与草稿恢复，避免把两类问题混为一谈。
 
 ## 2026-08-01 第五十九次主动迭代
 

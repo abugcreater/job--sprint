@@ -77,6 +77,8 @@ const androidModules = [
   "AndroidRemoteSettingsBridge.java",
   "AndroidAuthSettingsBridge.java",
   "AndroidSessionCookieBridge.java",
+  "AndroidBackNavigationController.java",
+  "AndroidBackNavigationBridge.java",
   "AndroidRecorderBridge.java",
   "AndroidRecorderUploader.java",
   "AndroidTranscribeEndpointResolver.java",
