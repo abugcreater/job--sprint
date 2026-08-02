@@ -1,0 +1,70 @@
+docs/product/android-system-back-leave-guard/prd-recommended.md
+  s_8f6b4df0c955b0::t_6d5b6d4e286c8f 1-27
+apps/react-web/src/test/RouteLeaveGuard.test.tsx
+  s_8f6b4df0c955b0::t_77c94c160d98ec 1,81-83,93-95
+  s_8f6b4df0c955b0::t_98f99f744e9bdf 4,35-37
+  s_8f6b4df0c955b0::t_bcc14090754ffc 70-80,84-92,96-108
+  s_8f6b4df0c955b0::t_d0ef82e1e7ee74 38
+tests/android_webview_initializer_test.js
+  s_8f6b4df0c955b0::t_bcc14090754ffc 13-20,49-51,77-89
+  s_8f6b4df0c955b0::t_d1dd2a095a5ad7 90
+docs/product/android-system-back-leave-guard/development-workflow.md
+  s_8f6b4df0c955b0::t_6d5b6d4e286c8f 1-11
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidActivityLifecycleController.java
+  s_8f6b4df0c955b0::t_35ad897f6d3fc4 11,17-18,24,67
+  s_8f6b4df0c955b0::t_bcc14090754ffc 61-62
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidBackNavigationBridge.java
+  s_8f6b4df0c955b0::t_35ad897f6d3fc4 1-16
+docs/product/android-system-back-leave-guard/review-and-adjudication.md
+  s_8f6b4df0c955b0::t_6d5b6d4e286c8f 1-22
+tools/validate_architecture_quality.js
+  s_8f6b4df0c955b0::t_35ad897f6d3fc4 80-81
+apps/react-web/src/app/RouteLeaveGuard.tsx
+  s_8f6b4df0c955b0::t_35ad897f6d3fc4 5-21,65,68-77,79,86,88-96
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_9728b3ea9cdff9 3-9
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidBackNavigationController.java
+  s_8f6b4df0c955b0::t_35ad897f6d3fc4 1-38,45
+  s_8f6b4df0c955b0::t_bcc14090754ffc 39-44
+docs/product/android-system-back-leave-guard/README.md
+  s_8f6b4df0c955b0::t_4d9ef1ca0a91dd 3
+  s_8f6b4df0c955b0::t_6d5b6d4e286c8f 1-2,5-35
+  s_8f6b4df0c955b0::t_9728b3ea9cdff9 4
+docs/product/android-system-back-leave-guard/prd-options.md
+  s_8f6b4df0c955b0::t_6d5b6d4e286c8f 1-13
+apps/android/app/src/main/java/com/kai/jobsprint/AndroidWebViewInitializer.java
+  s_8f6b4df0c955b0::t_35ad897f6d3fc4 55-59,73-74
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_cef52ef847ad44 3-42
+tests/android_activity_lifecycle_controller_test.js
+  s_8f6b4df0c955b0::t_bcc14090754ffc 23,38,40
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_9728b3ea9cdff9 28
+docs/product/android-system-back-leave-guard/completion-audit.md
+  s_8f6b4df0c955b0::t_9728b3ea9cdff9 4,8-11,14-27
+  s_8f6b4df0c955b0::t_4d9ef1ca0a91dd 3
+  s_8f6b4df0c955b0::t_98f99f744e9bdf 12
+  s_8f6b4df0c955b0::t_6d5b6d4e286c8f 1-2,5-7,13
+apps/android/app/src/main/assets/react/assets/index-DHr4pnPf.css
+  s_8f6b4df0c955b0::t_76937f9767f167 1
+apps/android/app/src/main/assets/react/assets/index-JJsChUsV.js
+  s_8f6b4df0c955b0::t_0cc5c9c91147f1 1,9,17,25,33,41-50,59,68,77,82,87,92,97,102,107,112,117,122,127,132,137,142,147,152,157,162,167,172,177,182,187,192,197,202,207,212,217,222,227,232,237,242,247,252,257,262,267,272,277,282,287,292,297,302,307,312,317,322,327,332,337,342,347,352,357,362,367,372,377,382,387,392,397,402,407,412,417,422,427,432,437,442,447,452,457,462,467,472,477,482,487,492-502,504,507
+apps/android/app/src/main/assets/react/index.html
+  s_8f6b4df0c955b0::t_74b509b040c6a0 8-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.19",
+  "base_commit_sha": "3ae2b5ae2f8cde6e7f3cd9cea5ed0021ddc1c544",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
