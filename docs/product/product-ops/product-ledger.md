@@ -1,6 +1,12 @@
 # 产品决策账本
 
-日期：2026-08-01
+日期：2026-08-02
+
+## 2026-08-02 产品决策
+
+| 决策 | 已实现边界 | 未纳入本轮 |
+|---|---|---|
+| Android Activity 的系统返回必须遵循与站内链接相同的未保存内容确认 | 原生 `AndroidBackNavigationController` 先向网页派发可取消的 `jobsprint:android-back-pressed`；存在任一已注册 dirty 草稿时，React `RouteLeaveGuardProvider` 取消该事件并显示既有“继续编辑 / 放弃修改并离开”面板。确认放弃后才通过无参数 `AndroidBackNavigation` bridge 完成一次真实 `WebView.goBack()`，无页面可退时结束当前 Activity。桥不读取或传递草稿、账号、Cookie、令牌、远端 URL 或文件。 | 不使用重复 `pushState` 或 history 回滚；不承诺浏览器历史返回、预测返回动画、应用强杀、进程回收、自动保存或草稿恢复；未部署服务器，也没有连接 Android 设备做真机运行时验收。 |
 
 ## 2026-08-01 产品决策
 

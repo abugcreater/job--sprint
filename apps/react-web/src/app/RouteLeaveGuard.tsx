@@ -2,10 +2,23 @@ import { AlertTriangle, ArrowRight, X } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-type PendingRouteLeave = {
-  to: string;
-  trigger: HTMLElement;
-};
+type PendingRouteLeave =
+  | {
+      kind: "route";
+      to: string;
+      trigger: HTMLElement;
+    }
+  | {
+      kind: "android-system-back";
+    };
+
+declare global {
+  interface Window {
+    AndroidBackNavigation?: {
+      completeBackNavigation: () => void;
+    };
+  }
+}
 
 type RouteLeaveGuardContextValue = {
   registerDirtyCheck: (id: string, isDirty: () => boolean) => () => void;
@@ -49,20 +62,38 @@ export function RouteLeaveGuardProvider({ children }: { children: ReactNode }) {
 
     event.preventDefault();
     event.stopPropagation();
-    setPendingLeave({ to: target, trigger: anchor });
+    setPendingLeave({ kind: "route", to: target, trigger: anchor });
   }, [hasUnsavedChanges, location.pathname, location.search]);
 
+  useEffect(() => {
+    const handleAndroidSystemBack = (event: Event) => {
+      if (!hasUnsavedChanges()) return;
+      event.preventDefault();
+      setPendingLeave((current) => current ?? { kind: "android-system-back" });
+    };
+    window.addEventListener("jobsprint:android-back-pressed", handleAndroidSystemBack);
+    return () => window.removeEventListener("jobsprint:android-back-pressed", handleAndroidSystemBack);
+  }, [hasUnsavedChanges]);
+
   const continueEditing = useCallback(() => {
-    const trigger = pendingLeave?.trigger;
+    const trigger = pendingLeave?.kind === "route" ? pendingLeave.trigger : undefined;
     setPendingLeave(null);
     window.requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
   }, [pendingLeave]);
 
   const discardAndLeave = useCallback(() => {
     if (!pendingLeave) return;
-    const { to } = pendingLeave;
+    const leave = pendingLeave;
     setPendingLeave(null);
-    navigate(to);
+    if (leave.kind === "android-system-back") {
+      if (window.AndroidBackNavigation?.completeBackNavigation) {
+        window.AndroidBackNavigation.completeBackNavigation();
+        return;
+      }
+      window.history.back();
+      return;
+    }
+    navigate(leave.to);
   }, [navigate, pendingLeave]);
 
   const value = useMemo(() => ({ registerDirtyCheck }), [registerDirtyCheck]);

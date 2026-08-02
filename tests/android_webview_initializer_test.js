@@ -10,6 +10,14 @@ const initializer = fs.readFileSync(
   "apps/android/app/src/main/java/com/kai/jobsprint/AndroidWebViewInitializer.java",
   "utf8"
 );
+const backNavigationController = fs.readFileSync(
+  "apps/android/app/src/main/java/com/kai/jobsprint/AndroidBackNavigationController.java",
+  "utf8"
+);
+const backNavigationBridge = fs.readFileSync(
+  "apps/android/app/src/main/java/com/kai/jobsprint/AndroidBackNavigationBridge.java",
+  "utf8"
+);
 
 assert.match(initializer, /final class AndroidWebViewInitializer/);
 assert.match(initializer, /private final Activity activity/);
@@ -38,6 +46,9 @@ assert.match(initializer, /new AndroidSessionCookieBridge\(activity, remoteWebVi
 assert.match(initializer, /webView\.addJavascriptInterface\([\s\S]*"AndroidRemoteSettings"/);
 assert.match(initializer, /webView\.addJavascriptInterface\([\s\S]*"AndroidAuthSettings"/);
 assert.match(initializer, /webView\.addJavascriptInterface\([\s\S]*"AndroidSessionCookies"/);
+assert.match(initializer, /new AndroidBackNavigationController\(activity, webView\)/);
+assert.match(initializer, /new AndroidBackNavigationBridge\(backNavigationController\)/);
+assert.match(initializer, /"AndroidBackNavigation"/);
 assert.match(initializer, /AndroidFileChooserController fileChooserController = new AndroidFileChooserController\(activity\)/);
 assert.match(initializer, /new AndroidWebChromePermissionController\([\s\S]*activity,[\s\S]*audioPermissionRequest,[\s\S]*fileChooserController[\s\S]*\)/);
 assert.match(initializer, /webView\.setWebViewClient\(new AndroidRemoteWebViewClient\(basicAuthController, remoteWebViewController\)\)/);
@@ -62,5 +73,19 @@ assert.doesNotMatch(initializer, /loadRemoteOrFallback/);
 assert.doesNotMatch(initializer, /loadLocalReactOrFallback/);
 assert.doesNotMatch(initializer, /setStatusBarColor/);
 assert.doesNotMatch(initializer, /setContentView/);
+
+assert.match(backNavigationController, /final class AndroidBackNavigationController/);
+assert.match(backNavigationController, /jobsprint:android-back-pressed/);
+assert.match(backNavigationController, /webView\.evaluateJavascript\(REQUEST_WEB_BACK_SCRIPT, result ->/);
+assert.match(backNavigationController, /"\\\"true\\\""\.equals\(result\)/);
+assert.match(backNavigationController, /void completeBackNavigation\(\)/);
+assert.match(backNavigationController, /webView != null && webView\.canGoBack\(\)/);
+assert.match(backNavigationController, /webView\.goBack\(\)/);
+assert.match(backNavigationController, /activity\.finish\(\)/);
+assert.match(backNavigationController, /void destroy\(\)/);
+assert.match(backNavigationController, /webView\.destroy\(\)/);
+assert.match(backNavigationBridge, /@JavascriptInterface\s+public void completeBackNavigation\(\)/);
+assert.match(backNavigationBridge, /backNavigationController\.completeBackNavigation\(\)/);
+assert.doesNotMatch(backNavigationBridge, /CookieManager|AuthCredentialStore|RemoteUrlPolicy|Toast/);
 
 console.log("android webview initializer tests passed");

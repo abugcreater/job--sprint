@@ -16,11 +16,11 @@ const initializer = fs.readFileSync(
 );
 
 assert.match(controller, /final class AndroidActivityLifecycleController/);
-assert.match(controller, /private final WebView webView/);
 assert.match(controller, /private final AndroidSpeechBridge speechBridge/);
 assert.match(controller, /private final AndroidRecorderBridge recorderBridge/);
 assert.match(controller, /private final AndroidFileChooserController fileChooserController/);
 assert.match(controller, /private final int audioPermissionRequest/);
+assert.match(controller, /private final AndroidBackNavigationController backNavigationController/);
 assert.match(controller, /void onAudioPermissionResult\(int requestCode, int\[\] grantResults\)/);
 assert.match(controller, /requestCode != audioPermissionRequest/);
 assert.match(controller, /PackageManager\.PERMISSION_GRANTED/);
@@ -35,12 +35,9 @@ assert.match(controller, /void onDestroy\(\)/);
 assert.match(controller, /speechBridge\.destroy\(\)/);
 assert.match(controller, /recorderBridge\.destroy\(\)/);
 assert.match(controller, /fileChooserController\.cancelPendingRequest\(\)/);
-assert.match(controller, /webView\.destroy\(\)/);
+assert.match(controller, /backNavigationController\.destroy\(\)/);
 assert.match(controller, /boolean handleBackPressed\(\)/);
-assert.match(controller, /webView\.canGoBack\(\)/);
-assert.match(controller, /webView\.goBack\(\)/);
-assert.match(controller, /return true/);
-assert.match(controller, /return false/);
+assert.match(controller, /backNavigationController != null && backNavigationController\.requestSystemBack\(\)/);
 
 assert.match(activity, /private AndroidActivityLifecycleController lifecycleController/);
 assert.match(activity, /lifecycleController = new AndroidAppStartupController\(/);
@@ -63,8 +60,6 @@ assert.doesNotMatch(activity, /recorderBridge\.cancelFromLifecycle/);
 assert.doesNotMatch(activity, /speechBridge\.destroy/);
 assert.doesNotMatch(activity, /recorderBridge\.destroy/);
 assert.doesNotMatch(activity, /webView\.destroy/);
-assert.doesNotMatch(activity, /webView\.canGoBack/);
-assert.doesNotMatch(activity, /webView\.goBack/);
 assert.doesNotMatch(activity, /PackageManager\.PERMISSION_GRANTED/);
 
 assert.doesNotMatch(controller, /setWebViewClient/);
