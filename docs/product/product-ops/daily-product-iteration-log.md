@@ -1,6 +1,44 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-02
+日期：2026-08-03
+
+## 2026-08-03 第六十一次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在 `v0.2.6` 后的正常增量；当前只有 Android 系统返回这一项未发布需求，未满 7 天且未达到累计 3 项阈值，因此本轮完成 `develop` PR 后不创建 release，也不执行服务器交付。
+
+### 今日选择：认证会话与本地快照隔离
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 新用户或共享设备切换账号时，任何旧画像、日程、机会或复盘短暂出现都会破坏数据隔离信任。 |
+| 确定性 | 5/5 | React 使用单一 `jobSprint.react.v1` 持久化键；运行时关闭或异步认证未完成时，既有 RuntimeSyncBridge 不会先重置 owner。 |
+| 风险降低 | 5/5 | 认证确认前不渲染业务路由；匿名会清空运行态，认证 owner/dataScope 不匹配时先清空再同步。 |
+| 交互改善 | 4/5 | 检查、登录和会话失败各有单一清晰入口，普通已登录用户仍直接进入工作台。 |
+| 可验证性 | 5/5 | owner transition、真实 AppShell 异步渲染、全量 React、Android 构建和根门禁均可自动验证。 |
+| 实现范围 | 4/5 | 只收口客户端会话与本地状态，不改服务端协议、账号或生产数据。 |
+
+### 改动
+
+- 建立 `session-scope-gate` feature capsule，比较只在同步桥处理、AppShell 门禁和按账号分存储键三个方案，裁决为 AppShell 门禁加 owner transition。
+- 新增 `authSessionScope`：集中 owner/dataScope 比较、匿名/认证的运行态切换和业务路由访问判断；同步桥复用同一 owner 比较逻辑。
+- AppShell 会话解析后先切换不匹配运行态，再允许业务内容渲染；认证检查、匿名和失败状态不显示旧工作台。匿名状态会清空 owner 并提供登录入口；失败状态保留未知缓存但不展示。
+- 新增状态机和真实 AppShell 异步认证回归，覆盖旧路由在检查中不渲染、匿名后清空、失败后继续隐藏。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，47 个文件、142 项测试。
+- `npm --prefix apps/react-web run build`、`npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；仅保留既有 Vite 单包体积和 Gradle deprecated feature 提示。
+- `npm test`、`npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive`、`git diff --check`：PASS；功能覆盖/对齐门禁仅提示既有 Android 远端 evidence 缺失。
+
+### 限制与明日建议
+
+- 本轮没有连接 Android 设备，不把 Android debug 构建扩大解释为真实 WebView 登录切换验收；未部署服务器、创建账号或修改远端配置。
+- `local` 与 `unconfigured` 继续允许单机/开发用本地数据，不等价于多用户认证环境；浏览器存储未改为多账号分键或加密。
+- 明日优先在可用设备上验证 A -> B -> 退出登录的真实切换，再处理浏览器历史返回、预测返回和强杀恢复的统一语义。
 
 ## 2026-08-02 第六十次主动迭代
 

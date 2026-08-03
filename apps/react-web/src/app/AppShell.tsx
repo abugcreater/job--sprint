@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { CloudOff, LogIn, LogOut, ShieldCheck, UserRound } from "lucide-react";
 import { NavLink, Outlet, useLocation } from "react-router-dom";
 import { AuthSessionContext } from "./authSessionContext";
+import { canReadSprintForSession, resolveRuntimeOwnerTransition } from "./authSessionScope";
 import { MobileBottomNav } from "./MobileBottomNav";
 import { RouteLeaveGuardProvider } from "./RouteLeaveGuard";
 import { appRoutes, desktopNavRouteIds, routeById, visibleRouteIds, type AppRouteId } from "./navigation";
@@ -26,10 +27,16 @@ export function AppShell() {
   const syncLabel = syncStateLabel(syncState);
   const visibleDesktopRouteIds = visibleRouteIds(desktopNavRouteIds, { owner: isOwnerSession(authSession) });
   const currentRoute = appRoutes.find((route) => location.pathname.startsWith(route.path)) ?? routeById.today;
+  const canReadSprint = canReadSprintForSession(authSession);
   const refreshAuth = useCallback(() => {
     let active = true;
     fetchAuthSession().then((session) => {
-      if (active) setAuthSession(session);
+      if (!active) return;
+      const transition = resolveRuntimeOwnerTransition(session, useSprintStore.getState().storageOwner);
+      if (transition) {
+        useSprintStore.getState().resetRuntimeForOwner(transition.storageOwner, transition.syncState);
+      }
+      setAuthSession(session);
     });
     return () => {
       active = false;
@@ -47,6 +54,17 @@ export function AppShell() {
     await logoutAuthSession();
     window.location.href = buildLoginHref();
   }, []);
+
+  if (!canReadSprint) {
+    return (
+      <AuthSessionContext.Provider value={authSession}>
+        <RouteLeaveGuardProvider>
+          <ScrollToTop />
+          <SessionAccessGate session={authSession} onRetry={() => setAuthSession({ status: "checking" })} />
+        </RouteLeaveGuardProvider>
+      </AuthSessionContext.Provider>
+    );
+  }
 
   return (
     <AuthSessionContext.Provider value={authSession}>
@@ -147,6 +165,39 @@ export function AppShell() {
         <MobileBottomNav />
       </RouteLeaveGuardProvider>
     </AuthSessionContext.Provider>
+  );
+}
+
+function SessionAccessGate({ session, onRetry }: { session: AuthSessionState; onRetry: () => void }) {
+  const isChecking = session.status === "checking";
+  const isAnonymous = session.status === "anonymous";
+  const title = isChecking ? "正在确认当前账号" : isAnonymous ? "登录后继续使用" : "暂时无法确认当前账号";
+  const detail = isChecking
+    ? "正在核对你的数据域。"
+    : isAnonymous
+      ? "为保护求职资料，请登录后进入工作台。"
+      : "为保护已保存的求职资料，当前不会展示本地业务数据。";
+
+  return (
+    <main id="app-content" tabIndex={-1} className="flex min-h-dvh items-center justify-center bg-surface-0 px-5 py-10">
+      <section className="w-full max-w-md border border-line bg-white p-6 shadow-panel" aria-live="polite">
+        <span className="grid size-11 place-items-center rounded-control bg-brand-100 text-brand-800">
+          {isAnonymous ? <LogIn size={21} aria-hidden="true" /> : <ShieldCheck size={21} aria-hidden="true" />}
+        </span>
+        <h1 className="mt-5 text-xl font-black text-ink-950">{title}</h1>
+        <p className="mt-2 text-sm font-semibold leading-6 text-ink-600">{detail}</p>
+        {isAnonymous ? (
+          <a className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-control bg-brand-700 px-4 text-sm font-black text-white transition hover:bg-brand-800" href={buildLoginHref()}>
+            <LogIn size={16} aria-hidden="true" />
+            去登录
+          </a>
+        ) : isChecking ? null : (
+          <button type="button" className="mt-6 inline-flex min-h-11 items-center rounded-control bg-brand-700 px-4 text-sm font-black text-white transition hover:bg-brand-800" onClick={onRetry}>
+            重新检查
+          </button>
+        )}
+      </section>
+    </main>
   );
 }
 
