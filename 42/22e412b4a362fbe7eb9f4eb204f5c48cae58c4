@@ -1,0 +1,51 @@
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_5b55d9bb86d09f 3-41
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_5b55d9bb86d09f 3,10
+docs/product/session-scope-gate/development-workflow.md
+  s_8f6b4df0c955b0::t_6146e360ca068e 1-7
+docs/product/session-scope-gate/completion-audit.md
+  s_8f6b4df0c955b0::t_6146e360ca068e 1-2,4-6
+  s_8f6b4df0c955b0::t_5b55d9bb86d09f 3,7-25
+apps/react-web/src/app/authSessionScope.ts
+  s_8f6b4df0c955b0::t_b26ae1ac729e63 40-41
+  s_8f6b4df0c955b0::t_cdf63666d481ce 1-39,42
+docs/product/session-scope-gate/README.md
+  s_8f6b4df0c955b0::t_6146e360ca068e 1-33
+apps/react-web/src/app/providers.tsx
+  s_8f6b4df0c955b0::t_cdf63666d481ce 2,4,7-8
+apps/react-web/src/test/authSessionScope.test.ts
+  s_8f6b4df0c955b0::t_cdf63666d481ce 1-38,40-46
+  s_8f6b4df0c955b0::t_b26ae1ac729e63 39
+docs/product/session-scope-gate/prd-options.md
+  s_8f6b4df0c955b0::t_6146e360ca068e 1-25
+docs/product/session-scope-gate/prd-recommended.md
+  s_8f6b4df0c955b0::t_6146e360ca068e 1-18
+apps/react-web/src/app/AppShell.tsx
+  s_8f6b4df0c955b0::t_cdf63666d481ce 5,30,34-39,171-200
+  s_8f6b4df0c955b0::t_8ca9db55f2b7f3 58-68
+  s_8f6b4df0c955b0::t_d974f543794f48 201-203
+apps/react-web/src/test/AppShellSessionGate.test.tsx
+  s_8f6b4df0c955b0::t_eb168501d3ac45 1-55,74
+  s_8f6b4df0c955b0::t_737df5fab07993 56-73
+docs/product/session-scope-gate/review-and-adjudication.md
+  s_8f6b4df0c955b0::t_6146e360ca068e 1-17
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_5b55d9bb86d09f 3-9
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "4222e412b4a362fbe7eb9f4eb204f5c48cae58c4",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
