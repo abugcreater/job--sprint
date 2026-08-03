@@ -1,7 +1,10 @@
 import { useEffect, type PropsWithChildren } from "react";
-import { fetchAuthSession, type AuthUser } from "../api/authClient";
+import { fetchAuthSession } from "../api/authClient";
 import { buildRuntimeData, canUseServerRuntime, fetchRuntimeState, saveRuntimeState } from "../api/runtimeClient";
+import { isStorageOwnerMatch, ownerFromUser } from "./authSessionScope";
 import { useSprintStore, type RuntimeStorageOwner } from "../stores/sprintStore";
+
+export { isStorageOwnerMatch, ownerFromUser } from "./authSessionScope";
 
 export function AppProviders({ children }: PropsWithChildren) {
   return (
@@ -148,13 +151,6 @@ function runtimeDataFromState(state: ReturnType<typeof useSprintStore.getState>)
   });
 }
 
-export function ownerFromUser(user: AuthUser): RuntimeStorageOwner {
-  return {
-    username: user.username,
-    dataScope: user.dataScope || user.username
-  };
-}
-
 export function shouldApplyRuntimeSaveResponse({
   disposed,
   requestId,
@@ -188,14 +184,6 @@ function hasRuntimeContent(data: ReturnType<typeof buildRuntimeData>) {
       data.applications.length ||
       data.interviewMistakes.length
   );
-}
-
-export function isStorageOwnerMatch(left?: RuntimeStorageOwner, right?: RuntimeStorageOwner) {
-  if (!right?.dataScope && !right?.username) return true;
-  if (!left?.dataScope && !left?.username) return false;
-  const leftScope = left.dataScope || left.username || "";
-  const rightScope = right.dataScope || right.username || "";
-  return Boolean(leftScope && rightScope && leftScope === rightScope);
 }
 
 export function shouldUploadLocalFirst(
