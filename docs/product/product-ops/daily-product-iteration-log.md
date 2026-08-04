@@ -1,6 +1,44 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-03
+日期：2026-08-04
+
+## 2026-08-04 第六十二次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在 `v0.2.6` 后的正常增量。开始时只有 #43、#44 两项已合入需求，未达到 7 天或累计 3 项阈值；本轮需求合入后将成为第三项，需按 `release/v0.2.7 -> main` 收口，不执行服务器交付。
+
+### 今日选择：邀请账号数据域唯一性
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 账号被误配到其他人的 `dataScope` 会让新用户直接读写旧求职数据，破坏核心隔离承诺。 |
+| 确定性 | 5/5 | Node/Rust users-file 开通路径此前允许 owner 任意提交 `dataScope`，没有检查是否已归属其他登录名。 |
+| 风险降低 | 5/5 | 两套服务端在写账号、审计、邀请前统一返回 `409 data_scope_conflict`；页面预检只提升反馈，不替代后端。 |
+| 交互改善 | 4/5 | 数据域字段明确标为独立，冲突时保留 owner 输入并直接指出占用账号。 |
+| 可验证性 | 5/5 | Node/Rust 真实接口合同、React 页面保存路径、构建与 Android 资产可自动验证。 |
+| 实现范围 | 4/5 | 只收口邀请制登录账号配置，不改 runtime 表结构、公开注册或历史数据。 |
+
+### 改动
+
+- 建立 `data-scope-uniqueness` feature capsule，裁决为 Node/Rust 后端强制唯一加 React 非权威预检。
+- Node users file 新增标准化 scope 比较；Rust 抽出 `auth_data_scope` 模块，避免账号存储模块继续膨胀。
+- 冲突返回占用登录名与可恢复文案，且路由会在 `upsertInvitation` 前终止，因此不会留下半开通账号或邀请记录。
+- 邀请管理保存前拦截已读取账号中的冲突 scope；新增页面测试和 Node/Rust 合同测试。
+
+### 已完成验证
+
+- `node tests/invitation_account_provisioning_test.js`、`cargo test --manifest-path apps/rust-api/Cargo.toml runtime_contract_matches_node_core_api`：PASS。
+- `npm --prefix apps/react-web run typecheck`、`npm --prefix apps/react-web test`：PASS，48 个文件、143 项；`InviteManagementDataScopeConflict` 覆盖预检不发送请求。
+- `npm --prefix apps/react-web run build`、`npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；仅保留既有 Vite 单包体积和 Gradle deprecated feature 提示。
+- `npm run test:local-functional`、`npm test`、`npm run validate:architecture-quality`、`npm run scan:sensitive`、`git diff --check`：PASS；功能覆盖/对齐门禁仅提示既有 Android 远端 evidence 缺失。
+
+### 限制与明日建议
+
+- 本轮不迁移历史重复 users file、不创建或修改远端账号、不部署服务器；没有 Android 设备，因此 debug 构建不替代真实 WebView 登录验收。
+- 历史重复 scope 必须由 owner 在核验数据归属后手工调整；不应猜测合并、删除或迁移哪一份求职数据。
+- 本项完成 `develop` 合入后，应创建 `release/v0.2.7 -> main`，打 tag 并回同步 `develop`；服务器交付仍需用户单独授权。
 
 ## 2026-08-03 第六十一次主动迭代
 

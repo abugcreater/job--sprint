@@ -30,7 +30,7 @@ import { InviteManagementLedger } from "./InviteManagementLedger";
 import { Field, MetricTile, PanelTitle, Textarea } from "./CoachPrimitives";
 import { buildBatchAccountActionConfirmation, buildBatchActionHint } from "./inviteManagementBatchActions";
 import { accountProvisioningText, roleFamilyOptions, statusLabel, statusOptions, templateVersionOptions } from "./inviteManagementConfig";
-import { accountProvisioningReadyMessage, draftFromConfiguredUser, draftFromInvitation } from "./inviteManagementDraft";
+import { accountProvisioningReadyMessage, dataScopeConflictMessage, draftFromConfiguredUser, draftFromInvitation } from "./inviteManagementDraft";
 import { findInviteManagementOnboardingUser } from "./inviteManagementOnboarding";
 
 export function InviteManagementPanel({ onboardingReport = null }: { onboardingReport?: CoachOnboardingReportResponse | null }) {
@@ -71,6 +71,8 @@ export function InviteManagementPanel({ onboardingReport = null }: { onboardingR
       setMessage("请先填写登录名。");
       return;
     }
+    const conflictMessage = (draft.provisionAccount || draft.password.trim()) ? dataScopeConflictMessage(draft, response?.configuredUsers ?? []) : "";
+    if (conflictMessage) { setStatus("error"); setMessage(conflictMessage); return; }
     setStatus("saving");
     try {
       const result = await saveCoachInvitation({
@@ -439,7 +441,7 @@ export function InviteManagementPanel({ onboardingReport = null }: { onboardingR
           <div className="grid gap-3 md:grid-cols-2">
             <Field label="登录名" value={draft.username} onChange={(value) => setDraft((current) => ({ ...current, username: value }))} placeholder="mia" />
             <Field label="显示名" value={draft.displayName} onChange={(value) => setDraft((current) => ({ ...current, displayName: value }))} placeholder="Mia" />
-            <Field label="数据域" value={draft.dataScope} onChange={(value) => setDraft((current) => ({ ...current, dataScope: value }))} placeholder="默认同登录名" />
+            <Field label="数据域（每个账号必须独立）" value={draft.dataScope} onChange={(value) => setDraft((current) => ({ ...current, dataScope: value }))} placeholder="默认同登录名" />
             <Field label="邀请批次" value={draft.inviteBatch} onChange={(value) => setDraft((current) => ({ ...current, inviteBatch: value }))} />
             <label className="block">
               <span className="text-sm font-black text-ink-700">建档模板版本</span>
@@ -537,7 +539,6 @@ export function InviteManagementPanel({ onboardingReport = null }: { onboardingR
           />
         </div>
       </div>
-
       <InviteManagementDetailPanel
         accountAuditEvents={response?.accountAuditEvents}
         accountProvisioningEnabled={response?.accountProvisioning?.enabled !== false}
@@ -548,7 +549,6 @@ export function InviteManagementPanel({ onboardingReport = null }: { onboardingR
         onPrepareAccountProvisioning={prepareAccountProvisioning}
         onRunAccountAction={runAccountAction}
       />
-
       {message ? (
         <p className={`mt-4 rounded-control px-3 py-2 text-sm font-bold ${status === "error" ? "bg-risk-100 text-risk-600" : "bg-success-100 text-success-600"}`} role="status">
           {message}
