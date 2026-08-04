@@ -1,0 +1,23 @@
+CHANGELOG.md
+  s_8f6b4df0c955b0::t_5eb8e25f27c932 7-12
+tests/api_runtime_test.js
+  s_8f6b4df0c955b0::t_34b7b49aed7c01 13,456,458,492
+package.json
+  s_8f6b4df0c955b0::t_5eb8e25f27c932 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "2ca0eea84f00f3f86ecedddf3279d5fdcd3ed428",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
