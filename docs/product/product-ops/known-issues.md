@@ -1,12 +1,14 @@
 # 产品已知问题与下一步
 
-日期：2026-08-01
+日期：2026-08-04
 
 ## P0 防回归
 
 | 问题 | 当前状态 | 下一步 |
 |---|---|---|
 | 按钮只计数、不产生真实业务状态 | 已通过本地流程和测试修复为输入、反馈、保存、读回；邀请账号管理批量按钮已补持续可见的 disabled 原因 | 每次 UI 改动继续跑 React/Vitest/本地功能/Android 本地功能，并保留按钮 disabled 原因。 |
+| 同一浏览器切换账号可能展示旧本地快照 | 已修复：单一 `jobSprint.react.v1` 缓存不再直接决定可见内容。远端会话检查中、匿名或失败时 AppShell 不渲染业务路由；认证账号或 `dataScope` 与 `storageOwner` 不匹配时先清空运行态，匿名会清空 owner，运行时同步仍拒绝跨 owner 上传。`local` / `unconfigured` 明确保留单机数据。 | 保持 `AppShellSessionGate`、owner transition 和 RuntimeSyncBridge 回归；真实 Android WebView 登录切换需在有设备时单独验收，不能把本地构建当成真机证据。 |
+| 邀请账号可能被误配为其他账号的数据域 | 已修复：Node/Rust users-file 开通或更新登录账号前拒绝重复 `dataScope`，返回 `409 data_scope_conflict` 且不会写入账号或邀请记录；React 邀请管理在保存前提示已被占用的数据域。 | 历史 users file 若已存在重复配置，不自动猜测迁移；owner 需先核验归属并手工改为独立 scope。该产品仍不是组织共享工作区或公开多租户 SaaS。 |
 | 创建/编辑表单没有说明当前模式 | 教练页知识边界、我的日程、机会页机会记录、面试页口述训练入口、学习页学习笔记入口、复盘页服务端结果快照入口和本地复盘表单已补状态说明、保存影响提示；日程编辑已补取消编辑动作和草稿替换确认，知识边界已补编辑/取消/AI 候选修订前的草稿确认，测试覆盖新建边界切换编辑、编辑后取消、候选修订前反馈不写入、保存后快速取消与原记录读回，机会页测试覆盖新增写入 Evidence Gate/AI 信号和编辑更新证据，面试页测试覆盖空回答 disabled 原因和保存写入 Evidence Gate，学习页测试覆盖空笔记 disabled 原因和保存写入当前知识任务 Evidence Gate，复盘页测试覆盖本地模式禁用服务端快照、空复盘 disabled 原因、新增保存影响、编辑覆盖影响和未保存取消确认；画像详细表单已补新建、切换和重新编辑前的未保存修改确认 | 后续所有保存类表单默认检查：当前模式、保存影响、成功反馈、取消编辑、刷新读回和不可保存时的明确原因。 |
 | 机会编辑取消会丢失未保存修改 | 机会工作台原先点击“取消编辑”或移动端关闭会直接重置草稿，用户刚输入的公司、岗位或沟通反馈没有恢复选择。 | 已补新增/编辑草稿基线比较与“继续编辑 / 放弃修改”确认，确认前不写入 Evidence Gate；同时已接入 AppShell 站内跳转确认与浏览器整页离开提示。系统/Android 返回、应用强杀与自动恢复另行设计。 |
 | 画像替换会丢失未保存修改 | 详细画像表单原先点击“新建画像”、切换已有画像或“编辑当前画像”会直接替换本地草稿，导致岗位、经验和不可夸大边界丢失。 | 已补 `ProfileDraft` 本地基线比较与“继续编辑 / 放弃修改”确认；确认前不切换 active profile、不重载草稿也不写入持久数据，未修改保持快速路径；同时已接入 AppShell 站内跳转确认与浏览器整页离开提示。系统/Android 返回与自动恢复仍不在本轮。 |
@@ -25,7 +27,7 @@
 
 | 问题 | 影响 | 下一步 |
 |---|---|---|
-| 浏览器或 Android 系统返回仍可能绕过站内确认 | 当前 HashRouter 的站内链接已被统一保护，但浏览器历史返回、Android 系统返回、应用强杀和进程回收不具备可靠的产品内确认或草稿恢复语义。 | 先以 feature capsule 定义 Android WebView 返回策略、草稿快照位置、恢复提示和数据域边界；不得用重复 pushState 或 history 回滚制造返回循环。 |
+| 浏览器历史返回、预测返回与强杀恢复仍缺少统一语义 | Android Activity 的 `onBackPressed` 已先与 React dirty 回调协商，脏草稿会显示确认；但浏览器历史返回、预测返回动画适配、应用强杀和进程回收仍没有可靠的产品内确认或草稿恢复语义，且本轮无连接设备做真机验证。 | 后续先定义浏览器历史与预测返回的兼容策略、草稿快照位置、恢复提示和数据域边界；不得用重复 `pushState` 或 history 回滚制造返回循环。 |
 | 每日主动产品迭代曾持续遗留 Draft 和冲突分支 | 旧 heartbeat 只要求实现、验证和汇报，没有把合入 `develop`、删除短分支和定期 release 写进完成定义，导致 #11/#12/#13 跨日堆叠，后续分支反复冲突，还曾错误创建 `develop -> main` PR。 | 已增加积压收口门禁与机器合同：有开放需求 PR 时不得创建新分支；完成后必须 rebase、验证、转 Ready、通过 required checks、squash merge 到 `develop` 并删分支。每 7 天或累计 3 项需求后通过 `release/* -> main` 发布并回同步；validator 校验 `.github/gitflow-automation-contract.json` 的精确值，GitHub `validate` 同时运行合同/扫描器回归测试与实际校验。 |
 | 本地验收时 AI 运行记录长期显示 `local-fallback / server_unavailable` | 纯 Vite 前端无法处理 `/api/coach/artifacts`，容易把环境问题误读成模型失败。Coach 与 Stats 已共用诊断口径；Node 与 Rust 均有两进程本地 smoke。它们通过 Vite `/api` proxy 验证：匿名请求归类为 `auth_required`，登录 Cookie 会话保留独立数据域，已登录且未配置 provider 的请求归类为 `provider_not_configured`，随后回收进程和临时 JSON/SQLite 数据。本轮 React 已把认证、未配置 provider、API 不可用、限流、超时、响应合同异常与未知生成失败转为中文诊断、恢复动作和诊断码。 | 当前自动证据覆盖 Node/Rust fallback、proxy、Cookie 会话、AI 权限、schema 和 Rust `llm_runs` 读回；本地回环桩已覆盖 `429`，`408` / `504` 由自动化测试覆盖，仍不调用真实 provider。后续只在有真实运行时证据时补 `Retry-After`、自动重试或熔断策略，不再重复建设基础用户提示。 |
 | Rust 健康接口曾把空 provider 环境变量误报为已配置 | `ANTHROPIC_BASE_URL=""` 和 `ANTHROPIC_AUTH_TOKEN=""` 会使 Rust 生成链路正确回落到本地规则，但旧 `/api/health` 只检查变量存在，会返回 `apiConfigured=true`，造成运行记录诊断自相矛盾 | 已改为仅当两个必需变量均为非空时才返回 `apiConfigured=true`，空模型名也不再显示；`npm run test:rust-coach-runtime` 验证免登录 SQLite fallback，`npm run test:rust-coach-runtime-proxy-auth` 额外验证 Vite proxy、匿名 `auth_required`、登录 Cookie/dataScope、已登录 `provider_not_configured` 与 `llm_runs` 读回。真实 provider 仍是独立验收层。 |

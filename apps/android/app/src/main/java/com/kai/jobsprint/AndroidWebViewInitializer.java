@@ -52,6 +52,11 @@ final class AndroidWebViewInitializer {
             new AndroidSessionCookieBridge(activity, remoteWebViewController),
             "AndroidSessionCookies"
         );
+        AndroidBackNavigationController backNavigationController = new AndroidBackNavigationController(activity, webView);
+        webView.addJavascriptInterface(
+            new AndroidBackNavigationBridge(backNavigationController),
+            "AndroidBackNavigation"
+        );
 
         AndroidFileChooserController fileChooserController = new AndroidFileChooserController(activity);
         webView.setWebChromeClient(new AndroidWebChromePermissionController(
@@ -62,11 +67,11 @@ final class AndroidWebViewInitializer {
         webView.setWebViewClient(new AndroidRemoteWebViewClient(basicAuthController, remoteWebViewController));
 
         return new AndroidActivityLifecycleController(
-            webView,
             speechBridge,
             recorderBridge,
             fileChooserController,
-            audioPermissionRequest
+            audioPermissionRequest,
+            backNavigationController
         );
     }
 

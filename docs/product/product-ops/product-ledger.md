@@ -1,6 +1,24 @@
 # 产品决策账本
 
-日期：2026-08-01
+日期：2026-08-04
+
+## 2026-08-04 产品决策
+
+| 决策 | 已实现边界 | 未纳入本轮 |
+|---|---|---|
+| 邀请制个人账号必须拥有唯一 `dataScope`，不能通过 owner 配置形成共享 runtime | Node 和 Rust 在 users-file 创建或更新登录账号前都会比较其他登录名的标准化数据域；冲突返回 `409 data_scope_conflict`，不会写入账号、审计或邀请记录。React 邀请管理把字段标为“每个账号必须独立”，并按已读账号清单在保存前拦截；同一账号的密码重置仍可保持本数据域。 | 不新增组织工作区或共享数据域，不自动迁移历史 users file，不创建/修改远端账号或生产数据；公开注册与完整用户管理后台仍不在当前产品边界。 |
+
+## 2026-08-03 产品决策
+
+| 决策 | 已实现边界 | 未纳入本轮 |
+|---|---|---|
+| 远端认证会话必须先于浏览器本地求职快照展示；账号或 `dataScope` 变化必须先切换运行态 owner | React `AppShell` 在会话解析后先比较持久化 `storageOwner` 与当前 `dataScope`；不匹配时清空运行态并绑定新 owner，再渲染工作台。认证检查中、匿名或失败时不渲染业务路由、导航或旧快照；匿名会清空运行态并给出登录入口。`RuntimeSyncBridge` 复用同一 owner 比较，继续拒绝跨 scope 的 local-first 上传。 | 不按账号拆分 localStorage 键、不改 Node/Rust 协议、不做公开注册、离线多账号缓存、跨设备冲突合并或存储加密；`local` / `unconfigured` 保持明确的单机与开发模式。 |
+
+## 2026-08-02 产品决策
+
+| 决策 | 已实现边界 | 未纳入本轮 |
+|---|---|---|
+| Android Activity 的系统返回必须遵循与站内链接相同的未保存内容确认 | 原生 `AndroidBackNavigationController` 先向网页派发可取消的 `jobsprint:android-back-pressed`；存在任一已注册 dirty 草稿时，React `RouteLeaveGuardProvider` 取消该事件并显示既有“继续编辑 / 放弃修改并离开”面板。确认放弃后才通过无参数 `AndroidBackNavigation` bridge 完成一次真实 `WebView.goBack()`，无页面可退时结束当前 Activity。桥不读取或传递草稿、账号、Cookie、令牌、远端 URL 或文件。 | 不使用重复 `pushState` 或 history 回滚；不承诺浏览器历史返回、预测返回动画、应用强杀、进程回收、自动保存或草稿恢复；未部署服务器，也没有连接 Android 设备做真机运行时验收。 |
 
 ## 2026-08-01 产品决策
 

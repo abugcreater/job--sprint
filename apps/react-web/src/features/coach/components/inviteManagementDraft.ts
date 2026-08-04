@@ -42,3 +42,12 @@ export function draftFromInvitation(invitation: CoachInvitationRecord): CoachInv
 export function accountProvisioningReadyMessage(user: CoachConfiguredUser) {
   return `已将「${user.displayName}」切到开通/重置模式；请在左侧输入新密码后保存，系统不会显示旧密码。`;
 }
+
+export function dataScopeConflictMessage(draft: CoachInvitationDraft, users: CoachConfiguredUser[]) {
+  const username = draft.username.trim();
+  const dataScope = draft.dataScope.trim() || username;
+  const conflictingUser = users.find((user) => user.username !== username && user.dataScope.trim() === dataScope);
+  return conflictingUser
+    ? `数据域「${dataScope}」已由登录账号「${conflictingUser.username}」使用；请为每个邀请账号使用独立数据域。`
+    : "";
+}

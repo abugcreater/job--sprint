@@ -12,6 +12,7 @@ mod application_routes;
 mod auth_account_audit;
 mod auth_account_actions;
 mod auth_account_batch_actions;
+mod auth_data_scope;
 mod auth_account_store;
 mod auth_account_users_file;
 mod auth_bearer;

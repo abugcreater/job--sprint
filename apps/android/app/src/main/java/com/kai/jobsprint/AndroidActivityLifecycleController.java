@@ -2,27 +2,26 @@ package com.kai.jobsprint;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.webkit.WebView;
 
 final class AndroidActivityLifecycleController {
-    private final WebView webView;
     private final AndroidSpeechBridge speechBridge;
     private final AndroidRecorderBridge recorderBridge;
     private final AndroidFileChooserController fileChooserController;
     private final int audioPermissionRequest;
+    private final AndroidBackNavigationController backNavigationController;
 
     AndroidActivityLifecycleController(
-        WebView webView,
         AndroidSpeechBridge speechBridge,
         AndroidRecorderBridge recorderBridge,
         AndroidFileChooserController fileChooserController,
-        int audioPermissionRequest
+        int audioPermissionRequest,
+        AndroidBackNavigationController backNavigationController
     ) {
-        this.webView = webView;
         this.speechBridge = speechBridge;
         this.recorderBridge = recorderBridge;
         this.fileChooserController = fileChooserController;
         this.audioPermissionRequest = audioPermissionRequest;
+        this.backNavigationController = backNavigationController;
     }
 
     boolean onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -59,16 +58,12 @@ final class AndroidActivityLifecycleController {
         if (fileChooserController != null) {
             fileChooserController.cancelPendingRequest();
         }
-        if (webView != null) {
-            webView.destroy();
+        if (backNavigationController != null) {
+            backNavigationController.destroy();
         }
     }
 
     boolean handleBackPressed() {
-        if (webView != null && webView.canGoBack()) {
-            webView.goBack();
-            return true;
-        }
-        return false;
+        return backNavigationController != null && backNavigationController.requestSystemBack();
     }
 }
