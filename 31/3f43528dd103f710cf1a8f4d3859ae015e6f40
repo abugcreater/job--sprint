@@ -1,0 +1,64 @@
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_4f949540501971 3,11
+apps/rust-api/tests/runtime_contract/invitation_account.rs
+  s_8f6b4df0c955b0::t_da09c8cc705042 137-176
+docs/product/data-scope-uniqueness/prd-recommended.md
+  s_8f6b4df0c955b0::t_879ed0de480afd 1-21
+docs/product/data-scope-uniqueness/README.md
+  s_8f6b4df0c955b0::t_879ed0de480afd 1-34
+docs/product/data-scope-uniqueness/development-workflow.md
+  s_8f6b4df0c955b0::t_879ed0de480afd 1-8
+apps/react-web/src/test/InviteManagementDataScopeConflict.test.tsx
+  s_8f6b4df0c955b0::t_889153a59b2e4a 1-35
+apps/react-web/src/features/coach/components/inviteManagementDraft.ts
+  s_8f6b4df0c955b0::t_da09c8cc705042 45-53
+apps/rust-api/src/lib.rs
+  s_8f6b4df0c955b0::t_24a80001e4407d 15
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_4f949540501971 3-9
+docs/product/data-scope-uniqueness/completion-audit.md
+  s_8f6b4df0c955b0::t_879ed0de480afd 1-2,4-6,20-24
+  s_8f6b4df0c955b0::t_4f949540501971 3,7-19
+apps/rust-api/src/auth_account_store.rs
+  s_8f6b4df0c955b0::t_da09c8cc705042 118
+  s_8f6b4df0c955b0::t_24a80001e4407d 9,116-117
+apps/react-web/src/features/coach/components/InviteManagementPanel.tsx
+  s_8f6b4df0c955b0::t_da09c8cc705042 33,444
+  s_8f6b4df0c955b0::t_889153a59b2e4a 74-75
+apps/react-web/src/api/coachInvitationClient.ts
+  s_8f6b4df0c955b0::t_da09c8cc705042 39
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_4f949540501971 3-41
+docs/product/data-scope-uniqueness/review-and-adjudication.md
+  s_8f6b4df0c955b0::t_879ed0de480afd 1-17
+tests/invitation_account_provisioning_test.js
+  s_8f6b4df0c955b0::t_da09c8cc705042 14,181-199
+  s_8f6b4df0c955b0::t_be232c8d6d8aa3 200
+apps/server/auth_account_store.js
+  s_8f6b4df0c955b0::t_da09c8cc705042 88-105,354-356
+  s_8f6b4df0c955b0::t_f9a22a39db3876 357-358
+apps/rust-api/src/auth_data_scope.rs
+  s_8f6b4df0c955b0::t_24a80001e4407d 1-31
+docs/product/data-scope-uniqueness/prd-options.md
+  s_8f6b4df0c955b0::t_879ed0de480afd 1-25
+apps/android/app/src/main/assets/react/assets/index-7Ew1YXN1.js
+  s_8f6b4df0c955b0::t_dc4753ea2159ad 9,17,25,41,43,48-49,502,504,507
+apps/android/app/src/main/assets/react/index.html
+  s_8f6b4df0c955b0::t_7c2c8724d04b01 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.20",
+  "base_commit_sha": "313f43528dd103f710cf1a8f4d3859ae015e6f40",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
