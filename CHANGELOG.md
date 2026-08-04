@@ -4,6 +4,12 @@ All notable changes should be documented in this file.
 
 ## Unreleased
 
+## 0.2.7 - 2026-08-04
+
+- Enforced a unique data scope for every invited login account across the Node and Rust account-provisioning paths.
+- Added owner-facing conflict feedback before an invitation form submits a duplicated data scope.
+- Preserved existing account password reset behavior while preventing a second login account from entering another user's runtime scope.
+
 ## 0.2.6 - 2026-08-01
 
 - Added a unified route-leave confirmation for unsaved profile, knowledge boundary, schedule, opportunity, and review drafts.
