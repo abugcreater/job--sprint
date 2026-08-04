@@ -11,6 +11,7 @@ const runtimePath = path.join(tmpDir, "runtime.json");
 const ownerLoginText = ["Owner", "pass", "2026!"].join("-");
 const firstLoginText = ["Mia", "pass", "2026!"].join("-");
 const resetLoginText = ["Mia", "reset", "2026!"].join("-");
+const duplicateScopeLoginText = ["Mia", "shadow", "pass", "2026!"].join("-");
 const leoLoginText = ["Leo", "pass", "2026!"].join("-");
 const forbiddenOwnerLoginText = ["Shadow", "owner", "pass", "2026!"].join("-");
 
@@ -176,6 +177,26 @@ async function login(server, username, password, expectedStatus = 200) {
     assert.strictEqual(miaUser.dataScope, "mia");
     assert.strictEqual(miaUser.passwordHash, sha256(firstLoginText));
     assert.ok(!fs.readFileSync(usersFile, "utf8").includes(firstLoginText));
+
+    res = await request(server, "POST", "/api/coach/invitations", {
+      username: "mia-shadow",
+      displayName: "Mia Shadow",
+      dataScope: "mia",
+      inviteBatch: "2026-07-beta",
+      roleFamily: "qa",
+      targetRole: "测试开发工程师",
+      status: "invited",
+      provisionAccount: true,
+      accountRole: "coach",
+      password: duplicateScopeLoginText
+    }, { cookie: ownerCookie });
+    assert.strictEqual(res.status, 409, res.raw);
+    assert.strictEqual(res.json.error, "data_scope_conflict");
+    assert.strictEqual(res.json.accountProvisioning.conflictingUsername, "mia");
+    assert.strictEqual(fs.readFileSync(usersFile, "utf8").includes("mia-shadow"), false);
+    res = await request(server, "GET", "/api/coach/invitations", undefined, { cookie: ownerCookie });
+    assert.strictEqual(res.status, 200, res.raw);
+    assert.strictEqual(res.json.invitations.some((invitation) => invitation.username === "mia-shadow"), false);
 
     const miaCookie = await login(server, "mia", firstLoginText);
     res = await request(server, "GET", "/api/auth/session", undefined, { cookie: miaCookie });

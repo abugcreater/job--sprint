@@ -36,6 +36,7 @@ export interface CoachAccountAuditEvent {
   username?: string;
   role?: string;
   dataScope?: string;
+  conflictingUsername?: string;
   inviteBatch?: string;
   affectedUsernames?: string[];
   affectedCount?: number;

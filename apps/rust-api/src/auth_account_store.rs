@@ -6,6 +6,7 @@ use crate::auth_account_audit::{
     account_audit_events_from_config, append_account_audit_event, write_users_config_with_audit,
 };
 use crate::auth_account_users_file::read_users_config;
+use crate::auth_data_scope::data_scope_conflict;
 use crate::auth_hash::sha256_hex;
 
 const USERNAME_CHARS: &str = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789._-";
@@ -112,6 +113,9 @@ pub(crate) fn provision_user_account_from_invitation(
     let index = users
         .iter()
         .position(|user| text(user, "username") == username);
+    if let Some(conflict) = data_scope_conflict(&users, &username, &next_user) {
+        return Err(conflict);
+    }
     let action = if let Some(index) = index {
         users[index] = merge_user(&users[index], &next_user);
         "password_reset"

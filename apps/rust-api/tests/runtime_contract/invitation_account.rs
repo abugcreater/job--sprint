@@ -134,6 +134,46 @@ pub(crate) async fn verify_invitation_account_provisioning() {
     assert!(users_raw.contains(&sha256_hex(first_password)));
     assert!(!users_raw.contains(first_password));
 
+    res = request(
+        &app,
+        Method::POST,
+        "/api/coach/invitations",
+        Some(json!({
+            "username": "mia-shadow",
+            "displayName": "Mia Shadow",
+            "dataScope": "mia",
+            "inviteBatch": "2026-07-beta",
+            "roleFamily": "qa",
+            "targetRole": "测试开发工程师",
+            "status": "invited",
+            "provisionAccount": true,
+            "accountRole": "coach",
+            "password": "Mia-shadow-pass-2026!"
+        })),
+        &[("cookie", owner_cookie.as_str())],
+    )
+    .await;
+    assert_eq!(res.status, StatusCode::CONFLICT);
+    assert_eq!(res.json["error"], "data_scope_conflict");
+    assert_eq!(res.json["accountProvisioning"]["conflictingUsername"], "mia");
+    assert!(!fs::read_to_string(&users_file)
+        .unwrap()
+        .contains("mia-shadow"));
+    res = request(
+        &app,
+        Method::GET,
+        "/api/coach/invitations",
+        None,
+        &[("cookie", owner_cookie.as_str())],
+    )
+    .await;
+    assert_eq!(res.status, StatusCode::OK);
+    assert!(!res.json["invitations"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .any(|invitation| invitation["username"] == "mia-shadow"));
+
     let mia_login = request(
         &app,
         Method::POST,

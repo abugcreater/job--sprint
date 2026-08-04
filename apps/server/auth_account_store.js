@@ -85,6 +85,24 @@ function provisionUserAccountFromInvitation(payload, env = process.env, operator
 
   const nextUser = userFromInvitation(payload, password);
   const currentIndex = existingConfig.users.findIndex((user) => text(user, "username") === username);
+  const conflictingUser = existingConfig.users.find((user) => {
+    const existingUsername = text(user, "username");
+    return existingUsername !== username && dataScopeForUser(user) === nextUser.dataScope;
+  });
+  if (conflictingUser) {
+    return {
+      ok: false,
+      statusCode: 409,
+      accountProvisioning: {
+        status: "USER_ACTION_REQUIRED",
+        error: "data_scope_conflict",
+        username,
+        dataScope: nextUser.dataScope,
+        conflictingUsername: text(conflictingUser, "username"),
+        message: "数据域已被其他登录账号使用；每个邀请账号必须使用独立数据域。"
+      }
+    };
+  }
   const action = currentIndex === -1 ? "created" : "password_reset";
   const nextUsers = [...existingConfig.users];
   if (currentIndex === -1) {
@@ -331,6 +349,11 @@ function userFromInvitation(payload, password) {
     passwordHash: sha256(password),
     permissions: []
   };
+}
+
+function dataScopeForUser(user) {
+  const username = text(user, "username");
+  return text(user, "dataScope") || username;
 }
 
 function accountActionMessage(action, username) {
