@@ -10,7 +10,7 @@ const TEST_PASSWORD = ["test", "password", "only"].join("-");
 const BAD_LOGIN_VALUE = ["wrong", "password"].join("-");
 process.env.RUNTIME_DATA_PATH = path.join(tmpDir, "runtime.json");
 process.env.ANTHROPIC_AUTH_TOKEN = "test-token-that-must-not-leak";
-process.env.AI_PROVIDER_TIMEOUT_MS = "50";
+process.env.AI_PROVIDER_TIMEOUT_MS = "500";
 process.env.JOB_SPRINT_AUTH_USER = TEST_USER;
 process.env.JOB_SPRINT_AUTH_PASSWORD = TEST_PASSWORD;
 process.env.JOB_SPRINT_SESSION_SECRET = ["test", "session", "secret", "only", "long", "enough"].join("-");
@@ -453,7 +453,9 @@ async function login(server) {
     assert.strictEqual(res.json.data.progress.coachOnboardingEvents[0].stepId, "profile_template");
 
     const hangingProvider = await startHangingProvider();
+    const providerTimeoutMs = process.env.AI_PROVIDER_TIMEOUT_MS;
     try {
+      process.env.AI_PROVIDER_TIMEOUT_MS = "50";
       const { port: providerPort } = hangingProvider.address();
       process.env.ANTHROPIC_BASE_URL = `http://127.0.0.1:${providerPort}`;
       res = await request(server, "POST", "/api/generate-kb", {
@@ -487,6 +489,7 @@ async function login(server) {
       assert.ok(Array.isArray(res.json.suggestions));
       assert.ok(res.json.suggestions.length >= 1);
     } finally {
+      process.env.AI_PROVIDER_TIMEOUT_MS = providerTimeoutMs;
       delete process.env.ANTHROPIC_BASE_URL;
       hangingProvider.close();
     }
