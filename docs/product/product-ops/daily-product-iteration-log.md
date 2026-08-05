@@ -1,6 +1,45 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-04
+日期：2026-08-05
+
+## 2026-08-05 第六十三次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先；文件树差异只有 `v0.2.7` 发布收口后的日更记录。距 `v0.2.7` 不足 7 天，且没有累计 3 项新需求，因此本轮只合入 `develop`，不创建 release，也不执行服务器交付。
+
+### 今日选择：历史数据域冲突可见性
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 新建账号已拒绝重复 scope，但历史 users file 仍可能让新用户看到旧数据；owner 必须先能发现风险。 |
+| 确定性 | 5/5 | 邀请管理已读取可登录账号及其 `dataScope`，缺少的只是按 scope 聚合并显式返回。 |
+| 风险降低 | 5/5 | 只读检测不迁移、不猜测历史 runtime 归属，也不会把其他账号信息给普通用户。 |
+| 交互改善 | 4/5 | owner 在账号台账摘要下直接看到受影响数据域、账号与恢复边界，不必从配置文件排查。 |
+| 可验证性 | 5/5 | Node HTTP、Rust 聚合、React UI、Web/Android 构建与本地功能流均可自动验证。 |
+| 实现范围 | 4/5 | 改动限于 owner 邀请管理响应和告警，不改变登录、runtime 或历史账号。 |
+
+### 改动
+
+- 建立 `data-scope-conflict-observability` feature capsule，裁决为“服务端检测、owner 显示、人工核验”，不做自动修复。
+- Node 与 Rust `/api/coach/invitations` 响应新增稳定排序的 `dataScopeConflicts`；只含数据域及受影响登录名，不含密码、hash、session 或求职内容。
+- React owner 邀请管理在摘要下方显示风险告警，说明需先核验归属，再通过独立数据域和开通/重置处理；不会提供一键迁移。
+- Node 合同使用临时 users file 模拟历史重复；Rust 与 React 各补对应回归测试。
+
+### 已完成验证
+
+- `node tests/invitation_account_provisioning_test.js`：PASS，历史重复 scope 可被 owner HTTP 响应读回，响应不含明文密码。
+- `npm run test:rust`：PASS，24 个单元测试和 2 个合同测试；`npm run test:local-functional`：PASS。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、144 项；`npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web run build`、`npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Vite 单包体积及 Gradle deprecated feature 提示。
+- 拆分告警与 Node/Rust 聚合模块后，`npm run validate:architecture-quality`、`npm test`、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase before-pr` 和 `git diff --check`：PASS；功能覆盖门禁仅保留既有 Android 远端 evidence 缺失 warning。
+
+### 限制与明日建议
+
+- 本轮不部署服务器、不创建或修改真实账号、不迁移 runtime 数据；debug APK 不等于 Android 真机和 HTTPS 远端验收。
+- owner 仍需核验哪份历史数据应归属哪个账号；系统不会自动删除、合并或复制数据。
+- 明日优先候选：在有真机和可用公网 HTTPS 后，验收 Android 登录切换与 owner 风险提示；否则继续处理浏览器历史返回或 AI 运行质量的可验证小项。
 
 ## 2026-08-04 第六十二次主动迭代
 

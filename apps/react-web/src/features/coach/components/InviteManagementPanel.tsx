@@ -25,6 +25,7 @@ import {
   parseCoachInvitationImport
 } from "../../../api/coachInvitationImportClient";
 import { InviteManagementDetailPanel, type InviteManagementDetail } from "./InviteManagementDetailPanel";
+import { InviteManagementDataScopeConflicts } from "./InviteManagementDataScopeConflicts";
 import { InviteManagementFilters, filterInviteManagementRecords } from "./InviteManagementFilters";
 import { InviteManagementLedger } from "./InviteManagementLedger";
 import { Field, MetricTile, PanelTitle, Textarea } from "./CoachPrimitives";
@@ -32,7 +33,6 @@ import { buildBatchAccountActionConfirmation, buildBatchActionHint } from "./inv
 import { accountProvisioningText, roleFamilyOptions, statusLabel, statusOptions, templateVersionOptions } from "./inviteManagementConfig";
 import { accountProvisioningReadyMessage, dataScopeConflictMessage, draftFromConfiguredUser, draftFromInvitation } from "./inviteManagementDraft";
 import { findInviteManagementOnboardingUser } from "./inviteManagementOnboarding";
-
 export function InviteManagementPanel({ onboardingReport = null }: { onboardingReport?: CoachOnboardingReportResponse | null }) {
   const [draft, setDraft] = useState<CoachInvitationDraft>(() => createCoachInvitationDraft());
   const [response, setResponse] = useState<CoachInvitationResponse | null>(null);
@@ -48,7 +48,6 @@ export function InviteManagementPanel({ onboardingReport = null }: { onboardingR
   const [ledgerSearch, setLedgerSearch] = useState("");
   const [selectedDetail, setSelectedDetail] = useState<InviteManagementDetail | null>(null);
   const detailReturnFocusRef = useRef<HTMLElement | null>(null);
-
   useEffect(() => {
     void loadInvitations();
   }, []);
@@ -320,6 +319,8 @@ export function InviteManagementPanel({ onboardingReport = null }: { onboardingR
         <MetricTile label="已激活" value={`${summary?.activeCount ?? 0} 条`} />
         <MetricTile label="已暂停" value={`${summary?.pausedCount ?? 0} 条`} />
       </div>
+
+      <InviteManagementDataScopeConflicts conflicts={response?.dataScopeConflicts ?? []} />
 
       <div className="mt-4 rounded-card border border-line bg-surface-0 p-4">
         <div className="flex flex-col gap-3">

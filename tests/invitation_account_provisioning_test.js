@@ -364,6 +364,33 @@ async function login(server, username, password, expectedStatus = 200) {
     assert.ok(!JSON.stringify(usersConfig.accountAuditEvents).includes(leoLoginText));
     assert.ok(!res.raw.includes(sha256(resetLoginText)));
     assert.ok(!res.raw.includes(sha256(leoLoginText)));
+
+    usersConfig.users.push(
+      {
+        username: "legacy-mia",
+        displayName: "Legacy Mia",
+        role: "coach",
+        dataScope: "legacy-mia-scope",
+        inviteBatch: "2026-07-legacy",
+        passwordHash: sha256("Legacy-mia-pass-2026!")
+      },
+      {
+        username: "legacy-mia-shadow",
+        displayName: "Legacy Mia Shadow",
+        role: "coach",
+        dataScope: "legacy-mia-scope",
+        inviteBatch: "2026-07-legacy",
+        passwordHash: sha256("Legacy-shadow-pass-2026!")
+      }
+    );
+    fs.writeFileSync(usersFile, `${JSON.stringify(usersConfig, null, 2)}\n`);
+    res = await request(server, "GET", "/api/coach/invitations", undefined, { cookie: ownerCookie });
+    assert.strictEqual(res.status, 200, res.raw);
+    assert.deepStrictEqual(res.json.dataScopeConflicts, [{
+      dataScope: "legacy-mia-scope",
+      usernames: ["legacy-mia", "legacy-mia-shadow"]
+    }]);
+    assert.strictEqual(res.raw.includes("Legacy-mia-pass-2026!"), false);
     console.log("invitation account provisioning tests passed");
   } finally {
     server.close();

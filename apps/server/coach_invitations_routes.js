@@ -19,6 +19,7 @@ const {
 } = require("./http_utils");
 const { bulkImportInvitations } = require("./coach_invitation_import_routes");
 const { buildInvitationNotificationAction } = require("./coach_invitation_notifications");
+const { dataScopeConflicts } = require("./coach_invitation_data_scope_conflicts");
 
 const INVITATION_STATUSES = new Set(["draft", "invited", "active", "paused"]);
 
@@ -312,11 +313,13 @@ function normalizeInvitations(value) {
 }
 
 function responsePayload(authState, invitations) {
+  const users = configuredUsers(authState);
   return {
     ok: true,
     storage: "server-json",
     invitations,
-    configuredUsers: configuredUsers(authState),
+    configuredUsers: users,
+    dataScopeConflicts: dataScopeConflicts(users),
     accountAuditEvents: accountAuditEventsForManagement(),
     summary: summarizeInvitations(invitations),
     accountProvisioning: accountProvisioningCapability()

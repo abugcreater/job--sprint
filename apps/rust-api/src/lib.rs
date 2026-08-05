@@ -37,6 +37,7 @@ mod coach_boundary_provider;
 mod coach_boundary_routes;
 mod coach_boundary_suggestions;
 mod coach_invitation_action_routes;
+mod coach_invitation_data_scope_conflicts;
 mod coach_invitation_import_routes;
 mod coach_invitation_notifications;
 mod coach_invitation_routes;

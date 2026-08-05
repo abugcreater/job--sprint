@@ -13,6 +13,24 @@ vi.mock("../api/coachInvitationClient", async () => ({
 }));
 
 describe("InviteManagementPanel data scope conflict", () => {
+  it("shows owner a recoverable warning for legacy duplicate data scopes", async () => {
+    const response: CoachInvitationResponse = {
+      ok: true, storage: "sqlite", invitations: [],
+      configuredUsers: [
+        { username: "mia", displayName: "Mia", dataScope: "mia", inviteBatch: "2026-07-beta", role: "coach" },
+        { username: "mia-shadow", displayName: "Mia Shadow", dataScope: "mia", inviteBatch: "2026-07-beta", role: "coach" }
+      ],
+      dataScopeConflicts: [{ dataScope: "mia", usernames: ["mia", "mia-shadow"] }],
+      summary: { totalInvitations: 0, batchCount: 1, draftCount: 0, invitedCount: 0, activeCount: 0, pausedCount: 0, nextActionLabel: "检查账号。" }
+    };
+    fetchCoachInvitations.mockResolvedValue(response);
+    render(<InviteManagementPanel />);
+
+    expect(await screen.findByRole("alert", { name: "数据域冲突风险" })).toHaveTextContent("发现 1 个历史数据域重复配置");
+    expect(screen.getByRole("alert")).toHaveTextContent("数据域「mia」被登录账号「mia、mia-shadow」共用。");
+    expect(screen.getByRole("alert")).toHaveTextContent("系统不会自动迁移或改写历史求职数据");
+  });
+
   it("blocks account provisioning before it sends a duplicated data scope", async () => {
     const response: CoachInvitationResponse = {
       ok: true, storage: "sqlite", invitations: [],

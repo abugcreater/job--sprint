@@ -28,6 +28,11 @@ export interface CoachConfiguredUser {
   canLogin?: boolean;
 }
 
+export interface CoachDataScopeConflict {
+  dataScope: string;
+  usernames: string[];
+}
+
 export interface CoachAccountAuditEvent {
   id: string;
   createdAt: string;
@@ -94,6 +99,7 @@ export interface CoachInvitationResponse {
   storage?: string;
   invitations: CoachInvitationRecord[];
   configuredUsers: CoachConfiguredUser[];
+  dataScopeConflicts?: CoachDataScopeConflict[];
   accountAuditEvents?: CoachAccountAuditEvent[];
   summary: CoachInvitationSummary;
   accountProvisioning?: AccountProvisioningState;
