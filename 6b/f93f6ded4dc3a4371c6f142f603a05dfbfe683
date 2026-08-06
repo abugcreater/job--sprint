@@ -1,0 +1,60 @@
+docs/product/browser-history-leave-guard/review-and-adjudication.md
+  s_8f6b4df0c955b0::t_5e5a0ea737d7d5 1-18
+docs/product/browser-history-leave-guard/README.md
+  s_8f6b4df0c955b0::t_5e5a0ea737d7d5 1-15,17-22,24-34
+  s_8f6b4df0c955b0::t_75fb87c64873ab 16,23
+docs/product/browser-history-leave-guard/prd-recommended.md
+  s_8f6b4df0c955b0::t_75fb87c64873ab 6,14
+  s_8f6b4df0c955b0::t_5e5a0ea737d7d5 1-5,7-13,15-25
+docs/product/browser-history-leave-guard/development-workflow.md
+  s_8f6b4df0c955b0::t_5e5a0ea737d7d5 1-23
+apps/react-web/src/test/RouteLeaveGuard.test.tsx
+  s_8f6b4df0c955b0::t_05781bbc1a205f 1,92-94,96
+  s_8f6b4df0c955b0::t_072831f1ddaf10 3,24-35,74-91,95
+  s_8f6b4df0c955b0::t_7a5bbd274e5f49 97-98
+docs/product/browser-history-leave-guard/prd-options.md
+  s_8f6b4df0c955b0::t_5e5a0ea737d7d5 1-31
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_c6365d4ebccb83 3-36,38-43
+  s_8f6b4df0c955b0::t_dcc5d051bcf8a4 37
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_c6365d4ebccb83 30
+apps/react-web/src/app/router.tsx
+  s_8f6b4df0c955b0::t_6c5c8d68b46c29 1,15-16,34-35,38
+  s_8f6b4df0c955b0::t_072831f1ddaf10 2,36,39
+  s_8f6b4df0c955b0::t_221de26c2a5a7b 17-33
+docs/product/browser-history-leave-guard/completion-audit.md
+  s_8f6b4df0c955b0::t_c6365d4ebccb83 3,14-18,23
+  s_8f6b4df0c955b0::t_5e5a0ea737d7d5 1-2,4-13,20-22
+  s_8f6b4df0c955b0::t_dcc5d051bcf8a4 19
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_c6365d4ebccb83 5-9
+  s_8f6b4df0c955b0::t_dcc5d051bcf8a4 3
+  s_8f6b4df0c955b0::t_8cb2d0c35f2f14 4
+apps/react-web/src/app/RouteLeaveGuard.tsx
+  s_8f6b4df0c955b0::t_072831f1ddaf10 7-8,30,36,59-61,63-68,81-82,85,99-100
+  s_8f6b4df0c955b0::t_75fb87c64873ab 35
+  s_8f6b4df0c955b0::t_05781bbc1a205f 3,34
+apps/react-web/src/test/AppShellSessionGate.test.tsx
+  s_8f6b4df0c955b0::t_0c02475eadcbf4 2,21-30,46,62
+apps/android/app/src/main/assets/react/assets/index-C9j-gXqn.js
+  s_8f6b4df0c955b0::t_f18d04969d54d9 1,9,17,25,33,41,43-46,48-50,59-60,69,78,83,88,93,98,103,108,113,118,123,128,133,138,143,148,153,158,163,168,173,178,183,188,193,198,203,208,213,218,223,228,233,238,243,248,253,258,263,268,273,278,283,288,293,298,303,308,313,318,323,328,333,338,343,348,353,358,363,368,373,378,383,388,393,398,403,408,413,418,423,428,433,438,443,448,453,458,463,468,473,478,483,488,493,498,503,505,508
+apps/android/app/src/main/assets/react/index.html
+  s_8f6b4df0c955b0::t_2acf0aa601b3ee 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "6bf93f6ded4dc3a4371c6f142f603a05dfbfe683",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
