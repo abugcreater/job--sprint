@@ -1,6 +1,6 @@
-import { act, fireEvent, render, screen } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { useState } from "react";
-import { HashRouter, Link, useLocation } from "react-router-dom";
+import { createMemoryRouter, Link, RouterProvider, useLocation } from "react-router-dom";
 import { afterEach, vi } from "vitest";
 import { RouteLeaveGuardProvider, useRouteLeaveGuard } from "../app/RouteLeaveGuard";
 
@@ -21,15 +21,18 @@ function GuardedHarness() {
   );
 }
 
-function renderHarness() {
-  window.location.hash = "#/start";
-  return render(
-    <HashRouter future={{ v7_relativeSplatPath: true, v7_startTransition: true }}>
-      <RouteLeaveGuardProvider>
-        <GuardedHarness />
-      </RouteLeaveGuardProvider>
-    </HashRouter>
-  );
+function renderHarness(initialEntries = ["/start"], initialIndex?: number) {
+  const router = createMemoryRouter([
+    {
+      path: "*",
+      element: (
+        <RouteLeaveGuardProvider>
+          <GuardedHarness />
+        </RouteLeaveGuardProvider>
+      )
+    }
+  ], { initialEntries, initialIndex });
+  return { router, ...render(<RouterProvider router={router} future={{ v7_startTransition: true }} />) };
 }
 
 afterEach(() => {
@@ -66,6 +69,31 @@ describe("RouteLeaveGuard", () => {
     const dirtyEvent = new Event("beforeunload", { cancelable: true });
     window.dispatchEvent(dirtyEvent);
     expect(dirtyEvent.defaultPrevented).toBe(true);
+  });
+
+  it("keeps a dirty draft on browser history return until the user explicitly discards it", async () => {
+    const { router } = renderHarness(["/start", "/next"], 1);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "有未保存修改" }));
+    await act(async () => {
+      await router.navigate(-1);
+    });
+
+    expect(screen.getByRole("alertdialog", { name: "离开当前页面？" })).toBeInTheDocument();
+    expect(screen.getByText("当前路径：/next")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.getByRole("checkbox", { name: "有未保存修改" })).toBeChecked();
+    expect(screen.getByText("当前路径：/next")).toBeInTheDocument();
+
+    await act(async () => {
+      await router.navigate(-1);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "放弃修改并离开" }));
+    });
+
+    await waitFor(() => expect(screen.getByText("当前路径：/start")).toBeInTheDocument());
   });
 
   it("asks before Android system back and only calls the native bridge after discard", () => {

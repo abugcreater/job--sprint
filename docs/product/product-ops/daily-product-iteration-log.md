@@ -1,6 +1,46 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-05
+日期：2026-08-06
+
+## 2026-08-06 第六十四次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在正常未发布差异。`v0.2.7` 发布于 2026-08-04，开始时只有一项新需求；本轮完成后累计两项，仍未满 7 天或三项阈值，因此只创建目标为 `develop` 的需求 PR，不创建 release，也不执行服务器交付。
+
+### 今日选择：浏览器历史返回未保存草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 用户填写画像、知识边界、日程、机会或复盘后使用浏览器后退，原实现会绕过确认并可能丢失内存草稿。 |
+| 确定性 | 5/5 | 现有守卫只在链接点击捕获阶段中断导航；React Router 6.30.4 已提供 Hash 数据路由与 `useBlocker`。 |
+| 风险降低 | 5/5 | 路由在提交前暂停，确认前不保存、不同步、不写 AI 反馈，也不伪造或回滚浏览器历史。 |
+| 交互改善 | 5/5 | 浏览器历史、站内跨页面导航和 Android 系统返回各自进入一致的“继续编辑 / 放弃修改并离开”决策，而同页编辑器状态仍保留本地流程。 |
+| 可验证性 | 5/5 | 数据路由单测可模拟真实历史 `POP`；全量 React、浏览器功能流、Android 资源同步和 debug 编译均可自动执行。 |
+| 实现范围 | 4/5 | 限于 Web 路由与草稿守卫，不改草稿数据、服务端协议、账号、Android bridge 或远端配置。 |
+
+### 改动
+
+- 建立 `browser-history-leave-guard` feature capsule，比较 `popstate` 回滚、Hash 数据路由阻塞和自动保存，裁决为官方数据路由阻塞。
+- `AppRouter` 迁移到 `createHashRouter` + `RouterProvider`；保持现有 `#/...` URL、全部路由、权限可见性和部署方式不变。
+- `RouteLeaveGuardProvider` 使用 `useBlocker` 在 pathname 改变前暂停导航；继续编辑调用 `reset()`，放弃修改调用 `proceed()`，不再手工阻断链接或调用 history 回滚。站内链接来源仅用于恢复焦点。
+- 全局守卫刻意不拦截同页面 query/hash 变化，避免与机会编辑器等已有取消/替换确认发生双重弹窗。
+- 新增历史 `POP` 回归，并把 `RouteLeaveGuard` 与 `AppShell` 会话门禁测试迁移到数据路由容器。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test -- RouteLeaveGuard.test.tsx`：PASS，5 项，覆盖历史 `POP` 的继续编辑、确认离开、链接、整页离开和 Android bridge。
+- `npm --prefix apps/react-web run typecheck`：PASS；`npm --prefix apps/react-web test`：PASS，48 个文件、145 项。
+- `npm --prefix apps/react-web run build`、`npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Vite 单包体积和 Gradle deprecated feature 提示。
+- `npm run test:local-functional`：PASS，覆盖浏览器重启、移动端读回、导入恢复与 Rust SQLite UI 持久化；临时测试数据位于系统临时目录，没有写入生产数据。
+- `npm test`、`npm run validate:architecture-quality`、功能覆盖/对齐、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase before-pr` 和 `git diff --check`：PASS；仅保留既有 Android 远端真机 evidence 缺失 warning，目标验收为 `PASS_WITH_LIMITS`，不等价于服务器发布或完整最终交付。
+
+### 限制与明日建议
+
+- 本轮不提供浏览器关闭提示的人工兼容性、Android 真机、预测返回、强杀、进程恢复或草稿恢复证据；不部署服务器、不修改远端配置或真实账号。
+- 同页 query/hash 的编辑器、筛选和视图状态继续使用各模块既有确认，不由全局路由守卫接管。
+- 明日优先候选：有设备与可信 HTTPS 时验收 Android 登录切换和 owner 数据域风险；否则优先补 AI 真实 provider 的可观察性或预测返回的产品设计，不把本地构建扩大解释为交付。
 
 ## 2026-08-05 第六十三次主动迭代
 
