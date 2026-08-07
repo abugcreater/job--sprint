@@ -13,4 +13,4 @@
 - [x] 放弃后关闭草稿且不写入 Evidence Gate。
 - [x] 保存仍按原有路径创建学习笔记证据。
 - [x] 跨页面离开会进入全局离页确认。
-- [x] 聚焦学习页、全量 React、构建、Android debug、本地功能流、根测试、架构和敏感扫描通过；需求 PR 与版本发布门禁按 GitFlow 在本轮继续收口。
+- [x] 聚焦学习页、全量 React、构建、Android debug、本地功能流、根测试、架构和敏感扫描通过；#51 已合入 `develop`，随后 `v0.2.8` 已通过 `npm run test:git-release`、发布 PR #52 与附注标签收口，当前仅回同步 `main` 到 `develop`。
