@@ -15,7 +15,8 @@ import {
 } from "../../data/learningAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
 import { LearningNotesPanel, ResourcePanel } from "./components/LearningSidePanels";
-import { LearningTaskCard } from "./components/LearningTaskCard";
+import { LearningNoteDiscardChangesDialog, LearningTaskCard } from "./components/LearningTaskCard";
+import { useLearningNoteDraftProtection } from "./useLearningNoteDraftProtection";
 
 export function LearningPage() {
   const sprint = useSprintStore((state) => state.sprint);
@@ -36,6 +37,13 @@ export function LearningPage() {
   const [resourceFeedback, setResourceFeedback] = useState("");
   const [workspaceView, setWorkspaceView] = useState<"today" | "cards">("today");
   const hasProfile = userProfiles.length > 0;
+  const learningNoteDraftProtection = useLearningNoteDraftProtection({
+    noteTaskId,
+    noteDraft,
+    setNoteTaskId,
+    setNoteDraft,
+    setNoteFeedback
+  });
 
   const filteredKnowledgeCards = useMemo(
     () =>
@@ -57,17 +65,6 @@ export function LearningPage() {
   );
   const primaryTask = dashboard.learningTasks.find((task) => task.isCurrent) ?? dashboard.focusTask ?? dashboard.learningTasks[0];
 
-  const beginLearningNote = useCallback((task: LearningTaskSummary) => {
-    setNoteTaskId(task.id);
-    setNoteDraft("");
-    setNoteFeedback("");
-  }, []);
-
-  const cancelLearningNote = useCallback(() => {
-    setNoteTaskId(undefined);
-    setNoteDraft("");
-  }, []);
-
   const saveLearningNote = useCallback(
     (task: LearningTaskSummary) => {
       const content = noteDraft.trim();
@@ -80,10 +77,9 @@ export function LearningPage() {
         `${baseContent} 手动笔记：${content}`
       );
       setNoteFeedback(`已保存到 学习 > 学习笔记，并同步到 Evidence Gate：${task.title}`);
-      setNoteTaskId(undefined);
-      setNoteDraft("");
+      learningNoteDraftProtection.resetAfterSave();
     },
-    [addEvidence, noteDraft]
+    [addEvidence, learningNoteDraftProtection, noteDraft]
   );
 
   const toggleKnowledgeMark = useCallback((cardId: string) => {
@@ -183,10 +179,10 @@ export function LearningPage() {
                 isNoteOpen={noteTaskId === primaryTask.id}
                 noteDraft={noteTaskId === primaryTask.id ? noteDraft : ""}
                 feedback={noteFeedback}
-                onBeginNote={beginLearningNote}
+                onBeginNote={learningNoteDraftProtection.beginLearningNote}
                 onNoteDraftChange={setNoteDraft}
                 onSaveNote={saveLearningNote}
-                onCancelNote={cancelLearningNote}
+                onCancelNote={learningNoteDraftProtection.requestCancel}
               />
             ) : (
             <EmptyPanel text="今日没有知识任务，先回到今日 AI 教练处理当前任务。" />
@@ -225,6 +221,12 @@ export function LearningPage() {
         </section>
         ) : null}
       </section>
+      {learningNoteDraftProtection.discardConfirmation ? (
+        <LearningNoteDiscardChangesDialog
+          onContinue={learningNoteDraftProtection.continueEditing}
+          onDiscard={learningNoteDraftProtection.discardChanges}
+        />
+      ) : null}
     </main>
   );
 }

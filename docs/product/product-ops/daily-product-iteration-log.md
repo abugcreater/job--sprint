@@ -1,6 +1,43 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-06
+日期：2026-08-07
+
+## 2026-08-07 第六十五次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在正常未发布差异。`v0.2.7` 发布于 2026-08-04，开始时已有 #49、#50 两项需求合入 `develop`；本轮需求合入后会达到累计三项阈值，必须在同一轮启动 `release/v0.2.8 -> main`，不执行服务器交付。
+
+### 今日选择：学习笔记未保存草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 学习笔记是 Evidence Gate 与后续面试练习的输入，误点取消会中断求职闭环。 |
+| 确定性 | 5/5 | 现有学习页取消会直接清空内存草稿，且未调用已验证的 `useRouteLeaveGuard`。 |
+| 风险降低 | 5/5 | 确认前不清空文本、不导航、不写入 Evidence Gate 或服务端。 |
+| 交互改善 | 5/5 | 空笔记保持快速取消；有内容时提供明确的“继续编辑 / 放弃修改”。 |
+| 可验证性 | 5/5 | 页面回归覆盖取消、继续编辑、跨页离开和确认放弃；全量 Web、Android 与根门禁可运行。 |
+| 实现范围 | 5/5 | 仅改 React 本地草稿控制与 Android 打包资源，不改服务端、账号、运行时数据或远端配置。 |
+
+### 改动
+
+- 建立 `learning-note-unsaved-changes` feature capsule，比较直接清空、确认保护和自动保存，裁决为局部确认加既有路由离开守卫。
+- 新增 `useLearningNoteDraftProtection`，只在已打开笔记且去除空白后仍有内容时标记未保存状态；取消、保存和确认放弃统一重置草稿。
+- 学习任务卡在编辑器打开时不再显示会重新开启并清空同一笔记的按钮；有内容时点击取消显示无障碍确认弹窗，明确不会创建 Evidence Gate 证据。
+- 新增学习页回归：继续编辑保留文本、跨页面离开进入全局确认、确认放弃后不创建学习笔记证据。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS；`npm --prefix apps/react-web test`：PASS，48 个文件、146 项。
+- `npm --prefix apps/react-web run build`、`npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Vite 单包体积及 Gradle deprecated feature 提示。
+- `npm run test:local-functional`：PASS，浏览器重启、移动端读回、导入恢复与 Rust SQLite UI 持久化均使用临时测试数据。
+- `npm test`、架构/功能覆盖/功能对齐/产品迭代门禁和 `npm run scan:sensitive`：PASS；仅保留既有 Android 远端真机 evidence 缺失 warning，不等价于服务器发布或完整远端交付。
+
+### 限制与后续
+
+- 本轮不做自动保存、刷新恢复、浏览器关闭恢复、Android 预测返回/强杀恢复，不部署服务器、不创建账号、不修改远端配置或真实数据。
+- 完成需求 PR 收口后，本轮将按三项需求阈值立即完成 `v0.2.8` Git 版本发布和 `main -> develop` 回同步；服务器交付仍需用户单独授权。
 
 ## 2026-08-06 第六十四次主动迭代
 
