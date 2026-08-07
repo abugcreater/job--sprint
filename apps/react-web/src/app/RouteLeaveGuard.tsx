@@ -1,12 +1,11 @@
 import { AlertTriangle, ArrowRight, X } from "lucide-react";
 import { createContext, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, type MouseEvent, type ReactNode } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useBlocker, type BlockerFunction } from "react-router-dom";
 
 type PendingRouteLeave =
   | {
-      kind: "route";
-      to: string;
-      trigger: HTMLElement;
+      kind: "router-navigation";
+      trigger?: HTMLElement;
     }
   | {
       kind: "android-system-back";
@@ -27,12 +26,14 @@ type RouteLeaveGuardContextValue = {
 const RouteLeaveGuardContext = createContext<RouteLeaveGuardContextValue | null>(null);
 
 export function RouteLeaveGuardProvider({ children }: { children: ReactNode }) {
-  const location = useLocation();
-  const navigate = useNavigate();
   const checksRef = useRef(new Map<string, () => boolean>());
+  const pendingRouteTriggerRef = useRef<HTMLElement | null>(null);
   const [pendingLeave, setPendingLeave] = useState<PendingRouteLeave | null>(null);
 
   const hasUnsavedChanges = useCallback(() => Array.from(checksRef.current.values()).some((isDirty) => isDirty()), []);
+  const blocker = useBlocker(useCallback<BlockerFunction>(({ currentLocation, nextLocation }) => {
+    return currentLocation.pathname !== nextLocation.pathname && hasUnsavedChanges();
+  }, [hasUnsavedChanges]));
 
   const registerDirtyCheck = useCallback((id: string, isDirty: () => boolean) => {
     checksRef.current.set(id, isDirty);
@@ -55,15 +56,16 @@ export function RouteLeaveGuardProvider({ children }: { children: ReactNode }) {
     if (!(closestAnchor instanceof HTMLAnchorElement)) return;
     const anchor = closestAnchor;
     if (!event.currentTarget.contains(anchor) || anchor.target || anchor.hasAttribute("download")) return;
-    const href = anchor.getAttribute("href");
-    if (!href?.startsWith("#/")) return;
-    const target = href.slice(1);
-    if (target === `${location.pathname}${location.search}` || !hasUnsavedChanges()) return;
+    if (!hasUnsavedChanges()) return;
+    pendingRouteTriggerRef.current = anchor;
+  }, [hasUnsavedChanges]);
 
-    event.preventDefault();
-    event.stopPropagation();
-    setPendingLeave({ kind: "route", to: target, trigger: anchor });
-  }, [hasUnsavedChanges, location.pathname, location.search]);
+  useEffect(() => {
+    if (blocker.state !== "blocked") return;
+    const trigger = pendingRouteTriggerRef.current;
+    pendingRouteTriggerRef.current = null;
+    setPendingLeave((current) => current ?? { kind: "router-navigation", trigger: trigger?.isConnected ? trigger : undefined });
+  }, [blocker.state]);
 
   useEffect(() => {
     const handleAndroidSystemBack = (event: Event) => {
@@ -76,10 +78,11 @@ export function RouteLeaveGuardProvider({ children }: { children: ReactNode }) {
   }, [hasUnsavedChanges]);
 
   const continueEditing = useCallback(() => {
-    const trigger = pendingLeave?.kind === "route" ? pendingLeave.trigger : undefined;
+    const trigger = pendingLeave?.kind === "router-navigation" ? pendingLeave.trigger : undefined;
+    if (pendingLeave?.kind === "router-navigation" && blocker.state === "blocked") blocker.reset();
     setPendingLeave(null);
     window.requestAnimationFrame(() => trigger?.focus({ preventScroll: true }));
-  }, [pendingLeave]);
+  }, [blocker, pendingLeave]);
 
   const discardAndLeave = useCallback(() => {
     if (!pendingLeave) return;
@@ -93,8 +96,8 @@ export function RouteLeaveGuardProvider({ children }: { children: ReactNode }) {
       window.history.back();
       return;
     }
-    navigate(leave.to);
-  }, [navigate, pendingLeave]);
+    if (blocker.state === "blocked") blocker.proceed();
+  }, [blocker, pendingLeave]);
 
   const value = useMemo(() => ({ registerDirtyCheck }), [registerDirtyCheck]);
 

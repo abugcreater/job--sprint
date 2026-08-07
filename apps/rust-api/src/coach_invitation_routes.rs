@@ -16,6 +16,7 @@ use crate::auth_account_store::{
 use crate::auth_config::UserConfig;
 use crate::auth_config::get_auth_config;
 use crate::auth_state::{now_millis, require_auth, require_permission, user_username};
+use crate::coach_invitation_data_scope_conflicts::data_scope_conflicts;
 use crate::coach_invitations::{
     coach_invitation_from_payload, list_coach_invitations, summarize_coach_invitations,
     upsert_coach_invitation,
@@ -147,11 +148,14 @@ fn invitations_response(users: &[UserConfig], invitations: Vec<Value>) -> Respon
 
 pub(crate) fn response_value(users: &[UserConfig], invitations: Vec<Value>) -> Value {
     let summary = summarize_coach_invitations(&invitations);
+    let configured_users = configured_users(users);
+    let data_scope_conflicts = data_scope_conflicts(&configured_users);
     json!({
         "ok": true,
         "storage": "sqlite",
         "invitations": invitations,
-        "configuredUsers": configured_users(users),
+        "configuredUsers": configured_users,
+        "dataScopeConflicts": data_scope_conflicts,
         "accountAuditEvents": account_audit_events_for_management(),
         "summary": summary,
         "accountProvisioning": account_provisioning_capability()

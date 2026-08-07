@@ -1,13 +1,129 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-04
+日期：2026-08-07
+
+## 2026-08-07 第六十五次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在正常未发布差异。`v0.2.7` 发布于 2026-08-04，开始时已有 #49、#50 两项需求合入 `develop`；本轮需求合入后会达到累计三项阈值，必须在同一轮启动 `release/v0.2.8 -> main`，不执行服务器交付。
+
+### 今日选择：学习笔记未保存草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 学习笔记是 Evidence Gate 与后续面试练习的输入，误点取消会中断求职闭环。 |
+| 确定性 | 5/5 | 现有学习页取消会直接清空内存草稿，且未调用已验证的 `useRouteLeaveGuard`。 |
+| 风险降低 | 5/5 | 确认前不清空文本、不导航、不写入 Evidence Gate 或服务端。 |
+| 交互改善 | 5/5 | 空笔记保持快速取消；有内容时提供明确的“继续编辑 / 放弃修改”。 |
+| 可验证性 | 5/5 | 页面回归覆盖取消、继续编辑、跨页离开和确认放弃；全量 Web、Android 与根门禁可运行。 |
+| 实现范围 | 5/5 | 仅改 React 本地草稿控制与 Android 打包资源，不改服务端、账号、运行时数据或远端配置。 |
+
+### 改动
+
+- 建立 `learning-note-unsaved-changes` feature capsule，比较直接清空、确认保护和自动保存，裁决为局部确认加既有路由离开守卫。
+- 新增 `useLearningNoteDraftProtection`，只在已打开笔记且去除空白后仍有内容时标记未保存状态；取消、保存和确认放弃统一重置草稿。
+- 学习任务卡在编辑器打开时不再显示会重新开启并清空同一笔记的按钮；有内容时点击取消显示无障碍确认弹窗，明确不会创建 Evidence Gate 证据。
+- 新增学习页回归：继续编辑保留文本、跨页面离开进入全局确认、确认放弃后不创建学习笔记证据。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS；`npm --prefix apps/react-web test`：PASS，48 个文件、146 项。
+- `npm --prefix apps/react-web run build`、`npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Vite 单包体积及 Gradle deprecated feature 提示。
+- `npm run test:local-functional`：PASS，浏览器重启、移动端读回、导入恢复与 Rust SQLite UI 持久化均使用临时测试数据。
+- `npm test`、架构/功能覆盖/功能对齐/产品迭代门禁和 `npm run scan:sensitive`：PASS；仅保留既有 Android 远端真机 evidence 缺失 warning，不等价于服务器发布或完整远端交付。
+
+### 限制与后续
+
+- 本轮不做自动保存、刷新恢复、浏览器关闭恢复、Android 预测返回/强杀恢复，不部署服务器、不创建账号、不修改远端配置或真实数据。
+- 完成需求 PR 收口后，本轮将按三项需求阈值立即完成 `v0.2.8` Git 版本发布和 `main -> develop` 回同步；服务器交付仍需用户单独授权。
+
+## 2026-08-06 第六十四次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在正常未发布差异。`v0.2.7` 发布于 2026-08-04，开始时只有一项新需求；本轮完成后累计两项，仍未满 7 天或三项阈值，因此只创建目标为 `develop` 的需求 PR，不创建 release，也不执行服务器交付。
+
+### 今日选择：浏览器历史返回未保存草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 用户填写画像、知识边界、日程、机会或复盘后使用浏览器后退，原实现会绕过确认并可能丢失内存草稿。 |
+| 确定性 | 5/5 | 现有守卫只在链接点击捕获阶段中断导航；React Router 6.30.4 已提供 Hash 数据路由与 `useBlocker`。 |
+| 风险降低 | 5/5 | 路由在提交前暂停，确认前不保存、不同步、不写 AI 反馈，也不伪造或回滚浏览器历史。 |
+| 交互改善 | 5/5 | 浏览器历史、站内跨页面导航和 Android 系统返回各自进入一致的“继续编辑 / 放弃修改并离开”决策，而同页编辑器状态仍保留本地流程。 |
+| 可验证性 | 5/5 | 数据路由单测可模拟真实历史 `POP`；全量 React、浏览器功能流、Android 资源同步和 debug 编译均可自动执行。 |
+| 实现范围 | 4/5 | 限于 Web 路由与草稿守卫，不改草稿数据、服务端协议、账号、Android bridge 或远端配置。 |
+
+### 改动
+
+- 建立 `browser-history-leave-guard` feature capsule，比较 `popstate` 回滚、Hash 数据路由阻塞和自动保存，裁决为官方数据路由阻塞。
+- `AppRouter` 迁移到 `createHashRouter` + `RouterProvider`；保持现有 `#/...` URL、全部路由、权限可见性和部署方式不变。
+- `RouteLeaveGuardProvider` 使用 `useBlocker` 在 pathname 改变前暂停导航；继续编辑调用 `reset()`，放弃修改调用 `proceed()`，不再手工阻断链接或调用 history 回滚。站内链接来源仅用于恢复焦点。
+- 全局守卫刻意不拦截同页面 query/hash 变化，避免与机会编辑器等已有取消/替换确认发生双重弹窗。
+- 新增历史 `POP` 回归，并把 `RouteLeaveGuard` 与 `AppShell` 会话门禁测试迁移到数据路由容器。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test -- RouteLeaveGuard.test.tsx`：PASS，5 项，覆盖历史 `POP` 的继续编辑、确认离开、链接、整页离开和 Android bridge。
+- `npm --prefix apps/react-web run typecheck`：PASS；`npm --prefix apps/react-web test`：PASS，48 个文件、145 项。
+- `npm --prefix apps/react-web run build`、`npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Vite 单包体积和 Gradle deprecated feature 提示。
+- `npm run test:local-functional`：PASS，覆盖浏览器重启、移动端读回、导入恢复与 Rust SQLite UI 持久化；临时测试数据位于系统临时目录，没有写入生产数据。
+- `npm test`、`npm run validate:architecture-quality`、功能覆盖/对齐、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase before-pr` 和 `git diff --check`：PASS；仅保留既有 Android 远端真机 evidence 缺失 warning，目标验收为 `PASS_WITH_LIMITS`，不等价于服务器发布或完整最终交付。
+
+### 限制与明日建议
+
+- 本轮不提供浏览器关闭提示的人工兼容性、Android 真机、预测返回、强杀、进程恢复或草稿恢复证据；不部署服务器、不修改远端配置或真实账号。
+- 同页 query/hash 的编辑器、筛选和视图状态继续使用各模块既有确认，不由全局路由守卫接管。
+- 明日优先候选：有设备与可信 HTTPS 时验收 Android 登录切换和 owner 数据域风险；否则优先补 AI 真实 provider 的可观察性或预测返回的产品设计，不把本地构建扩大解释为交付。
+
+## 2026-08-05 第六十三次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先；文件树差异只有 `v0.2.7` 发布收口后的日更记录。距 `v0.2.7` 不足 7 天，且没有累计 3 项新需求，因此本轮只合入 `develop`，不创建 release，也不执行服务器交付。
+
+### 今日选择：历史数据域冲突可见性
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 新建账号已拒绝重复 scope，但历史 users file 仍可能让新用户看到旧数据；owner 必须先能发现风险。 |
+| 确定性 | 5/5 | 邀请管理已读取可登录账号及其 `dataScope`，缺少的只是按 scope 聚合并显式返回。 |
+| 风险降低 | 5/5 | 只读检测不迁移、不猜测历史 runtime 归属，也不会把其他账号信息给普通用户。 |
+| 交互改善 | 4/5 | owner 在账号台账摘要下直接看到受影响数据域、账号与恢复边界，不必从配置文件排查。 |
+| 可验证性 | 5/5 | Node HTTP、Rust 聚合、React UI、Web/Android 构建与本地功能流均可自动验证。 |
+| 实现范围 | 4/5 | 改动限于 owner 邀请管理响应和告警，不改变登录、runtime 或历史账号。 |
+
+### 改动
+
+- 建立 `data-scope-conflict-observability` feature capsule，裁决为“服务端检测、owner 显示、人工核验”，不做自动修复。
+- Node 与 Rust `/api/coach/invitations` 响应新增稳定排序的 `dataScopeConflicts`；只含数据域及受影响登录名，不含密码、hash、session 或求职内容。
+- React owner 邀请管理在摘要下方显示风险告警，说明需先核验归属，再通过独立数据域和开通/重置处理；不会提供一键迁移。
+- Node 合同使用临时 users file 模拟历史重复；Rust 与 React 各补对应回归测试。
+
+### 已完成验证
+
+- `node tests/invitation_account_provisioning_test.js`：PASS，历史重复 scope 可被 owner HTTP 响应读回，响应不含明文密码。
+- `npm run test:rust`：PASS，24 个单元测试和 2 个合同测试；`npm run test:local-functional`：PASS。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、144 项；`npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web run build`、`npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Vite 单包体积及 Gradle deprecated feature 提示。
+- 拆分告警与 Node/Rust 聚合模块后，`npm run validate:architecture-quality`、`npm test`、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase before-pr` 和 `git diff --check`：PASS；功能覆盖门禁仅保留既有 Android 远端 evidence 缺失 warning。
+
+### 限制与明日建议
+
+- 本轮不部署服务器、不创建或修改真实账号、不迁移 runtime 数据；debug APK 不等于 Android 真机和 HTTPS 远端验收。
+- owner 仍需核验哪份历史数据应归属哪个账号；系统不会自动删除、合并或复制数据。
+- 明日优先候选：在有真机和可用公网 HTTPS 后，验收 Android 登录切换与 owner 风险提示；否则继续处理浏览器历史返回或 AI 运行质量的可验证小项。
 
 ## 2026-08-04 第六十二次主动迭代
 
 ### GitFlow 基线与发布判定
 
 - 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或短分支积压。
-- `origin/main` 是 `origin/develop` 的祖先，文件树存在 `v0.2.6` 后的正常增量。开始时只有 #43、#44 两项已合入需求，未达到 7 天或累计 3 项阈值；本轮需求合入后将成为第三项，需按 `release/v0.2.7 -> main` 收口，不执行服务器交付。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在 `v0.2.6` 后的正常增量。开始时只有 #43、#44 两项已合入需求；#45 合入后成为第三项，因此已按 `release/v0.2.7 -> main` 完成源码发布、标签与本次 `main -> develop` 回同步，不执行服务器交付。
 
 ### 今日选择：邀请账号数据域唯一性
 
@@ -38,7 +154,7 @@
 
 - 本轮不迁移历史重复 users file、不创建或修改远端账号、不部署服务器；没有 Android 设备，因此 debug 构建不替代真实 WebView 登录验收。
 - 历史重复 scope 必须由 owner 在核验数据归属后手工调整；不应猜测合并、删除或迁移哪一份求职数据。
-- 本项完成 `develop` 合入后，应创建 `release/v0.2.7 -> main`，打 tag 并回同步 `develop`；服务器交付仍需用户单独授权。
+- #45 已经 GitHub `validate` 通过后 squash 合入 `develop`（`9d55dc4`），并删除需求短分支；#46 已通过发布门禁、merge 至 `main`（`8b2654d`），`v0.2.7` 已创建并推送；#47 已将发布提交和收口记录回同步到 `develop`，并删除 release/回同步短分支。服务器交付仍需用户单独授权。
 
 ## 2026-08-03 第六十一次主动迭代
 

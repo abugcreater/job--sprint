@@ -1,4 +1,4 @@
-import { ArrowRight, CheckCircle2, ClipboardCheck } from "lucide-react";
+import { AlertTriangle, ArrowRight, CheckCircle2, ClipboardCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import type { LearningTaskSummary } from "../../../data/learningAdapter";
 
@@ -56,16 +56,17 @@ export function LearningTaskCard({
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-        <button
-          type="button"
-          className="inline-flex min-h-11 items-center gap-2 rounded-control bg-brand-700 px-4 text-sm font-black text-white shadow-soft transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2"
-          aria-label={`为 ${task.title}补学习笔记`}
-          aria-expanded={isNoteOpen}
-          onClick={() => onBeginNote(task)}
-        >
-          <ClipboardCheck size={16} aria-hidden="true" />
-          {task.noteCount ? "再补一条" : "补学习笔记"}
-        </button>
+        {!isNoteOpen ? (
+          <button
+            type="button"
+            className="inline-flex min-h-11 items-center gap-2 rounded-control bg-brand-700 px-4 text-sm font-black text-white shadow-soft transition hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 focus:ring-offset-2"
+            aria-label={`为 ${task.title}补学习笔记`}
+            onClick={() => onBeginNote(task)}
+          >
+            <ClipboardCheck size={16} aria-hidden="true" />
+            {task.noteCount ? "再补一条" : "补学习笔记"}
+          </button>
+        ) : null}
         <Link
           to="/today"
           className="inline-flex min-h-11 items-center gap-2 rounded-control border border-line bg-white px-4 text-sm font-black text-ink-700 transition hover:bg-surface-0 focus:outline-none focus:ring-2 focus:ring-brand-600"
@@ -109,6 +110,28 @@ export function LearningTaskCard({
         </div>
       ) : null}
     </article>
+  );
+}
+
+export function LearningNoteDiscardChangesDialog({ onContinue, onDiscard }: { onContinue: () => void; onDiscard: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-end bg-ink-900/40 p-4 backdrop-blur-[1px] sm:items-center sm:justify-center" role="presentation">
+      <section className="w-full max-w-md rounded-card border border-line bg-white p-5 shadow-soft" role="alertdialog" aria-modal="true" aria-labelledby="discard-learning-note-title" aria-describedby="discard-learning-note-detail">
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-control bg-warn-100 text-warn-600">
+            <AlertTriangle size={20} aria-hidden="true" />
+          </span>
+          <div className="min-w-0">
+            <h2 id="discard-learning-note-title" className="text-lg font-black text-ink-950">放弃未保存的学习笔记？</h2>
+            <p id="discard-learning-note-detail" className="mt-2 text-sm font-semibold leading-6 text-ink-600">你输入的学习笔记尚未写入 Evidence Gate。继续编辑会保留所有输入；放弃后不会创建笔记或证据。</p>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-2">
+          <button type="button" className="primary-button justify-center" onClick={onContinue}>继续编辑</button>
+          <button type="button" className="secondary-button justify-center border-risk-200 text-risk-600 hover:bg-risk-100" onClick={onDiscard}>放弃修改</button>
+        </div>
+      </section>
+    </div>
   );
 }
 
