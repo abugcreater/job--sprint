@@ -1,0 +1,50 @@
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_ece7eab782dbca 3-40
+apps/react-web/src/features/learning/useLearningNoteDraftProtection.ts
+  s_8f6b4df0c955b0::t_9f3901b7f0644a 1-58
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_ece7eab782dbca 3-9
+docs/product/learning-note-unsaved-changes/review-and-adjudication.md
+  s_8f6b4df0c955b0::t_44b0a86682ef59 1-15
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_ece7eab782dbca 3,13
+docs/product/learning-note-unsaved-changes/README.md
+  s_8f6b4df0c955b0::t_44b0a86682ef59 1-23
+docs/product/learning-note-unsaved-changes/prd-options.md
+  s_8f6b4df0c955b0::t_44b0a86682ef59 1-15
+docs/product/learning-note-unsaved-changes/development-workflow.md
+  s_8f6b4df0c955b0::t_44b0a86682ef59 1-7
+docs/product/learning-note-unsaved-changes/prd-recommended.md
+  s_8f6b4df0c955b0::t_44b0a86682ef59 1-16
+docs/product/learning-note-unsaved-changes/completion-audit.md
+  s_8f6b4df0c955b0::t_ece7eab782dbca 11-16
+  s_8f6b4df0c955b0::t_44b0a86682ef59 1-10
+apps/react-web/src/test/LearningPage.test.tsx
+  s_8f6b4df0c955b0::t_a537fb366dd3db 1,132-154
+  s_8f6b4df0c955b0::t_01bd46dcdc0eed 155
+apps/react-web/src/features/learning/components/LearningTaskCard.tsx
+  s_8f6b4df0c955b0::t_9f3901b7f0644a 1,59-69,116-134
+  s_8f6b4df0c955b0::t_fa23110b42fc61 135-137
+apps/react-web/src/features/learning/LearningPage.tsx
+  s_8f6b4df0c955b0::t_9f3901b7f0644a 18-19,40-46,80,82,182,185,224-229
+apps/android/app/src/main/assets/react/assets/index-ChJ6z4Ut.js
+  s_8f6b4df0c955b0::t_4194164cc0e0b2 1,9,17,25,41,43-46,48-50,59-60,69,78,408,438,443,458,463,468,478,483,503,505,508
+apps/android/app/src/main/assets/react/index.html
+  s_8f6b4df0c955b0::t_2590bfadcf5d45 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "d8572b722df657d35abf721b3cd25e94530a78c2",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
