@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { App } from "../App";
 import { LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY } from "../data/learningAdapter";
 import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
@@ -128,5 +128,29 @@ describe("React Job Sprint learning workspace", () => {
 
     expect(await screen.findByRole("heading", { name: "Evidence Gate（证据门）" })).toBeInTheDocument();
     expect(screen.getByText(/已沉淀 1 条证据/)).toBeInTheDocument();
+  });
+
+  it("keeps an unfinished learning note until the user explicitly discards it", async () => {
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "为 补 缺陷归因 面试表达补学习笔记" }));
+    fireEvent.change(screen.getByLabelText("学习笔记内容"), { target: { value: "先保留这条缺陷归因的学习证据。" } });
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+
+    expect(screen.getByRole("alertdialog", { name: "放弃未保存的学习笔记？" })).toBeInTheDocument();
+    expect(screen.getByLabelText("学习笔记内容")).toHaveValue("先保留这条缺陷归因的学习证据。");
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.getByLabelText("学习笔记内容")).toHaveValue("先保留这条缺陷归因的学习证据。");
+
+    const nav = screen.getByRole("navigation", { name: "桌面模块导航" });
+    fireEvent.click(within(nav).getByRole("link", { name: "机会" }));
+    expect(screen.getByRole("alertdialog", { name: "离开当前页面？" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.getByLabelText("学习笔记内容")).toHaveValue("先保留这条缺陷归因的学习证据。");
+
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+    fireEvent.click(screen.getByRole("button", { name: "放弃修改" }));
+    expect(screen.queryByLabelText("学习笔记内容")).not.toBeInTheDocument();
+    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.learning]).toBeUndefined();
   });
 });
