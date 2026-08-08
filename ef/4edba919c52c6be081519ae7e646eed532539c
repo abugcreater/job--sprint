@@ -1,0 +1,52 @@
+docs/product/interview-answer-draft-protection/completion-audit.md
+  s_8f6b4df0c955b0::t_6152059c24e697 1-10
+  s_8f6b4df0c955b0::t_0740c7f85bffc9 16,20-22
+  s_8f6b4df0c955b0::t_7b9d5b0921567a 11-15,17-19
+docs/product/interview-answer-draft-protection/prd-recommended.md
+  s_8f6b4df0c955b0::t_6152059c24e697 1-15
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_7b9d5b0921567a 3,14
+docs/product/interview-answer-draft-protection/prd-options.md
+  s_8f6b4df0c955b0::t_6152059c24e697 1-15
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_7b9d5b0921567a 3-9
+apps/react-web/src/features/interview/InterviewPage.tsx
+  s_8f6b4df0c955b0::t_e1541ad9dfede5 1,13,15,64-66,70,86,88,149,153-161,178,183,198-204
+  s_8f6b4df0c955b0::t_37cb68b2c54fce 10,45-59
+docs/product/interview-answer-draft-protection/review-and-adjudication.md
+  s_8f6b4df0c955b0::t_6152059c24e697 1-15
+docs/product/interview-answer-draft-protection/development-workflow.md
+  s_8f6b4df0c955b0::t_6152059c24e697 1-7
+apps/react-web/src/features/interview/useInterviewAnswerDraftProtection.ts
+  s_8f6b4df0c955b0::t_40d3f3a7c8a729 1-92
+apps/react-web/src/features/interview/components/InterviewAnswerPanel.tsx
+  s_8f6b4df0c955b0::t_40d3f3a7c8a729 1-212
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_7b9d5b0921567a 3-32,38-41,43
+  s_8f6b4df0c955b0::t_0740c7f85bffc9 33-37,42
+apps/react-web/src/test/InterviewPage.test.tsx
+  s_8f6b4df0c955b0::t_c6a7d1ee8c529b 1,112-138
+  s_8f6b4df0c955b0::t_2caaffbe3a5370 139
+docs/product/interview-answer-draft-protection/README.md
+  s_8f6b4df0c955b0::t_6152059c24e697 1-24
+apps/android/app/src/main/assets/react/assets/index-DYmXzGoE.js
+  s_8f6b4df0c955b0::t_d339c7627da5e1 1,9,17,25,33,41-46,48-50,59-60,69,78,83,93,98,198,253,258,283,353,358,383,413,418,458,468,483,503,505,508
+apps/android/app/src/main/assets/react/index.html
+  s_8f6b4df0c955b0::t_ae63a56b1abd1a 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "ef4edba919c52c6be081519ae7e646eed532539c",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
