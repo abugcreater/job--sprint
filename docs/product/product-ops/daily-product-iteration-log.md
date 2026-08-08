@@ -1,6 +1,46 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-07
+日期：2026-08-08
+
+## 2026-08-08 第六十六次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先。两分支的文件树差异只有昨日 `v0.2.8` 发布回同步后的产品文档；距 `v0.2.8` 不足一天，且本轮前没有新的需求累计，因此本轮只完成目标为 `develop` 的普通需求，不创建 release，也不执行服务器交付。
+
+### 今日选择：口述回答草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 60 秒口述回答通常包含项目链路、异常分支与证据，误丢失后重新输入成本高。 |
+| 确定性 | 5/5 | 面试页已有 `answer` 状态但未注册路由离页守卫；原题型/题目切换会保留文本，使 A 题回答可被保存为 B 题证据。 |
+| 风险降低 | 5/5 | 确认前不清空文本、不切换题目、不写入 Evidence Gate，也不触发同步或服务端请求。 |
+| 交互改善 | 5/5 | 清空、切题和离页都提供明确的“继续编辑 / 放弃修改”，空回答保留原有快速操作。 |
+| 可验证性 | 5/5 | 面试页回归覆盖路由离页、清空、切题、继续编辑和放弃后无证据写入；现有保存回归保持覆盖。 |
+| 实现范围 | 5/5 | 仅改 React 本地草稿控制、页面拆分与 Android 打包资源，不改 rubric、AI provider、服务端、账号或远端配置。 |
+
+### 改动
+
+- 建立 `interview-answer-draft-protection` feature capsule，比较仅提示、局部确认加题目锁定、自动写入 Evidence Gate 三种方案；裁决为局部确认加既有离页守卫，不自动保存未完成回答。
+- 新增 `useInterviewAnswerDraftProtection`：非空回答进入既有 `useRouteLeaveGuard`；清空、题型切换、候选题切换统一先确认，保存或确认放弃后才重置草稿与评分状态。
+- 输入开始时固定当前候选题 ID；后续筛选不会悄然把尚未保存的回答归属到另一道题。
+- 将回答面板拆出 `InterviewPage`，使页面从 560 行门禁上限降至 397 行；保留本地自检、薄弱题与 Evidence Gate 保存路径。
+- 新增面试页回归，覆盖离页继续编辑、清空继续编辑、切换题型的确认放弃与无证据写入。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS；`npm --prefix apps/react-web test -- --run src/test/InterviewPage.test.tsx`：PASS，5 项，包含草稿保护和既有 Evidence Gate 保存路径。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、147 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
+- `npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Gradle deprecated feature 提示。
+- `npm run test:local-functional`：PASS，浏览器重启、移动端读回、导入恢复与 Rust SQLite UI 持久化均使用临时测试数据；`npm test`、产品迭代/架构质量门禁、`npm run scan:sensitive` 与 `git diff --check`：PASS。
+- 功能覆盖和功能对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning；这不等价于服务器发布、Android 真机验收或完整远端交付。
+
+### 限制与明日建议
+
+- 本轮不自动保存，也不在刷新、关闭浏览器、Android 预测返回、强杀或进程恢复后还原草稿；不部署服务器、不修改远端配置、账号或真实数据。
+- 当前面试页测试夹具只有一题候选题；题型替换已覆盖与候选题替换共用的确认状态机，多题候选题的端到端手工验证仍应在真实题库数据就绪后补充。
+- 若本轮验证与 PR 收口完成，下一轮可优先在有设备和可信 HTTPS 的前提下验收 Android 预测返回与登录切换；没有这些条件时，继续选择本地可验证的闭环缺口。
 
 ## 2026-08-07 第六十五次主动迭代
 
