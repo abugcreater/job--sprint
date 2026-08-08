@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { App } from "../App";
 import { INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY } from "../data/interviewAdapter";
 import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
@@ -108,5 +108,33 @@ describe("React Job Sprint interview workspace", () => {
     expect(await screen.findByRole("heading", { name: "Evidence Gate（证据门）" })).toBeInTheDocument();
     expect(screen.getByText(/已沉淀 1 条证据/)).toBeInTheDocument();
     expect(screen.getByText("口述训练证据")).toBeInTheDocument();
+  });
+
+  it("keeps an unfinished oral answer until the user explicitly discards it", async () => {
+    render(<App />);
+
+    const answer = "先保留这版口述回答，后面还要补异常分支和证据边界。";
+    fireEvent.change(screen.getByLabelText("我的口述回答"), { target: { value: answer } });
+
+    const nav = screen.getByRole("navigation", { name: "桌面模块导航" });
+    fireEvent.click(within(nav).getByRole("link", { name: "机会" }));
+    expect(screen.getByRole("alertdialog", { name: "离开当前页面？" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.getByLabelText("我的口述回答")).toHaveValue(answer);
+
+    fireEvent.click(screen.getByRole("button", { name: "清空回答" }));
+    expect(screen.getByRole("alertdialog", { name: "放弃未保存的口述回答？" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.getByLabelText("我的口述回答")).toHaveValue(answer);
+
+    fireEvent.click(screen.getByText("选择其他题目与筛选"));
+    fireEvent.click(screen.getByRole("button", { name: "技术核心" }));
+    expect(screen.getByRole("alertdialog", { name: "放弃未保存的口述回答？" })).toBeInTheDocument();
+    expect(screen.getByLabelText("我的口述回答")).toHaveValue(answer);
+    fireEvent.click(screen.getByRole("button", { name: "放弃修改" }));
+
+    expect(screen.getByLabelText("我的口述回答")).toHaveValue("");
+    expect(screen.getByRole("button", { name: "技术核心" })).toHaveAttribute("aria-pressed", "true");
+    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.interview]).toBeUndefined();
   });
 });
