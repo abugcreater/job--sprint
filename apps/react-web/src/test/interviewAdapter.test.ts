@@ -9,7 +9,7 @@ import {
   writeInterviewWeakQuestionMarks
 } from "../data/interviewAdapter";
 import type { ReviewEvidence } from "../types/sprint";
-import { buildQaSprint, qaTaskIds } from "./fixtures/coachFlow";
+import { buildQaSprint, qaProfile, qaTaskIds } from "./fixtures/coachFlow";
 
 describe("interviewAdapter", () => {
   it("builds questions from the current generated interview task", () => {
@@ -23,6 +23,44 @@ describe("interviewAdapter", () => {
     expect(interviewQuestionCategories(dashboard.candidateQuestions).map((item) => item.label)).toEqual(["当前任务"]);
     expect(JSON.stringify(dashboard)).not.toContain("G1/ZGC");
     expect(JSON.stringify(dashboard)).not.toContain("Spring 事务");
+  });
+
+  it("builds distinct candidates for technical, project, JD and AI practice modes", () => {
+    const sprint = buildQaSprint();
+    const context = {
+      profile: qaProfile,
+      opportunities: [{
+        company: "Example Cloud",
+        role: "测试开发工程师",
+        keywords: "接口自动化、质量平台",
+        tags: ["工程质量", "项目经验"],
+        status: "约面"
+      }]
+    };
+
+    const technical = buildInterviewDashboard(sprint, {}, "java-core", context);
+    const project = buildInterviewDashboard(sprint, {}, "resume-java", context);
+    const jd = buildInterviewDashboard(sprint, {}, "jd-match", context);
+    const ai = buildInterviewDashboard(sprint, {}, "llm-basics", context);
+
+    expect(technical.candidateQuestions).toHaveLength(2);
+    expect(technical.candidateQuestions[0]).toMatchObject({ mode: "java-core", modeLabel: "技术核心" });
+    expect(technical.candidateQuestions[0].question).toContain("核心机制或链路");
+    expect(project.candidateQuestions[0].question).toContain("测试平台用例");
+    expect(project.candidateQuestions[0].expectedKeywords).toContain("个人职责");
+    expect(jd.candidateQuestions[0].source).toContain("Example Cloud");
+    expect(jd.candidateQuestions[0].expectedKeywords).toContain("接口自动化");
+    expect(ai.candidateQuestions[0].question).toContain("AI 工具");
+    expect(new Set([technical.candidateQuestions[0].id, project.candidateQuestions[0].id, jd.candidateQuestions[0].id, ai.candidateQuestions[0].id]).size).toBe(4);
+  });
+
+  it("uses an explicit target-role exercise when no JD has been recorded", () => {
+    const dashboard = buildInterviewDashboard(buildQaSprint(), {}, "jd-match", { profile: qaProfile });
+
+    expect(dashboard.candidateQuestions).toHaveLength(1);
+    expect(dashboard.candidateQuestions[0].source).toBe("目标岗位 · 测试开发工程师");
+    expect(dashboard.candidateQuestions[0].question).toContain("还没有记录具体 JD");
+    expect(dashboard.candidateQuestions[0].hint).toContain("不代表某家公司或具体 JD 要求");
   });
 
   it("counts oral evidence records for generated tasks", () => {
