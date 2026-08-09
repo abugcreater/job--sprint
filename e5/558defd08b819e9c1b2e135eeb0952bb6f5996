@@ -1,0 +1,56 @@
+apps/react-web/src/data/interviewModeCandidates.ts
+  s_8f6b4df0c955b0::t_899bdc85d3dafb 1-198
+apps/react-web/src/data/interviewAdapter.ts
+  s_8f6b4df0c955b0::t_d5f8df87e24943 1,33-43,98-99,105,250-254,256-257,261,269,280-281
+  s_8f6b4df0c955b0::t_899bdc85d3dafb 2,258
+apps/react-web/src/test/interviewAdapter.test.ts
+  s_8f6b4df0c955b0::t_6efbe65921282e 12,28-53,55-64
+  s_8f6b4df0c955b0::t_617d218cbafebd 54
+  s_8f6b4df0c955b0::t_c788c7e205f877 65
+docs/product/interview-mode-candidates/prd-options.md
+  s_8f6b4df0c955b0::t_b9257668cd84dd 1-11
+docs/product/interview-mode-candidates/development-workflow.md
+  s_8f6b4df0c955b0::t_b9257668cd84dd 1-7
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_9be17805ce152a 3,9
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_9be17805ce152a 3-36,40-45
+  s_8f6b4df0c955b0::t_6714c51707dc9f 37-39
+apps/react-web/src/features/interview/InterviewPage.tsx
+  s_8f6b4df0c955b0::t_6c3e6b78496965 12,33-38
+docs/product/interview-mode-candidates/completion-audit.md
+  s_8f6b4df0c955b0::t_6714c51707dc9f 15,21-22
+  s_8f6b4df0c955b0::t_b9257668cd84dd 1-10
+  s_8f6b4df0c955b0::t_9be17805ce152a 11-14,16-20
+docs/product/interview-mode-candidates/review-and-adjudication.md
+  s_8f6b4df0c955b0::t_b9257668cd84dd 1-15
+docs/product/interview-mode-candidates/README.md
+  s_8f6b4df0c955b0::t_b9257668cd84dd 1-26
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_9be17805ce152a 3-9
+docs/product/interview-mode-candidates/prd-recommended.md
+  s_8f6b4df0c955b0::t_b9257668cd84dd 1-14
+apps/react-web/src/test/InterviewPage.test.tsx
+  s_8f6b4df0c955b0::t_6efbe65921282e 6,11,15,87-116
+  s_8f6b4df0c955b0::t_2f55e99ce3991e 117-118
+apps/android/app/src/main/assets/react/assets/index-BJRmlcJp.js
+  s_8f6b4df0c955b0::t_c5eb65e267432d 1,9,17,25,33,41,43-46,48-50,59-60,69,78,83,88,93,98,103,108,113,118,123,128,133,138,143,148,153,158,163,168,173,178,183,188,193,198,203,208,213,218,223,228,233,238,243,248,253,258,263,268,273,278,283,288,293,298,303,308,313,318,323,328,333,338,343,348,353,358,363,368,373,378,383,388,393,398,403,408,413,418,423,428,433,438,443,448,453,458,463,468,473,478,483,488,493,498,503,505,508
+apps/android/app/src/main/assets/react/index.html
+  s_8f6b4df0c955b0::t_52043c26b1b083 8
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "e5558defd08b819e9c1b2e135eeb0952bb6f5996",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
