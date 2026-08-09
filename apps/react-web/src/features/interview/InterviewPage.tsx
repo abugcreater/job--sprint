@@ -9,6 +9,7 @@ import {
   type InterviewMode, type InterviewQuestionOption,
   type OralScoreAnalysis, type OralTaskSummary
 } from "../../data/interviewAdapter";
+import { buildApplicationsDashboard } from "../../data/applicationsAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
 import { InterviewAnswerDiscardChangesDialog, InterviewAnswerPanel } from "./components/InterviewAnswerPanel";
 import { RecentRecords } from "./components/RecentRecords";
@@ -29,7 +30,12 @@ export function InterviewPage() {
   const [scoreAnalysis, setScoreAnalysis] = useState<OralScoreAnalysis | undefined>();
   const [scoreFeedback, setScoreFeedback] = useState("");
 
-  const dashboard = useMemo(() => buildInterviewDashboard(sprint, evidenceByTaskId, mode), [sprint, evidenceByTaskId, mode]);
+  const activeProfile = useMemo(() => userProfiles.find((profile) => profile.active) ?? userProfiles[0], [userProfiles]);
+  const applicationsDashboard = useMemo(() => buildApplicationsDashboard(sprint, evidenceByTaskId), [sprint, evidenceByTaskId]);
+  const dashboard = useMemo(
+    () => buildInterviewDashboard(sprint, evidenceByTaskId, mode, { profile: activeProfile, opportunities: applicationsDashboard.recentRecords }),
+    [activeProfile, applicationsDashboard.recentRecords, evidenceByTaskId, mode, sprint]
+  );
   const hasProfile = userProfiles.length > 0;
   const questionCategories = useMemo(() => interviewQuestionCategories(dashboard.candidateQuestions), [dashboard.candidateQuestions]);
   const filteredQuestions = useMemo(

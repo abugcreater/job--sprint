@@ -1,6 +1,48 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-08
+日期：2026-08-09
+
+## 2026-08-09 第六十七次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先。`develop` 的真实文件差异包含昨日 #54 的口述草稿保护和产品文档；距 `v0.2.8` 不足两天，且本轮前只有一项新需求，因此本轮只完成目标为 `develop` 的普通需求，不创建 release，也不执行服务器交付。
+
+### 今日选择：面试题型候选题闭环
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 用户点击技术核心、项目经历、JD 或 AI 后理应改变练习视角；原实现始终显示当前任务的同一道题。 |
+| 问题确定性 | 5/5 | `InterviewMode` 原先只影响按钮选中态与题目标签，候选题生成未按 mode 分支；现有夹具可稳定复现。 |
+| 风险降低 | 5/5 | 题目只使用当前用户的画像、当前任务和当前数据域内机会记录；没有 JD 时不虚构公司或岗位要求。 |
+| 交互改善 | 5/5 | 五个题型都有不同题干、来源和关键词；用户可选择后继续使用已有草稿保护与主动保存路径。 |
+| 可验证性 | 5/5 | adapter 覆盖模式差异与无 JD 降级，页面覆盖真实机会记录切换，完整 Web 与根门禁可继续运行。 |
+| 实现范围 | 4/5 | 仅改 React 本地候选题生成、面试页面数据组装、测试和 Android 打包资源，不改服务端、AI provider、账号或远端配置。 |
+
+### 改动
+
+- 建立 `interview-mode-candidates` feature capsule，裁决为当前用户上下文下的本地规则题，不因切换题型调用模型或自动抓取 JD。
+- 自动题型保持今日口述任务；技术核心题从当前任务的机制、链路、异常与恢复生成两道候选题。
+- 项目经历题引用当前用户画像中的经历、项目证据和不可夸大边界；AI 题围绕当前目标岗位的工具使用、人工校验、敏感数据和降级路径。
+- JD 题优先引用当前数据域最近机会记录的公司、岗位、关键词与命中点；无记录时明确以目标岗位做通用匹配练习，不伪造具体 JD。
+- 新增 `interviewModeCandidates` 模块，避免 `interviewAdapter` 超过 450 行架构上限；面试页仅组装活动画像和机会记录。
+- 新增 adapter 与页面回归，覆盖题型差异、机会记录、无 JD 降级和既有草稿切换行为。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS；面试 adapter 与页面定向测试：PASS，13 项。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、150 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
+- `npm run validate:architecture-quality`：PASS；首次实现曾触发 546/450 行 adapter 上限，已拆分为 365 行 adapter 与 198 行候选生成模块后通过。
+- `npm run sync:android-react` 与 `gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Gradle deprecated feature 提示。
+- `npm run test:local-functional`：PASS，浏览器重启、移动端读回、导入恢复与 Rust SQLite UI 持久化均使用临时测试数据；`npm test`、`npm run scan:sensitive`、产品迭代与 GitFlow PR 前门禁、`git diff --check`：PASS。
+- 功能覆盖和功能对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning；本轮结论是本地源码、Web 与 debug APK 通过，不等价于服务器发布、远端 Android 真机或真实 AI 题库验收。
+
+### 限制与明日建议
+
+- 本轮不调用真实模型、不抓取外部 JD、不做题库服务端持久化或跨刷新草稿恢复；不部署服务器、不修改远端配置、账号或真实数据。
+- 当前候选题是可解释的本地规则题，题目深度受用户已记录画像、机会和今日任务限制；真实 AI 题库质量、远端 Android 真机和预测返回仍需独立验收。
+- 下一轮优先候选是连接设备和可信 HTTPS 后验收 Android 预测返回与登录切换；否则继续选择可在本地闭环验证的数据隔离或用户输入质量缺口。
 
 ## 2026-08-08 第六十六次主动迭代
 
