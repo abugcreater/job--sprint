@@ -1,0 +1,21 @@
+tests/rust_sqlite_ui_persistence_test.js
+  s_2ec95b628b8d5f::t_b16b20cbe8f8a7 132-136
+tests/react_functional_persistence_test.js
+  s_2ec95b628b8d5f::t_b16b20cbe8f8a7 238-242
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "8dabf9a4c0c8c3be7fb6e0c5497c9cf72ef77e3f",
+  "prompts": {},
+  "sessions": {
+    "s_2ec95b628b8d5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019feaaf-492d-7e71-bfda-1f505d0a781f",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
