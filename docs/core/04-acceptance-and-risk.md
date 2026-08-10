@@ -1,6 +1,14 @@
 # 验收与风险
 
-日期：2026-07-10
+日期：2026-08-10
+
+## 2026-08-10 公安联网备案公开面验收更新
+
+正式域名根路径已从受保护工作台入口调整为公开的“日程回声谷（Job Sprint）”网站说明页，并已部署到 `https://app.jobdailyschedule.site/`。公开面展示个人非经营性定位、服务内容与边界、隐私政策、用户协议、`浙ICP备2026052607号` 和“公安联网备案申请准备中”状态；`/react/`、`/schedule.html`、`/data/` 与业务 API 仍要求登录，不开放公众注册、用户资料或管理能力。公安备案最终是否通过由属地公安机关审核决定，不能由代码验收代替；审核通过后必须使用备案平台提供的正式编号、图标和 HTML 代码替换当前占位状态。
+
+本轮代码与构建验证结果：`npm test` 通过（48 个 React 测试文件、154 条用例及 Node/边界/敏感扫描门禁）；`npm run test:local-functional` 的 Node/React 与 Rust/SQLite 两套浏览器功能链通过；`npm run build:rust:linux -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env`、`npm run build:public-safe`、`npm run scan:public-safe` 和 `npm run build:server-delivery` 通过。Linux ELF SHA-256 为 `38fe591738f5696f41032431c7f5049b79605d6c8cb767a9dc411909c3d7bc33`，server delivery manifest SHA-256 为 `b5f478a65088dd661ad3100cb5107929768a1c7f4d6359c123c1bd3ef9daab36`；服务器同步、manifest 读回、`job-sprint.service` 重启和正式域名浏览器桌面/移动视口检查均通过。
+
+正式域名验收结果：HTTP 根路径返回 308 并跳转 HTTPS，HTTPS 根路径、`/privacy.html`、`/terms.html`、`/login.html` 均返回 200；未登录 session 返回 401、私有日程返回 302；登录、session、`/api/progress` 写入读回、登录后 React 与私有数据访问均通过。通用 `write:remote-evidence` 因同域独立服务 `/sub2api/` 的旧页面仍使用根绝对静态资源引用而未得到全站 PASS；Job Sprint 专项远端脚本和正式域名主链路为 PASS，因此本次结论为 `PASS_WITH_LIMITS`，限制不影响公安备案公开页与 Job Sprint 登录/数据边界。
 
 ## 2026-07-11 HTTPS 生产交付更新
 
@@ -107,6 +115,7 @@
 | R-005 | 项目定位易被误读 | 新定位是泛 IT AI 求职教练，机会/JD 信号和规则版 JD 解析已影响建议，但当前仍不是公开 SaaS、企业 ATS、自动投递平台或高级 Java 后端主项目 | 对外统一使用 `docs/product/it-job-coach-v1/prd-recommended.md` 的定位：AI 原生求职教练叙事 + 邀请制收敛 MVP 工程边界。 |
 | R-011 | 公网 HTTPS 依赖备案、DNS、证书和边界链路 | 任一环节回退都会同时影响 Web 与 Android | 当前已通过；把 2026-07-06 诊断报告保留为历史基线，证书续期或 DNS 变更后复跑正式域名与 Android remote evidence。 |
 | R-012 | users file 账号开通配置边界被误用 | 如果把 `JOB_SPRINT_USERS_FILE` 放进仓库、复用内联 `JOB_SPRINT_USERS_JSON`，或在报告/API 中回显密码/hash，会把私人工具的邀请开通能力变成安全风险 | `JOB_SPRINT_USERS_FILE` 必须位于仓库外并尽量保持 `0600`；`JOB_SPRINT_USERS_JSON` 存在时页面开通必须禁用；API 响应、日志和 evidence 不得包含密码或 password hash；远端开通必须单独做脱敏 smoke。 |
+| R-013 | 同域 `/sub2api/` 旧页面静态资源使用根绝对路径 | 通用全站远端门禁会在 `/sub2api/` 基路径检查处失败，容易把独立服务问题误判为 Job Sprint 备案公开面失败 | 作为独立需求修复 `/sub2api/` 资源基路径或反向代理重写；修复前以 Job Sprint 专项远端检查作为本需求验收依据，不把该限制描述为全站 PASS。 |
 
 ## P2 风险
 
