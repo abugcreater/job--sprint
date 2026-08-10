@@ -77,7 +77,14 @@ check_no_basic_auth() {
   echo "OK ${path} no browser Basic Auth"
 }
 
-check "/" "302"
+check "/" "200"
+if ! grep -qF "日程回声谷" "$OUT_FILE"; then
+  echo "FAIL /: public filing page missing" >&2
+  exit 1
+fi
+echo "OK / public filing page"
+check "/privacy.html" "200"
+check "/terms.html" "200"
 check "/login.html" "200"
 check "/api/auth/session" "401"
 check "/api/health" "200"
@@ -133,11 +140,11 @@ if (!input.progress || !input.progress.remoteAcceptance || input.progress.remote
 NODE
 echo "OK /api/progress remote readback"
 check "/" "200" -b "$COOKIE_FILE"
-if ! grep -qF "Job Sprint | 个人求职作战台" "$OUT_FILE"; then
-  echo "FAIL /: logged-in root did not return React shell" >&2
+if ! grep -qF "日程回声谷" "$OUT_FILE"; then
+  echo "FAIL /: logged-in root did not return public filing page" >&2
   exit 1
 fi
-echo "OK / React shell"
+echo "OK / public filing page"
 check "/react/index.html" "200" -b "$COOKIE_FILE"
 if ! grep -qF "Job Sprint | 个人求职作战台" "$OUT_FILE"; then
   echo "FAIL /react/index.html: React shell missing" >&2

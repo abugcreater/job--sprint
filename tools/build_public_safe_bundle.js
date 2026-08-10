@@ -12,12 +12,16 @@ const localUserRootPattern = /\/Users\/(?!Shared\b)[A-Za-z0-9._-]+/g;
 const localUserPathPattern = /\/Users\/(?!Shared\b)[A-Za-z0-9._-]+\/[^\s"'，。；、)）\]}]*/g;
 const privateNamePattern = new RegExp(["冯", "凯"].join(""), "g");
 const sourceFiles = [
+  "index.html",
+  "privacy.html",
+  "terms.html",
   "schedule.html",
   "login.html",
   "no-profile-fallback.html",
   "assets/schedule.css",
   "assets/schedule.js",
   "assets/auth.js",
+  "assets/public-site.css",
   "assets/embedded-data.js",
   "assets/icon.svg",
   "assets/manifest.webmanifest",
@@ -180,12 +184,16 @@ function buildSafeInterviewContext() {
 fs.rmSync(outRoot, { recursive: true, force: true });
 fs.mkdirSync(outRoot, { recursive: true });
 
+copyFile("index.html");
+copyFile("privacy.html");
+copyFile("terms.html");
 copyFile("schedule.html");
 copyFile("login.html");
 copyFile("no-profile-fallback.html");
 copyFile("assets/schedule.css");
 copyFile("assets/schedule.js");
 copyFile("assets/auth.js");
+copyFile("assets/public-site.css");
 copyFile("assets/embedded-data.js");
 copyFile("assets/icon.svg");
 copyFile("assets/manifest.webmanifest");

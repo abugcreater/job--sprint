@@ -42,7 +42,14 @@ check_no_basic_auth() {
   echo "OK ${path} no browser Basic Auth"
 }
 
-check "/" "302"
+check "/" "200"
+if ! grep -qF "日程回声谷" "$OUT_FILE"; then
+  echo "FAIL /: public filing page missing" >&2
+  exit 1
+fi
+echo "OK / public filing page"
+check "/privacy.html" "200"
+check "/terms.html" "200"
 check "/login.html" "200"
 check "/api/auth/session" "401"
 check "/api/health" "200"
