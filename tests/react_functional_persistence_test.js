@@ -235,6 +235,11 @@ async function screenshot(page, name) {
 
 async function login(page, baseUrl) {
   await page.goto(`${baseUrl}/`);
+  await page.getByRole("heading", { name: /让每次行动都有回声/ }).waitFor();
+  await Promise.all([
+    page.waitForURL(/\/login\.html\?next=/),
+    page.getByRole("link", { name: "进入受邀工作台" }).click()
+  ]);
   await page.getByLabel("用户名").fill(TEST_USER);
   await page.getByLabel("密码").fill(TEST_PASSWORD);
   await Promise.all([
