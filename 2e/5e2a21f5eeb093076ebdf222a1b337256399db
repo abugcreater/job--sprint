@@ -1,0 +1,19 @@
+docs/core/04-acceptance-and-risk.md
+  s_2ec95b628b8d5f::t_bc9013c6a8ead2 3-11,118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "2e5e2a21f5eeb093076ebdf222a1b337256399db",
+  "prompts": {},
+  "sessions": {
+    "s_2ec95b628b8d5f": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019feaaf-492d-7e71-bfda-1f505d0a781f",
+        "model": "gpt-5.6-sol"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
