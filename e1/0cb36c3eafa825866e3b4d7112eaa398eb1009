@@ -1,0 +1,41 @@
+apps/react-web/src/app/RouteLeaveGuard.tsx
+  s_8f6b4df0c955b0::t_03153bde414b03 17,51,136,140-142,149-153,157-158
+  s_8f6b4df0c955b0::t_32f908bbc80c53 14-16,18-25,35,41,45-46,48-50,52-55,106,117,131,135,138,146-148,154-155
+  s_8f6b4df0c955b0::t_cd94244413cac0 139
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_367b8daf470591 19
+apps/react-web/src/features/applications/ApplicationsPage.tsx
+  s_8f6b4df0c955b0::t_32f908bbc80c53 26-30,52,96-97,105,120-121,127-136,149,156,158-161,163,188,211,216
+  s_8f6b4df0c955b0::t_03153bde414b03 104,141,144,190,192
+  s_8f6b4df0c955b0::t_607f3195386b71 31-32,77,122
+apps/react-web/src/test/RouteLeaveGuard.test.tsx
+  s_8f6b4df0c955b0::t_2a3ff0ba84e076 122,124-133
+  s_8f6b4df0c955b0::t_32f908bbc80c53 7,10,19-20,25,31,100-121
+  s_8f6b4df0c955b0::t_de57ba3032e466 123
+apps/react-web/src/test/ApplicationsPage.test.tsx
+  s_8f6b4df0c955b0::t_32f908bbc80c53 139-190
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_367b8daf470591 3-9
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_2e34c9b7f54567 3
+  s_8f6b4df0c955b0::t_72d74057aab728 33,36
+  s_8f6b4df0c955b0::t_2a3ff0ba84e076 34-35
+  s_8f6b4df0c955b0::t_367b8daf470591 5-32,37-42
+  s_8f6b4df0c955b0::t_021e4516569c20 4
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "e10cb36c3eafa825866e3b4d7112eaa398eb1009",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
