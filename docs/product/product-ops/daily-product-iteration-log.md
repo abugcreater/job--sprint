@@ -7,7 +7,7 @@
 ### GitFlow 基线与发布判定
 
 - 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或远端短分支积压。
-- `origin/main` 是 `origin/develop` 的祖先，文件树存在真实差异。四个差异提交中有两个是 `v0.2.8` 回同步，正式需求只有 #54 与 #55 两项；距 `v0.2.8` 不足三天，未达到 7 天或三项需求阈值，因此本轮不创建 `release/v0.2.9`，也不执行服务器交付。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在真实差异。开始时四个差异提交中有两个是 `v0.2.8` 回同步，正式需求只有 #54 与 #55 两项；距 `v0.2.8` 不足三天，开始时不创建 release。#56 合入后成为第三项正式需求，随即按合同创建 `release/v0.2.9 -> main`，始终不执行服务器交付。
 
 ### 今日选择：机会编辑器同页草稿保护
 
@@ -33,7 +33,14 @@
 - `npm --prefix apps/react-web test -- --run src/test/RouteLeaveGuard.test.tsx src/test/ApplicationsPage.test.tsx`：PASS，2 个文件、16 项，覆盖同页 query、浏览器历史、保存、取消、重新新建、默认不拦截与既有机会工作台行为。
 - `npm --prefix apps/react-web test`：PASS，48 个文件、153 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
 - `npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Gradle deprecated feature 提示。
-- `npm run test:local-functional`、`npm test`、`npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive` 与 `git diff --check`：PASS；功能覆盖与对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning。GitFlow PR 前门禁和发布收口将在本轮后续执行后补记。
+- `npm run test:local-functional`、`npm test`、`npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive` 与 `git diff --check`：PASS；功能覆盖与对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning。
+- #56 已 squash 合入 `develop`（`3b0d852`）；`npm run test:git-release`、公开安全构建与扫描：PASS。#57 已以 merge 方式合入 `main`（`058e667`），附注标签 `v0.2.9` 已推送；本回同步 PR 将该发布事实合回 `develop`。
+
+### 发布与回同步
+
+- 普通需求 #56 已合入 `develop` 后，#54、#55、#56 满足自 `v0.2.8` 起累计三项正式需求的发布阈值。
+- `release/v0.2.9` 仅承载已验证源码，通过 #57 合入 `main` 并打 `v0.2.9`；没有运行 `npm run test:release`，没有服务器同步、远端重启、账号或数据操作。
+- `main -> develop` 回同步使用 `codex/chore/GITFLOW-010-sync-v0.2.9-to-develop`，只记录这次发布事实；合并后删除本地和远端回同步分支。
 
 ### 限制与明日建议
 
