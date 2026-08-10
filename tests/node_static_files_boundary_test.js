@@ -47,11 +47,14 @@ assert.strictEqual(statics.normalizePathname("/api/health"), "/api/health");
 assert.strictEqual(statics.requestBase("/job-sprint/react/index.html"), "/job-sprint");
 assert.strictEqual(statics.requestBase("/react/index.html"), "");
 assert.strictEqual(statics.isPrivateStatic("/react/index.html"), true);
+assert.strictEqual(statics.isPrivateStatic("/"), false);
 assert.strictEqual(statics.isPrivateStatic("/login.html"), false);
 assert.strictEqual(statics.isPublicApi("/api/auth/session"), true);
 assert.strictEqual(statics.isPrivateApi("/api/runtime"), true);
 assert.strictEqual(statics.isPrivateApi("/api/health"), false);
 assert.strictEqual(statics.safePath("/../AGENTS.md").error, "forbidden");
+assert.match(statics.safePath("/").filePath, /index\.html$/);
+assert.match(statics.safePath("/privacy.html").filePath, /privacy\.html$/);
 assert.match(statics.loginPathFor("/job-sprint/react"), /^\/job-sprint\/login\.html\?next=/);
 
 console.log("node static files boundary tests passed");

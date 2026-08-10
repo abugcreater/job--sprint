@@ -72,9 +72,24 @@ async function getJson(server, requestPath, cookie) {
   const server = await startServer();
   try {
     let res = await request(server, "GET", "/");
-    assert.strictEqual(res.status, 302);
-    assert.match(res.headers.location, /\/login\.html/);
-    assert.match(decodeURIComponent(res.headers.location), /\/react\/index\.html#\/today/);
+    assert.strictEqual(res.status, 200);
+    assert.match(res.raw, /日程回声谷/);
+    assert.match(res.raw, /浙ICP备2026052607号/);
+    assert.match(res.raw, /公安联网备案申请准备中/);
+    assert.match(res.raw, /个人 · 非经营性互联网信息服务/);
+    assert.doesNotMatch(res.raw, /JOB_SPRINT_AUTH_PASSWORD/);
+
+    res = await request(server, "GET", "/privacy.html");
+    assert.strictEqual(res.status, 200);
+    assert.match(res.raw, /隐私政策/);
+
+    res = await request(server, "GET", "/terms.html");
+    assert.strictEqual(res.status, 200);
+    assert.match(res.raw, /用户协议/);
+
+    res = await request(server, "GET", "/assets/public-site.css");
+    assert.strictEqual(res.status, 200);
+    assert.match(res.raw, /\.site-header/);
 
     res = await request(server, "GET", "/schedule.html");
     assert.strictEqual(res.status, 302);
@@ -82,7 +97,8 @@ async function getJson(server, requestPath, cookie) {
 
     res = await request(server, "GET", "/login.html");
     assert.strictEqual(res.status, 200);
-    assert.match(res.raw, /登录 AI 求职教练/);
+    assert.match(res.raw, /登录个人求职工作台/);
+    assert.match(res.raw, /浙ICP备2026052607号/);
     assert.match(res.raw, /loginForm/);
 
     res = await request(server, "GET", "/data/schedule.json");
@@ -91,8 +107,8 @@ async function getJson(server, requestPath, cookie) {
     const cookie = await login(server);
 
     res = await request(server, "GET", "/", undefined, { cookie });
-    assert.strictEqual(res.status, 302);
-    assert.strictEqual(decodeURIComponent(res.headers.location), "/react/index.html#/today");
+    assert.strictEqual(res.status, 200);
+    assert.match(res.raw, /日程回声谷/);
 
     res = await request(server, "GET", "/react/index.html", undefined, { cookie });
     assert.strictEqual(res.status, 200);

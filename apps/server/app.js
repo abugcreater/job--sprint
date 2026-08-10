@@ -48,7 +48,7 @@ const PORT = Number(process.env.PORT || 8000);
 const HOST = process.env.HOST || "127.0.0.1";
 
 function rejectUnauthenticated(req, res, pathname, authState) {
-  if (pathname === "/" || pathname === "/schedule.html" || pathname === "/react" || pathname === "/react/" || pathname === REACT_ENTRY_PATH) {
+  if (pathname === "/schedule.html" || pathname === "/react" || pathname === "/react/" || pathname === REACT_ENTRY_PATH) {
     const parsed = new URL(req.url, "http://localhost");
     const nextPathname = pathname === "/schedule.html" ? "/schedule.html" : REACT_DEFAULT_ENTRY;
     sendRedirect(res, loginPathFor(parsed.pathname, nextPathname));
@@ -172,10 +172,6 @@ async function route(req, res) {
   if (isPrivateStatic(pathname)) {
     authState = requireAuth(req, res, pathname);
     if (!authState) return;
-    if (pathname === "/") {
-      sendRedirect(res, `${requestBase(parsedUrl.pathname)}${REACT_DEFAULT_ENTRY}`);
-      return;
-    }
   }
 
   serveStatic(pathname, res, authState);

@@ -19,8 +19,7 @@ pub(crate) fn request_base(pathname: &str) -> &'static str {
 }
 
 pub(crate) fn is_private_static(pathname: &str) -> bool {
-    pathname == "/"
-        || pathname == "/schedule.html"
+    pathname == "/schedule.html"
         || pathname == "/assets/embedded-data.js"
         || pathname == "/react"
         || pathname == "/react/"
@@ -55,7 +54,7 @@ pub(crate) fn no_store_path(path: &Path) -> bool {
 
 fn safe_static_path(root: &Path, pathname: &str) -> Option<PathBuf> {
     let relative = if pathname == "/" {
-        "/react/index.html"
+        "/index.html"
     } else {
         pathname
     };
@@ -71,7 +70,10 @@ fn safe_static_path(root: &Path, pathname: &str) -> Option<PathBuf> {
         };
         return safe_join(&react_root, react_relative);
     }
-    let allowed = relative == "/schedule.html"
+    let allowed = relative == "/index.html"
+        || relative == "/privacy.html"
+        || relative == "/terms.html"
+        || relative == "/schedule.html"
         || relative == "/login.html"
         || relative == "/sw.js"
         || relative == "/assets/manifest.webmanifest"
@@ -125,5 +127,20 @@ mod tests {
         assert!(safe_join(root, "/assets/app.js").is_some());
         assert!(safe_join(root, "/assets/../data/interview_context.json").is_none());
         assert!(safe_join(root, "/assets/../../private.env").is_none());
+    }
+
+    #[test]
+    fn public_site_files_are_available_without_crossing_private_boundary() {
+        let root = Path::new("/tmp/job-sprint-static-root");
+
+        assert_eq!(static_path_for(root, "/", false), Some(root.join("index.html")));
+        assert_eq!(
+            static_path_for(root, "/privacy.html", false),
+            Some(root.join("privacy.html"))
+        );
+        assert!(!is_private_static("/"));
+        assert!(!is_private_static("/terms.html"));
+        assert!(is_private_static("/react/index.html"));
+        assert!(is_private_static("/data/schedule.json"));
     }
 }
