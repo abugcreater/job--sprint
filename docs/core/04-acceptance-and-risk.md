@@ -4,7 +4,7 @@
 
 ## 2026-08-10 公安联网备案公开面验收更新
 
-正式域名根路径已从受保护工作台入口调整为公开的“日程回声谷（Job Sprint）”网站说明页，并已部署到 `https://app.jobdailyschedule.site/`。公开面展示个人非经营性定位、服务内容与边界、隐私政策、用户协议、`浙ICP备2026052607号` 和“公安联网备案申请准备中”状态；`/react/`、`/schedule.html`、`/data/` 与业务 API 仍要求登录，不开放公众注册、用户资料或管理能力。公安备案最终是否通过由属地公安机关审核决定，不能由代码验收代替；审核通过后必须使用备案平台提供的正式编号、图标和 HTML 代码替换当前占位状态。
+正式域名根路径已从受保护工作台入口调整为公开的“日程回声谷（Job Sprint）”网站说明页，并已部署到正式环境。公开面展示个人非经营性定位、服务内容与边界、隐私政策、用户协议、`浙ICP备2026052607号` 和“公安联网备案申请准备中”状态；`/react/`、`/schedule.html`、`/data/` 与业务 API 仍要求登录，不开放公众注册、用户资料或管理能力。公安备案最终是否通过由属地公安机关审核决定，不能由代码验收代替；审核通过后必须使用备案平台提供的正式编号、图标和 HTML 代码替换当前占位状态。
 
 本轮代码与构建验证结果：`npm test` 通过（48 个 React 测试文件、154 条用例及 Node/边界/敏感扫描门禁）；`npm run test:local-functional` 的 Node/React 与 Rust/SQLite 两套浏览器功能链通过；`npm run build:rust:linux -- --delivery-env-file ~/.job-sprint/job-sprint-delivery.env`、`npm run build:public-safe`、`npm run scan:public-safe` 和 `npm run build:server-delivery` 通过。Linux ELF SHA-256 为 `38fe591738f5696f41032431c7f5049b79605d6c8cb767a9dc411909c3d7bc33`，server delivery manifest SHA-256 为 `b5f478a65088dd661ad3100cb5107929768a1c7f4d6359c123c1bd3ef9daab36`；服务器同步、manifest 读回、`job-sprint.service` 重启和正式域名浏览器桌面/移动视口检查均通过。
 
