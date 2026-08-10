@@ -11,6 +11,18 @@ type PendingRouteLeave =
       kind: "android-system-back";
     };
 
+type DirtyCheck = {
+  isDirty: () => boolean;
+  blockSearchChanges: boolean;
+  consumeAllowedSearchChange: () => boolean;
+  onDiscard?: () => void;
+};
+
+export type RouteLeaveGuardOptions = {
+  blockSearchChanges?: boolean;
+  onDiscard?: () => void;
+};
+
 declare global {
   interface Window {
     AndroidBackNavigation?: {
@@ -20,23 +32,27 @@ declare global {
 }
 
 type RouteLeaveGuardContextValue = {
-  registerDirtyCheck: (id: string, isDirty: () => boolean) => () => void;
+  registerDirtyCheck: (id: string, getCheck: () => DirtyCheck) => () => void;
 };
 
 const RouteLeaveGuardContext = createContext<RouteLeaveGuardContextValue | null>(null);
 
 export function RouteLeaveGuardProvider({ children }: { children: ReactNode }) {
-  const checksRef = useRef(new Map<string, () => boolean>());
+  const checksRef = useRef(new Map<string, () => DirtyCheck>());
   const pendingRouteTriggerRef = useRef<HTMLElement | null>(null);
   const [pendingLeave, setPendingLeave] = useState<PendingRouteLeave | null>(null);
 
-  const hasUnsavedChanges = useCallback(() => Array.from(checksRef.current.values()).some((isDirty) => isDirty()), []);
+  const dirtyChecks = useCallback(() => Array.from(checksRef.current.values()).map((getCheck) => getCheck()), []);
+  const hasUnsavedChanges = useCallback(() => dirtyChecks().some((check) => check.isDirty()), [dirtyChecks]);
   const blocker = useBlocker(useCallback<BlockerFunction>(({ currentLocation, nextLocation }) => {
-    return currentLocation.pathname !== nextLocation.pathname && hasUnsavedChanges();
-  }, [hasUnsavedChanges]));
+    if (!hasUnsavedChanges()) return false;
+    if (currentLocation.pathname !== nextLocation.pathname) return true;
+    return currentLocation.search !== nextLocation.search
+      && dirtyChecks().some((check) => check.blockSearchChanges && check.isDirty() && !check.consumeAllowedSearchChange());
+  }, [dirtyChecks, hasUnsavedChanges]));
 
-  const registerDirtyCheck = useCallback((id: string, isDirty: () => boolean) => {
-    checksRef.current.set(id, isDirty);
+  const registerDirtyCheck = useCallback((id: string, getCheck: () => DirtyCheck) => {
+    checksRef.current.set(id, getCheck);
     return () => checksRef.current.delete(id);
   }, []);
 
@@ -87,6 +103,7 @@ export function RouteLeaveGuardProvider({ children }: { children: ReactNode }) {
   const discardAndLeave = useCallback(() => {
     if (!pendingLeave) return;
     const leave = pendingLeave;
+    dirtyChecks().filter((check) => check.isDirty()).forEach((check) => check.onDiscard?.());
     setPendingLeave(null);
     if (leave.kind === "android-system-back") {
       if (window.AndroidBackNavigation?.completeBackNavigation) {
@@ -97,7 +114,7 @@ export function RouteLeaveGuardProvider({ children }: { children: ReactNode }) {
       return;
     }
     if (blocker.state === "blocked") blocker.proceed();
-  }, [blocker, pendingLeave]);
+  }, [blocker, dirtyChecks, pendingLeave]);
 
   const value = useMemo(() => ({ registerDirtyCheck }), [registerDirtyCheck]);
 
@@ -111,16 +128,34 @@ export function RouteLeaveGuardProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useRouteLeaveGuard(isDirty: boolean) {
+export function useRouteLeaveGuard(isDirty: boolean, options: RouteLeaveGuardOptions = {}) {
   const context = useContext(RouteLeaveGuardContext);
   const id = useId();
   const dirtyRef = useRef(isDirty);
+  const optionsRef = useRef(options);
+  const allowedSearchChangeRef = useRef(false);
   dirtyRef.current = isDirty;
+  optionsRef.current = options;
+
+  const allowNextSearchChange = useCallback(() => {
+    allowedSearchChangeRef.current = true;
+  }, []);
 
   useEffect(() => {
     if (!context) return undefined;
-    return context.registerDirtyCheck(id, () => dirtyRef.current);
+    return context.registerDirtyCheck(id, () => ({
+      isDirty: () => dirtyRef.current,
+      blockSearchChanges: Boolean(optionsRef.current.blockSearchChanges),
+      consumeAllowedSearchChange: () => {
+        const allowed = allowedSearchChangeRef.current;
+        allowedSearchChangeRef.current = false;
+        return allowed;
+      },
+      onDiscard: optionsRef.current.onDiscard
+    }));
   }, [context, id]);
+
+  return { allowNextSearchChange };
 }
 
 function RouteLeaveConfirmation({ onContinue, onDiscard }: { onContinue: () => void; onDiscard: () => void }) {

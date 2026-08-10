@@ -1,17 +1,18 @@
-import { fireEvent, render, screen } from "@testing-library/react";
+import { fireEvent, render, screen, within } from "@testing-library/react";
 import { App } from "../App";
 import { INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY } from "../data/interviewAdapter";
 import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";
+import type { ReviewEvidence } from "../types/sprint";
 import { buildQaSprint, qaProfile, qaScheduleEvents, qaTaskIds } from "./fixtures/coachFlow";
 
 const fixedNow = new Date("2026-07-02T14:05:00+08:00");
 
-function resetSprint(hash = "#/interview", withProfile = true) {
+function resetSprint(hash = "#/interview", withProfile = true, initialEvidenceByTaskId: Record<string, ReviewEvidence[]> = {}) {
   window.location.hash = hash;
   window.localStorage.clear();
   const completed = {};
-  const evidenceByTaskId = {};
+  const evidenceByTaskId = initialEvidenceByTaskId;
   useSprintStore.setState({
     completed,
     evidenceByTaskId,
@@ -83,6 +84,38 @@ describe("React Job Sprint interview workspace", () => {
     expect(screen.getAllByText(/练 Mock 服务边界 60 秒回答/).length).toBeGreaterThan(0);
   });
 
+  it("changes candidate questions for each practice mode using the current opportunity record", async () => {
+    resetSprint("#/interview", true, {
+      [qaTaskIds.opportunity]: [{
+        id: "opportunity-evidence-1",
+        taskId: qaTaskIds.opportunity,
+        type: "delivery_record",
+        title: "机会反馈证据",
+        content: "React 机会页本地记录：围绕「记录测试开发岗位机会反馈」补一条机会反馈。公司：Example Cloud；岗位：测试开发工程师；状态：约面；JD 关键词：接口自动化、质量平台；命中点：工程质量、项目经验",
+        createdAt: "2026-07-02T15:00:00+08:00",
+        verified: true
+      }]
+    });
+    render(<App />);
+
+    await screen.findByRole("heading", { name: "面试训练" });
+    fireEvent.click(screen.getByText("选择其他题目与筛选"));
+
+    fireEvent.click(screen.getByRole("button", { name: "技术核心" }));
+    expect(screen.getByText("匹配 2 题")).toBeInTheDocument();
+    expect(screen.getAllByText(/核心机制或链路/).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: "项目经历" }));
+    expect(screen.getAllByText(/测试平台用例/).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: "JD" }));
+    expect(screen.getAllByText(/Example Cloud/).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/接口自动化/).length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole("button", { name: "AI" }));
+    expect(screen.getAllByText(/AI 工具/).length).toBeGreaterThan(0);
+  });
+
   it("records a local oral answer that feeds the today Evidence Gate", async () => {
     render(<App />);
 
@@ -108,5 +141,33 @@ describe("React Job Sprint interview workspace", () => {
     expect(await screen.findByRole("heading", { name: "Evidence Gate（证据门）" })).toBeInTheDocument();
     expect(screen.getByText(/已沉淀 1 条证据/)).toBeInTheDocument();
     expect(screen.getByText("口述训练证据")).toBeInTheDocument();
+  });
+
+  it("keeps an unfinished oral answer until the user explicitly discards it", async () => {
+    render(<App />);
+
+    const answer = "先保留这版口述回答，后面还要补异常分支和证据边界。";
+    fireEvent.change(screen.getByLabelText("我的口述回答"), { target: { value: answer } });
+
+    const nav = screen.getByRole("navigation", { name: "桌面模块导航" });
+    fireEvent.click(within(nav).getByRole("link", { name: "机会" }));
+    expect(screen.getByRole("alertdialog", { name: "离开当前页面？" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.getByLabelText("我的口述回答")).toHaveValue(answer);
+
+    fireEvent.click(screen.getByRole("button", { name: "清空回答" }));
+    expect(screen.getByRole("alertdialog", { name: "放弃未保存的口述回答？" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.getByLabelText("我的口述回答")).toHaveValue(answer);
+
+    fireEvent.click(screen.getByText("选择其他题目与筛选"));
+    fireEvent.click(screen.getByRole("button", { name: "技术核心" }));
+    expect(screen.getByRole("alertdialog", { name: "放弃未保存的口述回答？" })).toBeInTheDocument();
+    expect(screen.getByLabelText("我的口述回答")).toHaveValue(answer);
+    fireEvent.click(screen.getByRole("button", { name: "放弃修改" }));
+
+    expect(screen.getByLabelText("我的口述回答")).toHaveValue("");
+    expect(screen.getByRole("button", { name: "技术核心" })).toHaveAttribute("aria-pressed", "true");
+    expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.interview]).toBeUndefined();
   });
 });

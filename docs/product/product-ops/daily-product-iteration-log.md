@@ -1,6 +1,127 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-07
+日期：2026-08-10
+
+## 2026-08-10 第六十八次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在真实差异。四个差异提交中有两个是 `v0.2.8` 回同步，正式需求只有 #54 与 #55 两项；距 `v0.2.8` 不足三天，未达到 7 天或三项需求阈值，因此本轮不创建 `release/v0.2.9`，也不执行服务器交付。
+
+### 今日选择：机会编辑器同页草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 机会记录承载公司、岗位、JD 与沟通事实，普通用户在桌面端编辑时可直接从左侧切换记录。 |
+| 问题确定性 | 5/5 | `RouteLeaveGuard` 只比较 pathname；机会编辑器的 `record` / `mode` 变化留在同一路径，能稳定复现草稿被替换。 |
+| 风险降低 | 5/5 | 确认前不改 Evidence Gate、机会记录、AI 信号或同步层；放弃后不残留内存草稿。 |
+| 交互改善 | 5/5 | 继续编辑保留输入，放弃后才进入原目标记录或空白新建表单；保存路径不被上一帧 dirty 状态误拦截。 |
+| 可验证性 | 5/5 | 路由守卫与机会页回归覆盖 query 切换、继续编辑、放弃、清空和重新新建。 |
+| 实现范围 | 4/5 | 仅改 React 本地守卫、机会页与回归测试，不改服务端、账号、数据域、Android bridge 或远端配置。 |
+
+### 改动
+
+- `RouteLeaveGuard` 增加页面 opt-in 的 search 参数切换保护与放弃时清理回调；保持其他模块默认只拦截跨 pathname 导航。
+- 机会编辑器在选择其它记录、浏览器历史改变编辑视图或进入对照视图时会确认；放弃后才放行原操作并清空内存草稿。
+- 保存或本地确认放弃会为下一次同页跳转标记已确认，避免 React state 更新前的上一帧 dirty 状态错误阻断正常展示。
+- 编辑已有记录时再次点击“新增机会”会先确认；放弃后打开空白新记录草稿，避免旧详情记录被 effect 回填。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test -- --run src/test/RouteLeaveGuard.test.tsx src/test/ApplicationsPage.test.tsx`：PASS，2 个文件、16 项，覆盖同页 query、浏览器历史、保存、取消、重新新建、默认不拦截与既有机会工作台行为。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、153 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
+- `npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Gradle deprecated feature 提示。
+- `npm run test:local-functional`、`npm test`、`npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive` 与 `git diff --check`：PASS；功能覆盖与对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning。GitFlow PR 前门禁和发布收口将在本轮后续执行后补记。
+
+### 限制与明日建议
+
+- 本轮不自动保存、不跨刷新、关闭浏览器、Android 预测返回、强杀或进程恢复草稿；不部署服务器、不修改账号、数据域、远端配置或真实数据。
+- 同页保护只适用于机会编辑器的编辑视图变更，不拦截搜索、筛选等不离开编辑器的本地控制。
+- 下一轮优先候选仍是有设备和可信 HTTPS 后的 Android 预测返回与登录切换验收；没有这些条件时，可继续补真实 JD 结果和面试结果的长期归因。
+
+## 2026-08-09 第六十七次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先。`develop` 的真实文件差异包含昨日 #54 的口述草稿保护和产品文档；距 `v0.2.8` 不足两天，且本轮前只有一项新需求，因此本轮只完成目标为 `develop` 的普通需求，不创建 release，也不执行服务器交付。
+
+### 今日选择：面试题型候选题闭环
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 用户点击技术核心、项目经历、JD 或 AI 后理应改变练习视角；原实现始终显示当前任务的同一道题。 |
+| 问题确定性 | 5/5 | `InterviewMode` 原先只影响按钮选中态与题目标签，候选题生成未按 mode 分支；现有夹具可稳定复现。 |
+| 风险降低 | 5/5 | 题目只使用当前用户的画像、当前任务和当前数据域内机会记录；没有 JD 时不虚构公司或岗位要求。 |
+| 交互改善 | 5/5 | 五个题型都有不同题干、来源和关键词；用户可选择后继续使用已有草稿保护与主动保存路径。 |
+| 可验证性 | 5/5 | adapter 覆盖模式差异与无 JD 降级，页面覆盖真实机会记录切换，完整 Web 与根门禁可继续运行。 |
+| 实现范围 | 4/5 | 仅改 React 本地候选题生成、面试页面数据组装、测试和 Android 打包资源，不改服务端、AI provider、账号或远端配置。 |
+
+### 改动
+
+- 建立 `interview-mode-candidates` feature capsule，裁决为当前用户上下文下的本地规则题，不因切换题型调用模型或自动抓取 JD。
+- 自动题型保持今日口述任务；技术核心题从当前任务的机制、链路、异常与恢复生成两道候选题。
+- 项目经历题引用当前用户画像中的经历、项目证据和不可夸大边界；AI 题围绕当前目标岗位的工具使用、人工校验、敏感数据和降级路径。
+- JD 题优先引用当前数据域最近机会记录的公司、岗位、关键词与命中点；无记录时明确以目标岗位做通用匹配练习，不伪造具体 JD。
+- 新增 `interviewModeCandidates` 模块，避免 `interviewAdapter` 超过 450 行架构上限；面试页仅组装活动画像和机会记录。
+- 新增 adapter 与页面回归，覆盖题型差异、机会记录、无 JD 降级和既有草稿切换行为。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS；面试 adapter 与页面定向测试：PASS，13 项。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、150 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
+- `npm run validate:architecture-quality`：PASS；首次实现曾触发 546/450 行 adapter 上限，已拆分为 365 行 adapter 与 198 行候选生成模块后通过。
+- `npm run sync:android-react` 与 `gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Gradle deprecated feature 提示。
+- `npm run test:local-functional`：PASS，浏览器重启、移动端读回、导入恢复与 Rust SQLite UI 持久化均使用临时测试数据；`npm test`、`npm run scan:sensitive`、产品迭代与 GitFlow PR 前门禁、`git diff --check`：PASS。
+- 功能覆盖和功能对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning；本轮结论是本地源码、Web 与 debug APK 通过，不等价于服务器发布、远端 Android 真机或真实 AI 题库验收。
+
+### 限制与明日建议
+
+- 本轮不调用真实模型、不抓取外部 JD、不做题库服务端持久化或跨刷新草稿恢复；不部署服务器、不修改远端配置、账号或真实数据。
+- 当前候选题是可解释的本地规则题，题目深度受用户已记录画像、机会和今日任务限制；真实 AI 题库质量、远端 Android 真机和预测返回仍需独立验收。
+- 下一轮优先候选是连接设备和可信 HTTPS 后验收 Android 预测返回与登录切换；否则继续选择可在本地闭环验证的数据隔离或用户输入质量缺口。
+
+## 2026-08-08 第六十六次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先。两分支的文件树差异只有昨日 `v0.2.8` 发布回同步后的产品文档；距 `v0.2.8` 不足一天，且本轮前没有新的需求累计，因此本轮只完成目标为 `develop` 的普通需求，不创建 release，也不执行服务器交付。
+
+### 今日选择：口述回答草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 60 秒口述回答通常包含项目链路、异常分支与证据，误丢失后重新输入成本高。 |
+| 确定性 | 5/5 | 面试页已有 `answer` 状态但未注册路由离页守卫；原题型/题目切换会保留文本，使 A 题回答可被保存为 B 题证据。 |
+| 风险降低 | 5/5 | 确认前不清空文本、不切换题目、不写入 Evidence Gate，也不触发同步或服务端请求。 |
+| 交互改善 | 5/5 | 清空、切题和离页都提供明确的“继续编辑 / 放弃修改”，空回答保留原有快速操作。 |
+| 可验证性 | 5/5 | 面试页回归覆盖路由离页、清空、切题、继续编辑和放弃后无证据写入；现有保存回归保持覆盖。 |
+| 实现范围 | 5/5 | 仅改 React 本地草稿控制、页面拆分与 Android 打包资源，不改 rubric、AI provider、服务端、账号或远端配置。 |
+
+### 改动
+
+- 建立 `interview-answer-draft-protection` feature capsule，比较仅提示、局部确认加题目锁定、自动写入 Evidence Gate 三种方案；裁决为局部确认加既有离页守卫，不自动保存未完成回答。
+- 新增 `useInterviewAnswerDraftProtection`：非空回答进入既有 `useRouteLeaveGuard`；清空、题型切换、候选题切换统一先确认，保存或确认放弃后才重置草稿与评分状态。
+- 输入开始时固定当前候选题 ID；后续筛选不会悄然把尚未保存的回答归属到另一道题。
+- 将回答面板拆出 `InterviewPage`，使页面从 560 行门禁上限降至 397 行；保留本地自检、薄弱题与 Evidence Gate 保存路径。
+- 新增面试页回归，覆盖离页继续编辑、清空继续编辑、切换题型的确认放弃与无证据写入。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS；`npm --prefix apps/react-web test -- --run src/test/InterviewPage.test.tsx`：PASS，5 项，包含草稿保护和既有 Evidence Gate 保存路径。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、147 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
+- `npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Gradle deprecated feature 提示。
+- `npm run test:local-functional`：PASS，浏览器重启、移动端读回、导入恢复与 Rust SQLite UI 持久化均使用临时测试数据；`npm test`、产品迭代/架构质量门禁、`npm run scan:sensitive` 与 `git diff --check`：PASS。
+- 功能覆盖和功能对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning；这不等价于服务器发布、Android 真机验收或完整远端交付。
+
+### 限制与明日建议
+
+- 本轮不自动保存，也不在刷新、关闭浏览器、Android 预测返回、强杀或进程恢复后还原草稿；不部署服务器、不修改远端配置、账号或真实数据。
+- 当前面试页测试夹具只有一题候选题；题型替换已覆盖与候选题替换共用的确认状态机，多题候选题的端到端手工验证仍应在真实题库数据就绪后补充。
+- 若本轮验证与 PR 收口完成，下一轮可优先在有设备和可信 HTTPS 的前提下验收 Android 预测返回与登录切换；没有这些条件时，继续选择本地可验证的闭环缺口。
 
 ## 2026-08-07 第六十五次主动迭代
 
@@ -37,7 +158,7 @@
 ### 限制与后续
 
 - 本轮不做自动保存、刷新恢复、浏览器关闭恢复、Android 预测返回/强杀恢复，不部署服务器、不创建账号、不修改远端配置或真实数据。
-- 完成需求 PR 收口后，本轮将按三项需求阈值立即完成 `v0.2.8` Git 版本发布和 `main -> develop` 回同步；服务器交付仍需用户单独授权。
+- #51 已 squash 合入 `develop`（`72a547f`）；#52 已以 release merge 合入 `main`（`2969790`），附注标签 `v0.2.8` 已推送。本回同步分支只负责将该 `main` 发布提交按 GitFlow 合回 `develop`；服务器交付仍需用户单独授权。
 
 ## 2026-08-06 第六十四次主动迭代
 

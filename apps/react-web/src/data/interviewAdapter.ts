@@ -1,4 +1,5 @@
-import type { DailySprint, ReviewEvidence, Task } from "../types/sprint";
+import type { DailySprint, ReviewEvidence, Task, UserProfile } from "../types/sprint";
+import { buildModeCandidateQuestions } from "./interviewModeCandidates";
 
 export type InterviewMode = "auto" | "java-core" | "resume-java" | "jd-match" | "llm-basics";
 
@@ -27,6 +28,17 @@ export interface InterviewQuestionFilters {
   category?: string;
   weakOnly?: boolean;
   weakQuestionIds?: Set<string>;
+}
+
+export interface InterviewCandidateContext {
+  profile?: Pick<UserProfile, "targetRole" | "experienceSummary" | "projectEvidence" | "nonClaims">;
+  opportunities?: Array<{
+    company: string;
+    role: string;
+    keywords: string;
+    tags: string[];
+    status: string;
+  }>;
 }
 
 export interface OralTaskSummary {
@@ -83,13 +95,14 @@ const rubricDimensions = ["结论先行", "真实项目证据", "边界与风险
 export function buildInterviewDashboard(
   sprint: DailySprint,
   evidenceByTaskId: Record<string, ReviewEvidence[]>,
-  mode: InterviewMode = "auto"
+  mode: InterviewMode = "auto",
+  context: InterviewCandidateContext = {}
 ): InterviewDashboard {
   const currentTask = sprint.tasks.find((task) => task.id === sprint.currentTaskId);
   const interviewTasks = sprint.tasks.filter((task) => task.type === "interview");
   const targetTask = currentTask ?? interviewTasks[0] ?? sprint.tasks[0];
   const oralTasks = buildOralTasks(interviewTasks, currentTask, evidenceByTaskId);
-  const candidateQuestions = buildCandidateQuestions(targetTask, mode);
+  const candidateQuestions = buildCandidateQuestions(targetTask, mode, context);
   const recentRecords = buildRecentRecords(sprint.tasks, evidenceByTaskId);
 
   return {
@@ -234,12 +247,18 @@ function buildOralTasks(
   }));
 }
 
-function buildCandidateQuestions(targetTask: Task | undefined, mode: InterviewMode): InterviewQuestionOption[] {
+function buildCandidateQuestions(
+  targetTask: Task | undefined,
+  mode: InterviewMode,
+  context: InterviewCandidateContext
+): InterviewQuestionOption[] {
   if (!targetTask) return [];
-  const fromTask = taskQuestions(targetTask, mode);
+  const questions = mode === "auto"
+    ? currentTaskQuestions(targetTask)
+    : buildModeCandidateQuestions(targetTask, mode, context);
 
   const seen = new Set<string>();
-  return fromTask.filter((question) => {
+  return questions.filter((question) => {
     const key = question.question.trim();
     if (!key || seen.has(key)) return false;
     seen.add(key);
@@ -247,8 +266,7 @@ function buildCandidateQuestions(targetTask: Task | undefined, mode: InterviewMo
   }).slice(0, 8);
 }
 
-function taskQuestions(task: Task | undefined, mode: InterviewMode): InterviewQuestionOption[] {
-  if (!task) return [];
+function currentTaskQuestions(task: Task): InterviewQuestionOption[] {
   const questions = task.interviewQuestions.length
     ? task.interviewQuestions
     : [
@@ -259,8 +277,8 @@ function taskQuestions(task: Task | undefined, mode: InterviewMode): InterviewQu
 
   return questions.map((question, index) => ({
     id: `${task.id}-question-${index + 1}`,
-    mode: "current-task",
-    modeLabel: mode === "auto" ? "当前任务" : "当前任务",
+    mode: "current-task" as const,
+    modeLabel: "当前任务",
     source: task.title,
     question,
     hint: task.acceptanceCriteria || "先给结论，再讲真实经历、边界、证据和下一步。",

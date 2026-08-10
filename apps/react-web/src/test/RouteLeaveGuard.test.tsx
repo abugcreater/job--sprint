@@ -4,10 +4,10 @@ import { createMemoryRouter, Link, RouterProvider, useLocation } from "react-rou
 import { afterEach, vi } from "vitest";
 import { RouteLeaveGuardProvider, useRouteLeaveGuard } from "../app/RouteLeaveGuard";
 
-function GuardedHarness() {
+function GuardedHarness({ blockSearchChanges = false }: { blockSearchChanges?: boolean }) {
   const [dirty, setDirty] = useState(false);
   const location = useLocation();
-  useRouteLeaveGuard(dirty);
+  useRouteLeaveGuard(dirty, { blockSearchChanges });
 
   return (
     <main>
@@ -16,18 +16,19 @@ function GuardedHarness() {
         有未保存修改
       </label>
       <Link to="/next">前往下一页</Link>
-      <p>当前路径：{location.pathname}</p>
+      <Link to="/start?mode=detail">切换当前页视图</Link>
+      <p>当前路径：{location.pathname}{location.search}</p>
     </main>
   );
 }
 
-function renderHarness(initialEntries = ["/start"], initialIndex?: number) {
+function renderHarness(initialEntries = ["/start"], initialIndex?: number, blockSearchChanges = false) {
   const router = createMemoryRouter([
     {
       path: "*",
       element: (
         <RouteLeaveGuardProvider>
-          <GuardedHarness />
+          <GuardedHarness blockSearchChanges={blockSearchChanges} />
         </RouteLeaveGuardProvider>
       )
     }
@@ -94,6 +95,40 @@ describe("RouteLeaveGuard", () => {
     });
 
     await waitFor(() => expect(screen.getByText("当前路径：/start")).toBeInTheDocument());
+  });
+
+  it("can protect same-page query changes when an editor opts in", async () => {
+    const { router } = renderHarness(["/start?mode=edit", "/start?mode=detail"], 0, true);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "有未保存修改" }));
+    await act(async () => {
+      await router.navigate(1);
+    });
+
+    expect(screen.getByRole("alertdialog", { name: "离开当前页面？" })).toBeInTheDocument();
+    expect(screen.getByText("当前路径：/start?mode=edit")).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "继续编辑" }));
+    expect(screen.getByText("当前路径：/start?mode=edit")).toBeInTheDocument();
+
+    await act(async () => {
+      await router.navigate(1);
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "放弃修改并离开" }));
+    });
+
+    await waitFor(() => expect(screen.getByText("当前路径：/start?mode=detail")).toBeInTheDocument());
+  });
+
+  it("keeps same-page query changes unblocked by default", () => {
+    renderHarness(["/start?mode=edit"]);
+
+    fireEvent.click(screen.getByRole("checkbox", { name: "有未保存修改" }));
+    fireEvent.click(screen.getByRole("link", { name: "切换当前页视图" }));
+
+    expect(screen.queryByRole("alertdialog", { name: "离开当前页面？" })).not.toBeInTheDocument();
+    expect(screen.getByText("当前路径：/start?mode=detail")).toBeInTheDocument();
   });
 
   it("asks before Android system back and only calls the native bridge after discard", () => {
