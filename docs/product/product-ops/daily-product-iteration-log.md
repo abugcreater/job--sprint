@@ -1,6 +1,45 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-09
+日期：2026-08-10
+
+## 2026-08-10 第六十八次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或远端短分支积压。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在真实差异。四个差异提交中有两个是 `v0.2.8` 回同步，正式需求只有 #54 与 #55 两项；距 `v0.2.8` 不足三天，未达到 7 天或三项需求阈值，因此本轮不创建 `release/v0.2.9`，也不执行服务器交付。
+
+### 今日选择：机会编辑器同页草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 机会记录承载公司、岗位、JD 与沟通事实，普通用户在桌面端编辑时可直接从左侧切换记录。 |
+| 问题确定性 | 5/5 | `RouteLeaveGuard` 只比较 pathname；机会编辑器的 `record` / `mode` 变化留在同一路径，能稳定复现草稿被替换。 |
+| 风险降低 | 5/5 | 确认前不改 Evidence Gate、机会记录、AI 信号或同步层；放弃后不残留内存草稿。 |
+| 交互改善 | 5/5 | 继续编辑保留输入，放弃后才进入原目标记录或空白新建表单；保存路径不被上一帧 dirty 状态误拦截。 |
+| 可验证性 | 5/5 | 路由守卫与机会页回归覆盖 query 切换、继续编辑、放弃、清空和重新新建。 |
+| 实现范围 | 4/5 | 仅改 React 本地守卫、机会页与回归测试，不改服务端、账号、数据域、Android bridge 或远端配置。 |
+
+### 改动
+
+- `RouteLeaveGuard` 增加页面 opt-in 的 search 参数切换保护与放弃时清理回调；保持其他模块默认只拦截跨 pathname 导航。
+- 机会编辑器在选择其它记录、浏览器历史改变编辑视图或进入对照视图时会确认；放弃后才放行原操作并清空内存草稿。
+- 保存或本地确认放弃会为下一次同页跳转标记已确认，避免 React state 更新前的上一帧 dirty 状态错误阻断正常展示。
+- 编辑已有记录时再次点击“新增机会”会先确认；放弃后打开空白新记录草稿，避免旧详情记录被 effect 回填。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test -- --run src/test/RouteLeaveGuard.test.tsx src/test/ApplicationsPage.test.tsx`：PASS，2 个文件、16 项，覆盖同页 query、浏览器历史、保存、取消、重新新建、默认不拦截与既有机会工作台行为。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、153 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
+- `npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Gradle deprecated feature 提示。
+- `npm run test:local-functional`、`npm test`、`npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive` 与 `git diff --check`：PASS；功能覆盖与对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning。GitFlow PR 前门禁和发布收口将在本轮后续执行后补记。
+
+### 限制与明日建议
+
+- 本轮不自动保存、不跨刷新、关闭浏览器、Android 预测返回、强杀或进程恢复草稿；不部署服务器、不修改账号、数据域、远端配置或真实数据。
+- 同页保护只适用于机会编辑器的编辑视图变更，不拦截搜索、筛选等不离开编辑器的本地控制。
+- 下一轮优先候选仍是有设备和可信 HTTPS 后的 Android 预测返回与登录切换验收；没有这些条件时，可继续补真实 JD 结果和面试结果的长期归因。
 
 ## 2026-08-09 第六十七次主动迭代
 

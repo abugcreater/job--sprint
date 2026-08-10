@@ -23,6 +23,13 @@ import { OpportunityComparisonPanel } from "./components/OpportunityComparisonPa
 import { OpportunityDetailPanel } from "./components/OpportunityDetailPanel";
 import { OpportunityRecordList } from "./components/OpportunityRecordList";
 
+type DiscardConfirmation = {
+  subject: string;
+  action: "close" | "create";
+};
+
+const newRecordDraftId = "new-application-record";
+
 export function ApplicationsPage() {
   const sprint = useSprintStore((state) => state.sprint);
   const evidenceByTaskId = useSprintStore((state) => state.evidenceByTaskId);
@@ -42,7 +49,7 @@ export function ApplicationsPage() {
   const [exportSummary, setExportSummary] = useState("");
   const [formFeedback, setFormFeedback] = useState("");
   const [validationMessage, setValidationMessage] = useState("");
-  const [discardConfirmation, setDiscardConfirmation] = useState<{ subject: string } | null>(null);
+  const [discardConfirmation, setDiscardConfirmation] = useState<DiscardConfirmation | null>(null);
   const [recentlyDeletedRecord, setRecentlyDeletedRecord] = useState<ApplicationEvidenceRecord | null>(null);
   const dashboard = useMemo(() => buildApplicationsDashboard(sprint, evidenceByTaskId), [sprint, evidenceByTaskId]);
   const visibleRecords = useMemo(() => {
@@ -64,11 +71,10 @@ export function ApplicationsPage() {
   const comparisonMode = searchParams.get("mode") === "compare" && comparisonRecords.length === 2;
   const mobileSecondaryView = Boolean(explicitSelectedRecord) || comparisonMode || formOpen;
   const hasUnsavedChanges = formOpen && isApplicationDraftDirty(draft, draftBaseline);
-  useRouteLeaveGuard(hasUnsavedChanges);
   const createButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
-    if (!formOpen || !explicitSelectedRecord || editingRecordId === explicitSelectedRecord.id) return;
+    if (!formOpen || !explicitSelectedRecord || editingRecordId === newRecordDraftId || editingRecordId === explicitSelectedRecord.id) return;
     const nextDraft = applicationRecordToDraft(explicitSelectedRecord);
     setEditingRecordId(explicitSelectedRecord.id);
     setDraft(nextDraft);
@@ -87,20 +93,15 @@ export function ApplicationsPage() {
     }));
   }, []);
 
-  const resetDraft = useCallback((preserve?: ApplicationFormDraft) => {
-    const nextDraft = {
-      ...createApplicationDraft(),
-      source: preserve?.source ?? "",
-      salaryRange: preserve?.salaryRange ?? "",
-      city: preserve?.city ?? "",
-      resumeVersion: preserve?.resumeVersion ?? "",
-      tags: preserve?.tags.length ? preserve.tags : createApplicationDraft().tags
-    };
+  const resetDraft = useCallback(() => {
+    const nextDraft = createApplicationDraft();
     setDraft(nextDraft);
     setDraftBaseline(cloneApplicationDraft(nextDraft));
     setEditingRecordId(undefined);
     return nextDraft;
   }, []);
+
+  const { allowNextSearchChange } = useRouteLeaveGuard(hasUnsavedChanges, { blockSearchChanges: true, onDiscard: resetDraft });
 
   const updateViewParams = useCallback((patch: { record?: string; mode?: "detail" | "compare" | "edit" }) => {
     const next = new URLSearchParams(searchParams);
@@ -116,34 +117,50 @@ export function ApplicationsPage() {
 
   const focusEditorTitle = () => window.requestAnimationFrame(() => document.getElementById("application-form-title")?.focus({ preventScroll: true }));
 
-  const openCreateForm = useCallback(() => {
-    resetDraft(draft);
+  const beginCreateForm = useCallback(() => {
+    resetDraft();
+    setEditingRecordId(newRecordDraftId);
     setFormFeedback("");
     setValidationMessage("");
     updateViewParams({ mode: "edit" });
     focusEditorTitle();
-  }, [draft, resetDraft, updateViewParams]);
+  }, [resetDraft, updateViewParams]);
+
+  const openCreateForm = useCallback(() => {
+    if (hasUnsavedChanges) {
+      const subject = [draft.company, draft.role].filter(Boolean).join(" · ") || "这条机会记录";
+      setDiscardConfirmation({ subject, action: "create" });
+      return;
+    }
+    beginCreateForm();
+  }, [beginCreateForm, draft.company, draft.role, hasUnsavedChanges]);
 
   const finishCloseForm = useCallback(() => {
     resetDraft();
     setValidationMessage("");
+    allowNextSearchChange();
     updateViewParams({ record: selectedRecord?.id, mode: selectedRecord ? "detail" : undefined });
     window.requestAnimationFrame(() => createButtonRef.current?.focus({ preventScroll: true }));
-  }, [resetDraft, selectedRecord, updateViewParams]);
+  }, [allowNextSearchChange, resetDraft, selectedRecord, updateViewParams]);
 
   const requestCloseForm = useCallback(() => {
     if (hasUnsavedChanges) {
       const subject = [draft.company, draft.role].filter(Boolean).join(" · ") || "这条机会记录";
-      setDiscardConfirmation({ subject });
+      setDiscardConfirmation({ subject, action: "close" });
       return;
     }
     finishCloseForm();
   }, [draft.company, draft.role, finishCloseForm, hasUnsavedChanges]);
 
   const discardChanges = useCallback(() => {
+    const action = discardConfirmation?.action ?? "close";
     setDiscardConfirmation(null);
+    if (action === "create") {
+      beginCreateForm();
+      return;
+    }
     finishCloseForm();
-  }, [finishCloseForm]);
+  }, [beginCreateForm, discardConfirmation, finishCloseForm]);
 
   const handleRecord = useCallback(() => {
     if (!isApplicationDraftReady(draft)) {
@@ -168,10 +185,11 @@ export function ApplicationsPage() {
       savedRecordId = useSprintStore.getState().evidenceByTaskId[targetTask.id]?.at(-1)?.id;
     }
     setRecentlyDeletedRecord(null);
-    resetDraft(draft);
+    resetDraft();
     setValidationMessage("");
+    allowNextSearchChange();
     updateViewParams({ record: savedRecordId, mode: savedRecordId ? "detail" : undefined });
-  }, [addEvidence, dashboard.targetTask, draft, editingRecord, resetDraft, sprint.tasks, updateEvidence, updateViewParams]);
+  }, [addEvidence, allowNextSearchChange, dashboard.targetTask, draft, editingRecord, resetDraft, sprint.tasks, updateEvidence, updateViewParams]);
 
   const handleEditRecord = useCallback((record: ApplicationEvidenceRecord) => {
     const nextDraft = applicationRecordToDraft(record);
@@ -190,12 +208,12 @@ export function ApplicationsPage() {
       deleteEvidence(record.taskId, record.id);
       setComparisonIds((current) => current.filter((recordId) => recordId !== record.id));
       if (record.id === editingRecordId) {
-        resetDraft(draft);
+        resetDraft();
       }
       if (record.id === selectedRecordId) updateViewParams({});
       setFormFeedback(`已删除「${record.company || record.role || "未命名机会"}」记录，可在机会清单顶部撤销。`);
     },
-    [deleteEvidence, draft, editingRecordId, resetDraft, selectedRecordId, updateViewParams]
+    [deleteEvidence, editingRecordId, resetDraft, selectedRecordId, updateViewParams]
   );
 
   const handleUndoDeleteRecord = useCallback(() => {
