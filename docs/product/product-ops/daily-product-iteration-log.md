@@ -1,6 +1,44 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-10
+日期：2026-08-11
+
+## 2026-08-11 第六十九次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或短分支积压，gone 分支清理结果为空。
+- `origin/main` 与 `origin/develop` 存在真实内容差异：最新 #59 是公开备案展示面的已合并需求，不是 SHA 历史差异。`v0.2.9` 于 2026-08-10 创建，此后仅累计该一项需求，未满足 7 天或 3 项需求的 release 阈值；本轮不创建 release，也不部署服务器。
+
+### 今日选择：快速建档草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 新用户导入简历或 JD 是最早的真实输入路径，误点“改用详细画像”或阶段导航会直接损失整理中的素材。 |
+| 问题确定性 | 5/5 | `InitializationWizardPanel` 把画像、素材、预览和候选保存在局部 state；切换表单或阶段会卸载组件，原先没有确认。 |
+| 风险降低 | 5/5 | 确认前不写画像、知识边界、日程、Evidence Gate、同步层或账号数据；离页仍由同一草稿状态拦截。 |
+| 交互改善 | 5/5 | 用户能明确选择继续编辑或放弃，再进入详细表单或目标阶段；已确认的画像字段不再被误判为未保存。 |
+| 可验证性 | 5/5 | 页面用例覆盖两条同页入口和取消/放弃分支，完整 React 测试、构建与架构门禁可本地复现。 |
+| 实现范围 | 4/5 | 仅改 React 快速建档、专用退出 hook、确认对话框、测试与产品记录；不改服务端、账号、数据域、Android 或远端配置。 |
+
+### 改动
+
+- `InitializationWizardPanel` 为未保存画像字段、简历/JD 素材、预览和边界候选建立本地 dirty 判断，注册站内离开守卫；确认写入画像会刷新画像字段基线。
+- 新增 `useInitializationWizardExit`，统一处理改用详细表单和准备阶段切换；继续编辑留在当前快速建档界面，放弃后才执行原动作并清理草稿。
+- 新增响应式确认对话框，明确说明未写入的数据范围和下一步动作。
+- `CoachPage` 回归测试覆盖改用详细画像、切换知识边界、继续编辑和确认放弃，且确认放弃不会写入画像或知识边界。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test -- CoachPage.test.tsx`：PASS，5 项，覆盖快速建档的两类退出入口。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、155 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
+- `npm test`、`npm run test:local-functional`：PASS；后者覆盖临时 Node/React 与 Rust/SQLite 的本地持久化流程，不代表远端或 Android 真机。
+- `npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase work` 与 `git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮不自动保存、不跨刷新、关闭浏览器、Android 预测返回、强杀或进程恢复快速建档草稿；不部署服务器、不修改账号、数据域、远端配置或真实数据。
+- 下一轮优先候选仍是可信 HTTPS 与真机条件齐备后的 Android 预测返回/登录切换验收；没有这些条件时，应继续把真实 JD、面试结果与周复盘归因串成长期质量闭环。
 
 ## 2026-08-10 第六十八次主动迭代
 

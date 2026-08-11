@@ -41,6 +41,7 @@ import { useBoundaryDraftProtection } from "./useBoundaryDraftProtection";
 import { useProfileDraftProtection } from "./useProfileDraftProtection";
 import { useScheduleDraftProtection } from "./useScheduleDraftProtection";
 import { useBoundarySuggestions } from "./useBoundarySuggestions";
+import { useInitializationWizardExit } from "./useInitializationWizardExit";
 
 export function CoachPage() {
   const isResumeImportEntry = useSearchParams()[0].get("entry") === "resume-import";
@@ -137,6 +138,12 @@ export function CoachPage() {
       setRecentlyDeletedBoundary(null);
       setRecentlyDeletedScheduleEvent(null);
     }
+  });
+  const initializationWizardExit = useInitializationWizardExit({
+    activeStage,
+    showOnboarding,
+    setActiveStage,
+    setShowOnboarding
   });
   const profileDraftProtection = useProfileDraftProtection({
     activeProfile: dashboard.activeProfile,
@@ -412,26 +419,20 @@ export function CoachPage() {
           progressLabel={stageProgress.progressLabel}
           nextActionLabel={stageProgress.nextActionLabel}
           isRecording={isRecordingFirstLogin}
-          onStageChange={(stage) => {
-            setActiveStage(stage);
-            if (stage !== "profile") setShowOnboarding(false);
-            window.requestAnimationFrame(() => {
-              const stageWorkspace = document.getElementById(`coach-stage-${stage}`);
-              stageWorkspace?.focus({ preventScroll: true });
-              stageWorkspace?.scrollIntoView?.({ block: "start" });
-            });
-          }}
+          onStageChange={initializationWizardExit.handleStageChange}
           onRecordProgress={handleRecordFirstLoginInsight}
         />
         {feedback ? <p className="rounded-control bg-success-100 px-3 py-2 text-sm font-bold text-success-600" role="status">{feedback}</p> : null}
-
         <section className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_320px]">
           <section id={`coach-stage-${activeStage}`} className="workspace-anchor min-w-0 space-y-4" tabIndex={-1} aria-label={`当前准备阶段：${coachStageTitle(activeStage)}`}>
             {activeStage === "profile" ? (
               showOnboarding ? (
                 <>
-                  <InitializationWizardPanel />
-                  <button type="button" className="secondary-button w-full" onClick={() => setShowOnboarding(false)}>改用详细画像表单</button>
+                  <InitializationWizardPanel
+                    onDirtyStateChange={initializationWizardExit.setHasUnsavedChanges}
+                    onRegisterDiscard={initializationWizardExit.registerDiscard}
+                  />
+                  <button type="button" className="secondary-button w-full" onClick={initializationWizardExit.requestDetailedForm}>改用详细画像表单</button>
                 </>
               ) : (
                 <ProfilePanel
@@ -462,7 +463,6 @@ export function CoachPage() {
                 />
               )
             ) : null}
-
             {activeStage === "boundaries" ? (
               <>
                 <BoundarySuggestionPanel
@@ -546,6 +546,7 @@ export function CoachPage() {
 
           <CoachStageContext stage={activeStage} completed={completedStages[activeStage]} />
         </section>
+        {initializationWizardExit.exitDialog}
       </section>
     </main>
   );
