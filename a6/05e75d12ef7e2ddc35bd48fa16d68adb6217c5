@@ -1,0 +1,38 @@
+apps/react-web/src/test/CoachPage.test.tsx
+  s_8f6b4df0c955b0::t_81e6a4aa2d2e25 192-194,197-208,210-216
+  s_8f6b4df0c955b0::t_d174eff2718a4c 195-196,209
+apps/react-web/src/features/coach/components/InitializationDiscardChangesDialog.tsx
+  s_8f6b4df0c955b0::t_d174eff2718a4c 1-23
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_6c6842da526834 3,13
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_6c6842da526834 3-9
+apps/react-web/src/features/coach/components/InitializationWizardPanel.tsx
+  s_8f6b4df0c955b0::t_81e6a4aa2d2e25 2,5,8,12,21-27,37,44-47,50-52,55-77,112
+apps/react-web/src/features/coach/CoachPage.tsx
+  s_8f6b4df0c955b0::t_81e6a4aa2d2e25 431,434
+  s_8f6b4df0c955b0::t_d174eff2718a4c 44,142-144,147,422,432-433,435
+  s_8f6b4df0c955b0::t_facff4b15d8eec 145-146,549
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_1edf27047903cd 35-36
+  s_8f6b4df0c955b0::t_6c6842da526834 3-34,37-41
+apps/react-web/src/features/coach/useInitializationWizardExit.tsx
+  s_8f6b4df0c955b0::t_facff4b15d8eec 1-67,74-75,79-82,85-91
+  s_8f6b4df0c955b0::t_1edf27047903cd 68-73,76-78,83-84
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.21",
+  "base_commit_sha": "a605e75d12ef7e2ddc35bd48fa16d68adb6217c5",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
