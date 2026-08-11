@@ -189,6 +189,31 @@ describe("React Job Sprint AI coach workspace", () => {
     expect(screen.getByText("3/4")).toBeInTheDocument();
   });
 
+  it("protects unsaved quick initialization content before switching form or stage", async () => {
+    render(<App />);
+
+    await screen.findByRole("heading", { name: "导入简历建档" });
+    const wizardPanel = panelByHeading("导入简历建档");
+    const sourceText = "我正在整理一份未保存的后端简历和 JD 重点。";
+    fireEvent.change(wizardPanel.getByLabelText("导入素材"), { target: { value: sourceText } });
+
+    fireEvent.click(screen.getByRole("button", { name: "改用详细画像表单" }));
+    const formDialog = await screen.findByRole("alertdialog", { name: "放弃未保存的快速建档内容？" });
+    expect(formDialog).toHaveTextContent("改用详细画像表单");
+    expect(wizardPanel.getByLabelText("导入素材")).toHaveValue(sourceText);
+    fireEvent.click(within(formDialog).getByRole("button", { name: "继续编辑" }));
+    expect(await screen.findByRole("heading", { name: "导入简历建档" })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole("button", { name: "知识边界阶段" }));
+    const stageDialog = await screen.findByRole("alertdialog", { name: "放弃未保存的快速建档内容？" });
+    expect(stageDialog).toHaveTextContent("切换到确认知识边界");
+    fireEvent.click(within(stageDialog).getByRole("button", { name: "放弃修改" }));
+
+    expect(await screen.findByRole("heading", { name: "知识边界" })).toBeInTheDocument();
+    expect(useSprintStore.getState().userProfiles).toHaveLength(0);
+    expect(useSprintStore.getState().knowledgeBoundaries).toHaveLength(0);
+  });
+
   it("deletes a profile from the redesigned profile panel and clears related data", async () => {
     render(<App />);
 
