@@ -8,6 +8,7 @@
 
 - 已执行 `git fetch --prune origin`；开始时工作树干净，没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或短分支积压，gone 分支清理结果为空。
 - `origin/main` 与 `origin/develop` 存在真实内容差异：`v0.2.9` 于 2026-08-10 创建，此后已合入 #59（公开展示面）与 #60（快速建档草稿保护）两项正式需求，尚未满足 7 天或 3 项需求的 release 阈值；本轮在普通需求合入后将重新判定发布。
+- #61 合入后达到三项正式需求阈值，`release/v0.2.10 -> main` 的 #62 已通过 required check 并 squash merge；带注释标签 `v0.2.10` 已推送且指向发布提交。本分支只把该发布结果回同步到 `develop`，不执行服务器交付。
 
 ### 今日选择：本地 AI 运行记录去技术化
 
@@ -31,6 +32,7 @@
 - `npm --prefix apps/react-web test`：PASS，48 个文件、156 项；包含 AI 运行记录和 Stats 的本地降级、未配置 provider、限流与 schema 异常分支。
 - `npm --prefix apps/react-web run typecheck`、`npm --prefix apps/react-web run build`：PASS；保留既有 Vite 单包体积提示，不将其扩大解释为本轮回归。
 - `npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase work` 与 `git diff --check`：PASS。
+- `npm run test:git-release`、`npm run validate:gitflow -- --phase release`：PASS；包含根 `npm test`、前端 48 个文件/156 项、React 与 Rust 本地持久化功能流、公开包构建与敏感扫描。未运行 `npm run test:release`，因此没有服务器交付或远端部署结论。
 
 ### 限制与明日建议
 
