@@ -1,13 +1,86 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-10
+日期：2026-08-12
+
+## 2026-08-12 第七十次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或短分支积压，gone 分支清理结果为空。
+- `origin/main` 与 `origin/develop` 存在真实内容差异：`v0.2.9` 于 2026-08-10 创建，此后已合入 #59（公开展示面）与 #60（快速建档草稿保护）两项正式需求，尚未满足 7 天或 3 项需求的 release 阈值；本轮在普通需求合入后将重新判定发布。
+
+### 今日选择：本地 AI 运行记录去技术化
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 4/5 | 普通用户看到 `local-fallback`、`schema pass` 容易把可审核的本地草稿误读为持续失败。 |
+| 问题确定性 | 5/5 | 运行记录已有中文诊断，但顶部标签仍直接渲染内部 provider 与 schema 枚举；截图和组件代码都可复现。 |
+| 风险降低 | 4/5 | 仅修改展示文案与回归测试，不伪造真实模型成功，也不改变运行记录、数据域或 AI 写入规则。 |
+| 交互改善 | 4/5 | 本地降级清楚说明“建议可用”、来源和结构校验，用户仍可从诊断看到真实模型的使用边界。 |
+| 可验证性 | 5/5 | 组件测试明确断言中文标签、中文诊断及不再显示内部标识；完整前端测试、构建和 GitFlow 门禁可复现。 |
+| 实现范围 | 5/5 | 限定在诊断文案、运行记录组件、组件测试和产品运维记录；不改服务端、账号、Android 或远端配置。 |
+
+### 改动
+
+- `server_unavailable` 的中性诊断调整为“本地建议可用 / 本地规则建议已生成”，明确草稿可审核但并非真实模型调用。
+- AI 运行记录和 Stats 将 `local-fallback` 显示为“本地规则”，将 `schema pass` 显示为“结构校验：通过”；真实服务端 AI 仍保留为“服务端 AI”。
+- 诊断模块统一来源与结构校验展示规则，`LlmRunPanel.test.tsx` 和 `StatsPage.test.tsx` 共同锁定用户可见文案并拒绝内部枚举回流。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test`：PASS，48 个文件、156 项；包含 AI 运行记录和 Stats 的本地降级、未配置 provider、限流与 schema 异常分支。
+- `npm --prefix apps/react-web run typecheck`、`npm --prefix apps/react-web run build`：PASS；保留既有 Vite 单包体积提示，不将其扩大解释为本轮回归。
+- `npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase work` 与 `git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮不连接真实 provider、不部署服务器、不修改账号、数据域、远端配置或 Android 资源；本地建议可用不等于真实模型质量已验收。
+- 下一轮优先候选仍是可信 HTTPS 与真机条件齐备后的 Android 预测返回/登录切换验收；否则继续将真实 JD、面试结果与周复盘归因串成长期质量闭环。
+
+## 2026-08-11 第六十九次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或短分支积压，gone 分支清理结果为空。
+- `origin/main` 与 `origin/develop` 存在真实内容差异：最新 #59 是公开备案展示面的已合并需求，不是 SHA 历史差异。`v0.2.9` 于 2026-08-10 创建，此后仅累计该一项需求，未满足 7 天或 3 项需求的 release 阈值；本轮不创建 release，也不部署服务器。
+
+### 今日选择：快速建档草稿保护
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 新用户导入简历或 JD 是最早的真实输入路径，误点“改用详细画像”或阶段导航会直接损失整理中的素材。 |
+| 问题确定性 | 5/5 | `InitializationWizardPanel` 把画像、素材、预览和候选保存在局部 state；切换表单或阶段会卸载组件，原先没有确认。 |
+| 风险降低 | 5/5 | 确认前不写画像、知识边界、日程、Evidence Gate、同步层或账号数据；离页仍由同一草稿状态拦截。 |
+| 交互改善 | 5/5 | 用户能明确选择继续编辑或放弃，再进入详细表单或目标阶段；已确认的画像字段不再被误判为未保存。 |
+| 可验证性 | 5/5 | 页面用例覆盖两条同页入口和取消/放弃分支，完整 React 测试、构建与架构门禁可本地复现。 |
+| 实现范围 | 4/5 | 仅改 React 快速建档、专用退出 hook、确认对话框、测试与产品记录；不改服务端、账号、数据域、Android 或远端配置。 |
+
+### 改动
+
+- `InitializationWizardPanel` 为未保存画像字段、简历/JD 素材、预览和边界候选建立本地 dirty 判断，注册站内离开守卫；确认写入画像会刷新画像字段基线。
+- 新增 `useInitializationWizardExit`，统一处理改用详细表单和准备阶段切换；继续编辑留在当前快速建档界面，放弃后才执行原动作并清理草稿。
+- 新增响应式确认对话框，明确说明未写入的数据范围和下一步动作。
+- `CoachPage` 回归测试覆盖改用详细画像、切换知识边界、继续编辑和确认放弃，且确认放弃不会写入画像或知识边界。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test -- CoachPage.test.tsx`：PASS，5 项，覆盖快速建档的两类退出入口。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、155 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
+- `npm test`、`npm run test:local-functional`：PASS；后者覆盖临时 Node/React 与 Rust/SQLite 的本地持久化流程，不代表远端或 Android 真机。
+- `npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase work` 与 `git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮不自动保存、不跨刷新、关闭浏览器、Android 预测返回、强杀或进程恢复快速建档草稿；不部署服务器、不修改账号、数据域、远端配置或真实数据。
+- 下一轮优先候选仍是可信 HTTPS 与真机条件齐备后的 Android 预测返回/登录切换验收；没有这些条件时，应继续把真实 JD、面试结果与周复盘归因串成长期质量闭环。
 
 ## 2026-08-10 第六十八次主动迭代
 
 ### GitFlow 基线与发布判定
 
 - 已执行 `git fetch --prune origin`；开始时工作树干净，`develop` 没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或远端短分支积压。
-- `origin/main` 是 `origin/develop` 的祖先，文件树存在真实差异。四个差异提交中有两个是 `v0.2.8` 回同步，正式需求只有 #54 与 #55 两项；距 `v0.2.8` 不足三天，未达到 7 天或三项需求阈值，因此本轮不创建 `release/v0.2.9`，也不执行服务器交付。
+- `origin/main` 是 `origin/develop` 的祖先，文件树存在真实差异。开始时四个差异提交中有两个是 `v0.2.8` 回同步，正式需求只有 #54 与 #55 两项；距 `v0.2.8` 不足三天，开始时不创建 release。#56 合入后成为第三项正式需求，随即按合同创建 `release/v0.2.9 -> main`，始终不执行服务器交付。
 
 ### 今日选择：机会编辑器同页草稿保护
 
@@ -33,7 +106,14 @@
 - `npm --prefix apps/react-web test -- --run src/test/RouteLeaveGuard.test.tsx src/test/ApplicationsPage.test.tsx`：PASS，2 个文件、16 项，覆盖同页 query、浏览器历史、保存、取消、重新新建、默认不拦截与既有机会工作台行为。
 - `npm --prefix apps/react-web test`：PASS，48 个文件、153 项；`npm --prefix apps/react-web run build`：PASS，保留既有 Vite 单包体积提示。
 - `npm run sync:android-react`、`gradle -p apps/android :app:assembleDebug`：PASS；保留既有 Gradle deprecated feature 提示。
-- `npm run test:local-functional`、`npm test`、`npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive` 与 `git diff --check`：PASS；功能覆盖与对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning。GitFlow PR 前门禁和发布收口将在本轮后续执行后补记。
+- `npm run test:local-functional`、`npm test`、`npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive` 与 `git diff --check`：PASS；功能覆盖与对齐门禁仅保留既有 Android 远端真机 evidence 缺失 warning。
+- #56 已 squash 合入 `develop`（`3b0d852`）；`npm run test:git-release`、公开安全构建与扫描：PASS。#57 已以 merge 方式合入 `main`（`058e667`），附注标签 `v0.2.9` 已推送；本回同步 PR 将该发布事实合回 `develop`。
+
+### 发布与回同步
+
+- 普通需求 #56 已合入 `develop` 后，#54、#55、#56 满足自 `v0.2.8` 起累计三项正式需求的发布阈值。
+- `release/v0.2.9` 仅承载已验证源码，通过 #57 合入 `main` 并打 `v0.2.9`；没有运行 `npm run test:release`，没有服务器同步、远端重启、账号或数据操作。
+- `main -> develop` 回同步使用 `codex/chore/GITFLOW-010-sync-v0.2.9-to-develop`，只记录这次发布事实；合并后删除本地和远端回同步分支。
 
 ### 限制与明日建议
 

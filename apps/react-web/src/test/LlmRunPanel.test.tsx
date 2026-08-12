@@ -27,6 +27,18 @@ describe("LlmRunPanel", () => {
     expect(screen.getByText("诊断码：api_timeout")).toBeInTheDocument();
     expect(screen.getByText("诊断码：api_contract_error")).toBeInTheDocument();
   });
+
+  it("uses user-facing labels when the page safely falls back to local rules", () => {
+    render(<LlmRunPanel runs={[run("server_unavailable", "2026-08-12T09:00:00+08:00")]} />);
+
+    expect(screen.getByText("本地建议可用")).toBeInTheDocument();
+    expect(screen.getByText("建议来源：本地规则")).toBeInTheDocument();
+    expect(screen.getByText("结构校验：通过")).toBeInTheDocument();
+    expect(screen.getByText("诊断：本地规则建议已生成")).toBeInTheDocument();
+    expect(screen.getByText("恢复动作：需要真实模型建议时，请使用已部署服务，或请维护者检查服务端运行情况。")).toBeInTheDocument();
+    expect(screen.queryByText("local-fallback")).not.toBeInTheDocument();
+    expect(screen.queryByText("schema pass")).not.toBeInTheDocument();
+  });
 });
 
 function run(warning: string, createdAt: string): LlmRun {

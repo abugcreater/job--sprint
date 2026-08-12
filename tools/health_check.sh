@@ -31,8 +31,14 @@ check_body_contains() {
 }
 
 check "/api/health" "200"
+check "/" "200"
+check_body_contains "日程回声谷"
+check "/privacy.html" "200"
+check_body_contains "隐私政策"
+check "/terms.html" "200"
+check_body_contains "用户协议"
 check "/login.html" "200"
-check_body_contains "登录 AI 求职教练"
+check_body_contains "登录个人求职工作台"
 
 if [[ -n "${JOB_SPRINT_AUTH_USER:-}" && -n "${JOB_SPRINT_AUTH_PASSWORD:-${JOB_SPRINT_AUTH_PASS:-}}" ]]; then
   auth_value="${JOB_SPRINT_AUTH_PASSWORD:-${JOB_SPRINT_AUTH_PASS:-}}"

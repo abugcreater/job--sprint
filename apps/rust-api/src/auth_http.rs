@@ -59,8 +59,7 @@ pub(crate) fn reject_static_unauthenticated(
     pathname: &str,
     auth_state: &AuthState,
 ) -> Response {
-    if pathname == "/"
-        || pathname == "/schedule.html"
+    if pathname == "/schedule.html"
         || pathname == "/react"
         || pathname == "/react/"
         || pathname == "/react/index.html"

@@ -1,12 +1,15 @@
 import { CalendarPlus, CheckCircle2, FileText, Sparkles, Upload } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   canSaveProfile,
+  cloneProfileDraft,
   createProfileDraft,
   createScheduleDraft,
+  isProfileDraftDirty,
   profileRoleFamilies,
   type ProfileDraft
 } from "../../../data/coachAdapter";
+import { useRouteLeaveGuard } from "../../../app/RouteLeaveGuard";
 import { coachOnboardingTemplates } from "../../../data/coachOnboardingTemplateAdapter";
 import { appendOnboardingMaterialBlock, onboardingMaterialBlocks, summarizeOnboardingMaterial } from "../../../data/coachOnboardingMaterialAdapter";
 import { generateBoundarySuggestionsFromText, type BoundarySuggestionDraft } from "../../../data/boundarySuggestionAdapter";
@@ -15,7 +18,13 @@ import { useSprintStore } from "../../../stores/sprintStore";
 import type { ProfileRoleFamily } from "../../../types/sprint";
 import { Field, PanelTitle, Textarea } from "./CoachPrimitives";
 
-export function InitializationWizardPanel() {
+export function InitializationWizardPanel({
+  onDirtyStateChange,
+  onRegisterDiscard
+}: {
+  onDirtyStateChange: (isDirty: boolean) => void;
+  onRegisterDiscard: (discard: (() => void) | null) => void;
+}) {
   const sprint = useSprintStore((state) => state.sprint);
   const profiles = useSprintStore((state) => state.userProfiles);
   const boundaries = useSprintStore((state) => state.knowledgeBoundaries);
@@ -25,16 +34,46 @@ export function InitializationWizardPanel() {
   const activeProfile = useMemo(() => profiles.find((profile) => profile.active) ?? profiles[0], [profiles]);
   const activeBoundaries = useMemo(() => activeProfile ? boundaries.filter((boundary) => boundary.profileId === activeProfile.id) : [], [activeProfile, boundaries]);
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>(() => createProfileDraft(activeProfile));
+  const [profileBaseline, setProfileBaseline] = useState<ProfileDraft>(() => cloneProfileDraft(createProfileDraft(activeProfile)));
   const [sourceText, setSourceText] = useState("");
   const [templateId, setTemplateId] = useState<ProfileRoleFamily>("backend");
   const [suggestions, setSuggestions] = useState<BoundarySuggestionDraft[]>([]);
   const [resumePreview, setResumePreview] = useState<ResumeProfilePreview | null>(null);
   const [message, setMessage] = useState("");
   const materialSummary = useMemo(() => summarizeOnboardingMaterial(sourceText), [sourceText]);
+  const hasUnsavedChanges = isProfileDraftDirty(profileDraft, profileBaseline)
+    || Boolean(sourceText.trim())
+    || suggestions.length > 0
+    || Boolean(resumePreview);
 
   useEffect(() => {
-    setProfileDraft(createProfileDraft(activeProfile));
+    const nextDraft = createProfileDraft(activeProfile);
+    setProfileDraft(nextDraft);
+    setProfileBaseline(cloneProfileDraft(nextDraft));
   }, [activeProfile?.id]);
+
+  const discardDraft = useCallback(() => {
+    const nextDraft = createProfileDraft(activeProfile);
+    setProfileDraft(nextDraft);
+    setProfileBaseline(cloneProfileDraft(nextDraft));
+    setSourceText("");
+    setTemplateId("backend");
+    setSuggestions([]);
+    setResumePreview(null);
+    setMessage("");
+  }, [activeProfile]);
+
+  useRouteLeaveGuard(hasUnsavedChanges, { onDiscard: discardDraft });
+
+  useEffect(() => {
+    onDirtyStateChange(hasUnsavedChanges);
+    return () => onDirtyStateChange(false);
+  }, [hasUnsavedChanges, onDirtyStateChange]);
+
+  useEffect(() => {
+    onRegisterDiscard(discardDraft);
+    return () => onRegisterDiscard(null);
+  }, [discardDraft, onRegisterDiscard]);
 
   const handleApplyTemplate = () => {
     const template = coachOnboardingTemplates.find((item) => item.id === templateId) ?? coachOnboardingTemplates[0];
@@ -70,6 +109,7 @@ export function InitializationWizardPanel() {
       return;
     }
     saveUserProfile(profileDraft);
+    setProfileBaseline(cloneProfileDraft(profileDraft));
     const nextSuggestions = generateBoundarySuggestionsFromText({
       text: sourceText,
       profile: { targetRole: profileDraft.targetRole, roleFamily: profileDraft.roleFamily },

@@ -6,15 +6,19 @@
     "assets/embedded-data.js": "e07308798d8b515cd279bcd72591d722263534575e55fa2f7a42e54be8f19617",
     "assets/icon.svg": "5a55c4892f25c6d375d0b05a212dd41dd22c977895ae233b312946cd578ab457",
     "assets/manifest.webmanifest": "59cfc76c9833822a273a771d89fa1b49c8a84e4cf739db5fa9824d2b0057145f",
-    "assets/schedule.css": "3ad82564108b578919a751e9f36326f81fbf3eabb1a7492a09d4bf45aff03414",
+    "assets/public-site.css": "b0d6143179a917b21c9fd2f9debfa42e8a8d48c798923b18d321152f6758b9e4",
+    "assets/schedule.css": "c2e0be4c9700669d71f97264d83f6fb69f7954ca5f5bbfb77ff57492e6666a73",
     "assets/schedule.js": "f55af0638c71e7aec8609ac6410c0f8fb485aa91dde2e8d2b49c5be6fdd159d8",
     "data/interview_context.json": "a1639c63eaf209044760c05b418ed3da14380f25c502cc30f44c2302cc8de0c5",
     "data/interview_kb.json": "caf54a8f352fc6b69bc61fd3cf04a17d31d0360a2f63b8317c05cd635dcba593",
     "data/schedule.json": "f5e88c117b1d83ebdaf879a6a4393333795c0568ccdb55f95ab7278fb0456fcf",
-    "login.html": "b347ac8dd3e36958b744fd66e1fe1915678d47a3ed7c71b15eff871e5d084eeb",
+    "index.html": "08a6a6b41c274efb53720f290b2ad24d16c6d3ab60cf8c367eab4b280a1d91c3",
+    "login.html": "66bae88faeb5584a8d7b6a0c2dfadaeb9b1aedf631516212de895695ab75380a",
     "no-profile-fallback.html": "d7f245438a0f60a0d1bdc7579b8b33181040399a9dde25e076c250d46da1f4eb",
+    "privacy.html": "55872ed3b1d308278f2f8a90aa7db3a5087a1eebcfb7aa905d830d80b95ef2a6",
     "schedule.html": "54d70ab1a021c431e6dd89b1ec95c3471cf59cca975bfea283001935dcfd6399",
     "sw.js": "0d28b9bbe3f25354a43acc8768ab7f92de2f87f94c109ee2cf4d59fe6409fa7c",
-    "tools/build_public_safe_bundle.js": "bdeae3953a8c423a8865f2bf053ceb2796ff8e85656912153b884e5f4b1b3929"
+    "terms.html": "31367688383efaa4784e717f66106142c38d5d1e9abd0a39f83266d80439b707",
+    "tools/build_public_safe_bundle.js": "c551bc11f19ff45ba8561f6703c42ef8331db1ecd96c78920e986848ab6796a7"
   }
 }

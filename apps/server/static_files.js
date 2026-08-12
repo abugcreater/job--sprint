@@ -51,7 +51,7 @@ function safePath(urlPath) {
   } catch (_) {
     return { error: "bad_request" };
   }
-  const relativePath = cleanPath === "/" ? REACT_ENTRY_PATH : cleanPath;
+  const relativePath = cleanPath === "/" ? "/index.html" : cleanPath;
   if (relativePath === "/react/" || relativePath === REACT_ENTRY_PATH || relativePath.startsWith("/react/assets/")) {
     const reactRoot = path.resolve(ROOT, "apps", "react-web", "dist");
     const reactRelativePath = relativePath === "/react/" ? "/index.html" : relativePath.slice("/react".length);
@@ -62,7 +62,10 @@ function safePath(urlPath) {
     }
     return { filePath: resolved };
   }
-  const allowed = relativePath === "/schedule.html"
+  const allowed = relativePath === "/index.html"
+    || relativePath === "/privacy.html"
+    || relativePath === "/terms.html"
+    || relativePath === "/schedule.html"
     || relativePath === "/login.html"
     || relativePath === "/sw.js"
     || relativePath === "/assets/manifest.webmanifest"
@@ -90,8 +93,7 @@ function loginPathFor(reqPathname, nextPathname = REACT_DEFAULT_ENTRY) {
 }
 
 function isPrivateStatic(pathname) {
-  return pathname === "/"
-    || pathname === "/schedule.html"
+  return pathname === "/schedule.html"
     || pathname === "/assets/embedded-data.js"
     || pathname === "/react"
     || pathname === "/react/"
