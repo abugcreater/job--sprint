@@ -76,7 +76,7 @@ describe("React Job Sprint stats workspace", () => {
     expect(within(aiRunPanel!).getByText("成功 / 降级")).toBeInTheDocument();
     expect(within(aiRunPanel!).getAllByText("1 / 1")).toHaveLength(2);
     expect(within(aiRunPanel!).getByText("失败 / Schema 异常")).toBeInTheDocument();
-    expect(within(aiRunPanel!).getByText("Schema 失败 · anthropic-compatible")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("Schema 失败 · 服务端 AI")).toBeInTheDocument();
     expect(within(aiRunPanel!).getByText("最新诊断")).toBeInTheDocument();
     expect(within(aiRunPanel!).getByText("模型响应未通过结构校验")).toBeInTheDocument();
     expect(within(aiRunPanel!).getByText("建议动作")).toBeInTheDocument();
@@ -98,9 +98,9 @@ describe("React Job Sprint stats workspace", () => {
 
     const aiRunPanel = (await screen.findByRole("heading", { name: "AI 运行质量" })).closest("article");
     expect(aiRunPanel).not.toBeNull();
-    expect(within(aiRunPanel!).getByText("本地模式 · local-fallback")).toBeInTheDocument();
-    expect(within(aiRunPanel!).getByText("本地前端未连接后端 AI API")).toBeInTheDocument();
-    expect(within(aiRunPanel!).getByText("用服务端 runtime 或远端环境复验 /api/coach/artifacts。")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("本地建议可用 · 本地规则")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("本地规则建议已生成")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("需要真实模型建议时，请使用已部署服务，或请维护者检查服务端运行情况。")).toBeInTheDocument();
   });
 
   it("keeps an unconfigured provider separate from an unavailable API", async () => {
@@ -120,7 +120,7 @@ describe("React Job Sprint stats workspace", () => {
 
     const aiRunPanel = (await screen.findByRole("heading", { name: "AI 运行质量" })).closest("article");
     expect(aiRunPanel).not.toBeNull();
-    expect(within(aiRunPanel!).getByText("未配置模型 · local-fallback")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("未配置模型 · 本地规则")).toBeInTheDocument();
     expect(within(aiRunPanel!).getByText("服务端已连接，但未启用真实 provider")).toBeInTheDocument();
     expect(within(aiRunPanel!).getByText("需要真实模型时，由维护者在仓库外配置 provider 后再生成。")).toBeInTheDocument();
   });
@@ -142,7 +142,7 @@ describe("React Job Sprint stats workspace", () => {
 
     const aiRunPanel = (await screen.findByRole("heading", { name: "AI 运行质量" })).closest("article");
     expect(aiRunPanel).not.toBeNull();
-    expect(within(aiRunPanel!).getByText("请求过多 · local-fallback")).toBeInTheDocument();
+    expect(within(aiRunPanel!).getByText("请求过多 · 本地规则")).toBeInTheDocument();
     expect(within(aiRunPanel!).getByText("AI 服务正在限流")).toBeInTheDocument();
     expect(within(aiRunPanel!).getByText("请等待片刻后再生成；不要连续点击或反复刷新页面。")).toBeInTheDocument();
   });

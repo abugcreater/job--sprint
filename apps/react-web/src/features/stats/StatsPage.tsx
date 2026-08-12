@@ -5,7 +5,7 @@ import { buildApplicationsDashboard } from "../../data/applicationsAdapter";
 import { buildCoachDashboard } from "../../data/coachAdapter";
 import { buildInterviewDashboard } from "../../data/interviewAdapter";
 import { buildLearningDashboard } from "../../data/learningAdapter";
-import { diagnoseLlmRun } from "../../data/llmRunDiagnosis";
+import { diagnoseLlmRun, llmRunProviderLabel } from "../../data/llmRunDiagnosis";
 import { buildReviewDashboard } from "../../data/reviewAdapter";
 import { useSprintStore } from "../../stores/sprintStore";
 import type { LlmRun } from "../../types/sprint";
@@ -234,7 +234,7 @@ function summarizeLlmRuns(runs: LlmRun[]) {
     schemaIssueCount,
     valueLabel: runs.length ? `${successCount}/${runs.length}` : "暂无",
     detailLabel: runs.length ? `成功 ${successCount} 次，降级 ${fallbackCount} 次，失败 ${failedCount} 次；最近为${latestDiagnosis?.label}` : "生成 AI 草稿后会统计 provider、fallback 和 schema 状态",
-    latestLabel: latest ? `${latestDiagnosis?.label ?? llmStatusLabel(latest.status)} · ${latest.provider}` : "暂无运行记录",
+    latestLabel: latest ? `${latestDiagnosis?.label ?? llmStatusLabel(latest.status)} · ${llmRunProviderLabel(latest.provider)}` : "暂无运行记录",
     latestDiagnosisLabel: latestDiagnosis?.title ?? "暂无 AI 运行记录",
     latestNextAction: latestDiagnosis?.nextAction ?? "生成 AI 草稿后会给出诊断和恢复动作"
   };

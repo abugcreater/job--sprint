@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { History } from "lucide-react";
-import { diagnoseLlmRun } from "../../../data/llmRunDiagnosis";
+import { diagnoseLlmRun, llmRunProviderLabel, llmRunSchemaStatusLabel } from "../../../data/llmRunDiagnosis";
 import type { LlmRun } from "../../../types/sprint";
 import { PanelTitle } from "./CoachPrimitives";
 
@@ -19,8 +19,8 @@ export function LlmRunPanel({ runs }: { runs: LlmRun[] }) {
             <div key={run.id} className="rounded-card border border-line bg-white p-4">
               <div className="flex flex-wrap gap-2">
                 <span className={`rounded-control px-2 py-1 text-xs font-black ${diagnosis.tone === "risk" ? "bg-risk-100 text-risk-600" : diagnosis.tone === "success" ? "bg-success-100 text-success-600" : "bg-brand-100 text-brand-700"}`}>{diagnosis.label}</span>
-                <span className="rounded-control bg-surface-0 px-2 py-1 text-xs font-black text-ink-500">{run.provider}</span>
-                <span className="rounded-control bg-surface-0 px-2 py-1 text-xs font-black text-ink-500">schema {run.schemaStatus}</span>
+                <span className="rounded-control bg-surface-0 px-2 py-1 text-xs font-black text-ink-500">建议来源：{llmRunProviderLabel(run.provider)}</span>
+                <span className="rounded-control bg-surface-0 px-2 py-1 text-xs font-black text-ink-500">结构校验：{llmRunSchemaStatusLabel(run.schemaStatus)}</span>
               </div>
               <p className="mt-3 text-sm font-black text-ink-900">{run.promptVersion} · {run.artifactCount} 条草稿</p>
               <p className="mt-1 break-words text-xs font-bold leading-5 text-ink-500">
