@@ -1,0 +1,37 @@
+apps/react-web/src/data/llmRunDiagnosis.ts
+  s_8f6b4df0c955b0::t_e3edea4f1a41b8 12-23
+  s_8f6b4df0c955b0::t_98c59375859105 108-111
+apps/react-web/src/features/coach/components/LlmRunPanel.tsx
+  s_8f6b4df0c955b0::t_e3edea4f1a41b8 3,22-23
+apps/react-web/src/test/LlmRunPanel.test.tsx
+  s_8f6b4df0c955b0::t_98c59375859105 30-41
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_e3edea4f1a41b8 36
+apps/react-web/src/features/stats/StatsPage.tsx
+  s_8f6b4df0c955b0::t_e3edea4f1a41b8 8,237
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_98c59375859105 114
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_e7dc87ed4f07cb 31-33
+  s_8f6b4df0c955b0::t_98c59375859105 3-25,28-30,34-38
+  s_8f6b4df0c955b0::t_e3edea4f1a41b8 26-27
+apps/react-web/src/test/StatsPage.test.tsx
+  s_8f6b4df0c955b0::t_49887de82800de 145
+  s_8f6b4df0c955b0::t_e3edea4f1a41b8 79,101-103,123
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "18556d478f49d95e1c52e955f2a5298b15423f74",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
