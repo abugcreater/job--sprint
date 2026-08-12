@@ -9,6 +9,18 @@ export interface LlmRunDiagnosis {
   tone: "success" | "neutral" | "risk";
 }
 
+export function llmRunProviderLabel(provider: string): string {
+  if (provider === "local-fallback") return "本地规则";
+  if (provider === "anthropic-compatible") return "服务端 AI";
+  return provider;
+}
+
+export function llmRunSchemaStatusLabel(status: LlmRun["schemaStatus"]): string {
+  if (status === "pass") return "通过";
+  if (status === "failed") return "未通过";
+  return "未校验";
+}
+
 export function diagnoseLlmRun(run: LlmRun): LlmRunDiagnosis {
   if (run.warning === "auth_required") {
     return {
@@ -93,10 +105,10 @@ export function diagnoseLlmRun(run: LlmRun): LlmRunDiagnosis {
   if (run.warning === "server_unavailable") {
     return {
       code: "server_unavailable",
-      label: "本地模式",
-      title: "本地前端未连接后端 AI API",
-      detail: "当前页面已用本地规则生成草稿，不代表远端大模型或 provider 本身失败。",
-      nextAction: "用服务端 runtime 或远端环境复验 /api/coach/artifacts。",
+      label: "本地建议可用",
+      title: "本地规则建议已生成",
+      detail: "当前页面没有连接后端 AI API，因此未调用真实模型；已生成的草稿仍可由你审核和采用。",
+      nextAction: "需要真实模型建议时，请使用已部署服务，或请维护者检查服务端运行情况。",
       tone: "neutral"
     };
   }

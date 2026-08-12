@@ -1,6 +1,41 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-11
+日期：2026-08-12
+
+## 2026-08-12 第七十次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；开始时工作树干净，没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或短分支积压，gone 分支清理结果为空。
+- `origin/main` 与 `origin/develop` 存在真实内容差异：`v0.2.9` 于 2026-08-10 创建，此后已合入 #59（公开展示面）与 #60（快速建档草稿保护）两项正式需求，尚未满足 7 天或 3 项需求的 release 阈值；本轮在普通需求合入后将重新判定发布。
+
+### 今日选择：本地 AI 运行记录去技术化
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 4/5 | 普通用户看到 `local-fallback`、`schema pass` 容易把可审核的本地草稿误读为持续失败。 |
+| 问题确定性 | 5/5 | 运行记录已有中文诊断，但顶部标签仍直接渲染内部 provider 与 schema 枚举；截图和组件代码都可复现。 |
+| 风险降低 | 4/5 | 仅修改展示文案与回归测试，不伪造真实模型成功，也不改变运行记录、数据域或 AI 写入规则。 |
+| 交互改善 | 4/5 | 本地降级清楚说明“建议可用”、来源和结构校验，用户仍可从诊断看到真实模型的使用边界。 |
+| 可验证性 | 5/5 | 组件测试明确断言中文标签、中文诊断及不再显示内部标识；完整前端测试、构建和 GitFlow 门禁可复现。 |
+| 实现范围 | 5/5 | 限定在诊断文案、运行记录组件、组件测试和产品运维记录；不改服务端、账号、Android 或远端配置。 |
+
+### 改动
+
+- `server_unavailable` 的中性诊断调整为“本地建议可用 / 本地规则建议已生成”，明确草稿可审核但并非真实模型调用。
+- AI 运行记录和 Stats 将 `local-fallback` 显示为“本地规则”，将 `schema pass` 显示为“结构校验：通过”；真实服务端 AI 仍保留为“服务端 AI”。
+- 诊断模块统一来源与结构校验展示规则，`LlmRunPanel.test.tsx` 和 `StatsPage.test.tsx` 共同锁定用户可见文案并拒绝内部枚举回流。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test`：PASS，48 个文件、156 项；包含 AI 运行记录和 Stats 的本地降级、未配置 provider、限流与 schema 异常分支。
+- `npm --prefix apps/react-web run typecheck`、`npm --prefix apps/react-web run build`：PASS；保留既有 Vite 单包体积提示，不将其扩大解释为本轮回归。
+- `npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase work` 与 `git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮不连接真实 provider、不部署服务器、不修改账号、数据域、远端配置或 Android 资源；本地建议可用不等于真实模型质量已验收。
+- 下一轮优先候选仍是可信 HTTPS 与真机条件齐备后的 Android 预测返回/登录切换验收；否则继续将真实 JD、面试结果与周复盘归因串成长期质量闭环。
 
 ## 2026-08-11 第六十九次主动迭代
 
