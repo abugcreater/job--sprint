@@ -18,9 +18,12 @@ import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { isOwnerSession } from "../../api/authClient";
 import { useAuthSessionContext } from "../../app/authSessionContext";
-import { buildMoreDashboard, buildReactStateExportPayload, parseReactStateImportPayload, type MoreExportItem } from "../../data/moreAdapter";
+import { buildMoreDashboard, buildReactStateExportPayload, parseReactStateImportPayload, type MoreExportItem, type ReactStateImportResult } from "../../data/moreAdapter";
 import { getLegacyStorageStatus } from "../../data/legacyAdapters";
 import { useSprintStore } from "../../stores/sprintStore";
+import { BackupImportConfirmationDialog } from "./BackupImportConfirmationDialog";
+
+type PendingReactStateImport = Extract<ReactStateImportResult, { ok: true }>;
 
 export function MorePage() {
   const authSession = useAuthSessionContext();
@@ -41,6 +44,7 @@ export function MorePage() {
   const restoreSnapshot = useSprintStore((state) => state.restoreSnapshot);
   const [exportMessage, setExportMessage] = useState("待导出");
   const [moreView, setMoreView] = useState<"account" | "backup" | "links">("account");
+  const [pendingImport, setPendingImport] = useState<PendingReactStateImport | null>(null);
   const storage = typeof window !== "undefined" ? window.localStorage : undefined;
   const dashboard = buildMoreDashboard({
     sprint,
@@ -75,14 +79,26 @@ export function MorePage() {
           setExportMessage(`导入失败：${result.error}`);
           return;
         }
-        restoreSnapshot(result.snapshot);
-        setExportMessage(`个人数据备份已导入：完成 ${result.summary.completedCount} 项，证据 ${result.summary.evidenceCount} 条，延期 ${result.summary.delayCount} 条，画像 ${result.summary.profileCount} 个，知识边界 ${result.summary.boundaryCount} 条，AI 建议 ${result.summary.aiArtifactCount} 条`);
+        setPendingImport(result);
+        setExportMessage("个人数据备份已读取，请确认是否恢复。");
       } catch {
         setExportMessage("导入失败：JSON 文件无法解析");
       }
     },
-    [authSession.user?.dataScope, authSession.user?.username, restoreSnapshot]
+    [authSession.user?.dataScope, authSession.user?.username]
   );
+
+  const confirmImportReactState = useCallback(() => {
+    if (!pendingImport) return;
+    restoreSnapshot(pendingImport.snapshot);
+    setExportMessage(importSuccessMessage(pendingImport.summary));
+    setPendingImport(null);
+  }, [pendingImport, restoreSnapshot]);
+
+  const cancelImportReactState = useCallback(() => {
+    setPendingImport(null);
+    setExportMessage("已取消导入，当前个人数据未变更。");
+  }, []);
 
   return (
     <main className="app-main">
@@ -126,8 +142,13 @@ export function MorePage() {
 
         {moreView === "links" ? <NextEntries entries={owner ? [...dashboard.nextEntries, { label: "管理员中心", path: "/admin", description: "管理账号邀请和使用状态。" }] : [{ label: "查看统计", path: "/stats", description: "集中查看个人进展和数据完整度。" }, ...dashboard.nextEntries]} /> : null}
       </section>
+      {pendingImport ? <BackupImportConfirmationDialog summary={pendingImport.summary} onCancel={cancelImportReactState} onConfirm={confirmImportReactState} /> : null}
     </main>
   );
+}
+
+function importSuccessMessage(summary: PendingReactStateImport["summary"]): string {
+  return `个人数据备份已恢复：完成 ${summary.completedCount} 项，证据 ${summary.evidenceCount} 条，延期 ${summary.delayCount} 条，画像 ${summary.profileCount} 个，知识边界 ${summary.boundaryCount} 条，AI 建议 ${summary.aiArtifactCount} 条`;
 }
 
 function MoreViewButton({ active, children, onClick }: { active: boolean; children: ReactNode; onClick: () => void }) {
