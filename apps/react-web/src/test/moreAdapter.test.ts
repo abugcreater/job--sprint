@@ -204,4 +204,22 @@ describe("moreAdapter", () => {
       error: "只支持 jobSprint.react.v1 导出文件"
     });
   });
+
+  it("requires a matching data scope before an authenticated account restores a backup", () => {
+    const legacyPayload = {
+      source: "jobSprint.react.v1",
+      completed: { "task-1": true }
+    };
+
+    expect(parseReactStateImportPayload(legacyPayload, { currentDataScope: "coach-a" })).toEqual({
+      ok: false,
+      error: "导入文件未标记数据域，不能恢复到当前已登录账号"
+    });
+    expect(parseReactStateImportPayload({ ...legacyPayload, storageOwner: { dataScope: "coach-b" } }, { currentDataScope: "coach-a" })).toEqual({
+      ok: false,
+      error: "导入文件属于 coach-b 数据域，不能恢复到当前 coach-a 数据域"
+    });
+    expect(parseReactStateImportPayload({ ...legacyPayload, storageOwner: { dataScope: "coach-a" } }, { currentDataScope: "coach-a" }).ok).toBe(true);
+    expect(parseReactStateImportPayload(legacyPayload).ok).toBe(true);
+  });
 });

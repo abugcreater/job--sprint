@@ -1,6 +1,43 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-14
+日期：2026-08-15
+
+## 2026-08-15 第七十二次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；工作树干净，没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 与 `origin/develop` 的提交祖先关系仍受 squash 历史影响，直接文件树差异包含 #64 的个人备份恢复确认。`v0.2.10` 于 2026-08-12 创建，此后只有 #64 一项正式需求，未满足 7 天或 3 项需求阈值；本轮不创建 release，也不部署服务器。
+
+### 今日选择：认证账号拒绝无数据域备份
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 已登录求职者恢复备份时必须能确认数据属于自己；无法归属的旧快照不应进入当前账号。 |
+| 问题确定性 | 5/5 | `parseReactStateImportPayload` 仅在备份有数据域且与当前账号不同才拒绝；无 `storageOwner` 时会绕过比较。 |
+| 风险降低 | 5/5 | 在解析层拒绝无标记或不匹配备份，恢复确认和 `restoreSnapshot` 都不会执行。 |
+| 交互改善 | 3/5 | 已登录用户会收到具体失败原因，本地模式保留旧备份兼容，避免把安全策略变成无解释的导入失败。 |
+| 可验证性 | 5/5 | 单测覆盖无标记拒绝、不匹配拒绝、匹配通过和本地模式兼容；完整前端回归与构建可复现。 |
+| 实现范围 | 5/5 | 仅修改备份解析条件、回归测试和产品记录，不改服务端、账号、数据域写入、Android 或远端配置。 |
+
+### 改动
+
+- `moreImportAdapter` 对带 `currentDataScope` 的调用要求备份显式包含同一数据域；缺失 `storageOwner` 和不匹配数据域均在恢复确认前返回可读失败原因。
+- 本地模式不传入 `currentDataScope`，继续支持历史 JSON 备份；没有通过猜测归属或自动迁移来放宽认证账号隔离。
+- `moreAdapter.test.ts` 覆盖认证账号无标记/不匹配/匹配备份与本地模式旧备份四条边界。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test -- moreAdapter.test.ts`：PASS，5 项。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、158 项。
+- `npm --prefix apps/react-web run build`：PASS；保留既有 Vite 单包大于 500 kB 提示，不将其扩大解释为本轮回归。
+- `npm run validate:architecture-quality`、`git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮不为无数据域旧备份设计迁移工具，也不提供跨设备合并、服务端恢复、版本历史或 Android 真机证据；没有部署服务器或修改任何远端账号/数据。
+- 下一轮优先候选仍是可信 HTTPS 和真机条件具备后的 Android 预测返回/登录切换验收；没有这些条件时，优先将机会状态、面试结果与周复盘归因接成长期质量闭环。
 
 ## 2026-08-14 第七十一次主动迭代
 
