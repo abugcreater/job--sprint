@@ -149,6 +149,7 @@ describe("React Job Sprint more workspace", () => {
     await waitFor(() => {
       expect(screen.getByRole("alertdialog", { name: "确认恢复个人数据？" })).toBeInTheDocument();
     });
+    expect(screen.getByText("本机未标记备份")).toBeInTheDocument();
     expect(useSprintStore.getState().completed["task-imported"]).toBeUndefined();
     expect(useSprintStore.getState().userProfiles).toEqual([qaProfile]);
 

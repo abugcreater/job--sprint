@@ -7,6 +7,7 @@ type ImportSummary = Extract<ReactStateImportResult, { ok: true }>[
 
 export function BackupImportConfirmationDialog({ summary, onCancel, onConfirm }: { summary: ImportSummary; onCancel: () => void; onConfirm: () => void }) {
   const items = [
+    { label: "备份归属", value: summary.sourceDataScope ? `数据域：${summary.sourceDataScope}` : "本机未标记备份" },
     { label: "完成", value: `${summary.completedCount} 项` },
     { label: "证据", value: `${summary.evidenceCount} 条` },
     { label: "画像", value: `${summary.profileCount} 个` },

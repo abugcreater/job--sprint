@@ -25,6 +25,7 @@ export type ReactStateImportResult =
         scheduleEventCount: number;
         aiArtifactCount: number;
         llmRunCount: number;
+        sourceDataScope?: string;
       };
     }
   | {
@@ -89,7 +90,8 @@ export function parseReactStateImportPayload(payload: unknown, options: { curren
       boundaryFeedbackCount: boundarySuggestionFeedback.length,
       scheduleEventCount: coachScheduleEvents.length,
       aiArtifactCount: aiArtifacts.length,
-      llmRunCount: llmRuns.length
+      llmRunCount: llmRuns.length,
+      ...(payloadDataScope ? { sourceDataScope: payloadDataScope } : {})
     }
   };
 }
