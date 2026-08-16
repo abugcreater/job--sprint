@@ -699,7 +699,10 @@ async function runMobileReadback(baseUrl, rawStorage, desktopSnapshot) {
 
 async function runImportRestoreFlow(baseUrl) {
   const importPayloadPath = path.join(downloadsDir, "job-sprint-react-state-import.json");
-  const importPayload = buildReactImportRestorePayload();
+  const importPayload = {
+    ...buildReactImportRestorePayload(),
+    storageOwner: { username: TEST_USER, dataScope: TEST_USER }
+  };
   fs.writeFileSync(importPayloadPath, JSON.stringify(importPayload, null, 2));
 
   const browser = await chromium.launch();
@@ -713,7 +716,9 @@ async function runImportRestoreFlow(baseUrl) {
     await gotoRoute(page, baseUrl, "/more", "账号与数据");
     await page.getByRole("button", { name: "备份" }).click();
     await page.getByLabel("导入个人数据备份").setInputFiles(importPayloadPath);
-    await page.getByText("个人数据备份已导入：完成 1 项，证据 1 条，延期 1 条，画像 1 个，知识边界 1 条，AI 建议 1 条").waitFor();
+    await page.getByText(`数据域：${TEST_USER}`).waitFor();
+    await page.getByRole("button", { name: "确认恢复" }).click();
+    await page.getByText("个人数据备份已恢复：完成 1 项，证据 1 条，延期 1 条，画像 1 个，知识边界 1 条，AI 建议 1 条").waitFor();
     await waitForServerRuntimeText(page, baseUrl, { includes: ["导入恢复证据", "导入恢复延期原因", "导入后补救动作", "导入恢复画像", "导入恢复 AI 草稿"] });
     await screenshot(page, "11-more-import-restore");
     const snapshot = await snapshotStorage(page, "09-after-more-import-restore");

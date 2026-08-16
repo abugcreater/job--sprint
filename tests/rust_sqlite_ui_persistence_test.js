@@ -388,6 +388,7 @@ async function runUiFlow(baseUrl) {
     const importPayload = {
       exportedAt: new Date().toISOString(),
       source: "jobSprint.react.v1",
+      storageOwner: { username: TEST_USER, dataScope: "rust-ui" },
       syncState: "online",
       sprint: {
         date: "2026-07-05",
@@ -433,7 +434,9 @@ async function runUiFlow(baseUrl) {
     };
     fs.writeFileSync(importPayloadPath, JSON.stringify(importPayload, null, 2));
     await page.getByLabel("导入个人数据备份").setInputFiles(importPayloadPath);
-    await page.getByText("个人数据备份已导入：完成").waitFor();
+    await page.getByText("数据域：rust-ui").waitFor();
+    await page.getByRole("button", { name: "确认恢复" }).click();
+    await page.getByText("个人数据备份已恢复：完成").waitFor();
     await waitForRuntimeText(baseUrl, cookieHeader, "Rust SQLite 导入恢复证据");
     await waitForRuntimeText(baseUrl, cookieHeader, "Rust SQLite 导入延期原因");
     await waitForRuntimeText(baseUrl, cookieHeader, "RustSQLite画像");
