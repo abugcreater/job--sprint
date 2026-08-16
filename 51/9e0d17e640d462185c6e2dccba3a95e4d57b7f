@@ -1,0 +1,37 @@
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_0af5277c80545f 3-44
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_0af5277c80545f 3-9
+apps/react-web/src/test/moreAdapter.test.ts
+  s_8f6b4df0c955b0::t_0af5277c80545f 1,132-135
+  s_8f6b4df0c955b0::t_ac4ffbc1cceccb 136-137
+apps/react-web/src/features/more/MorePage.tsx
+  s_8f6b4df0c955b0::t_0af5277c80545f 21,68-70,255
+apps/react-web/src/data/moreAdapter.ts
+  s_8f6b4df0c955b0::t_0af5277c80545f 76-77,238-252
+  s_8f6b4df0c955b0::t_fa4241f1f7faea 253
+apps/react-web/src/test/MorePage.test.tsx
+  s_8f6b4df0c955b0::t_0af5277c80545f 152
+apps/react-web/src/features/more/BackupImportConfirmationDialog.tsx
+  s_8f6b4df0c955b0::t_0af5277c80545f 10
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_0af5277c80545f 3,25
+apps/react-web/src/data/moreImportAdapter.ts
+  s_8f6b4df0c955b0::t_0af5277c80545f 28,93-94
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.22",
+  "base_commit_sha": "519e0d17e640d462185c6e2dccba3a95e4d57b7f",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
