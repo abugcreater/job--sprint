@@ -73,6 +73,8 @@ export interface ReactStateExportPayload {
   llmRuns: LlmRun[];
 }
 
+export type ReactStateBackupOwner = ReactStateExportPayload["storageOwner"];
+
 const reactStorageKey = "jobSprint.react.v1";
 
 const legacyLabels: Record<(typeof LEGACY_STORAGE_KEYS)[number], string> = {
@@ -231,6 +233,22 @@ export function buildReactStateExportPayload({
     aiArtifacts,
     llmRuns
   };
+}
+
+export function buildReactStateExportFilename(storageOwner?: ReactStateBackupOwner): string {
+  const dataScope = backupDataScope(storageOwner);
+  if (!dataScope) return "job-sprint-react-state-local.json";
+  const filenameScope = dataScope
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+  return `job-sprint-react-state-${filenameScope || "account"}.json`;
+}
+
+function backupDataScope(storageOwner?: ReactStateBackupOwner): string {
+  const dataScope = storageOwner?.dataScope?.trim();
+  return dataScope || storageOwner?.username?.trim() || "";
 }
 
 function readStorageBytes(key: string, storage?: Storage): number {

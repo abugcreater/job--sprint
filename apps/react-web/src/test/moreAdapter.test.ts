@@ -1,4 +1,4 @@
-import { buildMoreDashboard, buildReactStateExportPayload, parseReactStateImportPayload } from "../data/moreAdapter";
+import { buildMoreDashboard, buildReactStateExportFilename, buildReactStateExportPayload, parseReactStateImportPayload } from "../data/moreAdapter";
 import type { BoundarySuggestionFeedback, DelayRecord, LlmRun, ReviewEvidence } from "../types/sprint";
 import { buildQaSprint, qaTaskIds } from "./fixtures/coachFlow";
 
@@ -127,6 +127,12 @@ describe("moreAdapter", () => {
     expect(payload.boundarySuggestionFeedback).toHaveLength(1);
     expect(payload.llmRuns).toHaveLength(1);
     expect(payload.lastSavedAt).toBe("2026-07-02T14:10:00+08:00");
+  });
+
+  it("names account backups by their data scope while keeping a local fallback name", () => {
+    expect(buildReactStateExportFilename()).toBe("job-sprint-react-state-local.json");
+    expect(buildReactStateExportFilename({ dataScope: "Candidate A / 2026" })).toBe("job-sprint-react-state-candidate-a-2026.json");
+    expect(buildReactStateExportFilename({ username: "Coach-B" })).toBe("job-sprint-react-state-coach-b.json");
   });
 
   it("parses a React state export back into a restorable snapshot", () => {
