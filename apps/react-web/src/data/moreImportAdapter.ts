@@ -25,6 +25,7 @@ export type ReactStateImportResult =
         scheduleEventCount: number;
         aiArtifactCount: number;
         llmRunCount: number;
+        sourceDataScope?: string;
       };
     }
   | {
@@ -43,8 +44,13 @@ export function parseReactStateImportPayload(payload: unknown, options: { curren
     return { ok: false, error: "只支持 jobSprint.react.v1 导出文件" };
   }
   const payloadDataScope = readPayloadDataScope(payload.storageOwner);
-  if (options.currentDataScope && payloadDataScope && options.currentDataScope !== payloadDataScope) {
-    return { ok: false, error: `导入文件属于 ${payloadDataScope} 数据域，不能恢复到当前 ${options.currentDataScope} 数据域` };
+  if (options.currentDataScope) {
+    if (!payloadDataScope) {
+      return { ok: false, error: "导入文件未标记数据域，不能恢复到当前已登录账号" };
+    }
+    if (options.currentDataScope !== payloadDataScope) {
+      return { ok: false, error: `导入文件属于 ${payloadDataScope} 数据域，不能恢复到当前 ${options.currentDataScope} 数据域` };
+    }
   }
 
   const completed = parseCompleted(payload.completed);
@@ -84,7 +90,8 @@ export function parseReactStateImportPayload(payload: unknown, options: { curren
       boundaryFeedbackCount: boundarySuggestionFeedback.length,
       scheduleEventCount: coachScheduleEvents.length,
       aiArtifactCount: aiArtifacts.length,
-      llmRunCount: llmRuns.length
+      llmRunCount: llmRuns.length,
+      ...(payloadDataScope ? { sourceDataScope: payloadDataScope } : {})
     }
   };
 }

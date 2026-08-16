@@ -1,6 +1,122 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-12
+日期：2026-08-16
+
+## 2026-08-16 第七十三次主动迭代
+
+主任务：让个人备份在导出和恢复确认时明确可识别其数据域归属。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | 多账号或多次备份时，用户需要在下载目录和恢复前快速确认选中的就是自己的数据。 |
+| 问题确定性 | 5 | 现有导出固定使用同一文件名，确认面板只显示数据量；数据域校验存在但对用户不可见。 |
+| 风险降低 | 5 | 仅使用既有 `storageOwner` 元数据展示与命名，不放宽任何导入校验，也不触碰服务端数据。 |
+| 交互改善 | 5 | 文件名与确认摘要都提供归属信号，替换本地快照前的复核更直接。 |
+| 可验证性 | 5 | 适配器单测可断言文件名和归属摘要，页面测试可断言确认状态。 |
+| 实现大小 | 5 | 改动限制在 React 备份适配器、页面、确认弹窗、测试与产品台账。 |
+
+基线：
+
+- `git fetch --prune origin` 后工作树干净，目标为 `develop` 的开放 PR 为零。
+- `origin/main` 与 `origin/develop` 文件树存在发布前差异；`v0.2.10` 发布于 2026-08-12，开始本轮时仅累计 #64、#65 两项正式需求，未满足 7 天或 3 项阈值。
+
+改动：
+
+- 备份下载改为 `job-sprint-react-state-<数据域>.json`；无账号数据域的离线备份使用 `job-sprint-react-state-local.json`。
+- 解析后的恢复摘要增加备份数据域，确认面板会显示数据域；历史离线备份明确标为“本机未标记备份”。
+- 导入仍要求已登录账号的数据域严格匹配，未标记或不匹配文件继续在确认前拒绝。
+
+已验证：
+
+- React 定向适配器和 More 页面测试覆盖账号命名、本机命名、恢复确认归属和既有恢复行为。
+- 后续运行 typecheck、前端全量测试、build、产品迭代门禁、敏感扫描和 GitFlow PR 门禁。
+- 发布门禁首次运行发现 Node/Rust UI 持久化脚本仍断言过期的“已导入”文案，且没有执行已存在的“确认恢复”步骤；登录态夹具也缺少与测试账号匹配的 `storageOwner`。已改为按真实恢复流程提供同域备份、确认恢复、展示数据域并断言当前“已恢复”提示，再重新运行完整 Git 发布门禁。
+
+限制：
+
+- 不猜测或修复历史备份的归属；不支持跨账号迁移、字段级合并、服务端恢复或 Android 变更。
+- 本轮不部署服务器、不改远端配置、账号或生产数据。
+
+明日候选：
+
+1. 达到三项正式需求阈值后，按 `release/* -> main` 完成 GitFlow 发布与回同步。
+2. 继续治理 Android 预测返回和进程恢复的草稿语义，但先以真机可验证范围拆分需求。
+
+## 2026-08-15 第七十二次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；工作树干净，没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 与 `origin/develop` 的提交祖先关系仍受 squash 历史影响，直接文件树差异包含 #64 的个人备份恢复确认。`v0.2.10` 于 2026-08-12 创建，此后只有 #64 一项正式需求，未满足 7 天或 3 项需求阈值；本轮不创建 release，也不部署服务器。
+
+### 今日选择：认证账号拒绝无数据域备份
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 已登录求职者恢复备份时必须能确认数据属于自己；无法归属的旧快照不应进入当前账号。 |
+| 问题确定性 | 5/5 | `parseReactStateImportPayload` 仅在备份有数据域且与当前账号不同才拒绝；无 `storageOwner` 时会绕过比较。 |
+| 风险降低 | 5/5 | 在解析层拒绝无标记或不匹配备份，恢复确认和 `restoreSnapshot` 都不会执行。 |
+| 交互改善 | 3/5 | 已登录用户会收到具体失败原因，本地模式保留旧备份兼容，避免把安全策略变成无解释的导入失败。 |
+| 可验证性 | 5/5 | 单测覆盖无标记拒绝、不匹配拒绝、匹配通过和本地模式兼容；完整前端回归与构建可复现。 |
+| 实现范围 | 5/5 | 仅修改备份解析条件、回归测试和产品记录，不改服务端、账号、数据域写入、Android 或远端配置。 |
+
+### 改动
+
+- `moreImportAdapter` 对带 `currentDataScope` 的调用要求备份显式包含同一数据域；缺失 `storageOwner` 和不匹配数据域均在恢复确认前返回可读失败原因。
+- 本地模式不传入 `currentDataScope`，继续支持历史 JSON 备份；没有通过猜测归属或自动迁移来放宽认证账号隔离。
+- `moreAdapter.test.ts` 覆盖认证账号无标记/不匹配/匹配备份与本地模式旧备份四条边界。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test -- moreAdapter.test.ts`：PASS，5 项。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、158 项。
+- `npm --prefix apps/react-web run build`：PASS；保留既有 Vite 单包大于 500 kB 提示，不将其扩大解释为本轮回归。
+- `npm run validate:architecture-quality`、`git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮不为无数据域旧备份设计迁移工具，也不提供跨设备合并、服务端恢复、版本历史或 Android 真机证据；没有部署服务器或修改任何远端账号/数据。
+- 下一轮优先候选仍是可信 HTTPS 和真机条件具备后的 Android 预测返回/登录切换验收；没有这些条件时，优先将机会状态、面试结果与周复盘归因接成长期质量闭环。
+
+## 2026-08-14 第七十一次主动迭代
+
+### GitFlow 基线与发布判定
+
+- 已执行 `git fetch --prune origin`；工作树干净，没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或短分支积压。
+- `origin/main` 与 `origin/develop` 的提交祖先关系仍受 squash 历史影响，但直接文件树差异只有本日志的 `v0.2.10` 回同步记录；最新标签 `v0.2.10` 于 2026-08-12 创建，此后没有新的已合入正式需求，未满足 7 天或 3 项需求阈值。本轮不创建 release，也不部署服务器。
+
+### 今日选择：备份恢复前的覆盖确认
+
+| 维度 | 评分 | 依据 |
+|---|---:|---|
+| 用户价值 | 5/5 | 换设备或恢复个人备份时，完成记录、证据、画像和 AI 建议都是用户实际积累，不能因选中文件就被静默替换。 |
+| 问题确定性 | 5/5 | `MorePage` 在 JSON 解析和数据域校验后直接调用 `restoreSnapshot`，原流程没有确认或取消入口。 |
+| 风险降低 | 5/5 | 确认前不写入 Zustand 快照；取消后当前数据保持不变，避免误选旧备份立即覆盖本地进展。 |
+| 交互改善 | 4/5 | 对话框明确展示恢复动作和备份中完成、证据、画像、知识边界、日程、AI 建议数量，用户能判断是否继续。 |
+| 可验证性 | 5/5 | 页面测试分别覆盖确认前不写入、确认恢复和取消保留当前数据；完整前端测试、构建和架构门禁可复现。 |
+| 实现范围 | 5/5 | 改动限定在个人备份 UI、确认组件、页面测试和产品运维记录，不改服务端、账号、数据域、Android 或远端配置。 |
+
+### 改动
+
+- `MorePage` 将备份导入拆为“读取并校验”与“确认恢复”两步；成功读取只保留待恢复快照，不再立即调用 `restoreSnapshot`。
+- 新增响应式 `BackupImportConfirmationDialog`，明确说明恢复会替换当前本地数据而不是自动合并，并展示备份内容摘要；取消会丢弃待恢复快照并提示当前数据未变更。
+- `MorePage.test.tsx` 覆盖确认前状态不变、确认后的恢复读回和取消后保留当前画像/完成状态。
+
+### 已完成验证
+
+- `npm --prefix apps/react-web test -- MorePage.test.tsx`：PASS，4 项，覆盖读取、确认恢复、取消和既有导出/导航路径。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，48 个文件、157 项。
+- `npm --prefix apps/react-web run build`：PASS；保留既有 Vite 单包大于 500 kB 提示，不将其扩大解释为本轮回归。
+- `npm run validate:architecture-quality`、`git diff --check`：PASS。
+
+### 限制与明日建议
+
+- 本轮只保护当前设备的 JSON 快照替换，不提供跨设备字段合并、恢复撤销、服务端版本历史或已确认恢复后的自动同步承诺；不部署服务器，也不修改远端账号、数据域或 Android 资源。
+- 下一轮优先候选仍是可信 HTTPS 和真机条件具备后的 Android 预测返回/登录切换验收；没有这些条件时，应先把机会状态、面试结果与周复盘归因串成可验证的长期质量闭环。
 
 ## 2026-08-12 第七十次主动迭代
 
@@ -8,6 +124,7 @@
 
 - 已执行 `git fetch --prune origin`；开始时工作树干净，没有目标为 `develop` 或 `main` 的开放 PR、Draft、冲突或短分支积压，gone 分支清理结果为空。
 - `origin/main` 与 `origin/develop` 存在真实内容差异：`v0.2.9` 于 2026-08-10 创建，此后已合入 #59（公开展示面）与 #60（快速建档草稿保护）两项正式需求，尚未满足 7 天或 3 项需求的 release 阈值；本轮在普通需求合入后将重新判定发布。
+- #61 合入后达到三项正式需求阈值，`release/v0.2.10 -> main` 的 #62 已通过 required check 并 squash merge；带注释标签 `v0.2.10` 已推送且指向发布提交。本分支只把该发布结果回同步到 `develop`，不执行服务器交付。
 
 ### 今日选择：本地 AI 运行记录去技术化
 
@@ -31,6 +148,7 @@
 - `npm --prefix apps/react-web test`：PASS，48 个文件、156 项；包含 AI 运行记录和 Stats 的本地降级、未配置 provider、限流与 schema 异常分支。
 - `npm --prefix apps/react-web run typecheck`、`npm --prefix apps/react-web run build`：PASS；保留既有 Vite 单包体积提示，不将其扩大解释为本轮回归。
 - `npm run validate:architecture-quality`、`npm run validate:product-iteration`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase work` 与 `git diff --check`：PASS。
+- `npm run test:git-release`、`npm run validate:gitflow -- --phase release`：PASS；包含根 `npm test`、前端 48 个文件/156 项、React 与 Rust 本地持久化功能流、公开包构建与敏感扫描。未运行 `npm run test:release`，因此没有服务器交付或远端部署结论。
 
 ### 限制与明日建议
 

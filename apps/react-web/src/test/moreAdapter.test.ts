@@ -1,4 +1,4 @@
-import { buildMoreDashboard, buildReactStateExportPayload, parseReactStateImportPayload } from "../data/moreAdapter";
+import { buildMoreDashboard, buildReactStateExportFilename, buildReactStateExportPayload, parseReactStateImportPayload } from "../data/moreAdapter";
 import type { BoundarySuggestionFeedback, DelayRecord, LlmRun, ReviewEvidence } from "../types/sprint";
 import { buildQaSprint, qaTaskIds } from "./fixtures/coachFlow";
 
@@ -129,6 +129,12 @@ describe("moreAdapter", () => {
     expect(payload.lastSavedAt).toBe("2026-07-02T14:10:00+08:00");
   });
 
+  it("names account backups by their data scope while keeping a local fallback name", () => {
+    expect(buildReactStateExportFilename()).toBe("job-sprint-react-state-local.json");
+    expect(buildReactStateExportFilename({ dataScope: "Candidate A / 2026" })).toBe("job-sprint-react-state-candidate-a-2026.json");
+    expect(buildReactStateExportFilename({ username: "Coach-B" })).toBe("job-sprint-react-state-coach-b.json");
+  });
+
   it("parses a React state export back into a restorable snapshot", () => {
     const result = parseReactStateImportPayload({
       exportedAt: "2026-07-02T14:20:00+08:00",
@@ -203,5 +209,23 @@ describe("moreAdapter", () => {
       ok: false,
       error: "只支持 jobSprint.react.v1 导出文件"
     });
+  });
+
+  it("requires a matching data scope before an authenticated account restores a backup", () => {
+    const legacyPayload = {
+      source: "jobSprint.react.v1",
+      completed: { "task-1": true }
+    };
+
+    expect(parseReactStateImportPayload(legacyPayload, { currentDataScope: "coach-a" })).toEqual({
+      ok: false,
+      error: "导入文件未标记数据域，不能恢复到当前已登录账号"
+    });
+    expect(parseReactStateImportPayload({ ...legacyPayload, storageOwner: { dataScope: "coach-b" } }, { currentDataScope: "coach-a" })).toEqual({
+      ok: false,
+      error: "导入文件属于 coach-b 数据域，不能恢复到当前 coach-a 数据域"
+    });
+    expect(parseReactStateImportPayload({ ...legacyPayload, storageOwner: { dataScope: "coach-a" } }, { currentDataScope: "coach-a" }).ok).toBe(true);
+    expect(parseReactStateImportPayload(legacyPayload).ok).toBe(true);
   });
 });

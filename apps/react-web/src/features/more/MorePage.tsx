@@ -18,9 +18,12 @@ import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { isOwnerSession } from "../../api/authClient";
 import { useAuthSessionContext } from "../../app/authSessionContext";
-import { buildMoreDashboard, buildReactStateExportPayload, parseReactStateImportPayload, type MoreExportItem } from "../../data/moreAdapter";
+import { buildMoreDashboard, buildReactStateExportFilename, buildReactStateExportPayload, parseReactStateImportPayload, type MoreExportItem, type ReactStateImportResult } from "../../data/moreAdapter";
 import { getLegacyStorageStatus } from "../../data/legacyAdapters";
 import { useSprintStore } from "../../stores/sprintStore";
+import { BackupImportConfirmationDialog } from "./BackupImportConfirmationDialog";
+
+type PendingReactStateImport = Extract<ReactStateImportResult, { ok: true }>;
 
 export function MorePage() {
   const authSession = useAuthSessionContext();
@@ -41,6 +44,7 @@ export function MorePage() {
   const restoreSnapshot = useSprintStore((state) => state.restoreSnapshot);
   const [exportMessage, setExportMessage] = useState("待导出");
   const [moreView, setMoreView] = useState<"account" | "backup" | "links">("account");
+  const [pendingImport, setPendingImport] = useState<PendingReactStateImport | null>(null);
   const storage = typeof window !== "undefined" ? window.localStorage : undefined;
   const dashboard = buildMoreDashboard({
     sprint,
@@ -61,8 +65,9 @@ export function MorePage() {
 
   const handleExportReactState = useCallback(() => {
     const payload = buildReactStateExportPayload({ sprint, completed, evidenceByTaskId, delayRecords, userProfiles, knowledgeBoundaries, boundarySuggestionFeedback, coachScheduleEvents, aiArtifacts, llmRuns, syncState, lastSavedAt, storageOwner });
-    const ok = downloadJson("job-sprint-react-state.json", payload);
-    setExportMessage(ok ? "个人数据备份已导出" : "当前环境不支持浏览器下载");
+    const filename = buildReactStateExportFilename(storageOwner);
+    const ok = downloadJson(filename, payload);
+    setExportMessage(ok ? `个人数据备份已导出：${filename}` : "当前环境不支持浏览器下载");
   }, [aiArtifacts, boundarySuggestionFeedback, coachScheduleEvents, completed, delayRecords, evidenceByTaskId, knowledgeBoundaries, lastSavedAt, llmRuns, sprint, storageOwner, syncState, userProfiles]);
 
   const handleImportReactState = useCallback(
@@ -75,14 +80,26 @@ export function MorePage() {
           setExportMessage(`导入失败：${result.error}`);
           return;
         }
-        restoreSnapshot(result.snapshot);
-        setExportMessage(`个人数据备份已导入：完成 ${result.summary.completedCount} 项，证据 ${result.summary.evidenceCount} 条，延期 ${result.summary.delayCount} 条，画像 ${result.summary.profileCount} 个，知识边界 ${result.summary.boundaryCount} 条，AI 建议 ${result.summary.aiArtifactCount} 条`);
+        setPendingImport(result);
+        setExportMessage("个人数据备份已读取，请确认是否恢复。");
       } catch {
         setExportMessage("导入失败：JSON 文件无法解析");
       }
     },
-    [authSession.user?.dataScope, authSession.user?.username, restoreSnapshot]
+    [authSession.user?.dataScope, authSession.user?.username]
   );
+
+  const confirmImportReactState = useCallback(() => {
+    if (!pendingImport) return;
+    restoreSnapshot(pendingImport.snapshot);
+    setExportMessage(importSuccessMessage(pendingImport.summary));
+    setPendingImport(null);
+  }, [pendingImport, restoreSnapshot]);
+
+  const cancelImportReactState = useCallback(() => {
+    setPendingImport(null);
+    setExportMessage("已取消导入，当前个人数据未变更。");
+  }, []);
 
   return (
     <main className="app-main">
@@ -126,8 +143,13 @@ export function MorePage() {
 
         {moreView === "links" ? <NextEntries entries={owner ? [...dashboard.nextEntries, { label: "管理员中心", path: "/admin", description: "管理账号邀请和使用状态。" }] : [{ label: "查看统计", path: "/stats", description: "集中查看个人进展和数据完整度。" }, ...dashboard.nextEntries]} /> : null}
       </section>
+      {pendingImport ? <BackupImportConfirmationDialog summary={pendingImport.summary} onCancel={cancelImportReactState} onConfirm={confirmImportReactState} /> : null}
     </main>
   );
+}
+
+function importSuccessMessage(summary: PendingReactStateImport["summary"]): string {
+  return `个人数据备份已恢复：完成 ${summary.completedCount} 项，证据 ${summary.evidenceCount} 条，延期 ${summary.delayCount} 条，画像 ${summary.profileCount} 个，知识边界 ${summary.boundaryCount} 条，AI 建议 ${summary.aiArtifactCount} 条`;
 }
 
 function MoreViewButton({ active, children, onClick }: { active: boolean; children: ReactNode; onClick: () => void }) {
@@ -230,7 +252,7 @@ function ExportPanel({
           <div className="min-w-0">
             <span className="rounded-control bg-white px-2 py-1 text-xs font-black text-ink-500">可导入</span>
             <h3 className="mt-2 break-words text-base font-black leading-6 text-ink-900">导入个人数据备份</h3>
-            <p className="mt-1 break-words text-sm font-semibold leading-6 text-ink-500">恢复完成记录、证据、延期、画像、知识边界和 AI 建议。</p>
+            <p className="mt-1 break-words text-sm font-semibold leading-6 text-ink-500">恢复完成记录、证据、延期、画像、知识边界和 AI 建议。已登录账号只可恢复同一数据域的备份。</p>
           </div>
           <label
             className="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-control border border-brand-700 bg-white px-4 text-sm font-black text-brand-700 shadow-soft transition hover:bg-brand-100 focus-within:outline-none focus-within:ring-2 focus-within:ring-brand-600 focus-within:ring-offset-2"

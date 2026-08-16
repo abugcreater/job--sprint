@@ -84,7 +84,7 @@ describe("React Job Sprint more workspace", () => {
     expect(window.location.hash).toBe("#/today");
   });
 
-  it("imports React state JSON and restores completed, evidence and delay records", async () => {
+  it("reads a backup before confirmation, then restores completed, evidence and delay records", async () => {
     render(<App />);
 
     const payload = {
@@ -147,7 +147,16 @@ describe("React Job Sprint more workspace", () => {
     fireEvent.change(await screen.findByLabelText("导入个人数据备份"), { target: { files: [file] } });
 
     await waitFor(() => {
-      expect(screen.getByRole("status")).toHaveTextContent("个人数据备份已导入：完成 1 项，证据 1 条，延期 1 条，画像 0 个，知识边界 0 条，AI 建议 0 条");
+      expect(screen.getByRole("alertdialog", { name: "确认恢复个人数据？" })).toBeInTheDocument();
+    });
+    expect(screen.getByText("本机未标记备份")).toBeInTheDocument();
+    expect(useSprintStore.getState().completed["task-imported"]).toBeUndefined();
+    expect(useSprintStore.getState().userProfiles).toEqual([qaProfile]);
+
+    fireEvent.click(screen.getByRole("button", { name: "确认恢复" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("status")).toHaveTextContent("个人数据备份已恢复：完成 1 项，证据 1 条，延期 1 条，画像 0 个，知识边界 0 条，AI 建议 0 条");
     });
     const state = useSprintStore.getState();
     expect(state.completed["task-imported"]).toBe(true);
@@ -156,5 +165,23 @@ describe("React Job Sprint more workspace", () => {
     expect(state.boundarySuggestionFeedback[0].reason).toBe("导入候选反馈");
     expect(state.llmRuns[0].provider).toBe("local-fallback");
     expect(state.syncState).toBe("local_fallback");
+  });
+
+  it("keeps the current data when backup recovery is canceled", async () => {
+    render(<App />);
+    const file = new File([JSON.stringify({
+      source: "jobSprint.react.v1",
+      completed: { "task-imported": true }
+    })], "job-sprint-react-state.json", { type: "application/json" });
+
+    fireEvent.click(screen.getByRole("button", { name: "备份" }));
+    fireEvent.change(await screen.findByLabelText("导入个人数据备份"), { target: { files: [file] } });
+
+    expect(await screen.findByRole("alertdialog", { name: "确认恢复个人数据？" })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "取消" }));
+
+    expect(screen.getByRole("status")).toHaveTextContent("已取消导入，当前个人数据未变更。");
+    expect(useSprintStore.getState().completed["task-imported"]).toBeUndefined();
+    expect(useSprintStore.getState().userProfiles).toEqual([qaProfile]);
   });
 });
