@@ -18,7 +18,7 @@ import { useCallback, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
 import { isOwnerSession } from "../../api/authClient";
 import { useAuthSessionContext } from "../../app/authSessionContext";
-import { buildMoreDashboard, buildReactStateExportPayload, parseReactStateImportPayload, type MoreExportItem, type ReactStateImportResult } from "../../data/moreAdapter";
+import { buildMoreDashboard, buildReactStateExportFilename, buildReactStateExportPayload, parseReactStateImportPayload, type MoreExportItem, type ReactStateImportResult } from "../../data/moreAdapter";
 import { getLegacyStorageStatus } from "../../data/legacyAdapters";
 import { useSprintStore } from "../../stores/sprintStore";
 import { BackupImportConfirmationDialog } from "./BackupImportConfirmationDialog";
@@ -65,8 +65,9 @@ export function MorePage() {
 
   const handleExportReactState = useCallback(() => {
     const payload = buildReactStateExportPayload({ sprint, completed, evidenceByTaskId, delayRecords, userProfiles, knowledgeBoundaries, boundarySuggestionFeedback, coachScheduleEvents, aiArtifacts, llmRuns, syncState, lastSavedAt, storageOwner });
-    const ok = downloadJson("job-sprint-react-state.json", payload);
-    setExportMessage(ok ? "个人数据备份已导出" : "当前环境不支持浏览器下载");
+    const filename = buildReactStateExportFilename(storageOwner);
+    const ok = downloadJson(filename, payload);
+    setExportMessage(ok ? `个人数据备份已导出：${filename}` : "当前环境不支持浏览器下载");
   }, [aiArtifacts, boundarySuggestionFeedback, coachScheduleEvents, completed, delayRecords, evidenceByTaskId, knowledgeBoundaries, lastSavedAt, llmRuns, sprint, storageOwner, syncState, userProfiles]);
 
   const handleImportReactState = useCallback(
@@ -251,7 +252,7 @@ function ExportPanel({
           <div className="min-w-0">
             <span className="rounded-control bg-white px-2 py-1 text-xs font-black text-ink-500">可导入</span>
             <h3 className="mt-2 break-words text-base font-black leading-6 text-ink-900">导入个人数据备份</h3>
-            <p className="mt-1 break-words text-sm font-semibold leading-6 text-ink-500">恢复完成记录、证据、延期、画像、知识边界和 AI 建议。</p>
+            <p className="mt-1 break-words text-sm font-semibold leading-6 text-ink-500">恢复完成记录、证据、延期、画像、知识边界和 AI 建议。已登录账号只可恢复同一数据域的备份。</p>
           </div>
           <label
             className="inline-flex min-h-11 shrink-0 cursor-pointer items-center justify-center gap-2 rounded-control border border-brand-700 bg-white px-4 text-sm font-black text-brand-700 shadow-soft transition hover:bg-brand-100 focus-within:outline-none focus-within:ring-2 focus-within:ring-brand-600 focus-within:ring-offset-2"
