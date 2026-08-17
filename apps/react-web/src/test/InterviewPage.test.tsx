@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { App } from "../App";
-import { INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY } from "../data/interviewAdapter";
+import { interviewWeakQuestionMarksStorageKey } from "../data/interviewAdapter";
 import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";
 import type { ReviewEvidence } from "../types/sprint";
@@ -24,6 +24,7 @@ function resetSprint(hash = "#/interview", withProfile = true, initialEvidenceBy
     aiArtifacts: [],
     llmRuns: [],
     syncState: "local_fallback",
+    storageOwner: undefined,
     lastSavedAt: undefined,
     sprint: withProfile
       ? buildQaSprint({ now: fixedNow, completed, evidenceByTaskId })
@@ -76,7 +77,7 @@ describe("React Job Sprint interview workspace", () => {
 
     expect(screen.getByText("已标记薄弱题")).toBeInTheDocument();
     expect(screen.getByText("薄弱 1 题")).toBeInTheDocument();
-    expect(window.localStorage.getItem(INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY)).toContain(`${qaTaskIds.interview}-question-1`);
+    expect(window.localStorage.getItem(interviewWeakQuestionMarksStorageKey())).toContain(`${qaTaskIds.interview}-question-1`);
 
     fireEvent.click(screen.getByRole("button", { name: "只看薄弱题" }));
 
@@ -169,5 +170,26 @@ describe("React Job Sprint interview workspace", () => {
     expect(screen.getByLabelText("我的口述回答")).toHaveValue("");
     expect(screen.getByRole("button", { name: "技术核心" })).toHaveAttribute("aria-pressed", "true");
     expect(useSprintStore.getState().evidenceByTaskId[qaTaskIds.interview]).toBeUndefined();
+  });
+
+  it("does not show another account's weak-question marks after the data scope changes", async () => {
+    const targetId = `${qaTaskIds.interview}-question-1`;
+    const kai = { username: "kai", dataScope: "kai" };
+    const guest = { username: "guest", dataScope: "guest" };
+    window.localStorage.setItem(interviewWeakQuestionMarksStorageKey(kai), JSON.stringify([targetId]));
+    useSprintStore.setState({ storageOwner: guest });
+
+    render(<App />);
+
+    await screen.findByRole("heading", { name: "面试训练" });
+    expect(screen.queryByText("薄弱 1 题")).not.toBeInTheDocument();
+    act(() => useSprintStore.setState({ storageOwner: kai }));
+    await waitFor(() => expect(screen.getByText("薄弱 1 题")).toBeInTheDocument());
+    act(() => useSprintStore.setState({ storageOwner: guest }));
+    await waitFor(() => expect(screen.queryByText("薄弱 1 题")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: /标记薄弱题：练 Mock 服务边界/ }));
+
+    expect(window.localStorage.getItem(interviewWeakQuestionMarksStorageKey(guest))).toContain(targetId);
+    expect(window.localStorage.getItem(interviewWeakQuestionMarksStorageKey(kai))).toContain(targetId);
   });
 });

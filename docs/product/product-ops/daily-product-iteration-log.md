@@ -1,6 +1,45 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-16
+日期：2026-08-17
+
+## 2026-08-17 第七十四次主动迭代
+
+主任务：按 `dataScope` 隔离共用浏览器中的面试薄弱题标记。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 薄弱题是普通用户的练习偏好；新账号看到旧标记会误导训练重点。 |
+| 问题确定性 | 5 | 适配器固定读写一个全局 `localStorage` key，未接收账号或数据域。 |
+| 风险降低 | 5 | 认证账号不再读取无归属旧 key，避免把旧浏览器行为带入新账号。 |
+| 交互改善 | 3 | 用户切换账号后看到的是自己的薄弱题状态，不需要理解底层缓存。 |
+| 可验证性 | 5 | 适配器和页面测试可模拟两个数据域、旧 key 和当前 UI 标记动作。 |
+| 实现大小 | 5 | 仅改 React 本地标记适配器、面试页、测试和产品事实源。 |
+
+基线：
+
+- `git fetch --prune origin` 后工作树干净，目标为 `develop` 的开放 PR 为零；`origin/main` 与 `origin/develop` 文件树一致，提交差异为历史 squash/release 造成的 `3 / 9`。
+- 最新 tag 为 `v0.2.11`（2026-08-16）；无真实内容差异，因此本轮不创建 release，也不部署服务器。
+
+改动：
+
+- 新增以 `dataScope`、登录名或离线 `local` 命名的面试薄弱题浏览器键。
+- 已登录账号不再读取旧的无归属共享 key；切换 scope 时重新载入当前作用域标记。
+- 标记仍只代表本地练习偏好，保存口述证据、Evidence Gate、AI、runtime 和服务端写入时机不变。
+
+已验证：
+
+- React 定向测试：`interviewAdapter.test.ts` 与 `InterviewPage.test.tsx` 共 14 项通过，覆盖旧 key 拒读、双数据域隔离和运行中切换 scope 后重载。
+- `npm --prefix apps/react-web test`：48 个文件、160 项通过；`npm --prefix apps/react-web run typecheck`、`npm --prefix apps/react-web run build` 通过。构建保留既有的单包大于 500 kB 告警。
+- `npm run test:functional`：真实登录的 `functional-user` 写入 `v2.functional-user`，桌面浏览器重启和移动视口读回均为 1；测试报告为 `PASS`。
+- `npm test`、`npm run validate:product-iteration`、`npm run validate:architecture-quality`、`npm run scan:sensitive` 和 `git diff --check` 通过。功能流在首次旧契约断言失败时暴露了浏览器上下文清理缺口，现已补 `finally` 清理并在通过路径确认无残留测试进程。
+
+限制：
+
+- 不迁移或猜测旧共享 key 的归属；不把薄弱题标记作为正式数据同步到服务端或跨设备。
+- 未同步 Android React assets、未构建/安装 APK，也未运行 Android 真机或远端服务器验证；本轮的 Android 功能测试脚本只更新了作用域键契约并通过语法检查。
+- 本轮不改远端服务器、账号或生产数据。
 
 ## 2026-08-16 第七十三次主动迭代
 
