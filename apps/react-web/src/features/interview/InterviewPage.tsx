@@ -1,10 +1,10 @@
 import { ArrowRight, ClipboardCheck, FileQuestion, Filter, MessageCircleQuestion, Mic2, RotateCcw, Search, Star } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   buildInterviewDashboard, buildOralEvidenceContent, filterInterviewQuestions,
   findInterviewQuestion, interviewModes, interviewQuestionCategories,
-  readInterviewWeakQuestionMarks, scoreOralAnswer, toggleInterviewWeakQuestion,
+  interviewWeakQuestionMarksStorageKey, readInterviewWeakQuestionMarks, scoreOralAnswer, toggleInterviewWeakQuestion,
   writeInterviewWeakQuestionMarks,
   type InterviewMode, type InterviewQuestionOption,
   type OralScoreAnalysis, type OralTaskSummary
@@ -19,12 +19,14 @@ export function InterviewPage() {
   const sprint = useSprintStore((state) => state.sprint);
   const evidenceByTaskId = useSprintStore((state) => state.evidenceByTaskId);
   const userProfiles = useSprintStore((state) => state.userProfiles);
+  const storageOwner = useSprintStore((state) => state.storageOwner);
   const addEvidence = useSprintStore((state) => state.addEvidence);
   const [mode, setMode] = useState<InterviewMode>("auto");
   const [questionQuery, setQuestionQuery] = useState("");
   const [questionCategory, setQuestionCategory] = useState("all");
   const [weakOnly, setWeakOnly] = useState(false);
-  const [weakQuestionIds, setWeakQuestionIds] = useState<Set<string>>(() => readInterviewWeakQuestionMarks());
+  const weakQuestionStorageKey = interviewWeakQuestionMarksStorageKey(storageOwner);
+  const [weakQuestionIds, setWeakQuestionIds] = useState<Set<string>>(() => readInterviewWeakQuestionMarks(undefined, storageOwner));
   const [selectedQuestionId, setSelectedQuestionId] = useState<string | undefined>();
   const [answer, setAnswer] = useState("");
   const [scoreAnalysis, setScoreAnalysis] = useState<OralScoreAnalysis | undefined>();
@@ -50,6 +52,11 @@ export function InterviewPage() {
   );
   const activeQuestionId = selectedQuestionId ?? filteredQuestions[0]?.id ?? dashboard.candidateQuestions[0]?.id;
   const activeQuestion = findInterviewQuestion(dashboard.candidateQuestions, activeQuestionId);
+
+  useEffect(() => {
+    setWeakQuestionIds(readInterviewWeakQuestionMarks(undefined, storageOwner));
+  }, [storageOwner, weakQuestionStorageKey]);
+
   const interviewAnswerDraftProtection = useInterviewAnswerDraftProtection({
     answer,
     mode,
@@ -96,10 +103,10 @@ export function InterviewPage() {
   const toggleWeakQuestion = useCallback((questionId: string) => {
     setWeakQuestionIds((current) => {
       const next = toggleInterviewWeakQuestion(current, questionId);
-      writeInterviewWeakQuestionMarks(next);
+      writeInterviewWeakQuestionMarks(next, undefined, storageOwner);
       return next;
     });
-  }, []);
+  }, [storageOwner]);
 
   const resetQuestionFilters = useCallback(() => {
     setQuestionQuery("");
