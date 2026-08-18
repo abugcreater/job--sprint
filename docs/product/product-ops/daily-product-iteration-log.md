@@ -1,6 +1,45 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-17
+日期：2026-08-18
+
+## 2026-08-18 第七十五次主动迭代
+
+主任务：按 `dataScope` 隔离共用浏览器中的学习重点标记。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 学习重点会影响知识卡筛选和后续练习，新账号看到旧重点会误导学习方向。 |
+| 问题确定性 | 5 | React Web 适配器固定读写全局 `localStorage` key，页面未订阅账号数据域变化。 |
+| 风险降低 | 5 | 认证账号不再读取无归属旧 key，避免旧浏览器行为进入新账号。 |
+| 交互改善 | 3 | 用户切换账号后只看到自己的重点状态，不需要理解底层缓存。 |
+| 可验证性 | 5 | 适配器和页面测试可模拟两个数据域、旧 key 和当前 UI 标记动作；功能流可验证真实登录后重启读回。 |
+| 实现大小 | 5 | 仅改 React 本地标记适配器、学习页、功能流契约和产品事实源。 |
+
+基线：
+
+- `git fetch --prune origin` 后工作树干净，目标为 `develop` 的开放 PR 为零；本地与远端只保留 `main`、`develop`。
+- `origin/main` 与 `origin/develop` 文件树存在真实差异；最新 tag 为 `v0.2.11`（2026-08-16），发布后本轮仅累计 #69 一项普通需求，未满 7 天或 3 项阈值，因此不创建 release，也不部署服务器。
+
+改动：
+
+- 新增以 `dataScope`、登录名或离线 `local` 命名的学习重点浏览器键。
+- 已登录账号不再读取旧的无归属共享 key；切换 scope 时重新载入当前账号标记。
+- 学习重点仍只代表 React Web 本地学习偏好，保存学习笔记、Evidence Gate、AI、runtime 和服务端写入时机不变。
+
+已验证：
+
+- React 定向测试：`learningAdapter.test.ts` 与 `LearningPage.test.tsx` 共 13 项通过，覆盖旧 key 拒读、双数据域隔离和运行中切换 scope 后重载。
+- `npm --prefix apps/react-web test`：48 个文件、161 项通过；typecheck 和 build 通过。构建保留既有的单包大于 500 kB 告警。
+- `npm run test:functional`：真实登录的 `functional-user` 写入 `v2.functional-user`，桌面浏览器重启和移动视口读回均为 1；先前与全量前端测试并行的一次运行在学习快照处断言 `0 !== 1`，随后两次串行重跑均为 `PASS`，并保留了含预期键和计数的调试证据。未将这次未复现的并发异常归因为产品缺陷。
+- `npm test`、`npm run validate:product-iteration`、`npm run validate:architecture-quality`、`npm run scan:sensitive`、`npm run validate:gitflow -- --phase work` 和 `git diff --check` 通过。功能覆盖与功能对齐门禁仍提示既有 Android 功能报告缺失，不作为 Android 通过证据。
+
+限制：
+
+- 不迁移或猜测旧共享 key 的归属；不把学习重点作为正式数据同步到服务端或跨设备。
+- 未同步 Android React assets、未构建/安装 APK，也未运行 Android 真机或远端服务器验证；本轮的 Android 功能测试脚本只更新了作用域键契约并通过语法检查。
+- 本轮不改远端服务器、账号或生产数据。
 
 ## 2026-08-17 第七十四次主动迭代
 
