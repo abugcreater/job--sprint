@@ -1,4 +1,5 @@
 import type { DailySprint, ReviewEvidence, Task, UserProfile } from "../types/sprint";
+import type { RuntimeStorageOwner } from "../stores/sprintStoreTypes";
 import { buildModeCandidateQuestions } from "./interviewModeCandidates";
 
 export type InterviewMode = "auto" | "java-core" | "resume-java" | "jd-match" | "llm-basics";
@@ -83,6 +84,7 @@ export interface InterviewDashboard {
 }
 
 export const INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY = "jobSprint.react.interviewWeakQuestions.v1";
+export const INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_PREFIX = "jobSprint.react.interviewWeakQuestions.v2";
 
 interface StorageLike {
   getItem: (key: string) => string | null;
@@ -200,11 +202,16 @@ export function findInterviewQuestion(questions: InterviewQuestionOption[], ques
   return questions.find((question) => question.id === questionId);
 }
 
-export function readInterviewWeakQuestionMarks(storage = browserStorage()): Set<string> {
+export function interviewWeakQuestionMarksStorageKey(storageOwner?: RuntimeStorageOwner): string {
+  const dataScope = storageOwner?.dataScope?.trim() || storageOwner?.username?.trim() || "local";
+  return `${INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_PREFIX}.${encodeURIComponent(dataScope)}`;
+}
+
+export function readInterviewWeakQuestionMarks(storage = browserStorage(), storageOwner?: RuntimeStorageOwner): Set<string> {
   if (!storage) return new Set<string>();
 
   try {
-    const parsed = JSON.parse(storage.getItem(INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY) ?? "[]");
+    const parsed = JSON.parse(storage.getItem(interviewWeakQuestionMarksStorageKey(storageOwner)) ?? "[]");
     if (!Array.isArray(parsed)) return new Set<string>();
     return new Set(parsed.filter((value): value is string => typeof value === "string" && value.trim().length > 0));
   } catch {
@@ -212,9 +219,9 @@ export function readInterviewWeakQuestionMarks(storage = browserStorage()): Set<
   }
 }
 
-export function writeInterviewWeakQuestionMarks(questionIds: Set<string>, storage = browserStorage()): void {
+export function writeInterviewWeakQuestionMarks(questionIds: Set<string>, storage = browserStorage(), storageOwner?: RuntimeStorageOwner): void {
   if (!storage) return;
-  storage.setItem(INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY, JSON.stringify(Array.from(questionIds).sort()));
+  storage.setItem(interviewWeakQuestionMarksStorageKey(storageOwner), JSON.stringify(Array.from(questionIds).sort()));
 }
 
 export function toggleInterviewWeakQuestion(questionIds: Set<string>, questionId: string): Set<string> {

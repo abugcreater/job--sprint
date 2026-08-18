@@ -1,4 +1,5 @@
 import type { DailySprint, ReviewEvidence, Task, TaskType } from "../types/sprint";
+import type { RuntimeStorageOwner } from "../stores/sprintStoreTypes";
 
 const learningTaskTypes = new Set<TaskType>(["java", "agent", "rag", "project", "path-audit"]);
 
@@ -69,6 +70,7 @@ export interface LearningDashboard {
 }
 
 export const LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY = "jobSprint.react.learningKnowledgeMarks.v1";
+export const LEARNING_KNOWLEDGE_MARKS_STORAGE_PREFIX = "jobSprint.react.learningKnowledgeMarks.v2";
 
 interface StorageLike {
   getItem: (key: string) => string | null;
@@ -141,11 +143,16 @@ export function findLearningKnowledgeCard(cards: LearningKnowledgeCard[], cardId
   return cards.find((card) => card.id === cardId);
 }
 
-export function readLearningKnowledgeMarks(storage = browserStorage()): Set<string> {
+export function learningKnowledgeMarksStorageKey(storageOwner?: RuntimeStorageOwner): string {
+  const dataScope = storageOwner?.dataScope?.trim() || storageOwner?.username?.trim() || "local";
+  return `${LEARNING_KNOWLEDGE_MARKS_STORAGE_PREFIX}.${encodeURIComponent(dataScope)}`;
+}
+
+export function readLearningKnowledgeMarks(storage = browserStorage(), storageOwner?: RuntimeStorageOwner): Set<string> {
   if (!storage) return new Set<string>();
 
   try {
-    const parsed = JSON.parse(storage.getItem(LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY) ?? "[]");
+    const parsed = JSON.parse(storage.getItem(learningKnowledgeMarksStorageKey(storageOwner)) ?? "[]");
     if (!Array.isArray(parsed)) return new Set<string>();
     return new Set(parsed.filter((value): value is string => typeof value === "string" && value.trim().length > 0));
   } catch {
@@ -153,9 +160,9 @@ export function readLearningKnowledgeMarks(storage = browserStorage()): Set<stri
   }
 }
 
-export function writeLearningKnowledgeMarks(markedIds: Set<string>, storage = browserStorage()): void {
+export function writeLearningKnowledgeMarks(markedIds: Set<string>, storage = browserStorage(), storageOwner?: RuntimeStorageOwner): void {
   if (!storage) return;
-  storage.setItem(LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY, JSON.stringify(Array.from(markedIds).sort()));
+  storage.setItem(learningKnowledgeMarksStorageKey(storageOwner), JSON.stringify(Array.from(markedIds).sort()));
 }
 
 export function toggleLearningKnowledgeMark(markedIds: Set<string>, cardId: string): Set<string> {

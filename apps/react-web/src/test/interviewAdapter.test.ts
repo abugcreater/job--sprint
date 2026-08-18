@@ -1,7 +1,9 @@
 import {
   INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY,
+  INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_PREFIX,
   buildInterviewDashboard,
   filterInterviewQuestions,
+  interviewWeakQuestionMarksStorageKey,
   interviewQuestionCategories,
   readInterviewWeakQuestionMarks,
   scoreOralAnswer,
@@ -116,7 +118,7 @@ describe("interviewAdapter", () => {
     expect(weakQuestions.map((question) => question.id)).toEqual([targetId]);
   });
 
-  it("persists React weak-question marks without touching legacy mistake storage", () => {
+  it("keeps React weak-question marks isolated by data scope and never reads the legacy shared key", () => {
     const items = new Map<string, string>();
     const storage = {
       getItem: (key: string) => items.get(key) ?? null,
@@ -125,11 +127,18 @@ describe("interviewAdapter", () => {
       }
     };
     const targetId = `${qaTaskIds.interview}-question-1`;
+    const kai = { username: "kai", dataScope: "kai" };
+    const guest = { username: "guest", dataScope: "guest" };
+    items.set(INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY, JSON.stringify(["legacy-question"]));
 
-    writeInterviewWeakQuestionMarks(new Set([targetId]), storage);
+    writeInterviewWeakQuestionMarks(new Set([targetId]), storage, kai);
 
-    expect(readInterviewWeakQuestionMarks(storage)).toEqual(new Set([targetId]));
-    expect(items.get(INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY)).toBe(JSON.stringify([targetId]));
+    expect(readInterviewWeakQuestionMarks(storage, kai)).toEqual(new Set([targetId]));
+    expect(readInterviewWeakQuestionMarks(storage, guest)).toEqual(new Set());
+    expect(items.get(interviewWeakQuestionMarksStorageKey(kai))).toBe(JSON.stringify([targetId]));
+    expect(items.has(interviewWeakQuestionMarksStorageKey(guest))).toBe(false);
+    expect(interviewWeakQuestionMarksStorageKey()).toBe(`${INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_PREFIX}.local`);
+    expect(items.get(INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY)).toBe(JSON.stringify(["legacy-question"]));
     expect(items.has("jobSprint.interviewMistakes.v1")).toBe(false);
   });
 });

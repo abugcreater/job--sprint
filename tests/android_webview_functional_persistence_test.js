@@ -67,6 +67,8 @@ const IS_REMOTE_WEBVIEW = /^https?:\/\//i.test(WEBVIEW_URL);
 const EXPECTED_REMOTE_ORIGIN = IS_REMOTE_WEBVIEW ? new URL(WEBVIEW_URL).origin : null;
 const AUTH_USER = envValue("JOB_SPRINT_AUTH_USER");
 const AUTH_PASSWORD = envValue("JOB_SPRINT_AUTH_PASSWORD") || envValue("JOB_SPRINT_AUTH_PASS");
+const INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY = `jobSprint.react.interviewWeakQuestions.v2.${encodeURIComponent(AUTH_USER || "local")}`;
+const LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY = `jobSprint.react.learningKnowledgeMarks.v2.${encodeURIComponent(AUTH_USER || "local")}`;
 const AUTH_EVIDENCE = {
   mode: IS_REMOTE_WEBVIEW ? "remote" : "local",
   authUserConfigured: Boolean(AUTH_USER),
@@ -83,8 +85,8 @@ const evidenceRoot = path.resolve(
 const screenshotsDir = path.join(evidenceRoot, "screenshots");
 const snapshotsDir = path.join(evidenceRoot, "storage-snapshots");
 const EXPECTED_STORAGE_KEYS = [
-  "jobSprint.react.interviewWeakQuestions.v1",
-  "jobSprint.react.learningKnowledgeMarks.v1",
+  INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY,
+  LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY,
   "jobSprint.react.v1"
 ];
 const ANDROID_FLOW_LABEL = `Android功能测试${Date.now().toString(36)}`;
@@ -212,8 +214,8 @@ function summarizeStorage(raw, label, url) {
   const coachScheduleEvents = Array.isArray(state.coachScheduleEvents) ? state.coachScheduleEvents : Array.isArray(coach.coachScheduleEvents) ? coach.coachScheduleEvents : [];
   const aiArtifacts = Array.isArray(state.aiArtifacts) ? state.aiArtifacts : Array.isArray(coach.aiArtifacts) ? coach.aiArtifacts : [];
   const llmRuns = Array.isArray(state.llmRuns) ? state.llmRuns : Array.isArray(coach.llmRuns) ? coach.llmRuns : [];
-  const learningMarks = parseJson(raw["jobSprint.react.learningKnowledgeMarks.v1"], []);
-  const weakMarks = parseJson(raw["jobSprint.react.interviewWeakQuestions.v1"], []);
+  const learningMarks = parseJson(raw[LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY], []);
+  const weakMarks = parseJson(raw[INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY], []);
 
   return {
     label,

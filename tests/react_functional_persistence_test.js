@@ -13,6 +13,8 @@ const { buildReactImportRestorePayload } = require("./fixtures/react_import_rest
 
 const TEST_USER = "functional-user";
 const TEST_PASSWORD = ["functional", "password", "only"].join("-");
+const INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY = `jobSprint.react.interviewWeakQuestions.v2.${encodeURIComponent(TEST_USER)}`;
+const LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY = `jobSprint.react.learningKnowledgeMarks.v2.${encodeURIComponent(TEST_USER)}`;
 const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "job-sprint-functional-"));
 const evidenceRoot = path.resolve(process.env.JOB_SPRINT_FUNCTIONAL_EVIDENCE_DIR || path.join(tmpDir, "evidence"));
 const downloadsDir = path.join(evidenceRoot, "downloads");
@@ -20,8 +22,8 @@ const screenshotsDir = path.join(evidenceRoot, "screenshots");
 const snapshotsDir = path.join(evidenceRoot, "storage-snapshots");
 const persistentProfileDir = path.join(tmpDir, "chromium-profile");
 const EXPECTED_STORAGE_KEYS = [
-  "jobSprint.react.interviewWeakQuestions.v1",
-  "jobSprint.react.learningKnowledgeMarks.v1",
+  INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY,
+  LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY,
   "jobSprint.react.v1"
 ];
 
@@ -102,8 +104,8 @@ function summarizeStorage(raw, label, url) {
   const coachScheduleEvents = Array.isArray(state.coachScheduleEvents) ? state.coachScheduleEvents : Array.isArray(coach.coachScheduleEvents) ? coach.coachScheduleEvents : [];
   const aiArtifacts = Array.isArray(state.aiArtifacts) ? state.aiArtifacts : Array.isArray(coach.aiArtifacts) ? coach.aiArtifacts : [];
   const llmRuns = Array.isArray(state.llmRuns) ? state.llmRuns : Array.isArray(coach.llmRuns) ? coach.llmRuns : [];
-  const learningMarks = parseJson(raw["jobSprint.react.learningKnowledgeMarks.v1"], []);
-  const weakMarks = parseJson(raw["jobSprint.react.interviewWeakQuestions.v1"], []);
+  const learningMarks = parseJson(raw[LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY], []);
+  const weakMarks = parseJson(raw[INTERVIEW_WEAK_QUESTION_MARKS_STORAGE_KEY], []);
 
   return {
     label,
@@ -382,6 +384,8 @@ async function runDesktopFlow(baseUrl) {
     acceptDownloads: true,
     viewport: { width: 1440, height: 1000 }
   });
+  let reopenContext;
+  try {
   const page = context.pages()[0] || await context.newPage();
 
   await login(page, baseUrl);
@@ -621,7 +625,7 @@ async function runDesktopFlow(baseUrl) {
   const desktopRawStorage = await page.evaluate(() => Object.fromEntries(Object.entries(window.localStorage)));
   await context.close();
 
-  const reopenContext = await chromium.launchPersistentContext(persistentProfileDir, {
+  reopenContext = await chromium.launchPersistentContext(persistentProfileDir, {
     acceptDownloads: true,
     viewport: { width: 1440, height: 1000 }
   });
@@ -642,8 +646,6 @@ async function runDesktopFlow(baseUrl) {
   assert.ok(reopenSnapshot.react.delayReasons.includes("功能测试延期原因"));
   assertExpectedStorage(reopenSnapshot, "browser restart snapshot");
   assertSameExpectedStorage(moreSnapshot, reopenSnapshot, "browser restart should preserve expected localStorage bytes and hashes");
-  await reopenContext.close();
-
   return {
     applicationExportPath,
     moreExportPath,
@@ -651,6 +653,10 @@ async function runDesktopFlow(baseUrl) {
     browserRestartSnapshot: reopenSnapshot,
     rawStorage: desktopRawStorage
   };
+  } finally {
+    await reopenContext?.close().catch(() => {});
+    await context.close().catch(() => {});
+  }
 }
 
 async function runMobileReadback(baseUrl, rawStorage, desktopSnapshot) {
