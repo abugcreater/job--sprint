@@ -1,6 +1,6 @@
-import { fireEvent, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react";
 import { App } from "../App";
-import { LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY } from "../data/learningAdapter";
+import { learningKnowledgeMarksStorageKey } from "../data/learningAdapter";
 import { buildTodaySprint, getScheduleData } from "../data/scheduleAdapter";
 import { useSprintStore } from "../stores/sprintStore";
 import { buildQaSprint, qaProfile, qaScheduleEvents, qaTaskIds } from "./fixtures/coachFlow";
@@ -23,6 +23,7 @@ function resetSprint(hash = "#/learn", withProfile = true) {
     aiArtifacts: [],
     llmRuns: [],
     syncState: "local_fallback",
+    storageOwner: undefined,
     lastSavedAt: undefined,
     sprint: withProfile
       ? buildQaSprint({ now: fixedNow, completed, evidenceByTaskId })
@@ -93,13 +94,34 @@ describe("React Job Sprint learning workspace", () => {
     fireEvent.change(await screen.findByLabelText("搜索知识卡"), { target: { value: "缺陷" } });
     fireEvent.click(screen.getByRole("button", { name: "标记重点：补 缺陷归因 面试表达" }));
 
-    expect(window.localStorage.getItem(LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY)).toContain(`${qaTaskIds.learning}-knowledge-1`);
+    expect(window.localStorage.getItem(learningKnowledgeMarksStorageKey())).toContain(`${qaTaskIds.learning}-knowledge-1`);
 
     fireEvent.click(screen.getByRole("button", { name: "只看重点" }));
 
     expect(screen.getByText("匹配 1 张")).toBeInTheDocument();
     expect(screen.getByText("重点 1 张")).toBeInTheDocument();
     expect(screen.getAllByText("补 缺陷归因 面试表达").length).toBeGreaterThan(0);
+  });
+
+  it("does not show another account's knowledge marks after the data scope changes", async () => {
+    const targetId = `${qaTaskIds.learning}-knowledge-1`;
+    const kai = { username: "kai", dataScope: "kai" };
+    const guest = { username: "guest", dataScope: "guest" };
+    window.localStorage.setItem(learningKnowledgeMarksStorageKey(kai), JSON.stringify([targetId]));
+    useSprintStore.setState({ storageOwner: guest });
+
+    render(<App />);
+
+    fireEvent.click(await screen.findByRole("button", { name: "任务知识摘要" }));
+    expect(screen.queryByText("重点 1 张")).not.toBeInTheDocument();
+    act(() => useSprintStore.setState({ storageOwner: kai }));
+    await waitFor(() => expect(screen.getByText("重点 1 张")).toBeInTheDocument());
+    act(() => useSprintStore.setState({ storageOwner: guest }));
+    await waitFor(() => expect(screen.queryByText("重点 1 张")).not.toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "标记重点：补 缺陷归因 面试表达" }));
+
+    expect(window.localStorage.getItem(learningKnowledgeMarksStorageKey(guest))).toContain(targetId);
+    expect(window.localStorage.getItem(learningKnowledgeMarksStorageKey(kai))).toContain(targetId);
   });
 
   it("adds a learning note that feeds the today Evidence Gate", async () => {

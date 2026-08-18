@@ -1,7 +1,9 @@
 import {
   LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY,
+  LEARNING_KNOWLEDGE_MARKS_STORAGE_PREFIX,
   buildLearningDashboard,
   filterLearningKnowledgeCards,
+  learningKnowledgeMarksStorageKey,
   readLearningKnowledgeMarks,
   toggleLearningKnowledgeMark,
   writeLearningKnowledgeMarks
@@ -64,14 +66,28 @@ describe("learningAdapter", () => {
     expect(filterLearningKnowledgeCards(dashboard.knowledgeCards, { markedOnly: true, markedIds: new Set([target.id]) })).toEqual([target]);
   });
 
-  it("persists local knowledge marks without touching the legacy favorite key", () => {
-    window.localStorage.clear();
-    const marked = toggleLearningKnowledgeMark(new Set<string>(), `${qaTaskIds.learning}-knowledge-1`);
+  it("keeps knowledge marks isolated by data scope and never reads the legacy shared key", () => {
+    const items = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => items.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        items.set(key, value);
+      }
+    };
+    const targetId = `${qaTaskIds.learning}-knowledge-1`;
+    const kai = { username: "kai", dataScope: "kai" };
+    const guest = { username: "guest", dataScope: "guest" };
+    const marked = toggleLearningKnowledgeMark(new Set<string>(), targetId);
+    items.set(LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY, JSON.stringify(["legacy-card"]));
 
-    writeLearningKnowledgeMarks(marked, window.localStorage);
+    writeLearningKnowledgeMarks(marked, storage, kai);
 
-    expect(readLearningKnowledgeMarks(window.localStorage).has(`${qaTaskIds.learning}-knowledge-1`)).toBe(true);
-    expect(window.localStorage.getItem(LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY)).toBe(JSON.stringify([`${qaTaskIds.learning}-knowledge-1`]));
-    expect(window.localStorage.getItem("jobSprint.kbFavorites.v1")).toBeNull();
+    expect(readLearningKnowledgeMarks(storage, kai)).toEqual(new Set([targetId]));
+    expect(readLearningKnowledgeMarks(storage, guest)).toEqual(new Set());
+    expect(items.get(learningKnowledgeMarksStorageKey(kai))).toBe(JSON.stringify([targetId]));
+    expect(items.has(learningKnowledgeMarksStorageKey(guest))).toBe(false);
+    expect(learningKnowledgeMarksStorageKey()).toBe(`${LEARNING_KNOWLEDGE_MARKS_STORAGE_PREFIX}.local`);
+    expect(items.get(LEARNING_KNOWLEDGE_MARKS_STORAGE_KEY)).toBe(JSON.stringify(["legacy-card"]));
+    expect(items.has("jobSprint.kbFavorites.v1")).toBe(false);
   });
 });

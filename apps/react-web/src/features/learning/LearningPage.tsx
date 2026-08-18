@@ -1,11 +1,12 @@
 import { ArrowRight, BookOpen, Filter, Layers3, NotebookPen, RotateCcw, Search, Star, StarOff } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   buildLearningDashboard,
   buildLearningNoteContent,
   filterLearningKnowledgeCards,
   findLearningKnowledgeCard,
+  learningKnowledgeMarksStorageKey,
   readLearningKnowledgeMarks,
   toggleLearningKnowledgeMark,
   writeLearningKnowledgeMarks,
@@ -22,12 +23,14 @@ export function LearningPage() {
   const sprint = useSprintStore((state) => state.sprint);
   const evidenceByTaskId = useSprintStore((state) => state.evidenceByTaskId);
   const userProfiles = useSprintStore((state) => state.userProfiles);
+  const storageOwner = useSprintStore((state) => state.storageOwner);
   const addEvidence = useSprintStore((state) => state.addEvidence);
   const dashboard = useMemo(() => buildLearningDashboard(sprint, evidenceByTaskId), [sprint, evidenceByTaskId]);
   const [knowledgeQuery, setKnowledgeQuery] = useState("");
   const [knowledgeCategory, setKnowledgeCategory] = useState("all");
   const [markedOnly, setMarkedOnly] = useState(false);
-  const [markedKnowledgeIds, setMarkedKnowledgeIds] = useState<Set<string>>(() => readLearningKnowledgeMarks());
+  const learningKnowledgeMarksKey = learningKnowledgeMarksStorageKey(storageOwner);
+  const [markedKnowledgeIds, setMarkedKnowledgeIds] = useState<Set<string>>(() => readLearningKnowledgeMarks(undefined, storageOwner));
   const [selectedKnowledgeId, setSelectedKnowledgeId] = useState<string | undefined>();
   const [noteTaskId, setNoteTaskId] = useState<string | undefined>();
   const [noteDraft, setNoteDraft] = useState("");
@@ -65,6 +68,10 @@ export function LearningPage() {
   );
   const primaryTask = dashboard.learningTasks.find((task) => task.isCurrent) ?? dashboard.focusTask ?? dashboard.learningTasks[0];
 
+  useEffect(() => {
+    setMarkedKnowledgeIds(readLearningKnowledgeMarks(undefined, storageOwner));
+  }, [learningKnowledgeMarksKey, storageOwner]);
+
   const saveLearningNote = useCallback(
     (task: LearningTaskSummary) => {
       const content = noteDraft.trim();
@@ -85,10 +92,10 @@ export function LearningPage() {
   const toggleKnowledgeMark = useCallback((cardId: string) => {
     setMarkedKnowledgeIds((current) => {
       const next = toggleLearningKnowledgeMark(current, cardId);
-      writeLearningKnowledgeMarks(next);
+      writeLearningKnowledgeMarks(next, undefined, storageOwner);
       return next;
     });
-  }, []);
+  }, [storageOwner]);
 
   const resetKnowledgeFilters = useCallback(() => {
     setKnowledgeQuery("");
