@@ -36,7 +36,7 @@ export function InitializationWizardPanel({
   const [profileDraft, setProfileDraft] = useState<ProfileDraft>(() => createProfileDraft(activeProfile));
   const [profileBaseline, setProfileBaseline] = useState<ProfileDraft>(() => cloneProfileDraft(createProfileDraft(activeProfile)));
   const [sourceText, setSourceText] = useState("");
-  const [templateId, setTemplateId] = useState<ProfileRoleFamily>("backend");
+  const [templateId, setTemplateId] = useState<ProfileRoleFamily | "">(activeProfile?.roleFamily ?? "");
   const [suggestions, setSuggestions] = useState<BoundarySuggestionDraft[]>([]);
   const [resumePreview, setResumePreview] = useState<ResumeProfilePreview | null>(null);
   const [message, setMessage] = useState("");
@@ -50,6 +50,7 @@ export function InitializationWizardPanel({
     const nextDraft = createProfileDraft(activeProfile);
     setProfileDraft(nextDraft);
     setProfileBaseline(cloneProfileDraft(nextDraft));
+    setTemplateId(activeProfile?.roleFamily ?? "");
   }, [activeProfile?.id]);
 
   const discardDraft = useCallback(() => {
@@ -57,7 +58,7 @@ export function InitializationWizardPanel({
     setProfileDraft(nextDraft);
     setProfileBaseline(cloneProfileDraft(nextDraft));
     setSourceText("");
-    setTemplateId("backend");
+    setTemplateId(activeProfile?.roleFamily ?? "");
     setSuggestions([]);
     setResumePreview(null);
     setMessage("");
@@ -76,7 +77,11 @@ export function InitializationWizardPanel({
   }, [discardDraft, onRegisterDiscard]);
 
   const handleApplyTemplate = () => {
-    const template = coachOnboardingTemplates.find((item) => item.id === templateId) ?? coachOnboardingTemplates[0];
+    const template = coachOnboardingTemplates.find((item) => item.id === templateId);
+    if (!template) {
+      setMessage("请先选择岗位模板，或直接粘贴简历生成画像建议。");
+      return;
+    }
     setProfileDraft((current) => ({
       ...current,
       roleFamily: template.roleFamily,
@@ -187,7 +192,8 @@ export function InitializationWizardPanel({
       <div className="mt-4 grid gap-3 md:grid-cols-[minmax(0,1fr)_auto]">
         <label className="block">
           <span className="text-sm font-black text-ink-700">建档模板</span>
-          <select className="field-control mt-2" value={templateId} onChange={(event) => setTemplateId(event.target.value as ProfileRoleFamily)} aria-label="建档模板">
+          <select className="field-control mt-2" value={templateId} onChange={(event) => setTemplateId(event.target.value as ProfileRoleFamily | "")} aria-label="建档模板">
+            <option value="" disabled>请选择岗位模板（也可直接导入简历）</option>
             {coachOnboardingTemplates.map((template) => <option key={template.id} value={template.id}>{template.label}</option>)}
           </select>
         </label>
