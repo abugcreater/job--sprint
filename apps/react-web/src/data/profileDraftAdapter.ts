@@ -19,7 +19,7 @@ export function createProfileDraft(profile?: UserProfile): ProfileDraft {
   return {
     id: profile?.id,
     name: profile?.name ?? "我的求职画像",
-    roleFamily: profile?.roleFamily ?? "backend",
+    roleFamily: profile?.roleFamily ?? "other",
     targetRole: profile?.targetRole ?? "",
     targetLevel: profile?.targetLevel ?? "",
     cities: profile?.cities ?? "",

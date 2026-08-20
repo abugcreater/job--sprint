@@ -1,6 +1,14 @@
 import { cloneProfileDraft, createProfileDraft, isProfileDraftDirty, type ProfileDraft } from "../data/profileDraftAdapter";
 
 describe("profileDraftAdapter", () => {
+  it("uses a neutral role family for a new profile", () => {
+    expect(createProfileDraft()).toMatchObject({
+      name: "我的求职画像",
+      roleFamily: "other",
+      targetRole: ""
+    });
+  });
+
   it("compares cloned drafts across every editable field without sharing state", () => {
     const baseline = createProfileDraft();
     const changes: Partial<ProfileDraft>[] = [
