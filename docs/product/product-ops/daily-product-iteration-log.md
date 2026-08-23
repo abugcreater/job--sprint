@@ -1,6 +1,30 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-21
+日期：2026-08-23
+
+## 2026-08-23 第七十八次主动迭代
+
+主任务：收口因外部 Git HTTPS 连接失败而遗留的功能流测试分支。
+
+基线：
+
+- 已有本地短分支 `test/functional-browser-path-override`，只包含 2026-08-21 已验证的测试可靠性改动；它尚未上传，因此没有开放 PR、Draft 或远端短分支。
+- 本轮 `git fetch --prune origin` 恢复成功；没有新的目标为 `develop` 的 PR 积压，且工作树干净。
+
+收口：
+
+- 分支 rebase 到最新 `origin/develop`，无须重放提交或解决冲突。
+- 重新执行受控本机浏览器的完整 React 功能流，桌面写入、浏览器重启、移动端读回、导出和导入恢复均为 PASS；敏感扫描、PR GitFlow 门禁与差异空白检查通过。
+- PR #74 `test(functional): allow explicit browser path` 以 Ready 状态创建到 `develop`；GitHub `validate` required check 成功后 squash merge，最终提交为 `93293d5`。
+- 合并后远端短分支已删除，本地只保留 `main` 与 `develop`，工作树干净。
+
+发布判定：
+
+- `origin/main` 与 `origin/develop` 文件树存在真实差异；但最新 tag `v0.2.12` 发布于 2026-08-18，距今未满 7 天，且发布后只有 #73、#74 两项普通需求，因此本轮不创建 `release/*`。
+
+限制：
+
+- 没有新增产品行为；本条只记录 GitFlow 收口，未部署服务器、未改远端配置、账号、生产数据或 Android 资源。
 
 ## 2026-08-21 第七十七次主动迭代
 
