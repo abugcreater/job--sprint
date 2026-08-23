@@ -10,6 +10,8 @@ const ROOT = path.resolve(__dirname, "..");
 const reactRequire = createRequire(path.join(ROOT, "apps", "react-web", "package.json"));
 const { chromium } = reactRequire("playwright");
 const { buildReactImportRestorePayload } = require("./fixtures/react_import_restore_payload");
+const browserExecutablePath = process.env.JOB_SPRINT_PLAYWRIGHT_EXECUTABLE_PATH?.trim();
+const browserLaunchOptions = browserExecutablePath ? { executablePath: browserExecutablePath } : {};
 
 const TEST_USER = "functional-user";
 const TEST_PASSWORD = ["functional", "password", "only"].join("-");
@@ -381,6 +383,7 @@ async function exerciseCoachWorkspace(page, baseUrl, prefix) {
 
 async function runDesktopFlow(baseUrl) {
   const context = await chromium.launchPersistentContext(persistentProfileDir, {
+    ...browserLaunchOptions,
     acceptDownloads: true,
     viewport: { width: 1440, height: 1000 }
   });
@@ -626,6 +629,7 @@ async function runDesktopFlow(baseUrl) {
   await context.close();
 
   reopenContext = await chromium.launchPersistentContext(persistentProfileDir, {
+    ...browserLaunchOptions,
     acceptDownloads: true,
     viewport: { width: 1440, height: 1000 }
   });
@@ -660,7 +664,7 @@ async function runDesktopFlow(baseUrl) {
 }
 
 async function runMobileReadback(baseUrl, rawStorage, desktopSnapshot) {
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(browserLaunchOptions);
   const context = await browser.newContext({
     acceptDownloads: true,
     viewport: { width: 390, height: 844 },
@@ -711,7 +715,7 @@ async function runImportRestoreFlow(baseUrl) {
   };
   fs.writeFileSync(importPayloadPath, JSON.stringify(importPayload, null, 2));
 
-  const browser = await chromium.launch();
+  const browser = await chromium.launch(browserLaunchOptions);
   const context = await browser.newContext({
     acceptDownloads: true,
     viewport: { width: 1440, height: 1000 }
@@ -759,6 +763,7 @@ async function runImportRestoreFlow(baseUrl) {
     const report = {
       status: "PASS",
       baseUrl,
+      browserRuntime: browserExecutablePath ? "explicit-executable" : "playwright-managed",
       runtimeDataPath: process.env.RUNTIME_DATA_PATH,
       evidenceRoot,
       screenshotsDir,
