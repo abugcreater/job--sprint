@@ -1,0 +1,31 @@
+apps/react-web/src/features/interview/InterviewPage.tsx
+  s_8f6b4df0c955b0::t_f5aac08804b550 384
+docs/product/product-ops/daily-product-iteration-log.md
+  s_8f6b4df0c955b0::t_13c310121671e6 3-40
+docs/product/product-ops/product-ledger.md
+  s_8f6b4df0c955b0::t_13c310121671e6 3-9
+apps/react-web/src/test/InterviewPage.test.tsx
+  s_8f6b4df0c955b0::t_f5aac08804b550 67-69
+apps/react-web/src/features/learning/LearningPage.tsx
+  s_8f6b4df0c955b0::t_f5aac08804b550 355
+docs/product/product-ops/known-issues.md
+  s_8f6b4df0c955b0::t_13c310121671e6 3,10
+apps/react-web/src/test/LearningPage.test.tsx
+  s_8f6b4df0c955b0::t_f5aac08804b550 60-61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.23",
+  "base_commit_sha": "263b060b3c0fc348510cb4b9d3c926724c6dfb14",
+  "prompts": {},
+  "sessions": {
+    "s_8f6b4df0c955b0": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "019f3c33-1602-7c21-8305-4072140cc13f",
+        "model": "gpt-5.6-terra"
+      },
+      "human_author": "kai <1572020281@qq.com>"
+    }
+  }
+}
