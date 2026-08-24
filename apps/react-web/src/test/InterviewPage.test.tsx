@@ -64,6 +64,9 @@ describe("React Job Sprint interview workspace", () => {
     fireEvent.click(screen.getByText("选择其他题目与筛选"));
     fireEvent.click(screen.getByText("查看回答提示、结构与关键词"));
 
+    expect(screen.getByText("薄弱题仅保存在本设备")).toBeInTheDocument();
+    expect(screen.queryByText("localStorage fallback")).not.toBeInTheDocument();
+
     fireEvent.change(screen.getByLabelText("搜索候选题"), { target: { value: "Mock" } });
     fireEvent.change(screen.getByLabelText("候选题分类"), { target: { value: "current-task" } });
 

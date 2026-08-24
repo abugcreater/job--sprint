@@ -57,6 +57,8 @@ describe("React Job Sprint learning workspace", () => {
     expect(screen.getByLabelText("搜索知识卡")).toBeInTheDocument();
     expect(screen.getByLabelText("知识卡分类")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "只看重点" })).toBeInTheDocument();
+    expect(screen.getByText("重点仅保存在本设备")).toBeInTheDocument();
+    expect(screen.queryByText("localStorage fallback")).not.toBeInTheDocument();
   });
 
   it("opens resource details instead of rendering inert resource names", async () => {

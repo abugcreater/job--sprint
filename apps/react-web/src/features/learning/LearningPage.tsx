@@ -352,7 +352,7 @@ function KnowledgeBrowser({
         <span className="rounded-control bg-surface-0 px-2.5 py-1">共 {cards.length} 张</span>
         <span className="rounded-control bg-surface-0 px-2.5 py-1">匹配 {filteredCards.length} 张</span>
         <span className="rounded-control bg-surface-0 px-2.5 py-1">重点 {markedIds.size} 张</span>
-        <span className="rounded-control bg-success-100 px-2.5 py-1 text-success-600">localStorage fallback</span>
+        <span className="rounded-control bg-success-100 px-2.5 py-1 text-success-600">重点仅保存在本设备</span>
       </div>
       {feedback ? (
         <p className="mt-3 rounded-control bg-brand-100 px-3 py-2 text-sm font-bold text-brand-700" aria-live="polite">
