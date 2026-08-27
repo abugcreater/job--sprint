@@ -381,7 +381,7 @@ function QuestionPicker({
         <span className="rounded-control bg-surface-0 px-2.5 py-1">共 {allQuestionCount} 题</span>
         <span className="rounded-control bg-surface-0 px-2.5 py-1">匹配 {questions.length} 题</span>
         <span className="rounded-control bg-surface-0 px-2.5 py-1">薄弱 {weakQuestionIds.size} 题</span>
-        <span className="rounded-control bg-success-100 px-2.5 py-1 text-success-600">localStorage fallback</span>
+        <span className="rounded-control bg-success-100 px-2.5 py-1 text-success-600">薄弱题仅保存在本设备</span>
       </div>
 
       <div className="mt-4 grid gap-3">

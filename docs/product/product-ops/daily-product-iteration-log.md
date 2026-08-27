@@ -1,6 +1,66 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-23
+日期：2026-08-27
+
+## 2026-08-27 第八十次主动迭代（遗留分支收口）
+
+主任务：在 GitHub Git HTTPS 恢复后，收口知识与面试页练习偏好文案分支。
+
+事实与处理：
+
+- `git fetch --prune origin` 已恢复成功；无目标为 `develop` 的开放 PR。
+- `fix/replace-technical-browser-storage-labels` 已确认基于最新 `origin/develop`，无需产生 rebase 提交。
+- 已推送提交 `d241c8b`；将创建正式 PR，合并与分支删除仍以 GitHub required checks 为准。
+
+验证：
+
+- `npm --prefix apps/react-web test -- --run src/test/InterviewPage.test.tsx src/test/LearningPage.test.tsx`：PASS（2 个文件，15 个测试）。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm run scan:sensitive`：PASS。
+- `npm run validate:gitflow -- --phase pr --base develop --message "fix(ux): clarify local practice markers"`：PASS。
+- `git diff origin/develop...HEAD --check`：PASS。
+
+限制：
+
+- 本轮没有服务器、Android、账号、远端配置或生产数据改动；PR 未合入前不把推送或建 PR 表述为完成。
+
+## 2026-08-24 第七十九次主动迭代
+
+主任务：移除知识与面试页暴露给普通用户的 `localStorage fallback` 实现术语。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 普通用户在筛选重点知识或薄弱题时需要理解保存范围，而不是理解浏览器实现。 |
+| 问题确定性 | 5 | 知识与面试筛选摘要直接渲染 `localStorage fallback`，两处标记实际都仅保存在当前设备。 |
+| 风险降低 | 3 | 明确本机保存边界，减少用户误以为重点和薄弱题会跨设备同步或是系统故障回退的可能。 |
+| 交互改善 | 5 | 用“重点仅保存在本设备”和“薄弱题仅保存在本设备”替换内部术语。 |
+| 可验证性 | 5 | 页面测试同时断言新文案出现、旧实现术语不出现；类型检查可覆盖组件修改。 |
+| 实现大小 | 5 | 仅调整两处用户状态文案与回归，不触碰存储键、数据域隔离或业务流程。 |
+
+基线：
+
+- `git fetch --prune origin` 后工作树干净，目标为 `develop` 的开放 PR、Draft 与短分支均为零。
+- `origin/main` 与 `origin/develop` 文件树存在真实差异；最新 tag 为 `v0.2.12`（2026-08-18），发布后只有 #73、#74 两项普通产品需求，尚未达到发布阈值，因此本轮不创建 release，也不部署服务器。
+
+改动：
+
+- 面试候选题筛选摘要将 `localStorage fallback` 改为“薄弱题仅保存在本设备”。
+- 知识卡筛选摘要将 `localStorage fallback` 改为“重点仅保存在本设备”。
+- 回归测试明确拒绝旧实现术语，防止再次把浏览器实现细节暴露到普通用户路径。
+
+已验证：
+
+- `npm --prefix apps/react-web test -- --run src/test/InterviewPage.test.tsx src/test/LearningPage.test.tsx`：PASS，2 个文件、15 项用例通过。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `git diff --check`：PASS。
+
+限制：
+
+- 重点与薄弱题仍是按数据域隔离的本机练习偏好，不改为服务端或跨设备同步。
+- 当时 GitHub Git HTTPS 推送先返回 HTTP/2 framing 错误，改用 HTTP/1.1 后仍在超时窗口内未收到远端响应；该外部阻塞已在 2026-08-27 恢复，实际推送与 PR 状态见上方补充收口记录。PR 合入与分支删除前仍不算完成。
+- 未同步 Android React assets、未构建/安装 APK，也未改远端服务器、账号、配置或生产数据。
 
 ## 2026-08-23 第七十八次主动迭代
 
