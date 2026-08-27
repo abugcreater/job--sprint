@@ -1,6 +1,28 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-24
+日期：2026-08-27
+
+## 2026-08-27 第八十次主动迭代（遗留分支收口）
+
+主任务：在 GitHub Git HTTPS 恢复后，收口知识与面试页练习偏好文案分支。
+
+事实与处理：
+
+- `git fetch --prune origin` 已恢复成功；无目标为 `develop` 的开放 PR。
+- `fix/replace-technical-browser-storage-labels` 已确认基于最新 `origin/develop`，无需产生 rebase 提交。
+- 已推送提交 `d241c8b`；将创建正式 PR，合并与分支删除仍以 GitHub required checks 为准。
+
+验证：
+
+- `npm --prefix apps/react-web test -- --run src/test/InterviewPage.test.tsx src/test/LearningPage.test.tsx`：PASS（2 个文件，15 个测试）。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm run scan:sensitive`：PASS。
+- `npm run validate:gitflow -- --phase pr --base develop --message "fix(ux): clarify local practice markers"`：PASS。
+- `git diff origin/develop...HEAD --check`：PASS。
+
+限制：
+
+- 本轮没有服务器、Android、账号、远端配置或生产数据改动；PR 未合入前不把推送或建 PR 表述为完成。
 
 ## 2026-08-24 第七十九次主动迭代
 
@@ -37,7 +59,7 @@
 限制：
 
 - 重点与薄弱题仍是按数据域隔离的本机练习偏好，不改为服务端或跨设备同步。
-- GitHub Git HTTPS 推送先返回 HTTP/2 framing 错误，改用 HTTP/1.1 后仍在超时窗口内未收到远端响应；本地提交尚未上传、PR 尚未创建，更没有合入 `develop`。这不是完成状态，待外部链路恢复后应从当前短分支继续推送、创建 PR、等待检查并完成合并清理。
+- 当时 GitHub Git HTTPS 推送先返回 HTTP/2 framing 错误，改用 HTTP/1.1 后仍在超时窗口内未收到远端响应；该外部阻塞已在 2026-08-27 恢复，实际推送与 PR 状态见上方补充收口记录。PR 合入与分支删除前仍不算完成。
 - 未同步 Android React assets、未构建/安装 APK，也未改远端服务器、账号、配置或生产数据。
 
 ## 2026-08-23 第七十八次主动迭代
