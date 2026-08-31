@@ -2,6 +2,28 @@
 
 日期：2026-08-27
 
+## 2026-08-31 v0.2.13 发布与回同步
+
+主任务：完成累计需求达到发布条件后的 GitFlow 发布收口，并恢复 `main` 到 `develop` 的可追溯基线。
+
+发布事实：
+
+- `release/v0.2.13` 在合入 `main` 前发现与旧发布基线的真实冲突；逐块保留 `develop` 中的空白新用户中性建档、显式浏览器验收能力和最新产品事实源，再吸收 `main` 历史，未使用整文件选边。
+- release PR #77 `chore(release): prepare v0.2.13` 的 GitHub `validate` required check 成功后已合入 `main`，合并提交为 `ab030048d211babcefe6754a2fc5d1b940bd087e`。
+- 已在该合并提交创建并推送附注标签 `v0.2.13`。
+- 本版本包含 #73 的空白新用户建档中性默认值、#74 的 React 功能流显式浏览器路径支持、#76 的普通用户可理解的本机练习偏好文案，以及 Rust/SQLite 功能流对同一显式浏览器路径的支持。
+
+验证：
+
+- `JOB_SPRINT_PLAYWRIGHT_EXECUTABLE_PATH=<受控本机浏览器> npm run test:git-release`：PASS；覆盖 `npm test`、48 个 React 测试文件共 162 项、React 与 Rust/SQLite 本地功能流、公开安全构建与公开包扫描。
+- `npm run validate:gitflow -- --phase release --base main --message "chore(release): prepare v0.2.13"`：PASS。
+- `npm run scan:sensitive`、`npm run validate:product-iteration`、`git diff origin/main...HEAD --check`：PASS。
+
+限制与后续：
+
+- 本条不执行 `npm run test:release`，也没有部署服务器、修改远端配置、账号或生产数据。
+- `main -> develop` 通过独立的 PR #78 `chore(gitflow): sync v0.2.13 back to develop` 接收发布差异；该 PR 使用常规 required check 和短分支清理规则，避免把发布基线只留在 `main`。
+
 ## 2026-08-27 第八十次主动迭代（遗留分支收口）
 
 主任务：在 GitHub Git HTTPS 恢复后，收口知识与面试页练习偏好文案分支。
