@@ -11,6 +11,8 @@ const { execFileSync, spawn } = require("child_process");
 const ROOT = path.resolve(__dirname, "..");
 const reactRequire = createRequire(path.join(ROOT, "apps", "react-web", "package.json"));
 const { chromium } = reactRequire("playwright");
+const browserExecutablePath = process.env.JOB_SPRINT_PLAYWRIGHT_EXECUTABLE_PATH?.trim();
+const browserLaunchOptions = browserExecutablePath ? { executablePath: browserExecutablePath } : {};
 
 const TEST_USER = "rust-ui-user";
 const TEST_PASSWORD = ["rust", "ui", "password"].join("-");
@@ -305,6 +307,7 @@ function sqliteSnapshot() {
 
 async function runUiFlow(baseUrl) {
   const context = await chromium.launchPersistentContext(path.join(tmpDir, "chromium-profile"), {
+    ...browserLaunchOptions,
     acceptDownloads: true,
     viewport: { width: 1280, height: 900 }
   });
