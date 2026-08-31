@@ -146,12 +146,18 @@ describe("React Job Sprint AI coach workspace", () => {
     expect(screen.getByText("这条不贴合今天目标")).toBeInTheDocument();
   }, 10000);
 
-  it("runs the quick initialization flow from profile to boundaries and first schedule", async () => {
+  it("keeps empty quick initialization neutral before the user selects a template", async () => {
     render(<App />);
 
     expect(await screen.findByRole("heading", { name: "导入简历建档" })).toBeInTheDocument();
 
     const wizardPanel = panelByHeading("导入简历建档");
+    expect(wizardPanel.getByLabelText("建档模板")).toHaveValue("");
+    expect(wizardPanel.getByLabelText("角色方向")).toHaveValue("other");
+    expect(wizardPanel.getByLabelText("快速建档目标岗位")).toHaveValue("");
+    fireEvent.click(wizardPanel.getByRole("button", { name: "套用模板" }));
+    expect(await screen.findByText("请先选择岗位模板，或直接粘贴简历生成画像建议。")).toBeInTheDocument();
+
     fireEvent.change(wizardPanel.getByLabelText("建档模板"), { target: { value: "qa" } });
     fireEvent.click(wizardPanel.getByRole("button", { name: "套用模板" }));
     expect(await screen.findByText("已套用「测试求职者」建档模板。")).toBeInTheDocument();

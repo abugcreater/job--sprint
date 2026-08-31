@@ -1,6 +1,171 @@
 # 每日主动产品迭代日志
 
-日期：2026-08-18
+日期：2026-08-27
+
+## 2026-08-27 第八十次主动迭代（遗留分支收口）
+
+主任务：在 GitHub Git HTTPS 恢复后，收口知识与面试页练习偏好文案分支。
+
+事实与处理：
+
+- `git fetch --prune origin` 已恢复成功；无目标为 `develop` 的开放 PR。
+- `fix/replace-technical-browser-storage-labels` 已确认基于最新 `origin/develop`，无需产生 rebase 提交。
+- 已推送提交 `d241c8b`；将创建正式 PR，合并与分支删除仍以 GitHub required checks 为准。
+
+验证：
+
+- `npm --prefix apps/react-web test -- --run src/test/InterviewPage.test.tsx src/test/LearningPage.test.tsx`：PASS（2 个文件，15 个测试）。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm run scan:sensitive`：PASS。
+- `npm run validate:gitflow -- --phase pr --base develop --message "fix(ux): clarify local practice markers"`：PASS。
+- `git diff origin/develop...HEAD --check`：PASS。
+
+限制：
+
+- 本轮没有服务器、Android、账号、远端配置或生产数据改动；PR 未合入前不把推送或建 PR 表述为完成。
+
+## 2026-08-24 第七十九次主动迭代
+
+主任务：移除知识与面试页暴露给普通用户的 `localStorage fallback` 实现术语。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 普通用户在筛选重点知识或薄弱题时需要理解保存范围，而不是理解浏览器实现。 |
+| 问题确定性 | 5 | 知识与面试筛选摘要直接渲染 `localStorage fallback`，两处标记实际都仅保存在当前设备。 |
+| 风险降低 | 3 | 明确本机保存边界，减少用户误以为重点和薄弱题会跨设备同步或是系统故障回退的可能。 |
+| 交互改善 | 5 | 用“重点仅保存在本设备”和“薄弱题仅保存在本设备”替换内部术语。 |
+| 可验证性 | 5 | 页面测试同时断言新文案出现、旧实现术语不出现；类型检查可覆盖组件修改。 |
+| 实现大小 | 5 | 仅调整两处用户状态文案与回归，不触碰存储键、数据域隔离或业务流程。 |
+
+基线：
+
+- `git fetch --prune origin` 后工作树干净，目标为 `develop` 的开放 PR、Draft 与短分支均为零。
+- `origin/main` 与 `origin/develop` 文件树存在真实差异；最新 tag 为 `v0.2.12`（2026-08-18），发布后只有 #73、#74 两项普通产品需求，尚未达到发布阈值，因此本轮不创建 release，也不部署服务器。
+
+改动：
+
+- 面试候选题筛选摘要将 `localStorage fallback` 改为“薄弱题仅保存在本设备”。
+- 知识卡筛选摘要将 `localStorage fallback` 改为“重点仅保存在本设备”。
+- 回归测试明确拒绝旧实现术语，防止再次把浏览器实现细节暴露到普通用户路径。
+
+已验证：
+
+- `npm --prefix apps/react-web test -- --run src/test/InterviewPage.test.tsx src/test/LearningPage.test.tsx`：PASS，2 个文件、15 项用例通过。
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `git diff --check`：PASS。
+
+限制：
+
+- 重点与薄弱题仍是按数据域隔离的本机练习偏好，不改为服务端或跨设备同步。
+- 当时 GitHub Git HTTPS 推送先返回 HTTP/2 framing 错误，改用 HTTP/1.1 后仍在超时窗口内未收到远端响应；该外部阻塞已在 2026-08-27 恢复，实际推送与 PR 状态见上方补充收口记录。PR 合入与分支删除前仍不算完成。
+- 未同步 Android React assets、未构建/安装 APK，也未改远端服务器、账号、配置或生产数据。
+
+## 2026-08-23 第七十八次主动迭代
+
+主任务：收口因外部 Git HTTPS 连接失败而遗留的功能流测试分支。
+
+基线：
+
+- 已有本地短分支 `test/functional-browser-path-override`，只包含 2026-08-21 已验证的测试可靠性改动；它尚未上传，因此没有开放 PR、Draft 或远端短分支。
+- 本轮 `git fetch --prune origin` 恢复成功；没有新的目标为 `develop` 的 PR 积压，且工作树干净。
+
+收口：
+
+- 分支 rebase 到最新 `origin/develop`，无须重放提交或解决冲突。
+- 重新执行受控本机浏览器的完整 React 功能流，桌面写入、浏览器重启、移动端读回、导出和导入恢复均为 PASS；敏感扫描、PR GitFlow 门禁与差异空白检查通过。
+- PR #74 `test(functional): allow explicit browser path` 以 Ready 状态创建到 `develop`；GitHub `validate` required check 成功后 squash merge，最终提交为 `93293d5`。
+- 合并后远端短分支已删除，本地只保留 `main` 与 `develop`，工作树干净。
+
+发布判定：
+
+- `origin/main` 与 `origin/develop` 文件树存在真实差异；但最新 tag `v0.2.12` 发布于 2026-08-18，距今未满 7 天，且发布后只有 #73、#74 两项普通需求，因此本轮不创建 `release/*`。
+
+限制：
+
+- 没有新增产品行为；本条只记录 GitFlow 收口，未部署服务器、未改远端配置、账号、生产数据或 Android 资源。
+
+## 2026-08-21 第七十七次主动迭代
+
+主任务：让 React 真实功能流在浏览器缓存不可用时支持显式指定浏览器可执行文件。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 4 | 真实用户流程是数据隔离、首登和保存交互的验收依据；测试因本机缓存缺失而完全无法运行，会让产品结论长期缺少浏览器证据。 |
+| 问题确定性 | 5 | 功能流四处直接调用 Playwright 默认启动方式；项目锁定 Chromium 缓存缺失时，测试在页面启动前失败。 |
+| 风险降低 | 5 | 只在显式传入路径时使用外部浏览器，默认仍使用 Playwright 管理的锁定浏览器，不把本机环境差异伪装成产品结果。 |
+| 交互改善 | 2 | 本轮改善的是验收可靠性，不改变终端用户的业务交互。 |
+| 可验证性 | 5 | 使用已安装浏览器完成桌面持久化、浏览器重启、移动端回读、导出与导入恢复的完整合成账号功能流。 |
+| 实现大小 | 5 | 仅收敛测试启动参数与验收事实源，不改运行时业务代码、账号、服务端或远端配置。 |
+
+基线：
+
+- `git fetch --prune origin` 后工作树干净，目标为 `develop` 的开放 PR、Draft 与短分支均为零。
+- `main` 是 `develop` 的祖先；提交计数受历史 squash 影响。`v0.2.12` 发布于 2026-08-18，发布后仅有 #73 一项正式产品改动，未满 7 天或 3 项阈值，因此本轮不创建 release，也不部署服务器。
+
+改动：
+
+- `test:functional` 支持可选环境变量 `JOB_SPRINT_PLAYWRIGHT_EXECUTABLE_PATH`；设置时，桌面持久化上下文、重启上下文、移动端和导入恢复四个浏览器实例都使用同一显式路径。
+- 未设置该变量时，启动参数为空，行为仍是 Playwright 默认管理的浏览器版本。
+- 功能流报告仅记录 `explicit-executable` 或 `playwright-managed`，不写入本机绝对路径。
+
+已验证：
+
+- `node --check tests/react_functional_persistence_test.js`：PASS。
+- `JOB_SPRINT_PLAYWRIGHT_EXECUTABLE_PATH=<本机浏览器可执行文件> npm run test:functional`：PASS；合成 `functional-user` 的桌面写入、浏览器重启、390px 移动端读回、应用导出与同域导入恢复均通过。
+
+限制：
+
+- 显式路径是本地验收的显式可选兜底，不替代 CI 或默认环境中 `playwright install chromium` 的项目锁定浏览器；不同浏览器版本仍应以实际功能流结果为准。
+- GitHub Git HTTPS 在本轮两次推送时均无法连接 `github.com:443`，因此本地提交尚未上传、PR 尚未创建，更没有合入 `develop`；这不是完成状态，待外部链路恢复后应从当前短分支继续推送、创建 PR、等待检查并完成合并清理。
+- 未同步 Android React assets、未构建/安装 APK，也未改远端服务器、账号、配置或生产数据。
+
+## 2026-08-20 第七十六次主动迭代
+
+主任务：移除空白新用户快速建档中的后端岗位预设。
+
+选择原因：
+
+| 维度 | 分数 | 依据 |
+|---|---:|---|
+| 用户价值 | 5 | 新账号首屏看到“后端求职者”和“后端”会直接怀疑继承了旧 Java 用户内容，损害首登信任。 |
+| 问题确定性 | 5 | `createProfileDraft`、快速建档模板 state 和模板兜底均硬编码为 `backend`；真实新账号数据为空，因此这是默认值造成的串线错觉，不是服务端数据泄露。 |
+| 风险降低 | 4 | 不再由 UI 替用户假设岗位，减少误把产品默认内容当成跨账号数据的排查成本。 |
+| 交互改善 | 5 | 首次进入显示未选择模板和通用 IT 方向；未选模板点击时说明可以选择岗位或直接导入简历。 |
+| 可验证性 | 5 | 适配器与页面测试可直接断言空状态、无默认套用和显式模板后的既有流程。 |
+| 实现大小 | 5 | 仅修改 React 建档默认值、模板交互、测试和产品事实源，不改变账号、服务端数据或 AI 调用。 |
+
+基线：
+
+- `git fetch --prune origin` 后工作树干净，目标为 `develop` 的开放 PR、Draft 与短分支均为零。
+- `origin/main` 与 `origin/develop` 只有发布回同步日志差异；最新 tag 为 `v0.2.12`（2026-08-18），本轮不满足 7 天或 3 项正式需求阈值，因此不创建 release，也不部署服务器。
+
+改动：
+
+- 新建画像默认角色族由 `backend` 改为 `other`，目标岗位保持为空，不再给空白用户注入后端假设。
+- 快速建档的模板选择初始为空，新增“请选择岗位模板（也可直接导入简历）”占位项；已有画像仍回显它自己的角色模板。
+- 未选择模板时，“套用模板”不再静默采用模板列表第一个后端模板，而是提示用户选择模板或直接导入简历。
+- 页面和适配器回归覆盖空白首登、无默认套用、显式选择测试模板后的完整建档链路。
+
+已验证：
+
+- `npm --prefix apps/react-web run typecheck`：PASS。
+- `npm --prefix apps/react-web test`：PASS，48 个测试文件、162 项用例通过，覆盖空白建档中性默认值和显式模板流程。
+- `npm --prefix apps/react-web run build`：PASS；保留既有单包大于 500 kB 告警。
+- `git diff --check`：PASS。
+
+限制：
+
+- `npm run test:functional` 首次因本机缺少项目锁定版本 Playwright Chromium 而无法启动；补装时 CDN 下载速度异常缓慢，已停止该纯测试缓存下载。本轮不把单测与构建通过表述为真实浏览器功能流通过。
+- 未同步 Android React assets、未构建或安装 APK，也未改远端服务器、账号、配置或生产数据。
+
+## 2026-08-18 v0.2.12 发布回同步
+
+- `main` 已由 release PR #71 发布并打附注标签 `v0.2.12`；该版本包含面试薄弱题与学习重点的 `dataScope` 浏览器隔离修复。
+- 发布分支合入 `main` 前已吸收其历史，发布后 `main` 与 `develop` 文件树一致；本次回同步仅记录 GitFlow 收口事实，不新增产品行为或远端数据操作。
 
 ## 2026-08-18 第七十五次主动迭代
 
