@@ -22,7 +22,7 @@
 限制与后续：
 
 - 本条不执行 `npm run test:release`，也没有部署服务器、修改远端配置、账号或生产数据。
-- `main -> develop` 回同步正在按单独的 `chore/sync-v0.2.13-to-develop` PR 收口；只有其检查通过、PR 合入并删除短分支后，才可声明本次发布 GitFlow 全部完成。
+- `main -> develop` 通过独立的 PR #78 `chore(gitflow): sync v0.2.13 back to develop` 接收发布差异；该 PR 使用常规 required check 和短分支清理规则，避免把发布基线只留在 `main`。
 
 ## 2026-08-27 第八十次主动迭代（遗留分支收口）
 
